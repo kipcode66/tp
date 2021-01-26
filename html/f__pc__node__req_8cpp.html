@@ -82,6 +82,8 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="f__pc__node__req_8h_source.html">f/f_pc/f_pc_node_req.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="c__malloc_8h_source.html">SComponent/c_malloc.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="s__basic_8h_source.html">SStandard/s_basic.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="types_8h_source.html">dolphin/types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__base_8h_source.html">f/f_pc/f_pc_base.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__create__req_8h_source.html">f/f_pc/f_pc_create_req.h</a>&quot;</code><br />
@@ -89,6 +91,7 @@ $(function() {
 <code>#include &quot;<a class="el" href="f__pc__deletor_8h_source.html">f/f_pc/f_pc_deletor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__executor_8h_source.html">f/f_pc/f_pc_executor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__layer_8h_source.html">f/f_pc/f_pc_layer.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="f__pc__stdcreate__req_8h_source.html">f/f_pc/f_pc_stdcreate_req.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Include dependency graph for f_pc_node_req.cpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -105,10 +108,6 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aede5af67d5262978d4e1a1dc2f0ed40a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#aede5af67d5262978d4e1a1dc2f0ed40a">fpcSCtRq_Request</a> (<a class="el" href="structlayer__class.html">layer_class</a> *, <a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a>, <a class="el" href="f__pc__method_8h.html#abf9b33cc1155a600cb957704c94e23fa">process_method_func</a>, void *, void *)</td></tr>
-<tr class="separator:aede5af67d5262978d4e1a1dc2f0ed40a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97a4a5892917a8961337c55e8d98f8cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#a97a4a5892917a8961337c55e8d98f8cb">sBs_ClearArea</a> (void *pPtr, <a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a> pSize)</td></tr>
-<tr class="separator:a97a4a5892917a8961337c55e8d98f8cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6c9365113625d622afca9458619af45"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#af6c9365113625d622afca9458619af45">fpcNdRq_RequestQTo</a> (<a class="el" href="structnode__create__request.html">node_create_request</a> *pNodeCreateReq)</td></tr>
 <tr class="separator:af6c9365113625d622afca9458619af45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11872779e3c962a0ba9bb2d61dc9b09d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#a11872779e3c962a0ba9bb2d61dc9b09d">fpcNdRq_ToRequestQ</a> (<a class="el" href="structnode__create__request.html">node_create_request</a> *pNodeCreateReq)</td></tr>
@@ -137,8 +136,8 @@ Functions</h2></td></tr>
 <tr class="separator:a809c1307f2ad7593309ceadd9383261d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8f8ab8c667ec4652a21ca014737b70d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#ab8f8ab8c667ec4652a21ca014737b70d">fpcNdRq_IsIng</a> (<a class="el" href="structprocess__node__class.html">process_node_class</a> *pProcNode)</td></tr>
 <tr class="separator:ab8f8ab8c667ec4652a21ca014737b70d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52bf25bc38b207278145e92ce4ba02ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnode__create__request.html">node_create_request</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#a52bf25bc38b207278145e92ce4ba02ad">fpcNdRq_Create</a> (<a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a> pRequestSize)</td></tr>
-<tr class="separator:a52bf25bc38b207278145e92ce4ba02ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e7b391a20bfbb1c045cd0a24274100b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnode__create__request.html">node_create_request</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#a2e7b391a20bfbb1c045cd0a24274100b">fpcNdRq_Create</a> (<a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a> pRequestSize)</td></tr>
+<tr class="separator:a2e7b391a20bfbb1c045cd0a24274100b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c18a50fa7eff6359db9195993946278"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnode__create__request.html">node_create_request</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#a7c18a50fa7eff6359db9195993946278">fpcNdRq_ChangeNode</a> (<a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a> pRequestSize, <a class="el" href="structprocess__node__class.html">process_node_class</a> *pProcNode, <a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a> param_3, void *param_4)</td></tr>
 <tr class="separator:a7c18a50fa7eff6359db9195993946278"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a491a280e423e3d1df422883a2f687cd3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structnode__create__request.html">node_create_request</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__node__req_8cpp.html#a491a280e423e3d1df422883a2f687cd3">fpcNdRq_DeleteNode</a> (<a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a> pRequestSize, <a class="el" href="structprocess__node__class.html">process_node_class</a> *pProcNode)</td></tr>
@@ -247,8 +246,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a52bf25bc38b207278145e92ce4ba02ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a52bf25bc38b207278145e92ce4ba02ad">&#9670;&nbsp;</a></span>fpcNdRq_Create()</h2>
+<a id="a2e7b391a20bfbb1c045cd0a24274100b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e7b391a20bfbb1c045cd0a24274100b">&#9670;&nbsp;</a></span>fpcNdRq_Create()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -256,7 +255,7 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="structnode__create__request.html">node_create_request</a>* fpcNdRq_Create </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a>&#160;</td>
           <td class="paramname"><em>pRequestSize</em></td><td>)</td>
           <td></td>
         </tr>
@@ -675,80 +674,6 @@ Variables</h2></td></tr>
           <td class="paramtype"><a class="el" href="structnode__create__request.html">node_create_request</a> *&#160;</td>
           <td class="paramname"><em>pNodeCreateReq</em></td><td>)</td>
           <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aede5af67d5262978d4e1a1dc2f0ed40a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aede5af67d5262978d4e1a1dc2f0ed40a">&#9670;&nbsp;</a></span>fpcSCtRq_Request()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a> fpcSCtRq_Request </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structlayer__class.html">layer_class</a> *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a>&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="f__pc__method_8h.html#abf9b33cc1155a600cb957704c94e23fa">process_method_func</a>&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a97a4a5892917a8961337c55e8d98f8cb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a97a4a5892917a8961337c55e8d98f8cb">&#9670;&nbsp;</a></span>sBs_ClearArea()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void sBs_ClearArea </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>pPtr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>&#160;</td>
-          <td class="paramname"><em>pSize</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
