@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_5fgxcolor_15271',['_GXColor',['../struct__GXColor.html',1,'']]]
+  ['_5fgxcolor_14693',['_GXColor',['../struct__GXColor.html',1,'']]]
 ];
