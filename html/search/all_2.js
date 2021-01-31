@@ -1,7 +1,7 @@
 var searchData=
 [
   ['b_375',['b',['../struct__GXColor.html#ab5f92d6ef6636ecc7bd3262404bcc60e',1,'_GXColor']]],
-  ['base_5fanm_376',['base_anm',['../classmDoExt__bckAnm.html#a3de352a7f398caa8ecf770372ba6b42c',1,'mDoExt_bckAnm::base_anm()'],['../classmDoExt__btkAnm.html#a38930f51dafaee052267eaf4b63ba53f',1,'mDoExt_btkAnm::base_anm()']]],
+  ['base_5fanm_376',['base_anm',['../classmDoExt__btkAnm.html#a38930f51dafaee052267eaf4b63ba53f',1,'mDoExt_btkAnm::base_anm()'],['../classmDoExt__bckAnm.html#a3de352a7f398caa8ecf770372ba6b42c',1,'mDoExt_bckAnm::base_anm()']]],
   ['base_5fpriority_377',['base_priority',['../structOSThread.html#a52f180c472a8e06e576edc8b934cd5bf',1,'OSThread']]],
   ['base_5fprocess_5fclass_378',['base_process_class',['../structbase__process__class.html',1,'base_process_class'],['../f__pc__base_8h.html#a37a6142583ac987e2d0c8306517383db',1,'base_process_class():&#160;f_pc_base.h']]],
   ['battlebgmframework_379',['battleBgmFramework',['../classZ2SeqMgr.html#aa0d4eb2a8e99d1402ccf0bdecc3e5b85',1,'Z2SeqMgr']]],
@@ -9,7 +9,7 @@ var searchData=
   ['bckanm2_381',['bckAnm2',['../classdAttDraw__c.html#ab3427527eb82910e40fc9d59e957b1fc',1,'dAttDraw_c']]],
   ['becomecurrent_382',['becomeCurrent',['../classJKRArchive.html#a1c57e4360f849edec191bb6b23502162',1,'JKRArchive::becomeCurrent()'],['../classJKRFileCache.html#abce6963e15d50abba20877c1836c7b56',1,'JKRFileCache::becomeCurrent()'],['../classJKRFileLoader.html#a3530f043778c54ba1c1a44cba65f433f',1,'JKRFileLoader::becomeCurrent()']]],
   ['becomecurrentheap_383',['becomeCurrentHeap',['../classJKRHeap.html#a46b94ec1827a48ee4d3fc79ce954ae99',1,'JKRHeap']]],
-  ['becomecurrentheap_5f_5f7jkrheapfv_384',['becomeCurrentHeap__7JKRHeapFv',['../m__Do__DVDError_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_DVDError.cpp'],['../m__Do__ext_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_ext.cpp'],['../m__Do__machine_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_machine.cpp'],['../JKRThread_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;JKRThread.cpp']]],
+  ['becomecurrentheap_5f_5f7jkrheapfv_384',['becomeCurrentHeap__7JKRHeapFv',['../m__Do__ext_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_ext.cpp'],['../m__Do__DVDError_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_DVDError.cpp'],['../m__Do__machine_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_machine.cpp'],['../m__Do__MemCard_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;m_Do_MemCard.cpp'],['../JKRThread_8cpp.html#aab036c3a7c59745f97d08610f1fec951',1,'becomeCurrentHeap__7JKRHeapFv(void):&#160;JKRThread.cpp']]],
   ['becomesystemheap_385',['becomeSystemHeap',['../classJKRHeap.html#ad4717728d4420a4b1d5a1787a8ce8960',1,'JKRHeap']]],
   ['bee_5fchild_386',['BEE_CHILD',['../d__save_8h.html#a0a48966e59817e2d4685d1f0b44b33f2a274b5373eaa448016e5ecb35488c58cd',1,'d_save.h']]],
   ['bee_5frod_387',['BEE_ROD',['../d__save_8h.html#a0a48966e59817e2d4685d1f0b44b33f2a8d55f4fffecceec921ab40d7cefc8765',1,'d_save.h']]],
