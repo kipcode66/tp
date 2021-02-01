@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['shields_30157',['Shields',['../d__save_8h.html#a180a6a9bca7044e6ac566db4967500d8',1,'d_save.h']]],
-  ['swords_30158',['Swords',['../d__save_8h.html#a3c66d6f382ea908fcb6d2f2f82a22b4d',1,'d_save.h']]]
+  ['padmask_30765',['PADMask',['../pad_8h.html#ab96557969238b9fc6c43629bda3adf1c',1,'pad.h']]]
 ];

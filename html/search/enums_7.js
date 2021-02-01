@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['ossoundmode_30155',['OSSoundMode',['../OS_8h.html#a7085b2211651a7235a458e1d4b19a607',1,'OS.h']]]
+  ['j2dbaseposition_30760',['J2DBasePosition',['../J2DSys_8h.html#afafd1dbaf17cb41f7cbb8488b65e15c6',1,'J2DSys.h']]],
+  ['j2drotateaxis_30761',['J2DRotateAxis',['../J2DSys_8h.html#a568654c26104cd8c9ccd4aae037a0e58',1,'J2DSys.h']]],
+  ['jkrexpandswitch_30762',['JKRExpandSwitch',['../JKRDvdRipper_8h.html#a3a81ab253efe80892d32be96b8a9dec2',1,'JKRDvdRipper.h']]],
+  ['jkrmembreakflag_30763',['JKRMemBreakFlag',['../JKRMemArchive_8h.html#a2a0bd9c14b0a5e25b0a8d59556ac8dd2',1,'JKRMemArchive.h']]]
 ];
