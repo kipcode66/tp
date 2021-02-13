@@ -83,7 +83,7 @@ $(function() {
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="JSUList_8h_source.html">JSystem/JSupport/JSUList/JSUList.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="JUTXfb_8h_source.html">JSystem/JUtility/JUTXfb/JUTXfb.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="c__xyz_8h_source.html">SComponent/c_xyz.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="mtx__vec_8h_source.html">mtx_vec.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Include dependency graph for variables.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -108,6 +108,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structunkEvent.html">unkEvent</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnow.html">now</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structj3dsys.html">j3dsys</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
@@ -2913,10 +2915,8 @@ Variables</h2></td></tr>
 <tr class="separator:a145ea2f475ca898ac887647c1bdb1be7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ef6e3242c097aa7c7aac728cc2da330"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a7ef6e3242c097aa7c7aac728cc2da330">lbl_80424938</a></td></tr>
 <tr class="separator:a7ef6e3242c097aa7c7aac728cc2da330"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac95468c2177899648069eb584ff1cca8"><td class="memItemLeft" align="right" valign="top">j3dsys&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#ac95468c2177899648069eb584ff1cca8">lbl_80434AC8</a></td></tr>
+<tr class="memitem:ac95468c2177899648069eb584ff1cca8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structj3dsys.html">j3dsys</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#ac95468c2177899648069eb584ff1cca8">lbl_80434AC8</a></td></tr>
 <tr class="separator:ac95468c2177899648069eb584ff1cca8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29ba247b48e93fa7321562658a2821c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a29ba247b48e93fa7321562658a2821c3">lbl_80439A20</a> [65536]</td></tr>
-<tr class="separator:a29ba247b48e93fa7321562658a2821c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9854c4f9c4b36b35179331187ceedd8a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a9854c4f9c4b36b35179331187ceedd8a">lbl_80452508</a></td></tr>
 <tr class="separator:a9854c4f9c4b36b35179331187ceedd8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b5a996b0aec07f30e90c54190a8432b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a6b5a996b0aec07f30e90c54190a8432b">lbl_80450F10</a></td></tr>
@@ -5125,8 +5125,6 @@ Variables</h2></td></tr>
 <tr class="separator:a251b668fc1160d3e343d6470377fc1d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76d41a9477745f7d92f66a9084d48be8"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a76d41a9477745f7d92f66a9084d48be8">lbl_80378A50</a> [0x3F8]</td></tr>
 <tr class="separator:a76d41a9477745f7d92f66a9084d48be8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9233beb682c72307c9647d92a7602c0e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a9233beb682c72307c9647d92a7602c0e">lbl_803A3B18</a></td></tr>
-<tr class="separator:a9233beb682c72307c9647d92a7602c0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b0e0acadfe63d392c47a0c6f5d57693"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a2b0e0acadfe63d392c47a0c6f5d57693">lbl_803A65CC</a></td></tr>
 <tr class="separator:a2b0e0acadfe63d392c47a0c6f5d57693"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a562a87801244a4572665f30efc155e87"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="variables_8h.html#a562a87801244a4572665f30efc155e87">lbl_803A65FC</a></td></tr>
@@ -10291,28 +10289,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a> lbl_803A382C</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9233beb682c72307c9647d92a7602c0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9233beb682c72307c9647d92a7602c0e">&#9670;&nbsp;</a></span>lbl_803A3B18</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a> lbl_803A3B18</td>
         </tr>
       </table>
   </td>
@@ -18408,29 +18384,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">j3dsys lbl_80434AC8</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a29ba247b48e93fa7321562658a2821c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a29ba247b48e93fa7321562658a2821c3">&#9670;&nbsp;</a></span>lbl_80439A20</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a> lbl_80439A20[65536]</td>
+          <td class="memname"><a class="el" href="structj3dsys.html">j3dsys</a> lbl_80434AC8</td>
         </tr>
       </table>
   </td>

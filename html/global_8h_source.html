@@ -110,10 +110,10 @@ $(function() {
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordflow">return</span> (<span class="keywordtype">float</span>)<a class="code" href="global_8h.html#abba0edf6a9c212dabb29b8eba81249ab">fabsd</a>(f);</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;}</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="global_8h.html#a9530291b297c9d764e1c1481708d7a02">   34</a></span>&#160;<span class="keyword">extern</span> <span class="keywordtype">float</span> <a class="code" href="global_8h.html#a9530291b297c9d764e1c1481708d7a02">__fsqrte</a>(<span class="keywordtype">float</span>);</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">// extern float __frsqrte(float);</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
 <div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="global_8h.html#a1a45ea6591328683ef762d754c4ccd2b">   36</a></span>&#160;<span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code" href="global_8h.html#a1a45ea6591328683ef762d754c4ccd2b">sqrt</a>(<span class="keywordtype">float</span> f) {</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="global_8h.html#a9530291b297c9d764e1c1481708d7a02">__fsqrte</a>(f);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordflow">return</span> __frsqrte(f);</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="types_8h.html">dolphin/types.h</a>&quot;</span></div>
@@ -137,7 +137,6 @@ $(function() {
 <div class="ttc" id="aglobal_8h_html_a1a45ea6591328683ef762d754c4ccd2b"><div class="ttname"><a href="global_8h.html#a1a45ea6591328683ef762d754c4ccd2b">sqrt</a></div><div class="ttdeci">double sqrt(float f)</div><div class="ttdef"><b>Definition:</b> global.h:36</div></div>
 <div class="ttc" id="aglobal_8h_html_a233e496a72a14d16bf25788970e6572d"><div class="ttname"><a href="global_8h.html#a233e496a72a14d16bf25788970e6572d">checkEqual</a></div><div class="ttdeci">BOOL checkEqual(s32 a, s32 b)</div><div class="ttdef"><b>Definition:</b> global.h:50</div></div>
 <div class="ttc" id="aglobal_8h_html_a81a12a290275ae2dec544c11108043fa"><div class="ttname"><a href="global_8h.html#a81a12a290275ae2dec544c11108043fa">__fabsf</a></div><div class="ttdeci">float __fabsf(float)</div></div>
-<div class="ttc" id="aglobal_8h_html_a9530291b297c9d764e1c1481708d7a02"><div class="ttname"><a href="global_8h.html#a9530291b297c9d764e1c1481708d7a02">__fsqrte</a></div><div class="ttdeci">float __fsqrte(float)</div></div>
 <div class="ttc" id="aglobal_8h_html_abba0edf6a9c212dabb29b8eba81249ab"><div class="ttname"><a href="global_8h.html#abba0edf6a9c212dabb29b8eba81249ab">fabsd</a></div><div class="ttdeci">double fabsd(float f)</div><div class="ttdef"><b>Definition:</b> global.h:26</div></div>
 <div class="ttc" id="aglobal_8h_html_acd3521e6a0dbd207dc331c548414b366"><div class="ttname"><a href="global_8h.html#acd3521e6a0dbd207dc331c548414b366">fabsf</a></div><div class="ttdeci">float fabsf(float f)</div><div class="ttdef"><b>Definition:</b> global.h:30</div></div>
 <div class="ttc" id="aglobal_8h_html_add8c751814afc8108b19a1434ab15887"><div class="ttname"><a href="global_8h.html#add8c751814afc8108b19a1434ab15887">__cntlzw</a></div><div class="ttdeci">int __cntlzw(unsigned int)</div></div>

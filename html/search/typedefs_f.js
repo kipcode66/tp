@@ -1,10 +1,9 @@
 var searchData=
 [
-  ['u16_30770',['u16',['../types_8h.html#a9e6c91d77e24643b888dbd1a1a590054',1,'types.h']]],
-  ['u32_30771',['u32',['../types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac',1,'types.h']]],
-  ['u64_30772',['u64',['../types_8h.html#ad758b7a5c3f18ed79d2fcd23d9f16357',1,'types.h']]],
-  ['u8_30773',['u8',['../types_8h.html#aed742c436da53c1080638ce6ef7d13de',1,'types.h']]],
-  ['unk_5fprocess_5fnode_5fclass_30774',['unk_process_node_class',['../f__pc__node__req_8h.html#ad8dc8d6bd1efa7f0c9e630f988c7a447',1,'f_pc_node_req.h']]],
-  ['unkfunc_30775',['UnkFunc',['../structJStudio_1_1TFunctionValue__composite.html#aa22042025b995f096c8c33cd1b1d4d1c',1,'JStudio::TFunctionValue_composite']]],
-  ['update_5finterpolate_30776',['update_INTERPOLATE',['../structJStudio_1_1TFunctionValue__list.html#aa6d153aef81bd34793928e200049b397',1,'JStudio::TFunctionValue_list::update_INTERPOLATE()'],['../structJStudio_1_1TFunctionValue__list__parameter.html#a80708c87cc2fadf86362873b32e1d636',1,'JStudio::TFunctionValue_list_parameter::update_INTERPOLATE()']]]
+  ['s16_31425',['s16',['../types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1',1,'types.h']]],
+  ['s32_31426',['s32',['../types_8h.html#adafe97a8e4be18b0198f234819016582',1,'types.h']]],
+  ['s64_31427',['s64',['../types_8h.html#a4258bfb2c3a440d06c4aaa3c2b450dde',1,'types.h']]],
+  ['s8_31428',['s8',['../types_8h.html#a151f780fb455885061d3b77ec1c90c03',1,'types.h']]],
+  ['standard_5fcreate_5frequest_5fclass_31429',['standard_create_request_class',['../f__pc__stdcreate__req_8h.html#a18e2b569db0e7bd678256c92d3f86f21',1,'f_pc_stdcreate_req.h']]],
+  ['stdcreatefunc_31430',['stdCreateFunc',['../f__pc__stdcreate__req_8h.html#a0cd23abb99e1ab7ecb184e0eac28de12',1,'f_pc_stdcreate_req.h']]]
 ];
