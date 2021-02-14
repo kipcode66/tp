@@ -82,6 +82,7 @@ $(function() {
 <div class="textblock"><code>#include &quot;<a class="el" href="d__stage_8h_source.html">d/d_stage/d_stage.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="d__com__inf__game_8h_source.html">d/d_com/d_com_inf_game/d_com_inf_game.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__op__actor__mng_8h_source.html">f/f_op/f_op_actor_mng.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="f__op__camera__mng_8h_source.html">f/f_op/f_op_camera_mng.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__stdcreate__req_8h_source.html">f/f_pc/f_pc_stdcreate_req.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="global_8h_source.html">global.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="m__Do__Reset_8h_source.html">m_Do/m_Do_Reset/m_Do_Reset.h</a>&quot;</code><br />
@@ -216,6 +217,8 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a951bf35c9d6195af936af2bd71ef7349"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#a951bf35c9d6195af936af2bd71ef7349">fopCamM_Create__FisPv</a> (void)</td></tr>
+<tr class="separator:a951bf35c9d6195af936af2bd71ef7349"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55e123beb3d7f96e25e024a13582d987"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#a55e123beb3d7f96e25e024a13582d987">strcpy</a> (char *, const char *)</td></tr>
 <tr class="separator:a55e123beb3d7f96e25e024a13582d987"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21e4788b4a0ae39b11aa32e9a1079f98"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#a21e4788b4a0ae39b11aa32e9a1079f98">strcmp</a> (const char *, const char *)</td></tr>
@@ -286,8 +289,8 @@ Functions</h2></td></tr>
 <tr class="separator:ad601c6310f9ca19486bc0d73777b0e6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add3200c0a639ea4220bb86f65223c8f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#add3200c0a639ea4220bb86f65223c8f1">dTres_c_NS_addData</a> (void)</td></tr>
 <tr class="separator:add3200c0a639ea4220bb86f65223c8f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a006ede8220fd15858953b4e7bdd21780"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#a006ede8220fd15858953b4e7bdd21780">fopCamM_Create</a> (void)</td></tr>
-<tr class="separator:a006ede8220fd15858953b4e7bdd21780"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30fe9866b19ee41af25e3ff443743be2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#a30fe9866b19ee41af25e3ff443743be2">fopCamM_Create</a> (void)</td></tr>
+<tr class="separator:a30fe9866b19ee41af25e3ff443743be2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9980dbeba3872968704f0438c76abebe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#a9980dbeba3872968704f0438c76abebe">fopKyM_fastCreate</a> (void)</td></tr>
 <tr class="separator:a9980dbeba3872968704f0438c76abebe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf4ab7ddc8e736cda6de57357c354891"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__stage_8cpp.html#abf4ab7ddc8e736cda6de57357c354891">fopMsgM_Create</a> (void)</td></tr>
@@ -2022,14 +2025,32 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a006ede8220fd15858953b4e7bdd21780"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a006ede8220fd15858953b4e7bdd21780">&#9670;&nbsp;</a></span>fopCamM_Create()</h2>
+<a id="a30fe9866b19ee41af25e3ff443743be2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30fe9866b19ee41af25e3ff443743be2">&#9670;&nbsp;</a></span>fopCamM_Create()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopCamM_Create </td>
+          <td class="memname">void fopCamM_Create </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a951bf35c9d6195af936af2bd71ef7349"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a951bf35c9d6195af936af2bd71ef7349">&#9670;&nbsp;</a></span>fopCamM_Create__FisPv()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void fopCamM_Create__FisPv </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
