@@ -92,6 +92,7 @@ $(function() {
 <code>#include &quot;<a class="el" href="d__kankyo_8h_source.html">d/d_kankyo/d_kankyo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__op__actor__iter_8h_source.html">f/f_op/f_op_actor_iter.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__op__actor__mng_8h_source.html">f/f_op/f_op_actor_mng.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="f__op__overlap__mng_8h_source.html">f/f_op/f_op_overlap_mng.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__manager_8h_source.html">f/f_pc/f_pc_manager.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__pc__searcher_8h_source.html">f/f_pc/f_pc_searcher.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="m__Do__audio_8h_source.html">m_Do/m_Do_audio/m_Do_audio.h</a>&quot;</code><br />
@@ -4528,8 +4529,6 @@ Functions</h2></td></tr>
 <tr class="separator:aa5853b9802922fc2b5930ee052472891"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a254f284877eca56f0e54fc22757e943b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#a254f284877eca56f0e54fc22757e943b">fopMsgM_SearchByID</a> (void)</td></tr>
 <tr class="separator:a254f284877eca56f0e54fc22757e943b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d1f751401840552496179386909d9ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#a7d1f751401840552496179386909d9ae">fopOvlpM_IsPeek</a> (void)</td></tr>
-<tr class="separator:a7d1f751401840552496179386909d9ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b33e93413ceeba522971e459aa28dd5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#a3b33e93413ceeba522971e459aa28dd5">fpoAcM_relativePos</a> (void)</td></tr>
 <tr class="separator:a3b33e93413ceeba522971e459aa28dd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad251d6f0a99855ce77de1280271abe45"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#ad251d6f0a99855ce77de1280271abe45">freeAll__7JKRHeapFv</a> (void)</td></tr>
@@ -4544,6 +4543,8 @@ Functions</h2></td></tr>
 <tr class="separator:a130aeb01b19361a7d78f0d051dd48e09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29bcd91e8d453bd1542dd4530c6c1054"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#a29bcd91e8d453bd1542dd4530c6c1054">func_80362084</a> (void)</td></tr>
 <tr class="separator:a29bcd91e8d453bd1542dd4530c6c1054"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb0133bbdd9b5d3ff2f915d205c54451"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#afb0133bbdd9b5d3ff2f915d205c54451">fopOvlpM_IsPeek__Fv</a> (void)</td></tr>
+<tr class="separator:afb0133bbdd9b5d3ff2f915d205c54451"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aceecfa63d9a2ec2e63e307ac931947a5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#aceecfa63d9a2ec2e63e307ac931947a5">__cvt_fp2unsigned</a> (void)</td></tr>
 <tr class="separator:aceecfa63d9a2ec2e63e307ac931947a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aedd56b254bb9acd180537ebf4df91d04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__a__alink_8cpp.html#aedd56b254bb9acd180537ebf4df91d04">getGlbResource__13JKRFileLoaderFPCcP13JKRFileLoader</a> (void)</td></tr>
@@ -38164,14 +38165,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a7d1f751401840552496179386909d9ae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d1f751401840552496179386909d9ae">&#9670;&nbsp;</a></span>fopOvlpM_IsPeek()</h2>
+<a id="afb0133bbdd9b5d3ff2f915d205c54451"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb0133bbdd9b5d3ff2f915d205c54451">&#9670;&nbsp;</a></span>fopOvlpM_IsPeek__Fv()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_IsPeek </td>
+          <td class="memname">void fopOvlpM_IsPeek__Fv </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
