@@ -82,16 +82,11 @@ $(function() {
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="f__op__overlap__mng_8h_source.html">f/f_op/f_op_overlap_mng.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="c__request_8h_source.html">SComponent/c_request.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="f__op__overlap__req_8h_source.html">f/f_op/f_op_overlap_req.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="f__op__scene__pause_8h_source.html">f/f_op/f_op_scene_pause.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="f__pc__executor_8h_source.html">f/f_pc/f_pc_executor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="global_8h_source.html">global.h</a>&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E484.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E4C4.s&quot;</code><br />
 <code>#include &quot;f/f_op_overlap_mng/asm/func_8001E504.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E5A8.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E5D0.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E604.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E650.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E698.s&quot;</code><br />
-<code>#include &quot;f/f_op_overlap_mng/asm/func_8001E6E8.s&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Include dependency graph for f_op_overlap_mng.cpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -105,57 +100,49 @@ $(function() {
 Functions</h2></td></tr>
 <tr class="memitem:adeeec76f5e0dec174cfa8ee24637c3ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#adeeec76f5e0dec174cfa8ee24637c3ca">cReq_Is_Done__FP18request_base_class</a> (void)</td></tr>
 <tr class="separator:adeeec76f5e0dec174cfa8ee24637c3ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2dd98400f8ea35204e2602022c0c42d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a2dd98400f8ea35204e2602022c0c42d9">fopOvlpM_Cancel</a> (void)</td></tr>
-<tr class="separator:a2dd98400f8ea35204e2602022c0c42d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb7cece1bf9ee9d92a217bc0ed12252e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#aeb7cece1bf9ee9d92a217bc0ed12252e">fopOvlpM_ClearOfReq</a> (void)</td></tr>
-<tr class="separator:aeb7cece1bf9ee9d92a217bc0ed12252e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a754d4d92ad93e3607ec1ae5a646836f6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a754d4d92ad93e3607ec1ae5a646836f6">fopOvlpM_Done</a> (void)</td></tr>
 <tr class="separator:a754d4d92ad93e3607ec1ae5a646836f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa17d35b2d392d40f29030ec3469922ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#aa17d35b2d392d40f29030ec3469922ea">fopOvlpM_Init</a> (void)</td></tr>
 <tr class="separator:aa17d35b2d392d40f29030ec3469922ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af3d376ac9d54b3f94d5da5c7327c3a23"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#af3d376ac9d54b3f94d5da5c7327c3a23">fopOvlpM_IsDoingReq</a> (void)</td></tr>
-<tr class="separator:af3d376ac9d54b3f94d5da5c7327c3a23"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a133eb7b5294c728512451914fbcbb5b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a133eb7b5294c728512451914fbcbb5b5">fopOvlpM_Request</a> (void)</td></tr>
-<tr class="separator:a133eb7b5294c728512451914fbcbb5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79f0c97800806a225df1235e5d08ff34"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a79f0c97800806a225df1235e5d08ff34">fopOvlpM_SceneIsStart</a> (void)</td></tr>
-<tr class="separator:a79f0c97800806a225df1235e5d08ff34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad56f918cc30f5b7d34c1bcf39d42bcfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ad56f918cc30f5b7d34c1bcf39d42bcfc">fopOvlpM_SceneIsStop</a> (void)</td></tr>
-<tr class="separator:ad56f918cc30f5b7d34c1bcf39d42bcfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab840d38eb9a51b13dac8af7c0838fed7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ab840d38eb9a51b13dac8af7c0838fed7">fopOvlpM_Request</a> (void)</td></tr>
+<tr class="separator:ab840d38eb9a51b13dac8af7c0838fed7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ad5a6247d4a17f7d23b4765005b31a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a0ad5a6247d4a17f7d23b4765005b31a6">fopOvlpM_ToldAboutID</a> (void)</td></tr>
 <tr class="separator:a0ad5a6247d4a17f7d23b4765005b31a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c38892a2e2294960b4c369a3be58b42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a3c38892a2e2294960b4c369a3be58b42">fopOvlpReq_Cancel</a> (void)</td></tr>
-<tr class="separator:a3c38892a2e2294960b4c369a3be58b42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9a38bc62d6a3b4611b990dcd26f6f33b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a9a38bc62d6a3b4611b990dcd26f6f33b">fopOvlpReq_Handler</a> (void)</td></tr>
-<tr class="separator:a9a38bc62d6a3b4611b990dcd26f6f33b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a492865c65e318920fc64bf0ee11fe839"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a492865c65e318920fc64bf0ee11fe839">fopOvlpReq_OverlapClr</a> (void)</td></tr>
-<tr class="separator:a492865c65e318920fc64bf0ee11fe839"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5d5529238e34c3f2b617a82fe943c39"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ab5d5529238e34c3f2b617a82fe943c39">fopOvlpReq_Request</a> (void)</td></tr>
-<tr class="separator:ab5d5529238e34c3f2b617a82fe943c39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad26effb8847157f72fb17c308c6efc8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ad26effb8847157f72fb17c308c6efc8c">fopScnPause_Disable</a> (void)</td></tr>
 <tr class="separator:ad26effb8847157f72fb17c308c6efc8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a835fe3ff04c8f294c8e73459b705a9d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a835fe3ff04c8f294c8e73459b705a9d9">fopScnPause_Enable</a> (void)</td></tr>
-<tr class="separator:a835fe3ff04c8f294c8e73459b705a9d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7ddad57d088a5cf4d3ec206a2c68724e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a7ddad57d088a5cf4d3ec206a2c68724e">fpcEx_SearchByID</a> (void)</td></tr>
-<tr class="separator:a7ddad57d088a5cf4d3ec206a2c68724e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab88d54a2b1b6de131ecd59246c489ab6"><td class="memItemLeft" align="right" valign="top">asm <a class="el" href="types_8h.html#a050c65e107f0c828f856a231f4b4e788">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ab88d54a2b1b6de131ecd59246c489ab6">fopOvlpM_IsOutReq</a> (<a class="el" href="classoverlap__task__class.html">overlap_task_class</a> *pTaskClass)</td></tr>
-<tr class="separator:ab88d54a2b1b6de131ecd59246c489ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94efae6c2c81dffdc19bd8b9ed404224"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a94efae6c2c81dffdc19bd8b9ed404224">fopOvlpReq_OverlapClr__FP21overlap_request_class</a> (void)</td></tr>
+<tr class="separator:a94efae6c2c81dffdc19bd8b9ed404224"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c7058a37577c65cdfae422961610da3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a4c7058a37577c65cdfae422961610da3">fopOvlpM_SceneIsStop</a> (void)</td></tr>
+<tr class="separator:a4c7058a37577c65cdfae422961610da3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ff09d97721cee205aed2c59279f2959"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a4ff09d97721cee205aed2c59279f2959">fopOvlpM_SceneIsStart</a> (void)</td></tr>
+<tr class="separator:a4ff09d97721cee205aed2c59279f2959"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86eaa3b2e73965e5b0553743232d3d55"><td class="memItemLeft" align="right" valign="top">asm int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a86eaa3b2e73965e5b0553743232d3d55">fopOvlpM_IsOutReq</a> (<a class="el" href="classoverlap__task__class.html">overlap_task_class</a> *pTaskClass)</td></tr>
+<tr class="separator:a86eaa3b2e73965e5b0553743232d3d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35c7a9803d4f95cbfca1c8b387284d01"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a35c7a9803d4f95cbfca1c8b387284d01">fopOvlpM_Done</a> (<a class="el" href="classoverlap__task__class.html">overlap_task_class</a> *pTaskClass)</td></tr>
 <tr class="separator:a35c7a9803d4f95cbfca1c8b387284d01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac05b1b9c627ac3c4be5f3e4d93aaa503"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ac05b1b9c627ac3c4be5f3e4d93aaa503">fopOvlpM_ToldAboutID</a> (unsigned int param_1)</td></tr>
 <tr class="separator:ac05b1b9c627ac3c4be5f3e4d93aaa503"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24b551acff3acef389cd770cb504030b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a24b551acff3acef389cd770cb504030b">fopOvlpM_IsPeek</a> (void)</td></tr>
-<tr class="separator:a24b551acff3acef389cd770cb504030b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adfb4132be068a147abcecf6924e4e1e3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#adfb4132be068a147abcecf6924e4e1e3">fopOvlpM_IsPeek</a> (void)</td></tr>
+<tr class="separator:adfb4132be068a147abcecf6924e4e1e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6cc0316863096e82d2436089129f096"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#ae6cc0316863096e82d2436089129f096">fopOvlpM_IsDone</a> (void)</td></tr>
 <tr class="separator:ae6cc0316863096e82d2436089129f096"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aabe07b61be0f11e26e1c2e9c97e1371b"><td class="memItemLeft" align="right" valign="top">asm void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#aabe07b61be0f11e26e1c2e9c97e1371b">fopOvlpM_Management</a> (void)</td></tr>
-<tr class="separator:aabe07b61be0f11e26e1c2e9c97e1371b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fdb228a7ede8d538e6f7475bb1b3f5a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a4fdb228a7ede8d538e6f7475bb1b3f5a">fopOvlpM_IsDoingReq</a> (void)</td></tr>
+<tr class="separator:a4fdb228a7ede8d538e6f7475bb1b3f5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ccac6fe307060db72a3b64d687e028e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a6ccac6fe307060db72a3b64d687e028e">fopOvlpM_ClearOfReq</a> (void)</td></tr>
+<tr class="separator:a6ccac6fe307060db72a3b64d687e028e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5007374c774f44e3ff2bafe75a4202a4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structrequest__base__class.html">request_base_class</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a5007374c774f44e3ff2bafe75a4202a4">fopOvlpM_Request</a> (<a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a> param_1, <a class="el" href="types_8h.html#a9e6c91d77e24643b888dbd1a1a590054">u16</a> param_2)</td></tr>
+<tr class="separator:a5007374c774f44e3ff2bafe75a4202a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4870bcb5046552b13b034fa6081cef63"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a4870bcb5046552b13b034fa6081cef63">fopOvlpM_Management</a> (void)</td></tr>
+<tr class="separator:a4870bcb5046552b13b034fa6081cef63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae7c27763d41c6dd819f012061afd197"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#aae7c27763d41c6dd819f012061afd197">fopOvlpM_Cancel</a> (void)</td></tr>
+<tr class="separator:aae7c27763d41c6dd819f012061afd197"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a732aafbd2b928d7e6c06c181a40de258"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a732aafbd2b928d7e6c06c181a40de258">lbl_803F1DE8</a></td></tr>
-<tr class="separator:a732aafbd2b928d7e6c06c181a40de258"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f9107192d61647dc6fbb5cc63149676"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structrequest__base__class.html">request_base_class</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a2f9107192d61647dc6fbb5cc63149676">l_fopOvlpM_overlap</a></td></tr>
 <tr class="separator:a2f9107192d61647dc6fbb5cc63149676"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06839d87c4f7f5dabafdacad3eca8a45"><td class="memItemLeft" align="right" valign="top">overlap_request_class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__overlap__mng_8cpp.html#a06839d87c4f7f5dabafdacad3eca8a45">l_fopOvlpM_Request</a></td></tr>
+<tr class="separator:a06839d87c4f7f5dabafdacad3eca8a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="adeeec76f5e0dec174cfa8ee24637c3ca"></a>
@@ -176,14 +163,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a2dd98400f8ea35204e2602022c0c42d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2dd98400f8ea35204e2602022c0c42d9">&#9670;&nbsp;</a></span>fopOvlpM_Cancel()</h2>
+<a id="aae7c27763d41c6dd819f012061afd197"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae7c27763d41c6dd819f012061afd197">&#9670;&nbsp;</a></span>fopOvlpM_Cancel()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_Cancel </td>
+          <td class="memname">int fopOvlpM_Cancel </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -194,14 +181,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="aeb7cece1bf9ee9d92a217bc0ed12252e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb7cece1bf9ee9d92a217bc0ed12252e">&#9670;&nbsp;</a></span>fopOvlpM_ClearOfReq()</h2>
+<a id="a6ccac6fe307060db72a3b64d687e028e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ccac6fe307060db72a3b64d687e028e">&#9670;&nbsp;</a></span>fopOvlpM_ClearOfReq()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_ClearOfReq </td>
+          <td class="memname">int fopOvlpM_ClearOfReq </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -266,14 +253,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="af3d376ac9d54b3f94d5da5c7327c3a23"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af3d376ac9d54b3f94d5da5c7327c3a23">&#9670;&nbsp;</a></span>fopOvlpM_IsDoingReq()</h2>
+<a id="a4fdb228a7ede8d538e6f7475bb1b3f5a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fdb228a7ede8d538e6f7475bb1b3f5a">&#9670;&nbsp;</a></span>fopOvlpM_IsDoingReq()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void fopOvlpM_IsDoingReq </td>
+          <td class="memname">int fopOvlpM_IsDoingReq </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -302,14 +289,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="ab88d54a2b1b6de131ecd59246c489ab6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab88d54a2b1b6de131ecd59246c489ab6">&#9670;&nbsp;</a></span>fopOvlpM_IsOutReq()</h2>
+<a id="a86eaa3b2e73965e5b0553743232d3d55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86eaa3b2e73965e5b0553743232d3d55">&#9670;&nbsp;</a></span>fopOvlpM_IsOutReq()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm <a class="el" href="types_8h.html#a050c65e107f0c828f856a231f4b4e788">BOOL</a> fopOvlpM_IsOutReq </td>
+          <td class="memname">asm int fopOvlpM_IsOutReq </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classoverlap__task__class.html">overlap_task_class</a> *&#160;</td>
           <td class="paramname"><em>pTaskClass</em></td><td>)</td>
@@ -320,14 +307,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a24b551acff3acef389cd770cb504030b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24b551acff3acef389cd770cb504030b">&#9670;&nbsp;</a></span>fopOvlpM_IsPeek()</h2>
+<a id="adfb4132be068a147abcecf6924e4e1e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfb4132be068a147abcecf6924e4e1e3">&#9670;&nbsp;</a></span>fopOvlpM_IsPeek()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a> fopOvlpM_IsPeek </td>
+          <td class="memname">int fopOvlpM_IsPeek </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -338,14 +325,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="aabe07b61be0f11e26e1c2e9c97e1371b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aabe07b61be0f11e26e1c2e9c97e1371b">&#9670;&nbsp;</a></span>fopOvlpM_Management()</h2>
+<a id="a4870bcb5046552b13b034fa6081cef63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4870bcb5046552b13b034fa6081cef63">&#9670;&nbsp;</a></span>fopOvlpM_Management()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_Management </td>
+          <td class="memname">void fopOvlpM_Management </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -356,14 +343,42 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a133eb7b5294c728512451914fbcbb5b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a133eb7b5294c728512451914fbcbb5b5">&#9670;&nbsp;</a></span>fopOvlpM_Request()</h2>
+<a id="a5007374c774f44e3ff2bafe75a4202a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5007374c774f44e3ff2bafe75a4202a4">&#9670;&nbsp;</a></span>fopOvlpM_Request() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_Request </td>
+          <td class="memname"><a class="el" href="structrequest__base__class.html">request_base_class</a>* fopOvlpM_Request </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a>&#160;</td>
+          <td class="paramname"><em>param_1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="types_8h.html#a9e6c91d77e24643b888dbd1a1a590054">u16</a>&#160;</td>
+          <td class="paramname"><em>param_2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab840d38eb9a51b13dac8af7c0838fed7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab840d38eb9a51b13dac8af7c0838fed7">&#9670;&nbsp;</a></span>fopOvlpM_Request() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void fopOvlpM_Request </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -374,14 +389,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a79f0c97800806a225df1235e5d08ff34"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79f0c97800806a225df1235e5d08ff34">&#9670;&nbsp;</a></span>fopOvlpM_SceneIsStart()</h2>
+<a id="a4ff09d97721cee205aed2c59279f2959"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ff09d97721cee205aed2c59279f2959">&#9670;&nbsp;</a></span>fopOvlpM_SceneIsStart()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_SceneIsStart </td>
+          <td class="memname">int fopOvlpM_SceneIsStart </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -392,14 +407,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="ad56f918cc30f5b7d34c1bcf39d42bcfc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad56f918cc30f5b7d34c1bcf39d42bcfc">&#9670;&nbsp;</a></span>fopOvlpM_SceneIsStop()</h2>
+<a id="a4c7058a37577c65cdfae422961610da3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c7058a37577c65cdfae422961610da3">&#9670;&nbsp;</a></span>fopOvlpM_SceneIsStop()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopOvlpM_SceneIsStop </td>
+          <td class="memname">int fopOvlpM_SceneIsStop </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -446,68 +461,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a3c38892a2e2294960b4c369a3be58b42"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c38892a2e2294960b4c369a3be58b42">&#9670;&nbsp;</a></span>fopOvlpReq_Cancel()</h2>
+<a id="a94efae6c2c81dffdc19bd8b9ed404224"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a94efae6c2c81dffdc19bd8b9ed404224">&#9670;&nbsp;</a></span>fopOvlpReq_OverlapClr__FP21overlap_request_class()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void fopOvlpReq_Cancel </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9a38bc62d6a3b4611b990dcd26f6f33b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9a38bc62d6a3b4611b990dcd26f6f33b">&#9670;&nbsp;</a></span>fopOvlpReq_Handler()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void fopOvlpReq_Handler </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a492865c65e318920fc64bf0ee11fe839"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a492865c65e318920fc64bf0ee11fe839">&#9670;&nbsp;</a></span>fopOvlpReq_OverlapClr()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void fopOvlpReq_OverlapClr </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ab5d5529238e34c3f2b617a82fe943c39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5d5529238e34c3f2b617a82fe943c39">&#9670;&nbsp;</a></span>fopOvlpReq_Request()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void fopOvlpReq_Request </td>
+          <td class="memname">void fopOvlpReq_OverlapClr__FP21overlap_request_class </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -526,42 +487,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">void fopScnPause_Disable </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a835fe3ff04c8f294c8e73459b705a9d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a835fe3ff04c8f294c8e73459b705a9d9">&#9670;&nbsp;</a></span>fopScnPause_Enable()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void fopScnPause_Enable </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a7ddad57d088a5cf4d3ec206a2c68724e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7ddad57d088a5cf4d3ec206a2c68724e">&#9670;&nbsp;</a></span>fpcEx_SearchByID()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void fpcEx_SearchByID </td>
           <td>(</td>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
@@ -595,8 +520,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a732aafbd2b928d7e6c06c181a40de258"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a732aafbd2b928d7e6c06c181a40de258">&#9670;&nbsp;</a></span>lbl_803F1DE8</h2>
+<a id="a06839d87c4f7f5dabafdacad3eca8a45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06839d87c4f7f5dabafdacad3eca8a45">&#9670;&nbsp;</a></span>l_fopOvlpM_Request</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -605,7 +530,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a> lbl_803F1DE8</td>
+          <td class="memname">overlap_request_class l_fopOvlpM_Request</td>
         </tr>
       </table>
   </td>

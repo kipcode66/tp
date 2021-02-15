@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wallets_31628',['Wallets',['../d__save_8h.html#a5af6360fa7af6b3ff29f1d747eb0782a',1,'d_save.h']]]
+  ['wallets_31634',['Wallets',['../d__save_8h.html#a5af6360fa7af6b3ff29f1d747eb0782a',1,'d_save.h']]]
 ];
