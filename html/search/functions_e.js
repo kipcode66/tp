@@ -1,12 +1,12 @@
 var searchData=
 [
   ['newambcolget_25261',['NewAmbColGet',['../d__kankyo_8cpp.html#aa225e672f88addcd77b888960179587a',1,'d_kankyo.cpp']]],
-  ['newgroupid_25262',['newGroupId',['../classJKRExpHeap_1_1CMemBlock.html#ae5799f4786d07b97c8359495286cfe31',1,'JKRExpHeap::CMemBlock']]],
-  ['newgroupid_25263',['newGroupID',['../classJKRAramBlock.html#afadd223b3577265d19bd32896470e078',1,'JKRAramBlock']]],
+  ['newgroupid_25262',['newGroupID',['../classJKRAramBlock.html#afadd223b3577265d19bd32896470e078',1,'JKRAramBlock']]],
+  ['newgroupid_25263',['newGroupId',['../classJKRExpHeap_1_1CMemBlock.html#ae5799f4786d07b97c8359495286cfe31',1,'JKRExpHeap::CMemBlock']]],
   ['nextsrcdata_25264',['nextSrcData',['../JKRDvdRipper_8cpp.html#addf3e20a7141b3d98770ec00d68e238c',1,'nextSrcData(u8 *):&#160;JKRDvdRipper.cpp'],['../JKRDvdAramRipper_8cpp.html#addf3e20a7141b3d98770ec00d68e238c',1,'nextSrcData(u8 *):&#160;JKRDvdAramRipper.cpp'],['../JKRAram_8cpp.html#addf3e20a7141b3d98770ec00d68e238c',1,'nextSrcData(u8 *):&#160;JKRAram.cpp']]],
   ['nextsrcdata_5f_5ffpuc_25265',['nextSrcData__FPUc',['../JKRDvdAramRipper_8cpp.html#a27360973c282f793686deb69c252ebcf',1,'nextSrcData__FPUc(void):&#160;JKRDvdAramRipper.cpp'],['../JKRDvdRipper_8cpp.html#a27360973c282f793686deb69c252ebcf',1,'nextSrcData__FPUc(void):&#160;JKRDvdRipper.cpp'],['../JKRAram_8cpp.html#a27360973c282f793686deb69c252ebcf',1,'nextSrcData__FPUc(void):&#160;JKRAram.cpp']]],
-  ['norm_25266',['Norm',['../classcSGlobe.html#aaf45715b64cb1b4aa99b9ca0984138ec',1,'cSGlobe::Norm()'],['../classcSAngle.html#aa29e1fbd9cc7080428934d4bbbdd7576',1,'cSAngle::Norm()']]],
-  ['norm_25267',['norm',['../classcXyz.html#a353ef612739c9a49b6dc0b3f6c4bb91c',1,'cXyz']]],
+  ['norm_25266',['norm',['../classcXyz.html#a353ef612739c9a49b6dc0b3f6c4bb91c',1,'cXyz']]],
+  ['norm_25267',['Norm',['../classcSGlobe.html#aaf45715b64cb1b4aa99b9ca0984138ec',1,'cSGlobe::Norm()'],['../classcSAngle.html#aa29e1fbd9cc7080428934d4bbbdd7576',1,'cSAngle::Norm()']]],
   ['norm_5f_5f4cxyzcfv_25268',['norm__4cXyzCFv',['../d__camera_8cpp.html#a8e5ed755962254c8f6fce3b154cd75ff',1,'d_camera.cpp']]],
   ['norm_5f_5f7csanglecfv_25269',['Norm__7cSAngleCFv',['../d__camera_8cpp.html#a5bb8cc5f2f2def83eec6ab7c5b2b40e9',1,'d_camera.cpp']]],
   ['normalize_25270',['normalize',['../classcXyz.html#aebc6d6f9c2585d8ea5934a822f80f998',1,'cXyz']]],
