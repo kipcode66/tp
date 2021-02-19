@@ -125,17 +125,13 @@ Macros</h2></td></tr>
 <tr class="separator:a81d5f6c32dcf2185fe6cac2f3e2e4f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af574046c9cd01c3b55b79b8cdd6eda73"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#af574046c9cd01c3b55b79b8cdd6eda73">FLAG_ON</a>(V,  F)&#160;&#160;&#160;(((V) &amp; (F)) == 0)</td></tr>
 <tr class="separator:af574046c9cd01c3b55b79b8cdd6eda73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d8d2d8122d57a3007212f4651be71e0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#a7d8d2d8122d57a3007212f4651be71e0">FLOAT_LABEL</a>(x)&#160;&#160;&#160;(*(<a class="el" href="types_8h.html#a5f6906312a689f27d70e9d086649d3fd">f32</a>*)&amp;x)</td></tr>
+<tr class="separator:a7d8d2d8122d57a3007212f4651be71e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a191ef9a71eb892fc1475c10bd4f861cc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#a191ef9a71eb892fc1475c10bd4f861cc">DOUBLE_LABEL</a>(x)&#160;&#160;&#160;(*(<a class="el" href="types_8h.html#a94dab5770726ccbef8c7d026cfbdf8e5">f64</a>*)&amp;x)</td></tr>
+<tr class="separator:a191ef9a71eb892fc1475c10bd4f861cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a81a12a290275ae2dec544c11108043fa"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#a81a12a290275ae2dec544c11108043fa">__fabsf</a> (float)</td></tr>
-<tr class="separator:a81a12a290275ae2dec544c11108043fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abba0edf6a9c212dabb29b8eba81249ab"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#abba0edf6a9c212dabb29b8eba81249ab">fabsd</a> (float f)</td></tr>
-<tr class="separator:abba0edf6a9c212dabb29b8eba81249ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd3521e6a0dbd207dc331c548414b366"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#acd3521e6a0dbd207dc331c548414b366">fabsf</a> (float f)</td></tr>
-<tr class="separator:acd3521e6a0dbd207dc331c548414b366"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a45ea6591328683ef762d754c4ccd2b"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#a1a45ea6591328683ef762d754c4ccd2b">sqrt</a> (float f)</td></tr>
-<tr class="separator:a1a45ea6591328683ef762d754c4ccd2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add8c751814afc8108b19a1434ab15887"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#add8c751814afc8108b19a1434ab15887">__cntlzw</a> (unsigned int)</td></tr>
 <tr class="separator:add8c751814afc8108b19a1434ab15887"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a233e496a72a14d16bf25788970e6572d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#a050c65e107f0c828f856a231f4b4e788">BOOL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="global_8h.html#a233e496a72a14d16bf25788970e6572d">checkEqual</a> (<a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a> a, <a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a> b)</td></tr>
@@ -234,6 +230,24 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a191ef9a71eb892fc1475c10bd4f861cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a191ef9a71eb892fc1475c10bd4f861cc">&#9670;&nbsp;</a></span>DOUBLE_LABEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define DOUBLE_LABEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;(*(<a class="el" href="types_8h.html#a94dab5770726ccbef8c7d026cfbdf8e5">f64</a>*)&amp;x)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="af574046c9cd01c3b55b79b8cdd6eda73"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af574046c9cd01c3b55b79b8cdd6eda73">&#9670;&nbsp;</a></span>FLAG_ON</h2>
 
@@ -256,6 +270,24 @@ Functions</h2></td></tr>
           <td></td>
           <td>)</td>
           <td></td><td>&#160;&#160;&#160;(((V) &amp; (F)) == 0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7d8d2d8122d57a3007212f4651be71e0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d8d2d8122d57a3007212f4651be71e0">&#9670;&nbsp;</a></span>FLOAT_LABEL</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLOAT_LABEL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">x</td><td>)</td>
+          <td>&#160;&#160;&#160;(*(<a class="el" href="types_8h.html#a5f6906312a689f27d70e9d086649d3fd">f32</a>*)&amp;x)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -401,24 +433,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a81a12a290275ae2dec544c11108043fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81a12a290275ae2dec544c11108043fa">&#9670;&nbsp;</a></span>__fabsf()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float __fabsf </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a233e496a72a14d16bf25788970e6572d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a233e496a72a14d16bf25788970e6572d">&#9670;&nbsp;</a></span>checkEqual()</h2>
 
@@ -444,84 +458,6 @@ Functions</h2></td></tr>
           <td></td>
           <td>)</td>
           <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="abba0edf6a9c212dabb29b8eba81249ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abba0edf6a9c212dabb29b8eba81249ab">&#9670;&nbsp;</a></span>fabsd()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">double fabsd </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>f</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="acd3521e6a0dbd207dc331c548414b366"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acd3521e6a0dbd207dc331c548414b366">&#9670;&nbsp;</a></span>fabsf()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">float fabsf </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>f</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a1a45ea6591328683ef762d754c4ccd2b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a45ea6591328683ef762d754c4ccd2b">&#9670;&nbsp;</a></span>sqrt()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">double sqrt </td>
-          <td>(</td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>f</em></td><td>)</td>
-          <td></td>
         </tr>
       </table>
   </td>

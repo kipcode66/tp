@@ -99,6 +99,7 @@ $(function() {
 <code>#include &quot;<a class="el" href="m__Do__graphic_8h_source.html">m_Do/m_Do_graphic/m_Do_graphic.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="m__Do__machine_8h_source.html">m_Do/m_Do_machine/m_Do_machine.h</a>&quot;</code><br />
 <code>#include &quot;m_Do/m_Do_reset/m_Do_reset.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="string_8h_source.html">msl_c/string.h</a>&quot;</code><br />
 <code>#include &quot;m_Do/m_Do_main/asm/func_8000578C.s&quot;</code><br />
 <code>#include &quot;m_Do\m_Do_main\asm\func_80005AD8.s&quot;</code><br />
 <code>#include &quot;m_Do\m_Do_main\asm\func_80005D4C.s&quot;</code><br />
@@ -116,8 +117,6 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a21e4788b4a0ae39b11aa32e9a1079f98"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#a21e4788b4a0ae39b11aa32e9a1079f98">strcmp</a> (const char *, const char *)</td></tr>
-<tr class="separator:a21e4788b4a0ae39b11aa32e9a1079f98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68f5119d69fb97ddc78cc6ef82b322f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#a68f5119d69fb97ddc78cc6ef82b322f0">cDyl_InitAsync</a> (void)</td></tr>
 <tr class="separator:a68f5119d69fb97ddc78cc6ef82b322f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1ab14492783df20e4559459c070692b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#aa1ab14492783df20e4559459c070692b">CheckHeap1__9HeapCheckFv</a> (void)</td></tr>
@@ -166,8 +165,6 @@ Functions</h2></td></tr>
 <tr class="separator:a5373c2c31c26389af90f8e36d99c8841"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31d45045a0cb733d32e7ef94aa763454"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#a31d45045a0cb733d32e7ef94aa763454">mDoMemCd_Ctrl_c_NS_update</a> (void)</td></tr>
 <tr class="separator:a31d45045a0cb733d32e7ef94aa763454"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24793e5b248ddd4dcc4155bb5a9f1eca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#a24793e5b248ddd4dcc4155bb5a9f1eca">memcpy</a> (void *, const void *, int)</td></tr>
-<tr class="separator:a24793e5b248ddd4dcc4155bb5a9f1eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e22b4ba1ed864b8e1576ff49e43e94f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#a2e22b4ba1ed864b8e1576ff49e43e94f">read__8mDoCPd_cFv</a> (void)</td></tr>
 <tr class="separator:a2e22b4ba1ed864b8e1576ff49e43e94f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad37aefcd8514c1fa085ee353c19063f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="m__Do__main_8cpp.html#ad37aefcd8514c1fa085ee353c19063f0">version_check__Fv</a> (void)</td></tr>
@@ -1009,40 +1006,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a24793e5b248ddd4dcc4155bb5a9f1eca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24793e5b248ddd4dcc4155bb5a9f1eca">&#9670;&nbsp;</a></span>memcpy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void memcpy </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a2e22b4ba1ed864b8e1576ff49e43e94f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2e22b4ba1ed864b8e1576ff49e43e94f">&#9670;&nbsp;</a></span>read__8mDoCPd_cFv()</h2>
 
@@ -1091,34 +1054,6 @@ Variables</h2></td></tr>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a21e4788b4a0ae39b11aa32e9a1079f98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21e4788b4a0ae39b11aa32e9a1079f98">&#9670;&nbsp;</a></span>strcmp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int strcmp </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">

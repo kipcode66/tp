@@ -1972,7 +1972,7 @@ var searchData=
   ['decrcrowdsize_20567',['decrCrowdSize',['../classZ2SeMgr.html#af99a0507cbe444fd9461ecf4bbaaef3e',1,'Z2SeMgr']]],
   ['decrcrowdsize_5f_5f7z2semgrfv_20568',['decrCrowdSize__7Z2SeMgrFv',['../Z2SeMgr_8h.html#a66a1f915b53af0bdc72f42afbd13d4c0',1,'Z2SeMgr.h']]],
   ['decswordblur_20569',['decSwordBlur',['../classdaAlink__c.html#abef693f333cbd67f65c388f2dd84cfbe',1,'daAlink_c']]],
-  ['degree_20570',['Degree',['../classcSAngle.html#a2217f1950457de20a568b5cef1319ef2',1,'cSAngle']]],
+  ['degree_20570',['Degree',['../classcSAngle.html#a4caaff6a0f1ad2ece40d2e2766532737',1,'cSAngle']]],
   ['degree_5f_5f7csanglecfv_20571',['Degree__7cSAngleCFv',['../d__camera_8cpp.html#ac0f112fe54c249e7db451217ecc5ab98',1,'d_camera.cpp']]],
   ['delete_5fand_5finitialize_20572',['delete_and_initialize',['../classJUTResFont.html#a3a49dc404058ea7232c511180b0196db',1,'JUTResFont']]],
   ['deleteenemyall_20573',['deleteEnemyAll',['../classZ2SoundObjMgr.html#a69524d0a74a7b59a59860d87f2d35c40',1,'Z2SoundObjMgr']]],

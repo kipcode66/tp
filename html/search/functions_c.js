@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['l_5fhio_5fns_5fdtor_24930',['l_HIO_NS_dtor',['../f__op__actor__mng_8cpp.html#a0157ee3437e43cb07d9ab04409a07dae',1,'f_op_actor_mng.cpp']]],
-  ['layeractorloader_24931',['layerActorLoader',['../d__stage_8cpp.html#ae06f7a9c7f0367c3ed37a41d9926d864',1,'d_stage.cpp']]],
-  ['layermemoryinfoloader_24932',['layerMemoryInfoLoader',['../d__stage_8cpp.html#aee10ba0ecf78c2eb2d031e2b434e3406',1,'d_stage.cpp']]],
-  ['layertableloader_24933',['layerTableLoader',['../d__stage_8cpp.html#a02fe6671d6e1f311f48fce13167a20e1',1,'d_stage.cpp']]],
-  ['lcdisable_24934',['LCDisable',['../OS_8h.html#a175d62ba1caad8b54b649b4ff312defe',1,'OS.h']]],
+  ['l_5fhio_5fns_5fdtor_24929',['l_HIO_NS_dtor',['../f__op__actor__mng_8cpp.html#a0157ee3437e43cb07d9ab04409a07dae',1,'f_op_actor_mng.cpp']]],
+  ['layeractorloader_24930',['layerActorLoader',['../d__stage_8cpp.html#ae06f7a9c7f0367c3ed37a41d9926d864',1,'d_stage.cpp']]],
+  ['layermemoryinfoloader_24931',['layerMemoryInfoLoader',['../d__stage_8cpp.html#aee10ba0ecf78c2eb2d031e2b434e3406',1,'d_stage.cpp']]],
+  ['layertableloader_24932',['layerTableLoader',['../d__stage_8cpp.html#a02fe6671d6e1f311f48fce13167a20e1',1,'d_stage.cpp']]],
+  ['lcdisable_24933',['LCDisable',['../OS_8h.html#a175d62ba1caad8b54b649b4ff312defe',1,'OS.h']]],
+  ['ldexp_24934',['ldexp',['../math_8h.html#abdadd0417247a57733bc0b3b65d33254',1,'math.h']]],
   ['light_5finfluence_24935',['LIGHT_INFLUENCE',['../d__kankyo_8cpp.html#aebff444f37575ce3dd3d548fc31ee439',1,'d_kankyo.cpp']]],
   ['light_5finfluence_5fns_5fdtor_24936',['LIGHT_INFLUENCE_NS_dtor',['../d__kankyo_8cpp.html#a4fe09663d6ee69c217d27839f95ab141',1,'LIGHT_INFLUENCE_NS_dtor(void):&#160;d_a_alink.cpp'],['../d__a__alink_8cpp.html#aa23ea44de9fecdf6f531f80bc0f902d4',1,'LIGHT_INFLUENCE_NS_dtor(void):&#160;d_a_alink.cpp']]],
   ['lineartransform_24937',['linearTransform',['../namespaceZ2Calc.html#a795d4c65269a647388a9d5348494962d',1,'Z2Calc']]],

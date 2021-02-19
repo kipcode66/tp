@@ -81,6 +81,7 @@ $(function() {
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="d__com__inf__game_8h_source.html">d/d_com/d_com_inf_game/d_com_inf_game.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="global_8h_source.html">global.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="string_8h_source.html">msl_c/string.h</a>&quot;</code><br />
 <code>#include &quot;d/d_meter2/d_meter2_info/asm/func_8021BDDC.s&quot;</code><br />
 <code>#include &quot;d/d_meter2/d_meter2_info/asm/func_8021BE20.s&quot;</code><br />
 <code>#include &quot;d/d_meter2/d_meter2_info/asm/func_8021BE68.s&quot;</code><br />
@@ -141,10 +142,6 @@ $(function() {
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a55e123beb3d7f96e25e024a13582d987"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#a55e123beb3d7f96e25e024a13582d987">strcpy</a> (char *, const char *)</td></tr>
-<tr class="separator:a55e123beb3d7f96e25e024a13582d987"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21e4788b4a0ae39b11aa32e9a1079f98"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#a21e4788b4a0ae39b11aa32e9a1079f98">strcmp</a> (const char *, const char *)</td></tr>
-<tr class="separator:a21e4788b4a0ae39b11aa32e9a1079f98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2e37e45236a0a17dc9a205857f95141"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#aa2e37e45236a0a17dc9a205857f95141">dComIfGs_getMixItemIndex</a> (int)</td></tr>
 <tr class="separator:aa2e37e45236a0a17dc9a205857f95141"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f2e49bd9696e8c7127b4d6de08e4db8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#a4f2e49bd9696e8c7127b4d6de08e4db8">getBombNum__24dSv_player_item_record_cCFUc</a> (<a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>)</td></tr>
@@ -227,8 +224,6 @@ Functions</h2></td></tr>
 <tr class="separator:ad643f65cdc3d2ea93cc0e86ea72c0544"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac130ac98584341c17ad6aec3d52c8462"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#ac130ac98584341c17ad6aec3d52c8462">isLightDropGetFlag__16dSv_light_drop_cCFUc</a> (void)</td></tr>
 <tr class="separator:ac130ac98584341c17ad6aec3d52c8462"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24793e5b248ddd4dcc4155bb5a9f1eca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#a24793e5b248ddd4dcc4155bb5a9f1eca">memcpy</a> (void *, const void *, int)</td></tr>
-<tr class="separator:a24793e5b248ddd4dcc4155bb5a9f1eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab08b8aaf0b180b144b7a47580100cf54"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#ab08b8aaf0b180b144b7a47580100cf54">offFirstBit__21dSv_player_get_item_cFUc</a> (void)</td></tr>
 <tr class="separator:ab08b8aaf0b180b144b7a47580100cf54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a473773dca43a61b2cf8e93e214608fdd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="d__meter2__info_8cpp.html#a473773dca43a61b2cf8e93e214608fdd">onLetterGetFlag__17dSv_letter_info_cFi</a> (void)</td></tr>
@@ -1909,40 +1904,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a24793e5b248ddd4dcc4155bb5a9f1eca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24793e5b248ddd4dcc4155bb5a9f1eca">&#9670;&nbsp;</a></span>memcpy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void memcpy </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const void *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="ab08b8aaf0b180b144b7a47580100cf54"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab08b8aaf0b180b144b7a47580100cf54">&#9670;&nbsp;</a></span>offFirstBit__21dSv_player_get_item_cFUc()</h2>
 
@@ -2027,62 +1988,6 @@ Functions</h2></td></tr>
           <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a21e4788b4a0ae39b11aa32e9a1079f98"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21e4788b4a0ae39b11aa32e9a1079f98">&#9670;&nbsp;</a></span>strcmp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int strcmp </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a55e123beb3d7f96e25e024a13582d987"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55e123beb3d7f96e25e024a13582d987">&#9670;&nbsp;</a></span>strcpy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">char* strcpy </td>
-          <td>(</td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
