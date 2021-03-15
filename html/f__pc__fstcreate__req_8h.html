@@ -111,8 +111,8 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ac86d275dc04d995828d610c1d91863c3"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__fstcreate__req_8h.html#ac86d275dc04d995828d610c1d91863c3">fstCreateFunc</a>) (void *, void *)</td></tr>
-<tr class="separator:ac86d275dc04d995828d610c1d91863c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c14f3af571b992c62aa6816bf51d85c"><td class="memItemLeft" align="right" valign="top">typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__fstcreate__req_8h.html#a8c14f3af571b992c62aa6816bf51d85c">fstCreateFunc</a>) (void *, void *)</td></tr>
+<tr class="separator:a8c14f3af571b992c62aa6816bf51d85c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f2c60ab5d42be38ce0d8f2314614071"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structfast__create__request.html">fast_create_request</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__fstcreate__req_8h.html#a2f2c60ab5d42be38ce0d8f2314614071">fast_create_request</a></td></tr>
 <tr class="separator:a2f2c60ab5d42be38ce0d8f2314614071"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -122,7 +122,7 @@ Functions</h2></td></tr>
 <tr class="separator:a8522b9489f630ccef971b8c1c58abc89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3574866a7107ad35d69059ed9f7214a1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__fstcreate__req_8h.html#a3574866a7107ad35d69059ed9f7214a1">fpcFCtRq_Delete</a> (<a class="el" href="structfast__create__request.html">fast_create_request</a> *)</td></tr>
 <tr class="separator:a3574866a7107ad35d69059ed9f7214a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeaeb5bcbb8b990383c644e88854d3075"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbase__process__class.html">base_process_class</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__fstcreate__req_8h.html#aeaeb5bcbb8b990383c644e88854d3075">fpcFCtRq_Request</a> (<a class="el" href="structlayer__class.html">layer_class</a> *pLayer, <a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a> pProcTypeID, <a class="el" href="f__pc__fstcreate__req_8h.html#ac86d275dc04d995828d610c1d91863c3">fstCreateFunc</a> pFastCreateFunc, void *pFastCreateData, void *pData)</td></tr>
+<tr class="memitem:aeaeb5bcbb8b990383c644e88854d3075"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbase__process__class.html">base_process_class</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__pc__fstcreate__req_8h.html#aeaeb5bcbb8b990383c644e88854d3075">fpcFCtRq_Request</a> (<a class="el" href="structlayer__class.html">layer_class</a> *pLayer, <a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a> pProcTypeID, <a class="el" href="f__pc__fstcreate__req_8h.html#a8c14f3af571b992c62aa6816bf51d85c">fstCreateFunc</a> pFastCreateFunc, void *pFastCreateData, void *pData)</td></tr>
 <tr class="separator:aeaeb5bcbb8b990383c644e88854d3075"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
@@ -140,14 +140,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ac86d275dc04d995828d610c1d91863c3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac86d275dc04d995828d610c1d91863c3">&#9670;&nbsp;</a></span>fstCreateFunc</h2>
+<a id="a8c14f3af571b992c62aa6816bf51d85c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c14f3af571b992c62aa6816bf51d85c">&#9670;&nbsp;</a></span>fstCreateFunc</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef <a class="el" href="types_8h.html#adafe97a8e4be18b0198f234819016582">s32</a>(* fstCreateFunc) (void *, void *)</td>
+          <td class="memname">typedef int(* fstCreateFunc) (void *, void *)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -212,7 +212,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="f__pc__fstcreate__req_8h.html#ac86d275dc04d995828d610c1d91863c3">fstCreateFunc</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="f__pc__fstcreate__req_8h.html#a8c14f3af571b992c62aa6816bf51d85c">fstCreateFunc</a>&#160;</td>
           <td class="paramname"><em>pFastCreateFunc</em>, </td>
         </tr>
         <tr>
