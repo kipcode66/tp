@@ -204,12 +204,14 @@ var menudata={children:[
 {text:"Variables",url:"globals_vars.html",children:[
 {text:"_",url:"globals_vars.html#index__5F"},
 {text:"c",url:"globals_vars_c.html#index_c"},
+{text:"f",url:"globals_vars_f.html#index_f"},
 {text:"g",url:"globals_vars_g.html#index_g"},
 {text:"h",url:"globals_vars_h.html#index_h"},
 {text:"i",url:"globals_vars_i.html#index_i"},
 {text:"j",url:"globals_vars_j.html#index_j"},
 {text:"l",url:"globals_vars_l.html#index_l"},
 {text:"m",url:"globals_vars_m.html#index_m"},
+{text:"n",url:"globals_vars_n.html#index_n"},
 {text:"p",url:"globals_vars_p.html#index_p"},
 {text:"s",url:"globals_vars_s.html#index_s"}]},
 {text:"Typedefs",url:"globals_type.html",children:[
