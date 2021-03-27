@@ -82,6 +82,7 @@ $(function() {
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="f__op__msg__mng_8h_source.html">f/f_op/f_op_msg_mng.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="d__com__inf__game_8h_source.html">d/d_com/d_com_inf_game/d_com_inf_game.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="d__meter2__info_8h_source.html">d/d_meter2/d_meter2_info/d_meter2_info.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="d__msg__object_8h_source.html">d/d_msg_object/d_msg_object.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__op__scene__iter_8h_source.html">f/f_op/f_op_scene_iter.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="f__op__scene__mng_8h_source.html">f/f_op/f_op_scene_mng.h</a>&quot;</code><br />
@@ -98,7 +99,6 @@ $(function() {
 <code>#include &quot;f/f_op/f_op_msg_mng/asm/func_8001FD34.s&quot;</code><br />
 <code>#include &quot;f/f_op/f_op_msg_mng/asm/func_8001FE84.s&quot;</code><br />
 <code>#include &quot;f/f_op/f_op_msg_mng/asm/func_8001FFC4.s&quot;</code><br />
-<code>#include &quot;f/f_op/f_op_msg_mng/asm/func_800200C0.s&quot;</code><br />
 <code>#include &quot;f/f_op/f_op_msg_mng/asm/func_80020108.s&quot;</code><br />
 <code>#include &quot;f/f_op/f_op_msg_mng/asm/func_80020160.s&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -218,8 +218,8 @@ Functions</h2></td></tr>
 <tr class="separator:ae7a3da78e9d191c49f46944fe3d9d149"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c0e555a54d5f784c50ff0e121298a27"><td class="memItemLeft" align="right" valign="top">asm void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#a2c0e555a54d5f784c50ff0e121298a27">fopMsgM_messageSetDemo</a> (<a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a>)</td></tr>
 <tr class="separator:a2c0e555a54d5f784c50ff0e121298a27"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9a13018f963aeffeb5f0ea76fbc811a"><td class="memItemLeft" align="right" valign="top">asm void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#ae9a13018f963aeffeb5f0ea76fbc811a">fopMsgM_messageGet</a> (char *, <a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a>)</td></tr>
-<tr class="separator:ae9a13018f963aeffeb5f0ea76fbc811a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada59044afae344ee488b3b50115f4694"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#ada59044afae344ee488b3b50115f4694">fopMsgM_messageGet</a> (char *pMsg, <a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a> param_2)</td></tr>
+<tr class="separator:ada59044afae344ee488b3b50115f4694"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa99b0e61db1bc4234a4f5fc155676db6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#aa99b0e61db1bc4234a4f5fc155676db6">fopMsgM_setMessageID</a> (unsigned int messageId)</td></tr>
 <tr class="separator:aa99b0e61db1bc4234a4f5fc155676db6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40a11220ffd0a31958b0a0e6218018f6"><td class="memItemLeft" align="right" valign="top">asm void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#a40a11220ffd0a31958b0a0e6218018f6">fopMsgM_Create</a> (<a class="el" href="types_8h.html#a5ffa4f640862b25ba6d4f635b78bdbe1">s16</a>, int(*)(void *), void *)</td></tr>
@@ -259,8 +259,6 @@ Variables</h2></td></tr>
 <tr class="separator:abfc6c0e670ee5e2b20667817e9b23e2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a219c3f26e21099fd5e05b3e99dc421fc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#a219c3f26e21099fd5e05b3e99dc421fc">lbl_80451C88</a></td></tr>
 <tr class="separator:a219c3f26e21099fd5e05b3e99dc421fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a5ec56aa4a400e07ebcf8f725f12206"><td class="memItemLeft" align="right" valign="top"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="f__op__msg__mng_8cpp.html#a5a5ec56aa4a400e07ebcf8f725f12206">lbl_80430188</a></td></tr>
-<tr class="separator:a5a5ec56aa4a400e07ebcf8f725f12206"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ae47a2c39d9d20e6720dd81faecc1c1c7"></a>
@@ -1019,23 +1017,23 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="ae9a13018f963aeffeb5f0ea76fbc811a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae9a13018f963aeffeb5f0ea76fbc811a">&#9670;&nbsp;</a></span>fopMsgM_messageGet()</h2>
+<a id="ada59044afae344ee488b3b50115f4694"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada59044afae344ee488b3b50115f4694">&#9670;&nbsp;</a></span>fopMsgM_messageGet()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">asm void fopMsgM_messageGet </td>
+          <td class="memname">char* fopMsgM_messageGet </td>
           <td>(</td>
           <td class="paramtype">char *&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramname"><em>pMsg</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="types_8h.html#a2caf5cd7bcdbe1eefa727f44ffb10bac">u32</a>&#160;</td>
-          <td class="paramname">&#160;</td>
+          <td class="paramname"><em>param_2</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1653,28 +1651,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a> lbl_803A3970</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5a5ec56aa4a400e07ebcf8f725f12206"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a5ec56aa4a400e07ebcf8f725f12206">&#9670;&nbsp;</a></span>lbl_80430188</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="types_8h.html#aed742c436da53c1080638ce6ef7d13de">u8</a> lbl_80430188</td>
         </tr>
       </table>
   </td>
