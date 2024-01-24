@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ossoundmode_34273',['OSSoundMode',['../OS_8h.html#a7085b2211651a7235a458e1d4b19a607',1,'OS.h']]]
+  ['hardwaretype_0',['HardwareType',['../trk_8h.html#ae4dfd42394001deb6e8a0e60c81d6f7a',1,'trk.h']]]
 ];

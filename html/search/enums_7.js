@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['j2dbaseposition_34269',['J2DBasePosition',['../J2DSys_8h.html#afafd1dbaf17cb41f7cbb8488b65e15c6',1,'J2DSys.h']]],
-  ['j2drotateaxis_34270',['J2DRotateAxis',['../J2DSys_8h.html#a568654c26104cd8c9ccd4aae037a0e58',1,'J2DSys.h']]],
-  ['jkrexpandswitch_34271',['JKRExpandSwitch',['../JKRDvdRipper_8h.html#a3a81ab253efe80892d32be96b8a9dec2',1,'JKRDvdRipper.h']]],
-  ['jkrmembreakflag_34272',['JKRMemBreakFlag',['../JKRMemArchive_8h.html#a2a0bd9c14b0a5e25b0a8d59556ac8dd2',1,'JKRMemArchive.h']]]
+  ['gear_5ftype_5fe_0',['gear_type_e',['../classdaObjLv4Gear__c.html#a7214e3861360a1d1a2b33517e7f62716',1,'daObjLv4Gear_c']]]
 ];
