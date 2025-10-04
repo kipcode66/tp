@@ -10,13 +10,13 @@
 gzInfo_c g_gzInfo;
 
 int gzInfo_c::_create() {
-    mCursorColor = 0xEE8000FF; // temp
-
+    mSettings.mTextColor = 0xEE8000FF; // temp
+    setCursorType(1);
     mpFont = mDoExt_getMesgFont();
 
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
     mpIcon = new J2DPicture(icon);
-    mpHeader = new gzTextBox("tpgz v1.2.0", mCursorColor);
+    mpHeader = new gzTextBox("tpgz v1.2.0", mSettings.mTextColor);
 
     mpCurrentMenu = new gzMainMenu_c();
 
@@ -71,7 +71,7 @@ int gzInfo_c::draw() {
         }
 
         if (mpHeader != NULL) {
-            mpHeader->draw(65.0f, 30.0f, mCursorColor);
+            mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
         }
 
         dComIfGd_set2DOpaTop(mpCurrentMenu);
@@ -136,11 +136,13 @@ int gzInfo_c::storeSettingsMemcard() {
         if (ret == CARD_RESULT_READY) {
 
             gzSettings_s settings;
-            settings.mCursorColor = mCursorColor;
-            settings.mAreaReload = mAreaReload;
-            settings.mCursorType = mCursorType;
-            settings.mDropShadows = mDropShadows;
-            settings.mSwapEquips = mSwapEquips;
+            settings.mTextColor = mSettings.mTextColor;
+            settings.mAreaReload = mSettings.mAreaReload;
+            settings.mCursorType = mSettings.mCursorType;
+            settings.mDropShadows = mSettings.mDropShadows;
+            settings.mSwapEquips = mSettings.mSwapEquips;
+            settings.mProgessiveMode = mSettings.mProgessiveMode;
+
             memcpy(mDoMemCd_Ctrl_c::sTmpBuf, &settings, sizeof(gzSettings_s));
 
             ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
@@ -172,11 +174,12 @@ int gzInfo_c::loadSettingsMemcard() {
             gzSettings_s settings;
             memcpy(&settings, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzSettings_s));
 
-            mCursorColor = settings.mCursorColor;
-            mAreaReload = settings.mAreaReload;
-            mCursorType = settings.mCursorType;
-            mDropShadows = settings.mDropShadows;
-            mSwapEquips = settings.mSwapEquips;
+            mSettings.mTextColor = settings.mTextColor;
+            mSettings.mAreaReload = settings.mAreaReload;
+            mSettings.mCursorType = settings.mCursorType;
+            mSettings.mDropShadows = settings.mDropShadows;
+            mSettings.mSwapEquips = settings.mSwapEquips;
+            mSettings.mProgessiveMode = settings.mProgessiveMode;
         }
 
         CARDClose(&file);

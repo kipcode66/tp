@@ -5,51 +5,37 @@
 #include "m_Do/m_Do_machine.h"
 // #include "JSystem/J2DGraph/J2DTextBox.h"
 
-#define CURSOR_AQUAMARINE 0x71D9E2FF
-#define CURSOR_BOLD_CRIMSON 0xDC143CFF
-#define CURSOR_ELECTRIC_BLUE 0x7DF9FFFF
-#define CURSOR_FIERY_ORANGE 0xFF4500FF
-#define CURSOR_GOLD_DROP 0xEE8000FF
-#define CURSOR_HOT_PINK 0xFF69B4FF
-#define CURSOR_LEMON_YELLOW 0xFFF44FFF
-#define CURSOR_LIME_GREEN 0x32CD32FF
-#define CURSOR_MYSTICAL_PURPLE 0x9370DBFF
-#define CURSOR_TROPICAL_TURQUOISE 0x40E0D0FF
-#define CURSOR_VIVID_VIOLET 0x9F00FFFF
-#define CURSOR_ZESTY_CHARTREUSE 0x7FFF00FF
+#define COLOR_AMETHYST 0x9966FFFF
+#define COLOR_AQUAMARINE 0x71D9E2FF
+#define COLOR_BANANA_MANIA 0xFAE7B5FF
+#define COLOR_BOLD_CRIMSON 0xDC143CFF
+#define COLOR_BUBBLEGUM_PINK 0xFF69B4FF
+#define COLOR_CERULEAN 0x007BA7FF
+#define COLOR_COSMIC_COBALT 0x2E2D88FF
+#define COLOR_ELECTRIC_BLUE 0x7DF9FFFF
+#define COLOR_FIERY_ORANGE 0xFF4500FF
+#define COLOR_FLAMINGO_FEATHER 0xFC8EACFF
+#define COLOR_GOLD_DROP 0xEE8000FF
+#define COLOR_LEMON_YELLOW 0xFFF44FFF
+#define COLOR_LIME_GREEN 0x32CD32FF
+#define COLOR_MAGENTA_MAGIC 0xFF00FFFF
+#define COLOR_MIDNIGHT_BLUE 0x191970FF
+#define COLOR_MYSTICAL_PURPLE 0x9370DBFF
+#define COLOR_NEON_CARROT 0xFFA343FF
+#define COLOR_PERIWINKLE 0xCCCCFFFF
+#define COLOR_SAPPHIRE_SPARKLE 0x0F52BAFF
+#define COLOR_SHAMROCK_GREEN 0x009E60FF
+#define COLOR_SUNNY_YELLOW 0xFFFF00FF
+#define COLOR_TANGERINE_TWIST 0xFFA500FF
+#define COLOR_TROPICAL_TURQUOISE 0x40E0D0FF
+#define COLOR_VIVID_VIOLET 0x9F00FFFF
+#define COLOR_WILD_STRAWBERRY 0xFF43A4FF
+#define COLOR_ZESTY_CHARTREUSE 0x7FFF00FF
+#define COLOR_WHITE 0xFFFFFFFF
 
-#define CURSOR_AMETHYST 0x9966FFFF
-#define CURSOR_AQUAMARINE 0x71D9E2FF
-#define CURSOR_BANANA_MANIA 0xFAE7B5FF
-#define CURSOR_BOLD_CRIMSON 0xDC143CFF
-#define CURSOR_BUBBLEGUM_PINK 0xFF69B4FF
-#define CURSOR_CERULEAN 0x007BA7FF
-#define CURSOR_COSMIC_COBALT 0x2E2D88FF
-#define CURSOR_ELECTRIC_BLUE 0x7DF9FFFF
-#define CURSOR_FIERY_ORANGE 0xFF4500FF
-#define CURSOR_FLAMINGO_FEATHER 0xFC8EACFF
-#define CURSOR_GOLD_DROP 0xEE8000FF
-#define CURSOR_LEMON_YELLOW 0xFFF44FFF
-#define CURSOR_LIME_GREEN 0x32CD32FF
-#define CURSOR_MAGENTA_MAGIC 0xFF00FFFF
-#define CURSOR_MIDNIGHT_BLUE 0x191970FF
-#define CURSOR_MYSTICAL_PURPLE 0x9370DBFF
-#define CURSOR_NEON_CARROT 0xFFA343FF
-#define CURSOR_PERIWINKLE 0xCCCCFFFF
-#define CURSOR_SAPPHIRE_SPARKLE 0x0F52BAFF
-#define CURSOR_SHAMROCK_GREEN 0x009E60FF
-#define CURSOR_SUNNY_YELLOW 0xFFFF00FF
-#define CURSOR_TANGERINE_TWIST 0xFFA500FF
-#define CURSOR_TROPICAL_TURQUOISE 0x40E0D0FF
-#define CURSOR_VIVID_VIOLET 0x9F00FFFF
-#define CURSOR_WILD_STRAWBERRY 0xFF43A4FF
-#define CURSOR_ZESTY_CHARTREUSE 0x7FFF00FF
+static const int COLOR_COUNT = 26;
 
-bool g_progressiveMode = false;
-
-static const int CURSOR_COLOR_COUNT = 26;
-
-static char* l_cursorColorName[] = {
+static char* l_textColorName[] = {
     "amethyst",
     "aquamarine",
     "banana mania",
@@ -74,44 +60,46 @@ static char* l_cursorColorName[] = {
     "tangerine twist",
     "tropical turquoise",
     "vivid violet",
+    "white",
     "wild strawberry",
     "zesty chartreuse"
 };
 
-static u32 l_cursorColorValue[] = {
-    CURSOR_AMETHYST,
-    CURSOR_AQUAMARINE,
-    CURSOR_BANANA_MANIA,
-    CURSOR_BOLD_CRIMSON,
-    CURSOR_BUBBLEGUM_PINK,
-    CURSOR_CERULEAN,
-    CURSOR_COSMIC_COBALT,
-    CURSOR_ELECTRIC_BLUE,
-    CURSOR_FIERY_ORANGE,
-    CURSOR_FLAMINGO_FEATHER,
-    CURSOR_GOLD_DROP,
-    CURSOR_LEMON_YELLOW,
-    CURSOR_LIME_GREEN,
-    CURSOR_MAGENTA_MAGIC,
-    CURSOR_MIDNIGHT_BLUE,
-    CURSOR_MYSTICAL_PURPLE,
-    CURSOR_NEON_CARROT,
-    CURSOR_PERIWINKLE,
-    CURSOR_SAPPHIRE_SPARKLE,
-    CURSOR_SHAMROCK_GREEN,
-    CURSOR_SUNNY_YELLOW,
-    CURSOR_TANGERINE_TWIST,
-    CURSOR_TROPICAL_TURQUOISE,
-    CURSOR_VIVID_VIOLET,
-    CURSOR_WILD_STRAWBERRY,
-    CURSOR_ZESTY_CHARTREUSE
+static u32 l_textColorValue[] = {
+    COLOR_AMETHYST,
+    COLOR_AQUAMARINE,
+    COLOR_BANANA_MANIA,
+    COLOR_BOLD_CRIMSON,
+    COLOR_BUBBLEGUM_PINK,
+    COLOR_CERULEAN,
+    COLOR_COSMIC_COBALT,
+    COLOR_ELECTRIC_BLUE,
+    COLOR_FIERY_ORANGE,
+    COLOR_FLAMINGO_FEATHER,
+    COLOR_GOLD_DROP,
+    COLOR_LEMON_YELLOW,
+    COLOR_LIME_GREEN,
+    COLOR_MAGENTA_MAGIC,
+    COLOR_MIDNIGHT_BLUE,
+    COLOR_MYSTICAL_PURPLE,
+    COLOR_NEON_CARROT,
+    COLOR_PERIWINKLE,
+    COLOR_SAPPHIRE_SPARKLE,
+    COLOR_SHAMROCK_GREEN,
+    COLOR_SUNNY_YELLOW,
+    COLOR_TANGERINE_TWIST,
+    COLOR_TROPICAL_TURQUOISE,
+    COLOR_VIVID_VIOLET,
+    COLOR_WHITE,
+    COLOR_WILD_STRAWBERRY,
+    COLOR_ZESTY_CHARTREUSE
 };
 
 u32 nextColor() {
     // Find current color index
     int currentIndex = -1;
-    for (int i = 0; i < CURSOR_COLOR_COUNT; i++) {
-        if (g_gzInfo.getCursorColor() == l_cursorColorValue[i]) {
+    for (int i = 0; i < COLOR_COUNT; i++) {
+        if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
             currentIndex = i;
             break;
         }
@@ -119,19 +107,19 @@ u32 nextColor() {
     
     // If not found, default to first color
     if (currentIndex == -1) {
-        return l_cursorColorValue[0];
+        return l_textColorValue[0];
     }
     
     // Get next index with wrap around
-    int nextIndex = (currentIndex + 1) % CURSOR_COLOR_COUNT;
-    return l_cursorColorValue[nextIndex];
+    int nextIndex = (currentIndex + 1) % COLOR_COUNT;
+    return l_textColorValue[nextIndex];
 }
 
 u32 previousColor() {
     // Find current color index
     int currentIndex = -1;
-    for (int i = 0; i < CURSOR_COLOR_COUNT; i++) {
-        if (g_gzInfo.getCursorColor() == l_cursorColorValue[i]) {
+    for (int i = 0; i < COLOR_COUNT; i++) {
+        if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
             currentIndex = i;
             break;
         }
@@ -139,24 +127,23 @@ u32 previousColor() {
     
     // If not found, default to first color
     if (currentIndex == -1) {
-        return l_cursorColorValue[0];
+        return l_textColorValue[0];
     }
     
     // Get previous index with wrap around
-    int previousIndex = (currentIndex - 1 + CURSOR_COLOR_COUNT) % CURSOR_COLOR_COUNT;
-    return l_cursorColorValue[previousIndex];
+    int previousIndex = (currentIndex - 1 + COLOR_COUNT) % COLOR_COUNT;
+    return l_textColorValue[previousIndex];
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
-    // mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setStringf("area reload behavior: <%s>", g_gzInfo.getAreaReload() ? "load area" : "load file");
     mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->setStringf("%s", g_gzInfo.getAreaReload() ? "load area" : "load file");
-    mpLineOptions[SETTING_CURSOR_TYPE]->setStringf("%s", g_gzInfo.getCursorType() ? "tp" : "classic");
+    mpLineOptions[SETTING_CURSOR_TYPE]->setStringf("%s", getCursorTypeText());
 
     // Find current color name
     char* currentColorName = "unknown";
-    for (int i = 0; i < CURSOR_COLOR_COUNT; i++) {
-        if (g_gzInfo.getCursorColor() == l_cursorColorValue[i]) {
-            currentColorName = l_cursorColorName[i];
+    for (int i = 0; i < COLOR_COUNT; i++) {
+        if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
+            currentColorName = l_textColorName[i];
             break;
         }
     }
@@ -164,7 +151,19 @@ void gzSettingsMenu_c::updateDynamicLines() {
 
     mpLines[SETTING_DROP_SHADOW]->setStringf("drop shadows: [%s]", g_gzInfo.getDropShadows() ? "X" : " ");
     mpLines[SETTING_SWAP_EQUIPS]->setStringf("swap equips: [%s]", g_gzInfo.getSwapEquips() ? "X" : " ");
-    mpLines[SETTING_PROGRESSIVE_MODE]->setStringf("progressive mode: [%s]", g_progressiveMode ? "X" : " ");
+    mpLines[SETTING_PROGRESSIVE_MODE]->setStringf("progressive mode: [%s]", g_gzInfo.getProgressiveMode() ? "X" : " ");
+
+    J2DTextBox::TFontSize font_size;
+
+    // update option box bounds
+    for (int i = 0; i < LINE_NUM; i++) {
+        mpLineOptions[i]->getFontSize(font_size);
+        // applying font_size.mSizeX against a scaling factor 
+        // to create a linear relationship between string length 
+        // and text box bound size
+        font_size.mSizeX *= 0.5f;
+        mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
+    }
 }
 
 gzMenu_c::gzCursor gzSettingsMenu_c::mCursor = {0, 0};
@@ -179,6 +178,7 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
         // mpLines[i]->setLineSpace(0.0f);
 
         mpLineOptions[i] = new gzTextBox();
+        mpLineOptions[i]->mBounds.f.y = 10.0f;
     }
 
     mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setString("area reload behavior");
@@ -194,9 +194,6 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpLines[SETTING_COMMAND_COMBOS]->setString("command combos");
     mpLines[SETTING_MENU_POSITIONS]->setString("menu positions");
     mpLines[SETTING_CREDITS]->setString("credits");
-
-    mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->mBounds.f.x = 50.0f;
-    mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->mBounds.f.y = 10.0f;
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
@@ -249,8 +246,8 @@ void gzSettingsMenu_c::execute() {
             g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
             break;
         case SETTING_PROGRESSIVE_MODE:
-            g_progressiveMode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-            g_progressiveMode = !g_progressiveMode;
+            g_gzInfo.getProgressiveMode() ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
+            g_gzInfo.setProgressiveMode(!g_gzInfo.getProgressiveMode());
             break;
         case SETTING_SAVE_CARD:
             g_gzInfo.storeSettingsMemcard();
@@ -267,10 +264,10 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigRight()) {
         switch (mCursor.y) {
         case SETTING_CURSOR_TYPE:
-            g_gzInfo.setCursorType(!g_gzInfo.getCursorType());
+            g_gzInfo.setCursorType(g_gzInfo.nextCursorType());
             break;
         case SETTING_CURSOR_COLOR:
-            g_gzInfo.setCursorColor(nextColor());
+            g_gzInfo.setTextColor(nextColor());
             break;
         case SETTING_AREA_RELOAD_BEHAVIOR:
             g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
@@ -281,10 +278,10 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigLeft()) {
         switch (mCursor.y) {
         case SETTING_CURSOR_TYPE:
-            g_gzInfo.setCursorType(!g_gzInfo.getCursorType());
+            g_gzInfo.setCursorType(g_gzInfo.previousCursorType());
             break;
         case SETTING_CURSOR_COLOR:
-            g_gzInfo.setCursorColor(previousColor());
+            g_gzInfo.setTextColor(previousColor());
             break;
         case SETTING_AREA_RELOAD_BEHAVIOR:
             g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
@@ -297,9 +294,9 @@ void gzSettingsMenu_c::draw() {
     f32 x_alignment = 30.0f;
     f32 y_alignment = 90.0f;
 
-    f32 x_alignment_opts = x_alignment + 240.0f;
+    f32 x_alignment_opts = x_alignment - 50.0f;
 
-    f32 x_alignment_haihai = x_alignment_opts + 35.0f;
+    f32 x_alignment_haihai = x_alignment_opts + 305.0f;
     f32 y_alignment_haihai = y_alignment - 7.0f;
 
     J2DTextBox::TFontSize font_size;
@@ -313,16 +310,23 @@ void gzSettingsMenu_c::draw() {
             mpMeterHaihai->setScale(font_size.mSizeY * 0.04f);
         
             if (mCursor.y == i) {
-                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), g_gzInfo.getCursorType() == true ? 0xFFFFFFFF : g_gzInfo.getCursorColor());
-                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), g_gzInfo.getCursorType() == true ? 0xFFFFFFFF : g_gzInfo.getCursorColor());
+                // spacing between arrows will be determined off text box bound size
+                f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + 30.0f;
+                u32 cursor_color = g_gzInfo.getCursorType() & g_gzInfo.CURSOR_CLASSIC ? g_gzInfo.getTextColor() : COLOR_WHITE;
+                
+                if (mpLineOptions[i]->mStringLength != 0) {
+                    mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), x_size_haihai, 0.0f);
+                }
+
+                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), cursor_color);
                 mpDrawCursor->setPos(170.0f, 82.5f + ((i - 1) * 22.0f), (J2DPane*)mpLines[i], true);
-                mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), 100.0f, 0.0f);
+                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), cursor_color, HBIND_CENTER);
             } else {
-                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), 0xFFFFFFFF);
-                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), g_gzInfo.getCursorType() == true ? 0xFFFFFFFF : g_gzInfo.getCursorColor());
+                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE);
+                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE, HBIND_CENTER);
             }
         }
     }
 
-    if (g_gzInfo.getCursorType()) mpDrawCursor->draw();
+    if (g_gzInfo.getCursorType() & g_gzInfo.CURSOR_TP) mpDrawCursor->draw();
 }

@@ -82,6 +82,19 @@ public:
     virtual void execute();
     virtual void draw();
 
+    char* getCursorTypeText() {
+        switch (g_gzInfo.getCursorType()) {
+        case g_gzInfo.CURSOR_CLASSIC:
+            return "classic";
+        case g_gzInfo.CURSOR_TP:
+            return "tp";
+        case g_gzInfo.CURSOR_BOTH:
+            return "both";
+        default:
+            return "unknown";
+        }
+    }
+
     static const int LINE_NUM = SETTING_MAX;
     static gzCursor mCursor;
 

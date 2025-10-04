@@ -298,13 +298,7 @@ int dScnLogo_c::create() {
     Z2AudioMgr::getInterface()->loadStaticWaves();
     mDoGph_gInf_c::setTickRate((OS_BUS_CLOCK / 4) / 60);
     mDoGph_gInf_c::waitBlanking(0);
-    mDoGph_gInf_c::startFadeIn(30);
-
-    // Apply static progressive mode configuration
-    setProgressiveMode(g_progressiveMode ? PROGRESSIVE_MODE_ON : PROGRESSIVE_MODE_OFF);
-    if (g_progressiveMode) {
-        setRenderMode();
-    }
+    mDoGph_gInf_c::startFadeIn(0);
 
     // Always go directly to resource loading
     mExecCommand = EXEC_DVD_WAIT;

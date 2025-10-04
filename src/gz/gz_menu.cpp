@@ -68,7 +68,7 @@ void gzMainMenu_c::draw() {
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL) {
             if (mCursor.y == i) {
-                mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), g_gzInfo.getCursorColor());
+                mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), g_gzInfo.getTextColor());
             } else {
                 mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), 0xFFFFFFFF);
             }

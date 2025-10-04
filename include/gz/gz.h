@@ -11,9 +11,24 @@ class gzMenu_c;
 class gzTextBox;
 class gzMainMenu_c;
 
+struct gzSettings_s {
+    u32 mTextColor;  // todo: just make this an index?
+    bool mDropShadows;
+    bool mSwapEquips;
+    bool mAreaReload;
+    u8 mCursorType;
+    bool mProgessiveMode;
+};
+
 class gzInfo_c {
 public:
     gzInfo_c() { mGZInitialized = false; }
+
+    enum gzInfoMenu_CursorType_e {
+        CURSOR_CLASSIC = 1,
+        CURSOR_TP,
+        CURSOR_BOTH,
+    };
 
     int _create();
     int _delete();
@@ -25,46 +40,59 @@ public:
     void showHeapUsage();
 
     bool isDisplay() const { return mDisplay; }
-    u32 getCursorColor() const { return mCursorColor; }
-    void setCursorColor(u32 i_cursorColor) { mCursorColor = i_cursorColor; }
-    bool getDropShadows() const { return mDropShadows; }
-    void setDropShadows(bool i_dropShadows) { mDropShadows = i_dropShadows; }
-    bool getSwapEquips() const { return mSwapEquips; }
-    void setSwapEquips(bool i_swapEquips) { mSwapEquips = i_swapEquips; }
-    bool getAreaReload() const { return mAreaReload; }
-    void setAreaReload(bool i_areaReload) { mAreaReload = i_areaReload; }
-    bool getCursorType() const { return mCursorType; }
-    void setCursorType(bool i_type) { mCursorType = i_type; }
+    u32 getTextColor() const { return mSettings.mTextColor; }
+    void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
+    bool getDropShadows() const { return mSettings.mDropShadows; }
+    void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
+    bool getSwapEquips() const { return mSettings.mSwapEquips; }
+    void setSwapEquips(bool i_swapEquips) { mSettings.mSwapEquips = i_swapEquips; }
+    bool getAreaReload() const { return mSettings.mAreaReload; }
+    void setAreaReload(bool i_areaReload) { mSettings.mAreaReload = i_areaReload; }
+    u8 getCursorType() const { return mSettings.mCursorType; }
+    void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
+    bool getProgressiveMode() const { return mSettings.mProgessiveMode; }
+    void setProgressiveMode(bool i_mode) { mSettings.mProgessiveMode = i_mode; }
     void setFont(JUTFont* i_font) { mpFont = i_font; }
+    u8 nextCursorType() {
+        switch (getCursorType()) {
+        case CURSOR_CLASSIC:
+            return CURSOR_TP;
+        case CURSOR_TP:
+            return CURSOR_BOTH;
+        case CURSOR_BOTH:
+            return CURSOR_CLASSIC;
+        default:
+            return CURSOR_CLASSIC;
+        }
+    }
+
+    u8 previousCursorType() {
+        switch (getCursorType()) {
+        case CURSOR_CLASSIC:
+            return CURSOR_BOTH;
+        case CURSOR_BOTH:
+            return CURSOR_TP;
+        case CURSOR_TP:
+            return CURSOR_CLASSIC;
+        default:
+            return CURSOR_CLASSIC;
+        }
+    }
+
     JUTFont* getFont() { return mpFont; }
 
     J2DPicture* mpIcon;
     gzTextBox* mpHeader;
     gzMenu_c* mpCurrentMenu;
 
-    u32 mCursorColor;
     JUTFont* mpFont;
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
-    bool mDropShadows;
-    bool mSwapEquips;
-    bool mAreaReload;
-    bool mCursorType;
+    gzSettings_s mSettings;
 };
 
 extern gzInfo_c g_gzInfo;
-
-struct gzSettings_s {
-    u32 mCursorColor;  // todo: just make this an index?
-    bool mDropShadows;
-    bool mSwapEquips;
-    bool mAreaReload;
-    bool mCursorType;
-};
-
-// Static configuration options
-extern bool g_progressiveMode;
 
 namespace gzPad {
     inline u32 getTrig() { return mDoCPd_c::m_gzPadInfo.mPressedButtonFlags; }
@@ -154,6 +182,18 @@ public:
         setCharColor(color);
         setGradColor(color);
         J2DTextBox::draw(x, y, 608.0f, HBIND_LEFT);
+    }
+
+    void draw(f32 x, f32 y, u32 color, J2DTextBoxHBinding binding) {
+        if (g_gzInfo.getDropShadows()) {
+            setCharColor(0x00000080);
+            setGradColor(0x00000080);
+            J2DTextBox::draw(x + 2, y + 2, 608.0f, binding);
+        }
+        
+        setCharColor(color);
+        setGradColor(color);
+        J2DTextBox::draw(x, y, 608.0f, binding);
     }
 };
 
