@@ -182,17 +182,18 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
         mpLineOptions[i]->mBounds.f.y = 10.0f;
     }
 
+    mpDescription = new gzTextBox();
+
     mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setString("area reload behavior");
-    
     mpLines[SETTING_CURSOR_TYPE]->setString("cursor type");
     mpLines[SETTING_DISPLAY_MODE]->setString("display mode");
-    mpLines[SETTING_DROP_SHADOW]->setString("drop shadows");
-    mpLines[SETTING_FONT]->setString("font");
-    mpLines[SETTING_MENU_PAUSES_GAME]->setString("menu pauses game");;
-    mpLines[SETTING_TEXT_COLOR]->setString("text color");
-    mpLines[SETTING_SWAP_EQUIPS]->setString("swap equips");
-    mpLines[SETTING_SAVE_CARD]->setString("save card");
-    mpLines[SETTING_LOAD_CARD]->setString("load card");
+    mpLines[SETTING_DROP_SHADOW]->setStringDesc("drop shadows", "adds drop shadows to tpgz menu text");
+    mpLines[SETTING_FONT]->setStringDesc("font", "changes tpgz menu font");
+    mpLines[SETTING_MENU_PAUSES_GAME]->setString("menu pauses game");
+    mpLines[SETTING_TEXT_COLOR]->setStringDesc("text color", "changes tpgz menu text color");
+    mpLines[SETTING_SWAP_EQUIPS]->setStringDesc("swap equips", "swaps equips when loading practice saves");
+    mpLines[SETTING_SAVE_CARD]->setStringDesc("save card", "saves tpgz settings to memory card");
+    mpLines[SETTING_LOAD_CARD]->setStringDesc("load card", "loads tpgz settings from memory card");
     mpLines[SETTING_DELETE_CARD]->setString("delete card");
     mpLines[SETTING_COMMAND_COMBOS]->setString("command combos");
     mpLines[SETTING_MENU_POSITIONS]->setString("menu positions");
@@ -216,8 +217,14 @@ void gzSettingsMenu_c::_delete() {
         mpLines[i] = NULL;
     }
 
+    delete mpDescription;
+    mpDescription = NULL;
+
     delete mpDrawCursor;
+    mpDrawCursor = NULL;
+
     delete mpMeterHaihai;
+    mpMeterHaihai = NULL;
 }
 
 void gzSettingsMenu_c::execute() {
@@ -262,11 +269,12 @@ void gzSettingsMenu_c::execute() {
         case SETTING_CURSOR_TYPE:
             g_gzInfo.setCursorType(g_gzInfo.nextCursorType());
             break;
-        case SETTING_DISPLAY_MODE:
+        case SETTING_DISPLAY_MODE: {
             bool display_mode = g_gzInfo.getDisplayMode();
             display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
             g_gzInfo.setDisplayMode(!display_mode);
             break;
+        }
         case SETTING_DROP_SHADOW:
             g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
             break;
@@ -289,11 +297,12 @@ void gzSettingsMenu_c::execute() {
         case SETTING_CURSOR_TYPE:
             g_gzInfo.setCursorType(g_gzInfo.previousCursorType());
             break;
-        case SETTING_DISPLAY_MODE:
+        case SETTING_DISPLAY_MODE: {
             bool display_mode = g_gzInfo.getDisplayMode();
             display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
             g_gzInfo.setDisplayMode(!display_mode);
             break;
+        }
         case SETTING_DROP_SHADOW:
             g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
             break;
@@ -323,6 +332,7 @@ void gzSettingsMenu_c::draw() {
     updateDynamicLines();
     mpMeterHaihai->_execute(0);
 
+    u32 cursor_color = g_gzInfo.getCursorType() & g_gzInfo.CURSOR_CLASSIC ? g_gzInfo.getTextColor() : COLOR_WHITE;
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL && mpLineOptions[i] != NULL && mpMeterHaihai != NULL) {
             mpLineOptions[i]->getFontSize(font_size);
@@ -331,7 +341,6 @@ void gzSettingsMenu_c::draw() {
             if (mCursor.y == i) {
                 // spacing between arrows will be determined off text box bound size
                 f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + 30.0f;
-                u32 cursor_color = g_gzInfo.getCursorType() & g_gzInfo.CURSOR_CLASSIC ? g_gzInfo.getTextColor() : COLOR_WHITE;
                 
                 if (mpLineOptions[i]->mStringLength != 0) {
                     mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), x_size_haihai, 0.0f);
@@ -345,6 +354,11 @@ void gzSettingsMenu_c::draw() {
                 mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE, HBIND_CENTER);
             }
         }
+    }
+
+    if (mpDescription != NULL && mpLines[mCursor.y] != NULL && *mpLines[mCursor.y]->m_description != 0) {
+        mpDescription->setString(mpLines[mCursor.y]->m_description);
+        mpDescription->draw(30.0f, 420.0f, cursor_color);
     }
 
     if (g_gzInfo.getCursorType() & g_gzInfo.CURSOR_TP) mpDrawCursor->draw();
