@@ -17,7 +17,8 @@ struct gzSettings_s {
     bool mSwapEquips;
     bool mAreaReload;
     u8 mCursorType;
-    bool mProgessiveMode;
+    bool mDisplayMode;
+    bool mMenuPausesGame;
 };
 
 class gzInfo_c {
@@ -50,9 +51,12 @@ public:
     void setAreaReload(bool i_areaReload) { mSettings.mAreaReload = i_areaReload; }
     u8 getCursorType() const { return mSettings.mCursorType; }
     void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
-    bool getProgressiveMode() const { return mSettings.mProgessiveMode; }
-    void setProgressiveMode(bool i_mode) { mSettings.mProgessiveMode = i_mode; }
+    bool getDisplayMode() const { return mSettings.mDisplayMode; }
+    void setDisplayMode(bool i_mode) { mSettings.mDisplayMode = i_mode; }
     void setFont(JUTFont* i_font) { mpFont = i_font; }
+    bool getMenuPausesGame() const { return mSettings.mMenuPausesGame; }
+    void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
+
     u8 nextCursorType() {
         switch (getCursorType()) {
         case CURSOR_CLASSIC:

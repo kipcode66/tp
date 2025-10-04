@@ -147,11 +147,12 @@ void gzSettingsMenu_c::updateDynamicLines() {
             break;
         }
     }
-    mpLineOptions[SETTING_CURSOR_COLOR]->setStringf("%s", currentColorName);
-
-    mpLines[SETTING_DROP_SHADOW]->setStringf("drop shadows: [%s]", g_gzInfo.getDropShadows() ? "X" : " ");
-    mpLines[SETTING_SWAP_EQUIPS]->setStringf("swap equips: [%s]", g_gzInfo.getSwapEquips() ? "X" : " ");
-    mpLines[SETTING_PROGRESSIVE_MODE]->setStringf("progressive mode: [%s]", g_gzInfo.getProgressiveMode() ? "X" : " ");
+    mpLineOptions[SETTING_TEXT_COLOR]->setStringf("%s", currentColorName);
+    mpLineOptions[SETTING_DROP_SHADOW]->setStringf("%s", getDropShadowsText());
+    mpLineOptions[SETTING_SWAP_EQUIPS]->setStringf("%s", getSwapEquipsText());
+    mpLineOptions[SETTING_DISPLAY_MODE]->setStringf("%s", getDisplayModeText());
+    mpLineOptions[SETTING_MENU_PAUSES_GAME]->setStringf("%s", getMenuPausesGameText());
+    mpLineOptions[SETTING_FONT]->setString("rodan");
 
     J2DTextBox::TFontSize font_size;
 
@@ -182,12 +183,14 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     }
 
     mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setString("area reload behavior");
+    
     mpLines[SETTING_CURSOR_TYPE]->setString("cursor type");
-    mpLines[SETTING_CURSOR_COLOR]->setString("cursor color");
-    mpLines[SETTING_FONT]->setString("font");
+    mpLines[SETTING_DISPLAY_MODE]->setString("display mode");
     mpLines[SETTING_DROP_SHADOW]->setString("drop shadows");
+    mpLines[SETTING_FONT]->setString("font");
+    mpLines[SETTING_MENU_PAUSES_GAME]->setString("menu pauses game");;
+    mpLines[SETTING_TEXT_COLOR]->setString("text color");
     mpLines[SETTING_SWAP_EQUIPS]->setString("swap equips");
-    mpLines[SETTING_PROGRESSIVE_MODE]->setString("progressive mode");
     mpLines[SETTING_SAVE_CARD]->setString("save card");
     mpLines[SETTING_LOAD_CARD]->setString("load card");
     mpLines[SETTING_DELETE_CARD]->setString("delete card");
@@ -239,16 +242,6 @@ void gzSettingsMenu_c::execute() {
 
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
-        case SETTING_DROP_SHADOW:
-            g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
-            break;
-        case SETTING_SWAP_EQUIPS:
-            g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
-            break;
-        case SETTING_PROGRESSIVE_MODE:
-            g_gzInfo.getProgressiveMode() ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-            g_gzInfo.setProgressiveMode(!g_gzInfo.getProgressiveMode());
-            break;
         case SETTING_SAVE_CARD:
             g_gzInfo.storeSettingsMemcard();
             break;
@@ -263,28 +256,54 @@ void gzSettingsMenu_c::execute() {
 
     if (gzPad::getTrigRight()) {
         switch (mCursor.y) {
+        case SETTING_AREA_RELOAD_BEHAVIOR:
+            g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
+            break;
         case SETTING_CURSOR_TYPE:
             g_gzInfo.setCursorType(g_gzInfo.nextCursorType());
             break;
-        case SETTING_CURSOR_COLOR:
-            g_gzInfo.setTextColor(nextColor());
+        case SETTING_DISPLAY_MODE:
+            bool display_mode = g_gzInfo.getDisplayMode();
+            display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
+            g_gzInfo.setDisplayMode(!display_mode);
             break;
-        case SETTING_AREA_RELOAD_BEHAVIOR:
-            g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
+        case SETTING_DROP_SHADOW:
+            g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
+            break;
+        case SETTING_MENU_PAUSES_GAME:
+            break;
+        case SETTING_SWAP_EQUIPS:
+            g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
+            break;
+        case SETTING_TEXT_COLOR:
+            g_gzInfo.setTextColor(nextColor());
             break;
         }
     }
 
     if (gzPad::getTrigLeft()) {
         switch (mCursor.y) {
+        case SETTING_AREA_RELOAD_BEHAVIOR:
+            g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
+            break;
         case SETTING_CURSOR_TYPE:
             g_gzInfo.setCursorType(g_gzInfo.previousCursorType());
             break;
-        case SETTING_CURSOR_COLOR:
-            g_gzInfo.setTextColor(previousColor());
+        case SETTING_DISPLAY_MODE:
+            bool display_mode = g_gzInfo.getDisplayMode();
+            display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
+            g_gzInfo.setDisplayMode(!display_mode);
             break;
-        case SETTING_AREA_RELOAD_BEHAVIOR:
-            g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
+        case SETTING_DROP_SHADOW:
+            g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
+            break;
+        case SETTING_MENU_PAUSES_GAME:
+            break;
+        case SETTING_SWAP_EQUIPS:
+            g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
+            break;
+        case SETTING_TEXT_COLOR:
+            g_gzInfo.setTextColor(previousColor());
             break;
         }
     }

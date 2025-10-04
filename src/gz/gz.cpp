@@ -4,7 +4,6 @@
 #include "gz/gz_menu.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JUtility/JUTDbPrint.h"
-#include "SSystem/SComponent/c_counter.h"
 #include "m_Do/m_Do_MemCard.h"
 
 gzInfo_c g_gzInfo;
@@ -141,7 +140,8 @@ int gzInfo_c::storeSettingsMemcard() {
             settings.mCursorType = mSettings.mCursorType;
             settings.mDropShadows = mSettings.mDropShadows;
             settings.mSwapEquips = mSettings.mSwapEquips;
-            settings.mProgessiveMode = mSettings.mProgessiveMode;
+            settings.mDisplayMode = mSettings.mDisplayMode;
+            settings.mMenuPausesGame = mSettings.mMenuPausesGame;
 
             memcpy(mDoMemCd_Ctrl_c::sTmpBuf, &settings, sizeof(gzSettings_s));
 
@@ -179,7 +179,8 @@ int gzInfo_c::loadSettingsMemcard() {
             mSettings.mCursorType = settings.mCursorType;
             mSettings.mDropShadows = settings.mDropShadows;
             mSettings.mSwapEquips = settings.mSwapEquips;
-            mSettings.mProgessiveMode = settings.mProgessiveMode;
+            mSettings.mDisplayMode = settings.mDisplayMode;
+            mSettings.mMenuPausesGame = settings.mMenuPausesGame;
         }
 
         CARDClose(&file);

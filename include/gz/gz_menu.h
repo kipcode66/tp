@@ -2,9 +2,8 @@
 #define GZ_MENU_H
 
 #include "d/d_drawlist.h"
-#include "JSystem/J2DGraph/J2DTextBox.h"
-#include "d/d_select_cursor.h"
 #include "d/d_meter_haihai.h"
+#include "d/d_select_cursor.h"
 #include "gz/gz.h"
 
 class dSelect_cursor_c;
@@ -54,11 +53,13 @@ public:
     enum gzSettingsMenu_Settings_e {
         SETTING_AREA_RELOAD_BEHAVIOR,
         SETTING_CURSOR_TYPE,
-        SETTING_CURSOR_COLOR,
-        SETTING_FONT,
+        SETTING_DISPLAY_MODE,
         SETTING_DROP_SHADOW,
+        SETTING_FONT,
+        SETTING_MENU_PAUSES_GAME,
+        SETTING_TEXT_COLOR,
         SETTING_SWAP_EQUIPS,
-        SETTING_PROGRESSIVE_MODE,
+        
         SETTING_SAVE_CARD,
         SETTING_LOAD_CARD,
         SETTING_DELETE_CARD,
@@ -93,6 +94,22 @@ public:
         default:
             return "unknown";
         }
+    }
+
+    const char* getDropShadowsText() {
+        return g_gzInfo.getDropShadows() ? "enabled" : "disabled";
+    }
+
+    const char* getSwapEquipsText() {
+        return g_gzInfo.getSwapEquips() ? "yes" : "no";
+    }
+
+    const char* getDisplayModeText() {
+        return g_gzInfo.getDisplayMode() ? "progressive" : "interlaced";
+    }
+
+    const char* getMenuPausesGameText() {
+        return "no";
     }
 
     static const int LINE_NUM = SETTING_MAX;
