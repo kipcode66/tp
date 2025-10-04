@@ -6,6 +6,7 @@
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
+#include <cstring.h>
 
 class gzMenu_c;
 class gzTextBox;
@@ -150,6 +151,7 @@ public:
     gzTextBox() : J2DTextBox() {
         setFont(g_gzInfo.mpFont);
         setFontSize(18.0f, 18.0f);
+        m_description[0] = 0;
     }
 
     gzTextBox(const char* string, u32 color) : J2DTextBox() {
@@ -158,6 +160,12 @@ public:
         setString(string);
         setCharColor(color);
         setGradColor(color);
+        m_description[0] = 0;
+    }
+
+    void setStringDesc(const char* string, const char* description) {
+        setString(string);
+        strcpy(m_description, description);
     }
 
     void setFullColor(u32 color) {
@@ -199,6 +207,8 @@ public:
         setGradColor(color);
         J2DTextBox::draw(x, y, 608.0f, binding);
     }
+
+    char m_description[80]; // todo: is this the best way to handle this?
 };
 
 #endif

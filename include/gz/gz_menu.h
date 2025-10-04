@@ -118,6 +118,7 @@ public:
 public:
     gzTextBox* mpLines[LINE_NUM];
     gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpDescription;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
 };
