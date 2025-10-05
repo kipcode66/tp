@@ -31,9 +31,8 @@
 #define COLOR_VIVID_VIOLET 0x9F00FFFF
 #define COLOR_WILD_STRAWBERRY 0xFF43A4FF
 #define COLOR_ZESTY_CHARTREUSE 0x7FFF00FF
-#define COLOR_WHITE 0xFFFFFFFF
 
-static const int COLOR_COUNT = 26;
+static const int COLOR_COUNT = 27;
 
 static char* l_textColorName[] = {
     "amethyst",
@@ -95,7 +94,7 @@ static u32 l_textColorValue[] = {
     COLOR_ZESTY_CHARTREUSE
 };
 
-u32 nextColor() {
+u32 cycleTextColor(bool forward) {
     // Find current color index
     int currentIndex = -1;
     for (int i = 0; i < COLOR_COUNT; i++) {
@@ -110,29 +109,16 @@ u32 nextColor() {
         return l_textColorValue[0];
     }
     
-    // Get next index with wrap around
-    int nextIndex = (currentIndex + 1) % COLOR_COUNT;
-    return l_textColorValue[nextIndex];
+    // Calculate offset and new index with wrap around
+    int offset = forward ? 1 : -1;
+    int newIndex = (currentIndex + offset + COLOR_COUNT) % COLOR_COUNT;
+    return l_textColorValue[newIndex];
 }
 
-u32 previousColor() {
-    // Find current color index
-    int currentIndex = -1;
-    for (int i = 0; i < COLOR_COUNT; i++) {
-        if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
-            currentIndex = i;
-            break;
-        }
-    }
-    
-    // If not found, default to first color
-    if (currentIndex == -1) {
-        return l_textColorValue[0];
-    }
-    
-    // Get previous index with wrap around
-    int previousIndex = (currentIndex - 1 + COLOR_COUNT) % COLOR_COUNT;
-    return l_textColorValue[previousIndex];
+// Have to wrap since mwcc doesn't support lambdas
+// Is there a better way to do this?
+int storeSettingsCallbackWrapper() {
+    return g_gzInfo.storeSettingsMemcard();
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
@@ -250,7 +236,7 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
         case SETTING_SAVE_CARD:
-            g_gzInfo.storeSettingsMemcard();
+            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper);
             break;
         case SETTING_LOAD_CARD:
             g_gzInfo.loadSettingsMemcard();
@@ -284,7 +270,7 @@ void gzSettingsMenu_c::execute() {
             g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
             break;
         case SETTING_TEXT_COLOR:
-            g_gzInfo.setTextColor(nextColor());
+            g_gzInfo.setTextColor(cycleTextColor(true));
             break;
         }
     }
@@ -312,7 +298,7 @@ void gzSettingsMenu_c::execute() {
             g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
             break;
         case SETTING_TEXT_COLOR:
-            g_gzInfo.setTextColor(previousColor());
+            g_gzInfo.setTextColor(cycleTextColor(false));
             break;
         }
     }

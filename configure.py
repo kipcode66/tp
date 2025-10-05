@@ -2298,6 +2298,7 @@ config.libs = [
             Object(Custom, "gz/gz_menu.cpp"),
             Object(Custom, "gz/gz_settings.cpp"),
             Object(Custom, "gz/gz_credits.cpp"),
+            Object(Custom, "gz/gz_confirm.cpp"),
         ],
     },
 ]
@@ -2372,7 +2373,8 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
                 "gz/gz.cpp",
                 "gz/gz_menu.cpp",
                 "gz/gz_settings.cpp",
-                "gz/gz_credits.cpp"
+                "gz/gz_credits.cpp",
+                "gz/gz_confirm.cpp"
             ]
     return objects
 

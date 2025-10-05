@@ -6,6 +6,8 @@
 #include "d/d_select_cursor.h"
 #include "gz/gz.h"
 
+#define COLOR_WHITE 0xFFFFFFFF
+
 class dSelect_cursor_c;
 class dMeterHaihai_c;
 
@@ -96,21 +98,11 @@ public:
         }
     }
 
-    const char* getDropShadowsText() {
-        return g_gzInfo.getDropShadows() ? "enabled" : "disabled";
-    }
-
-    const char* getSwapEquipsText() {
-        return g_gzInfo.getSwapEquips() ? "yes" : "no";
-    }
-
-    const char* getDisplayModeText() {
-        return g_gzInfo.getDisplayMode() ? "progressive" : "interlaced";
-    }
-
-    const char* getMenuPausesGameText() {
-        return "no";
-    }
+    const char* getDropShadowsText() { return g_gzInfo.getDropShadows() ? "enabled" : "disabled"; }
+    const char* getSwapEquipsText() { return g_gzInfo.getSwapEquips() ? "yes" : "no"; }
+    const char* getDisplayModeText() { return g_gzInfo.getDisplayMode() ? "progressive" : "interlaced"; }
+    // TODO(Pheenoh): Finish writing this functionality
+    const char* getMenuPausesGameText() { return "no"; }
 
     static const int LINE_NUM = SETTING_MAX;
     static gzCursor mCursor;
@@ -136,9 +128,45 @@ public:
     // gzTextBox* mpLines[LINE_NUM];
 };
 
+typedef int (*confirmCallback)();
+class gzConfirmMenu_c : public gzMenu_c {
+public:
+    enum gzConfirmMenu_Confirm_e {
+        CONFIRM_NO,
+        CONFIRM_YES,
+
+        CONFIRM_MAX
+    };
+
+    gzConfirmMenu_c(confirmCallback);
+    ~gzConfirmMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+
+    static const int LINE_NUM = CONFIRM_MAX;
+    static gzCursor mCursor;
+
+public:
+    gzTextBox* mpLineConfirmPrompt;
+    gzTextBox* mpLines[LINE_NUM];
+    confirmCallback mpConfirmCallback;
+};
+
 template <typename T>
 inline void gzChangeMenu() {
     gzMenu_c* next = new T();
+    g_gzInfo.mpCurrentMenu->_delete();
+    delete g_gzInfo.mpCurrentMenu;
+    g_gzInfo.mpCurrentMenu = next;
+
+    g_gzInfo.mInputWaitTimer = 5;
+}
+
+template <typename T>
+inline void gzChangeMenu(confirmCallback i_callback) {
+    gzMenu_c* next = new T(i_callback);
     g_gzInfo.mpCurrentMenu->_delete();
     delete g_gzInfo.mpCurrentMenu;
     g_gzInfo.mpCurrentMenu = next;
