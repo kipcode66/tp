@@ -3,13 +3,15 @@
 ## Short term goals
 
 - [ ] Understand how framework sets up and executes processes
-- [ ] Make a functioning gz process that can run directly under the root layer
-- [ ] Compile game for GZ2E01
-- [ ] Have the framework execute the gz process on boot then pause (run some logic, draw text to screen)
+- [ ] ~~Make a functioning gz process that can run directly under the root layer~~
+  - [X] Setup gz as a global instead
+- [X] Compile game for GZ2E01
+- [ ] ~~Have the framework execute the gz process on boot then pause (run some logic, draw text to screen)~~
 
 ## Medium term goals
 
-- [ ] Setup basic menu structure
+- [X] Setup basic menu structure
+- [ ] Support booting straight to gz menu
 - [ ] Identify a few key features to migrate over
   - [ ] Migrate them and confirm functionality
 - [ ] Support compiling game for GZ2P01 and GZ2J01
@@ -49,9 +51,9 @@ Note this doesn't have anything to do with the framework's structure.
 ## Open questions
 
   - How is process priority/order determined?
-  - What kind of process should the new gz process be? leafdraw_class base? process_node_class base? new base entirely?
-  - At what layer should the gz process execute? Likely directly under root for maximum control
-  - How should the gz process profile definition be setup to ensure highest possible execution priority?
+  - ~~What kind of process should the new gz process be? leafdraw_class base? process_node_class base? new base entirely?~~
+  - ~~At what layer should the gz process execute? Likely directly under root for maximum control~~
+  - ~~How should the gz process profile definition be setup to ensure highest possible execution priority?~~
 
 ## Setup
 

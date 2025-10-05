@@ -43,26 +43,20 @@ static execFunc l_execFunc[2] = {
     &dScnLogo_c::nextSceneChange,
 };
 
-/* 802560B4-802560F8 2509F4 0044+00 1/1 0/0 0/0 .text            preLoad_dyl_create__10dScnLogo_cFv
- */
 void dScnLogo_c::preLoad_dyl_create() {
     m_preLoad_dylPhase = new request_of_phase_process_class[14];
     memset(m_preLoad_dylPhase, 0, sizeof(request_of_phase_process_class) * 14);
 }
 
-/* 802560F8-8025611C 250A38 0024+00 1/1 0/0 0/0 .text            preLoad_dyl_remove__10dScnLogo_cFv
- */
 void dScnLogo_c::preLoad_dyl_remove() {
     delete[] m_preLoad_dylPhase;
 }
 
-/* 80399FE0-80399FFC 026640 001C+00 1/1 0/0 0/0 .rodata          l_preLoad_dylKeyTbl */
 static s16 const l_preLoad_dylKeyTbl[14] = {
     0x02DC, 0x02CE, 0x0221, 0x00F2, 0x021B, 0x02F4, 0x0139,
     0x015A, 0x02E4, 0x00FE, 0x0308, 0x030F, 0x00FF, 0x013F,
 };
 
-/* 8025611C-80256198 250A5C 007C+00 2/2 0/0 0/0 .text            preLoad_dyl__10dScnLogo_cFv */
 bool dScnLogo_c::preLoad_dyl() {
     bool ret = true;
 
@@ -77,13 +71,11 @@ bool dScnLogo_c::preLoad_dyl() {
     return ret;
 }
 
-/* 80256210-80256264 250B50 0054+00 1/1 0/0 0/0 .text            draw__10dScnLogo_cFv */
 int dScnLogo_c::draw() {
     (this->*l_execFunc[mExecCommand])();
     return 1;
 }
 
-/* 80257070-80257284 2519B0 0214+00 1/0 0/0 0/0 .text            dvdWaitDraw__10dScnLogo_cFv */
 void dScnLogo_c::dvdWaitDraw() {
     if (!dComIfG_syncAllObjectRes()) {
         if (mpField0Command->sync() && mpAlAnmCommand->sync() && mpFmapResCommand->sync() &&
@@ -151,14 +143,12 @@ void dScnLogo_c::setupGameResources() {
     dMpath_c::createWork();
 }
 
-/* 80257284-802572B8 251BC4 0034+00 1/0 0/0 0/0 .text            nextSceneChange__10dScnLogo_cFv */
 void dScnLogo_c::nextSceneChange() {
     if (!mDoRst::isReset()) {
         dComIfG_changeOpeningScene(this, PROC_OPENING_SCENE);
     }
 }
 
-/* 802572B8-80257910 251BF8 0658+00 1/1 0/0 0/0 .text            __dt__10dScnLogo_cFv */
 dScnLogo_c::~dScnLogo_c() {
     if (mDoRst::isReset()) {
         if (mDoAud_zelAudio_c::isInitFlag()) {
@@ -166,12 +156,6 @@ dScnLogo_c::~dScnLogo_c() {
         }
         mDoRst_reset(0, 0x80000000, 0);
     }
-
-#if VERSION == VERSION_GCN_PAL
-    mpPalLogoResCommand->getArchive()->removeResourceAll();
-    mpPalLogoResCommand->getArchive()->unmount();
-    mpPalLogoResCommand->destroy();
-#endif
 
     preLoad_dyl_remove();
     dComIfG_deleteObjectResMain(LOGO_ARC);
@@ -206,7 +190,6 @@ dScnLogo_c::~dScnLogo_c() {
     mEnemyItemCommand->destroy();
 }
 
-/* 80257910-802579BC 252250 00AC+00 1/0 0/0 0/0 .text            phase_0__FP10dScnLogo_c */
 static int phase_0(dScnLogo_c* i_this) {
     mDoGph_gInf_c::setFadeColor(*(JUtility::TColor*)&g_blackColor);
     dComIfGp_particle_create();
@@ -216,31 +199,9 @@ static int phase_0(dScnLogo_c* i_this) {
     i_this->field_0x1d0 = JKRExpHeap::create(i_this->dummyGameAlloc, 0x340000, NULL, false);
     i_this->field_0x1d4 = JKRExpHeap::create(0x130000, i_this->field_0x1d0, false);
 
-    #if VERSION == VERSION_GCN_PAL
-    switch (i_this->getPalLanguage()) {
-    case 1:
-        i_this->mpPalLogoResCommand = mDoDvdThd_mountArchive_c::create("/res/Layout/LogoPalGm.arc", 0, NULL);
-        break;
-    case 2:
-        i_this->mpPalLogoResCommand = mDoDvdThd_mountArchive_c::create("/res/Layout/LogoPalFr.arc", 0, NULL);
-        break;
-    case 3:
-        i_this->mpPalLogoResCommand = mDoDvdThd_mountArchive_c::create("/res/Layout/LogoPalSp.arc", 0, NULL);
-        break;
-    case 4:
-        i_this->mpPalLogoResCommand = mDoDvdThd_mountArchive_c::create("/res/Layout/LogoPalIt.arc", 0, NULL);
-        break;
-    case 0:
-    default:
-        i_this->mpPalLogoResCommand = mDoDvdThd_mountArchive_c::create("/res/Layout/LogoPalUk.arc", 0, NULL);
-        break;
-    }
-    #endif
-
     return cPhs_NEXT_e;
 }
 
-/* 802579BC-80257A70 2522FC 00B4+00 1/0 0/0 0/0 .text            phase_1__FP10dScnLogo_c */
 static int phase_1(dScnLogo_c* i_this) {
     if (!cDyl_InitAsyncIsDone()) {
         return cPhs_INIT_e;
@@ -254,10 +215,6 @@ static int phase_1(dScnLogo_c* i_this) {
     if (!SyncWidthSound) {
         return cPhs_INIT_e;
     }
-
-    if (!i_this->mpPalLogoResCommand->sync()) {
-        return cPhs_INIT_e;
-    }
 #endif
 
     dComIfG_setObjectRes(LOGO_ARC, (u8)0, i_this->field_0x1d0);
@@ -266,7 +223,6 @@ static int phase_1(dScnLogo_c* i_this) {
     return cPhs_NEXT_e;
 }
 
-/* 80257A70-80257AB4 2523B0 0044+00 1/0 0/0 0/0 .text            phase_2__FP10dScnLogo_c */
 static int phase_2(dScnLogo_c* i_this) {
     if (dComIfG_syncAllObjectRes()) {
         return cPhs_INIT_e;
@@ -275,8 +231,6 @@ static int phase_2(dScnLogo_c* i_this) {
     }
 }
 
-/* 80257AB4-80257AE0 2523F4 002C+00 1/1 0/0 0/0 .text
- * resLoad__FP30request_of_phase_process_classP10dScnLogo_c     */
 static int resLoad(request_of_phase_process_class* i_phase, dScnLogo_c* i_this) {
     static int (*l_method[3])(void*) = {(int (*)(void*))phase_0, (int (*)(void*))phase_1,
                                         (int (*)(void*))phase_2};
@@ -284,7 +238,6 @@ static int resLoad(request_of_phase_process_class* i_phase, dScnLogo_c* i_this) 
     return dComLbG_PhaseHandler(i_phase, l_method, i_this);
 }
 
-/* 80257AE0-80257C64 252420 0184+00 1/1 0/0 0/0 .text            create__10dScnLogo_cFv */
 int dScnLogo_c::create() {
     int phase_state = resLoad(&field_0x1c4, this);
     if (phase_state != cPhs_COMPLEATE_e) {
@@ -312,7 +265,6 @@ int dScnLogo_c::create() {
     return phase_state;
 }
 
-/* 80257FEC-80258420 25292C 0434+00 1/1 0/0 0/0 .text            dvdDataLoad__10dScnLogo_cFv */
 void dScnLogo_c::dvdDataLoad() {
     dComIfG_setObjectRes("Always", (u8)0, NULL);
     archiveHeap->dump_sort();

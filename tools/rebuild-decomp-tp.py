@@ -68,8 +68,15 @@ if __name__ == "__main__":
         help="Folder to place the symbol map for the modified ISO (defaults to Dolphin's maps directory).",
     )
 
+    parser.add_argument(
+        "--version",
+        type=expanded_path,
+        default="GZ2E01",
+        help="Version of the game to build.",
+    )
+
     args = parser.parse_args()
-    decomp_build_path = args.decomp_repo_path / "build/GZ2E01"
+    decomp_build_path = args.decomp_repo_path / "build" / args.version
 
     # Validate input paths
     if not args.vanilla_iso_path.exists():
