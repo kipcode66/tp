@@ -2294,6 +2294,7 @@ config.libs = [
         "mw_version": MWVersion(config.version),
         "cflags": cflags_framework,
         "objects": [
+            Object(Custom, "dolphin/card/CARDDelete.c"),
             Object(Custom, "gz/gz.cpp"),
             Object(Custom, "gz/gz_menu.cpp"),
             Object(Custom, "gz/gz_settings.cpp"),
@@ -2370,11 +2371,12 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
         return objects
     if module_id == 0:  # DOL
         return objects + [
+                "dolphin/card/CARDDelete.c",
                 "gz/gz.cpp",
                 "gz/gz_menu.cpp",
                 "gz/gz_settings.cpp",
                 "gz/gz_credits.cpp",
-                "gz/gz_confirm.cpp"
+                "gz/gz_confirm.cpp",
             ]
     return objects
 

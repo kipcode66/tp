@@ -121,18 +121,24 @@ int storeSettingsCallbackWrapper() {
     return g_gzInfo.storeSettingsMemcard();
 }
 
+int deleteSettingsCallbackWrapper() {
+    return g_gzInfo.deleteSettingsMemcard();
+}
+
 void gzSettingsMenu_c::updateDynamicLines() {
     mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->setStringf("%s", g_gzInfo.getAreaReload() ? "load area" : "load file");
     mpLineOptions[SETTING_CURSOR_TYPE]->setStringf("%s", getCursorTypeText());
 
     // Find current color name
     char* currentColorName = "unknown";
+
     for (int i = 0; i < COLOR_COUNT; i++) {
         if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
             currentColorName = l_textColorName[i];
             break;
         }
     }
+
     mpLineOptions[SETTING_TEXT_COLOR]->setStringf("%s", currentColorName);
     mpLineOptions[SETTING_DROP_SHADOW]->setStringf("%s", getDropShadowsText());
     mpLineOptions[SETTING_SWAP_EQUIPS]->setStringf("%s", getSwapEquipsText());
@@ -170,12 +176,14 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
 
     mpDescription = new gzTextBox();
 
+    // NOTE(Pheenoh): was this really being used? can we delete it?
     mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setString("area reload behavior");
-    mpLines[SETTING_CURSOR_TYPE]->setString("cursor type");
-    mpLines[SETTING_DISPLAY_MODE]->setString("display mode");
+
+    mpLines[SETTING_CURSOR_TYPE]->setString("cursor type", "sets the cursor type to classic, tp or both");
+    mpLines[SETTING_DISPLAY_MODE]->setString("display mode", "change between progressive and interlaced display modes");
     mpLines[SETTING_DROP_SHADOW]->setStringDesc("drop shadows", "adds drop shadows to tpgz menu text");
     mpLines[SETTING_FONT]->setStringDesc("font", "changes tpgz menu font");
-    mpLines[SETTING_MENU_PAUSES_GAME]->setString("menu pauses game");
+    mpLines[SETTING_MENU_PAUSES_GAME]->setString("menu pauses game", "whether or not opening the gz menu pauses the game");
     mpLines[SETTING_TEXT_COLOR]->setStringDesc("text color", "changes tpgz menu text color");
     mpLines[SETTING_SWAP_EQUIPS]->setStringDesc("swap equips", "swaps equips when loading practice saves");
     mpLines[SETTING_SAVE_CARD]->setStringDesc("save card", "saves tpgz settings to memory card");
@@ -183,7 +191,7 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpLines[SETTING_DELETE_CARD]->setString("delete card");
     mpLines[SETTING_COMMAND_COMBOS]->setString("command combos");
     mpLines[SETTING_MENU_POSITIONS]->setString("menu positions");
-    mpLines[SETTING_CREDITS]->setString("credits");
+    mpLines[SETTING_CREDITS]->setString("credits", "show the tpgz credits");
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
@@ -240,6 +248,9 @@ void gzSettingsMenu_c::execute() {
             break;
         case SETTING_LOAD_CARD:
             g_gzInfo.loadSettingsMemcard();
+            break;
+        case SETTING_DELETE_CARD:
+            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper);
             break;
         case SETTING_CREDITS:
             gzChangeMenu<gzCreditsMenu_c>();

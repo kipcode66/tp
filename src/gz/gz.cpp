@@ -5,6 +5,7 @@
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JUtility/JUTDbPrint.h"
 #include "m_Do/m_Do_MemCard.h"
+#include "dolphin/card.h"
 
 gzInfo_c g_gzInfo;
 
@@ -184,6 +185,25 @@ int gzInfo_c::loadSettingsMemcard() {
         }
 
         CARDClose(&file);
+    }
+
+    return ret;
+}
+
+int gzInfo_c::deleteSettingsMemcard() {
+    CARDFileInfo file;
+    int ret;
+
+    ret = CARDProbeEx(0, NULL, NULL);
+    if (ret != CARD_RESULT_READY) {
+        return -1;
+    }
+
+    ret = CARDDelete(0, "tpgzcfg");
+    if (ret == CARD_RESULT_READY) {
+        OSReport("deleted tpgz settings from memcard!\n");
+    } else {
+        OSReport_Error("failed to delete tpgz settings from memcard!\n");
     }
 
     return ret;

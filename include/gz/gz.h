@@ -39,6 +39,7 @@ public:
 
     int storeSettingsMemcard();
     int loadSettingsMemcard();
+    int deleteSettingsMemcard();
     void showHeapUsage();
 
     bool isDisplay() const { return mDisplay; }
