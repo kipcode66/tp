@@ -2,6 +2,7 @@
 
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
+#include "f_op/f_op_scene_mng.h"
 
 gzMenu_c::gzCursor gzMainMenu_c::mCursor = {0, 0};
 
@@ -60,6 +61,12 @@ void gzMainMenu_c::execute() {
         case MENU_SETTINGS:
             gzChangeMenu<gzSettingsMenu_c>();
             break;
+        case MENU_WARPING:
+            scene_class* playScene = fopScnM_SearchByID(dStage_roomControl_c::getProcID());
+            if (playScene != NULL)
+                fopScnM_ChangeReq(playScene, PROC_MENU_SCENE, 0, 5);
+            g_gzInfo.mDisplay = false;
+            return;
         }
     }
 }
