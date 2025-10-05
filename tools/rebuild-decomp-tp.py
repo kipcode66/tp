@@ -163,6 +163,7 @@ if __name__ == "__main__":
         shutil.copy(decomp_build_path / "framework.elf.MAP", args.map)
 
         mod_assets_dir = Path('mod_assets')
+        mod_assets_dir.mkdir(exist_ok=True)
         for dir in mod_assets_dir.iterdir():
             if dir.is_dir():
                 gcm.add_new_directory(f"files/{dir.name}")
