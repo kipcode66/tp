@@ -20,6 +20,22 @@ gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback) {
     mpConfirmCallback = i_callback;
 }
 
+gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback, const char* msg) {
+    OSReport("creating gzConfirmMenu_c\n");
+    mpLineConfirmPrompt = new gzTextBox();
+
+    for (int i = 0; i < LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox();
+    }
+
+    mpLineConfirmPrompt->setString(msg);
+    mpLines[CONFIRM_NO]->setString("no");
+    mpLines[CONFIRM_YES]->setString("yes");
+
+    mpConfirmCallback = i_callback;
+}
+
+
 gzConfirmMenu_c::~gzConfirmMenu_c() {
     _delete();
 }

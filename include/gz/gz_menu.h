@@ -139,6 +139,7 @@ public:
     };
 
     gzConfirmMenu_c(confirmCallback);
+    gzConfirmMenu_c(confirmCallback, const char* msg);
     ~gzConfirmMenu_c();
 
     virtual void _delete();
@@ -167,6 +168,16 @@ inline void gzChangeMenu() {
 template <typename T>
 inline void gzChangeMenu(confirmCallback i_callback) {
     gzMenu_c* next = new T(i_callback);
+    g_gzInfo.mpCurrentMenu->_delete();
+    delete g_gzInfo.mpCurrentMenu;
+    g_gzInfo.mpCurrentMenu = next;
+
+    g_gzInfo.mInputWaitTimer = 5;
+}
+
+template <typename T>
+inline void gzChangeMenu(confirmCallback i_callback, const char* msg) {
+    gzMenu_c* next = new T(i_callback, msg);
     g_gzInfo.mpCurrentMenu->_delete();
     delete g_gzInfo.mpCurrentMenu;
     g_gzInfo.mpCurrentMenu = next;

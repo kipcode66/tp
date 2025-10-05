@@ -19,6 +19,7 @@ int gzInfo_c::_create() {
     mpHeader = new gzTextBox("tpgz v1.2.0", mSettings.mTextColor);
 
     mpCurrentMenu = new gzMainMenu_c();
+    mpNotification = new gzNotification_c();
 
     mInputWaitTimer = 5;
     mGZInitialized = true;
@@ -77,6 +78,10 @@ int gzInfo_c::draw() {
         dComIfGd_set2DOpaTop(mpCurrentMenu);
 
         // showHeapUsage();
+    }
+
+    if (mpNotification != NULL) {
+        mpNotification->draw();
     }
 
     return 1;
@@ -149,6 +154,7 @@ int gzInfo_c::storeSettingsMemcard() {
             ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
             if (ret == CARD_RESULT_READY) {
                 OSReport("stored tpgz settings to memcard!\n");
+                g_gzInfo.sendNotification("settings saved!");
             }
 
             CARDClose(&file);
@@ -172,6 +178,7 @@ int gzInfo_c::loadSettingsMemcard() {
         ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
         if (ret == CARD_RESULT_READY) {
             OSReport("loaded tpgz settings from memcard!\n");
+            g_gzInfo.sendNotification("settings loaded!");
             gzSettings_s settings;
             memcpy(&settings, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzSettings_s));
 
@@ -202,9 +209,14 @@ int gzInfo_c::deleteSettingsMemcard() {
     ret = CARDDelete(0, "tpgzcfg");
     if (ret == CARD_RESULT_READY) {
         OSReport("deleted tpgz settings from memcard!\n");
+        g_gzInfo.sendNotification("settings deleted!");
     } else {
         OSReport_Error("failed to delete tpgz settings from memcard!\n");
     }
 
     return ret;
+}
+
+void gzInfo_c::sendNotification(const char* msg) { 
+    if (mpNotification != NULL) mpNotification->send(msg);
 }

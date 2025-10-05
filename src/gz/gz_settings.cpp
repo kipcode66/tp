@@ -179,16 +179,16 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     // NOTE(Pheenoh): was this really being used? can we delete it?
     mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setString("area reload behavior");
 
-    mpLines[SETTING_CURSOR_TYPE]->setString("cursor type", "sets the cursor type to classic, tp or both");
-    mpLines[SETTING_DISPLAY_MODE]->setString("display mode", "change between progressive and interlaced display modes");
+    mpLines[SETTING_CURSOR_TYPE]->setStringDesc("cursor type", "sets the cursor type to classic, tp or both");
+    mpLines[SETTING_DISPLAY_MODE]->setStringDesc("display mode", "change between progressive and interlaced display modes");
     mpLines[SETTING_DROP_SHADOW]->setStringDesc("drop shadows", "adds drop shadows to tpgz menu text");
     mpLines[SETTING_FONT]->setStringDesc("font", "changes tpgz menu font");
-    mpLines[SETTING_MENU_PAUSES_GAME]->setString("menu pauses game", "whether or not opening the gz menu pauses the game");
+    mpLines[SETTING_MENU_PAUSES_GAME]->setStringDesc("menu pauses game", "whether or not opening the gz menu pauses the game");
     mpLines[SETTING_TEXT_COLOR]->setStringDesc("text color", "changes tpgz menu text color");
     mpLines[SETTING_SWAP_EQUIPS]->setStringDesc("swap equips", "swaps equips when loading practice saves");
     mpLines[SETTING_SAVE_CARD]->setStringDesc("save card", "saves tpgz settings to memory card");
     mpLines[SETTING_LOAD_CARD]->setStringDesc("load card", "loads tpgz settings from memory card");
-    mpLines[SETTING_DELETE_CARD]->setString("delete card");
+    mpLines[SETTING_DELETE_CARD]->setStringDesc("delete card", "deletes tpgz settings from memory card");
     mpLines[SETTING_COMMAND_COMBOS]->setString("command combos");
     mpLines[SETTING_MENU_POSITIONS]->setString("menu positions");
     mpLines[SETTING_CREDITS]->setString("credits", "show the tpgz credits");
@@ -244,13 +244,16 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
         case SETTING_SAVE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper);
+            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, "are you sure you want to save your settings?");
             break;
         case SETTING_LOAD_CARD:
             g_gzInfo.loadSettingsMemcard();
             break;
         case SETTING_DELETE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper);
+            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, "are you sure you want to delete your settings?");
+            break;
+        case SETTING_MENU_POSITIONS:
+            g_gzInfo.sendNotification("test!");
             break;
         case SETTING_CREDITS:
             gzChangeMenu<gzCreditsMenu_c>();

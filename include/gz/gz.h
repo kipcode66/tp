@@ -1,7 +1,6 @@
 #ifndef GZ_H
 #define GZ_H
 
-#include "f_op/f_op_msg_mng.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
@@ -11,6 +10,7 @@
 class gzMenu_c;
 class gzTextBox;
 class gzMainMenu_c;
+class gzNotification_c;
 
 struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
@@ -24,7 +24,7 @@ struct gzSettings_s {
 
 class gzInfo_c {
 public:
-    gzInfo_c() { mGZInitialized = false; }
+    gzInfo_c() { mGZInitialized = false; };
 
     enum gzInfoMenu_CursorType_e {
         CURSOR_CLASSIC = 1,
@@ -41,6 +41,7 @@ public:
     int loadSettingsMemcard();
     int deleteSettingsMemcard();
     void showHeapUsage();
+    void sendNotification(const char* msg);
 
     bool isDisplay() const { return mDisplay; }
     u32 getTextColor() const { return mSettings.mTextColor; }
@@ -90,6 +91,7 @@ public:
     J2DPicture* mpIcon;
     gzTextBox* mpHeader;
     gzMenu_c* mpCurrentMenu;
+    gzNotification_c* mpNotification;
 
     JUTFont* mpFont;
     s16 mInputWaitTimer;
@@ -210,6 +212,23 @@ public:
     }
 
     char m_description[80]; // todo: is this the best way to handle this?
+};
+
+class gzNotification_c {
+public:
+    gzNotification_c();
+    ~gzNotification_c();
+
+    void send(const char* message);
+    void draw();
+    static const int NOTIFICATION_MAX = 3;
+
+private:
+    gzTextBox* mpNotifications[NOTIFICATION_MAX];
+    int mNumNotifications;
+    u32 mStartFrames[NOTIFICATION_MAX];
+
+    void removeExpired();
 };
 
 #endif
