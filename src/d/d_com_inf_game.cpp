@@ -1841,7 +1841,7 @@ void dComIfGs_gameStart() {
     dComIfGp_setNextStage(name, point, roomNo, -1, 0.0f, 0, 1, 0, 0, 0, 0);
 }
 
-#ifdef DEBUG
+#ifndef DEBUG
 void dComIfG_playerStatusD() {
     dComIfGs_setDataNum(0);
     dComIfGs_setMaxLife(50);
@@ -1933,7 +1933,7 @@ void dComIfG_playerStatusD() {
     dComIfGs_onEventBit(0x5c01);
     dComIfGs_onEventBit(0x5d80);
 
-    if (!mDoCPd_c::isConnect(PAD_3)) {
+    /* if (!mDoCPd_c::isConnect(PAD_3)) {
         g_fmapHIO.mRangeCheckInterval = 0;
     } else {
         g_fmapHIO.mRangeCheckInterval = 1;
@@ -1946,7 +1946,7 @@ void dComIfG_playerStatusD() {
     g_mwHIO.setPachinkoFlag(1);
     g_mwHIO.setBombFlag(1);
     g_mwHIO.update();
-    g_mwHIO.setBombFlag(1);
+    g_mwHIO.setBombFlag(1); */
 }
 
 void dComIfG_playerStatusD_pre_clear() {

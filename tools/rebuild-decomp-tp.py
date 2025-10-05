@@ -161,6 +161,16 @@ if __name__ == "__main__":
 
         # Copy the map file to the specified location
         shutil.copy(decomp_build_path / "framework.elf.MAP", args.map)
+
+        mod_assets_dir = Path('mod_assets')
+        for dir in mod_assets_dir.iterdir():
+            if dir.is_dir():
+                gcm.add_new_directory(f"files/{dir.name}")
+
+                for file in dir.rglob('*'):
+                    if file.is_file():
+                        with open(file, "rb") as f:
+                            gcm.add_new_file(f"files/{dir.name}/{file.name}", BytesIO(f.read()))
         
         # Export the modified ISO
         for _ in gcm.export_disc_to_iso_with_changed_files(args.output_iso_path):
