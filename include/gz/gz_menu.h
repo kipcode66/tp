@@ -4,6 +4,7 @@
 #include "d/d_drawlist.h"
 #include "d/d_meter_haihai.h"
 #include "d/d_select_cursor.h"
+#include "f_pc/f_pc_layer.h"
 #include "gz/gz.h"
 
 #define COLOR_WHITE 0xFFFFFFFF
@@ -28,6 +29,7 @@ public:
     enum gzMainMenu_Menus_e {
         MENU_CHEATS,
         MENU_FLAGS,
+        MENU_FRAMEWORK,
         MENU_INVENTORY,
         MENU_MEMORY,
         MENU_PRACTICE,
@@ -35,6 +37,8 @@ public:
         MENU_SETTINGS,
         MENU_TOOLS,
         MENU_WARPING,
+
+        MENU_MAX
     };
 
     gzMainMenu_c();
@@ -44,7 +48,7 @@ public:
     virtual void execute();
     virtual void draw();
 
-    static const int LINE_NUM = 9;
+    static const int LINE_NUM = MENU_MAX;
     static gzCursor mCursor;
 
     gzTextBox* mpLines[LINE_NUM];
@@ -154,6 +158,55 @@ public:
     gzTextBox* mpLines[LINE_NUM];
     confirmCallback mpConfirmCallback;
 };
+
+class gzFrameworkMenu_c : public gzMenu_c {
+public:
+    enum gzFrameworkMenu_Settings_e {
+        FRAMEWORK_LINE_LAYER,
+        FRAMEWORK_LINE_NODE_LIST,
+        FRAMEWORK_LINE_NODE,
+        FRAMEWORK_LINE_PROCESS,
+
+        FRAMEWORK_LINE_MAX
+    };
+
+    enum gzSettingsMenu_Haihai_e {
+        ARROW_RIGHT = 4,
+        ARROW_LEFT = 1
+    };
+
+    gzFrameworkMenu_c();
+    ~gzFrameworkMenu_c();
+    void updateDynamicLines();
+    layer_class* getCurrentLayer();
+    node_list_class* getCurrentNodeList(layer_class* layer);
+    int getFirstActiveNodeListIndex(layer_class* layer);
+    void resetNodeListIndexForCurrentLayer();
+    int getFirstActiveNodeIndex(node_list_class* list);
+    void resetNodeIndexForCurrentNodeList();
+    base_process_class* getCurrentProcess(node_list_class* i_node_list);
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+
+    static const int LINE_NUM = FRAMEWORK_LINE_MAX;
+    static const int MAX_LAYERS = 8; // arbitrary, there's usually max 3
+    static gzCursor mCursor;
+
+public:
+    gzTextBox* mpLines[LINE_NUM];
+    gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpDescription;
+    dSelect_cursor_c* mpDrawCursor;
+    dMeterHaihai_c* mpMeterHaihai;
+    layer_class* mpActiveLayers[MAX_LAYERS];
+    int mNumActiveLayers;
+    int mCurrentLayerIndex;
+    int mCurrentNodeListIndex;
+    int mCurrentNodeIndex;
+};
+
 
 template <typename T>
 inline void gzChangeMenu() {

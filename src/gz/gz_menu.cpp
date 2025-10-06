@@ -15,6 +15,7 @@ gzMainMenu_c::gzMainMenu_c() {
 
     mpLines[MENU_CHEATS]->setString("cheats");
     mpLines[MENU_FLAGS]->setString("flags");
+    mpLines[MENU_FRAMEWORK]->setString("framework");
     mpLines[MENU_INVENTORY]->setString("inventory");
     mpLines[MENU_MEMORY]->setString("memory");
     mpLines[MENU_PRACTICE]->setString("practice");
@@ -58,6 +59,9 @@ void gzMainMenu_c::execute() {
 
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
+        case MENU_FRAMEWORK:
+            gzChangeMenu<gzFrameworkMenu_c>();
+            break;
         case MENU_SETTINGS:
             gzChangeMenu<gzSettingsMenu_c>();
             break;

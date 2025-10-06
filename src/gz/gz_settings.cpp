@@ -209,6 +209,9 @@ void gzSettingsMenu_c::_delete() {
     for (int i = 0; i < LINE_NUM; i++) {
         delete mpLines[i];
         mpLines[i] = NULL;
+
+        delete mpLineOptions[i];
+        mpLineOptions[i] = NULL;
     }
 
     delete mpDescription;
