@@ -94,6 +94,71 @@ static u32 l_textColorValue[] = {
     COLOR_ZESTY_CHARTREUSE
 };
 
+u8 gzSettingsMenu_c::getHaihaiFlags(int i) {
+    u8 haihai_flags = ARROW_LEFT | ARROW_RIGHT;
+    switch (i) {
+    case SETTING_AREA_RELOAD_BEHAVIOR:
+        if (!gzInfo_isAreaReload()) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    case SETTING_CURSOR_TYPE: {
+        u8 type = gzInfo_getCursorType();
+        if (type == gzInfo_c::CURSOR_CLASSIC) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else if (type == gzInfo_c::CURSOR_BOTH) {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    }
+    case SETTING_DISPLAY_MODE:
+        if (!gzInfo_getDisplayMode()) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    case SETTING_DROP_SHADOW:
+        if (!gzInfo_isDropShadows()) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    case SETTING_MENU_PAUSES_GAME:
+    case SETTING_FONT:
+        haihai_flags = 0;
+        break;
+    case SETTING_SWAP_EQUIPS:
+        if (!gzInfo_isSwapEquips()) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    case SETTING_TEXT_COLOR: {
+        int currentIndex = -1;
+        for (int j = 0; j < COLOR_COUNT; ++j) {
+            if (gzInfo_getTextColor() == l_textColorValue[j]) {
+                currentIndex = j;
+                break;
+            }
+        }
+        if (currentIndex == 0) {
+            haihai_flags &= ~ARROW_LEFT;
+        }
+        if (currentIndex == COLOR_COUNT - 1) {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    }
+    }
+
+    return haihai_flags;
+}
+
 u32 cycleTextColor(bool forward) {
     // Find current color index
     int currentIndex = -1;
@@ -336,7 +401,7 @@ void gzSettingsMenu_c::draw() {
                 f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + 30.0f;
                 
                 if (mpLineOptions[i]->mStringLength != 0) {
-                    mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), x_size_haihai, 0.0f);
+                    mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), x_size_haihai, 0.0f);
                 }
 
                 mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), cursor_color);

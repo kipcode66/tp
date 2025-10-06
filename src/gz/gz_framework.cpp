@@ -179,7 +179,7 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
 
     mpLines[FRAMEWORK_LINE_LAYER]->setStringDesc("layer", "layer containing node lists");
     mpLines[FRAMEWORK_LINE_NODE_LIST]->setStringDesc("node list", "node lists in this layer");
-    mpLines[FRAMEWORK_LINE_PROCESS]->setStringDesc("process", "processes in this node");
+    mpLines[FRAMEWORK_LINE_PROCESS]->setStringDesc("process", "processes in this node list");
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);

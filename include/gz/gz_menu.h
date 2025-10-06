@@ -116,6 +116,9 @@ public:
     gzTextBox* mpDescription;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
+
+private:
+    u8 getHaihaiFlags(int idx);
 };
 
 class gzCreditsMenu_c : public gzMenu_c {
