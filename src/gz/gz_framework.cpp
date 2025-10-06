@@ -5,6 +5,82 @@
 
 gzMenu_c::gzCursor gzFrameworkMenu_c::mCursor = {0, 0};
 
+u8 gzFrameworkMenu_c::getHaihaiFlags(int i) {
+    u8 haihai_flags = ARROW_LEFT | ARROW_RIGHT;
+    switch (i) {
+    case FRAMEWORK_LINE_LAYER: {
+        int num_layers = mNumActiveLayers;
+        if (num_layers <= 1) {
+            haihai_flags = 0;
+        } else if (mCurrentLayerIndex == 0) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else if (mCurrentLayerIndex == num_layers - 1) {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    }
+    case FRAMEWORK_LINE_NODE_LIST: {
+        layer_class* layer = getCurrentLayer();
+        if (!layer || layer->node_tree.mNumLists <= 0 || !layer->node_tree.mpLists) {
+            haihai_flags = 0;
+            break;
+        }
+        int num_lists = layer->node_tree.mNumLists;
+        int num_valid = 0;
+        int min_valid = -1;
+        int max_valid = -1;
+        for (int j = 0; j < num_lists; ++j) {
+            if (layer->node_tree.mpLists[j].mSize > 0) {
+                ++num_valid;
+                if (min_valid == -1) min_valid = j;
+                max_valid = j;
+            }
+        }
+        if (num_valid <= 1) {
+            haihai_flags = 0;
+        } else if (mCurrentNodeListIndex == min_valid) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else if (mCurrentNodeListIndex == max_valid) {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    }
+    case FRAMEWORK_LINE_PROCESS: {
+        node_list_class* list = getCurrentNodeList(getCurrentLayer());
+        if (!list || list->mSize <= 0) {
+            haihai_flags = 0;
+            break;
+        }
+        int num_nodes = list->mSize;
+        int num_valid = 0;
+        int min_valid = -1;
+        int max_valid = -1;
+        node_class* node = list->mpHead;
+        for (int j = 0; j < num_nodes; ++j) {
+            if (node != NULL) {
+                create_tag_class* tag = (create_tag_class*)node;
+                base_process_class* process = (base_process_class*)tag->mpTagData;
+                if (process != NULL) {
+                    ++num_valid;
+                    if (min_valid == -1) min_valid = j;
+                    max_valid = j;
+                }
+            }
+            node = node ? node->mpNextNode : NULL;
+        }
+        if (num_valid <= 1) {
+            haihai_flags = 0;
+        } else if (mCurrentProcessIndex == min_valid) {
+            haihai_flags &= ~ARROW_LEFT;
+        } else if (mCurrentProcessIndex == max_valid) {
+            haihai_flags &= ~ARROW_RIGHT;
+        }
+        break;
+    }
+    }
+    return haihai_flags;
+}
+
 // Helper to cycle index to next valid one
 void gzFrameworkMenu_c::cycleValidIndex(int& idx, int max, int dir, IndexValidityFunc isValid, void* context) {
     if (max <= 0) {
@@ -221,14 +297,6 @@ void gzFrameworkMenu_c::execute() {
     layer_class* layer = fpcLy_RootLayer();
     while (layer != NULL && mNumActiveLayers < MAX_LAYERS) {
         mpActiveLayers[mNumActiveLayers++] = layer;
-
-        OSReport("Layer %p ID %u numlists %d mplists %p\n", layer, layer->layer_id, layer->node_tree.mNumLists, layer->node_tree.mpLists);
-        if (layer->node_tree.mNumLists > 0 && layer->node_tree.mpLists != NULL) {
-            for (int list_idx = 0; list_idx < layer->node_tree.mNumLists; list_idx++) {
-                OSReport("List %d size %d\n", list_idx, layer->node_tree.mpLists[list_idx].mSize);
-            }
-        }
-
         layer = (layer_class*)layer->node.mpNextNode;
     }
 
@@ -376,7 +444,7 @@ void gzFrameworkMenu_c::draw() {
             f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
 
             if (mpLineOptions[i]->mStringLength != 0) {
-                mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
+                mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
             }
 
             mpLines[i]->draw(X_ALIGNMENT, y_pos, cursor_color);

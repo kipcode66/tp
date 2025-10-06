@@ -213,6 +213,9 @@ public:
     int mCurrentLayerIndex;
     int mCurrentNodeListIndex;
     int mCurrentProcessIndex;
+
+private:
+    u8 getHaihaiFlags(int idx);
 };
 
 

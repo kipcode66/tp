@@ -55,19 +55,8 @@ void gzConfirmMenu_c::_delete() {
 }
 
 void gzConfirmMenu_c::execute() {
-    if (gzPad::getTrigRight() && mCursor.x < LINE_NUM) {
-        mCursor.x++;
-    }
-
-    if (gzPad::getTrigLeft() && mCursor.x >= 0) {
-        mCursor.x--;
-    }
-
-    if (mCursor.x < 0) {
-        mCursor.x = LINE_NUM - 1;
-    } else if (mCursor.x > LINE_NUM - 1) {
-        mCursor.x = 0;
-    }
+    if (gzPad::getTrigRight()) mCursor.x = (mCursor.x + 1) % LINE_NUM;
+    if (gzPad::getTrigLeft()) mCursor.x = (mCursor.x - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigA()) {
         switch (mCursor.x) {
@@ -88,13 +77,18 @@ void gzConfirmMenu_c::execute() {
 }
 
 void gzConfirmMenu_c::draw() {
-    mpLineConfirmPrompt->draw(0.0f, 90.0f, COLOR_WHITE, HBIND_CENTER);
+    static const f32 PROMPT_X = 0.0f;
+    static const f32 PROMPT_Y = 90.0f;
+    static const f32 LINE_X_BASE = 20.0f;
+    static const f32 LINE_SPACING = 60.0f;
+    static const f32 LINE_Y = 120.0f;
 
+    mpLineConfirmPrompt->draw(PROMPT_X, PROMPT_Y, COLOR_WHITE, HBIND_CENTER);
+
+    u32 cursor_color = gzInfo_getCursorColor();
     for (int i = 0; i < LINE_NUM; i++) {
-        if (mCursor.x == i) {
-            mpLines[i]->draw(20.0f + ((i - 1) * 60.0f), 120.0f, gzInfo_getTextColor(), HBIND_CENTER);
-        } else {
-            mpLines[i]->draw(20.0f + ((i - 1) * 60.0f), 120.0f, COLOR_WHITE, HBIND_CENTER);
-        }
+        f32 x_pos = LINE_X_BASE + ((i - 1) * LINE_SPACING);
+        u32 color = (mCursor.x == i) ? cursor_color : COLOR_WHITE;
+        mpLines[i]->draw(x_pos, LINE_Y, color, HBIND_CENTER);
     }
 }

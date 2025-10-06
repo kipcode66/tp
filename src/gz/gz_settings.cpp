@@ -378,46 +378,59 @@ void gzSettingsMenu_c::execute() {
 }
 
 void gzSettingsMenu_c::draw() {
-    f32 x_alignment = 30.0f;
-    f32 y_alignment = 90.0f;
+    static const f32 X_ALIGNMENT = 30.0f;
+    static const f32 Y_ALIGNMENT = 90.0f;
+    static const f32 OPTIONS_X_OFFSET = -50.0f;
+    static const f32 HAIHAI_X_OFFSET = 305.0f;
+    static const f32 HAIHAI_Y_OFFSET = -7.0f;
+    static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
+    static const f32 HAIHAI_EXTRA_SPACING = 30.0f;
+    static const f32 CURSOR_X = 170.0f;
+    static const f32 CURSOR_Y_BASE = 82.5f;
+    static const f32 LINE_SPACING = 22.0f;
+    static const f32 DESCRIPTION_X = 30.0f;
+    static const f32 DESCRIPTION_Y = 420.0f;
 
-    f32 x_alignment_opts = x_alignment - 50.0f;
-
-    f32 x_alignment_haihai = x_alignment_opts + 305.0f;
-    f32 y_alignment_haihai = y_alignment - 7.0f;
-
-    J2DTextBox::TFontSize font_size;
-    
     updateDynamicLines();
 
-    u32 cursor_color = gzInfo_getCursorColor();
-    for (int i = 0; i < LINE_NUM; i++) {
-        if (mpLines[i] != NULL && mpLineOptions[i] != NULL && mpMeterHaihai != NULL) {
-            mpLineOptions[i]->getFontSize(font_size);
-            mpMeterHaihai->setScale(font_size.mSizeY * 0.04f);
-        
-            if (mCursor.y == i) {
-                // spacing between arrows will be determined off text box bound size
-                f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + 30.0f;
-                
-                if (mpLineOptions[i]->mStringLength != 0) {
-                    mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), x_size_haihai, 0.0f);
-                }
+    J2DTextBox::TFontSize font_size;
+    mpLineOptions[0]->getFontSize(font_size);  // assume that all lines have the same font size
+    mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
 
-                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), cursor_color);
-                mpDrawCursor->setPos(170.0f, 82.5f + ((i - 1) * 22.0f), (J2DPane*)mpLines[i], true);
-                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), cursor_color, HBIND_CENTER);
-            } else {
-                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE);
-                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE, HBIND_CENTER);
+    u32 cursor_color = gzInfo_getCursorColor();
+
+    f32 x_alignment_opts = X_ALIGNMENT + OPTIONS_X_OFFSET;
+    f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
+    f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
+
+    for (int i = 0; i < LINE_NUM; i++) {
+        f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+        f32 y_pos_haihai = y_alignment_haihai + ((i - 1) * LINE_SPACING);
+        f32 y_pos_cursor = CURSOR_Y_BASE + ((i - 1) * LINE_SPACING);
+
+        if (mCursor.y == i) {
+            // Spacing between arrows determined by text box bound size
+            f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
+            if (mpLineOptions[i]->mStringLength != 0) {
+                mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
             }
+
+            mpLines[i]->draw(X_ALIGNMENT, y_pos, cursor_color);
+            mpDrawCursor->setPos(CURSOR_X, y_pos_cursor, (J2DPane*)mpLines[i], true);
+            mpLineOptions[i]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
+        } else {
+            mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
+            mpLineOptions[i]->draw(x_alignment_opts, y_pos, COLOR_WHITE, HBIND_CENTER);
         }
     }
 
-    if (mpDescription != NULL && mpLines[mCursor.y] != NULL && *mpLines[mCursor.y]->m_description != 0) {
+    // Draw description if valid
+    if (mpLines[mCursor.y] && *mpLines[mCursor.y]->m_description != 0) {
         mpDescription->setString(mpLines[mCursor.y]->m_description);
-        mpDescription->draw(30.0f, 420.0f, cursor_color);
+        mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color);
     }
 
-    if (gzInfo_isCursorTypeTP()) mpDrawCursor->draw();
+    if (gzInfo_isCursorTypeTP()) {
+        mpDrawCursor->draw();
+    }
 }
