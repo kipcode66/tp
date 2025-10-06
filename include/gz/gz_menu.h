@@ -164,7 +164,6 @@ public:
     enum gzFrameworkMenu_Settings_e {
         FRAMEWORK_LINE_LAYER,
         FRAMEWORK_LINE_NODE_LIST,
-        FRAMEWORK_LINE_NODE,
         FRAMEWORK_LINE_PROCESS,
 
         FRAMEWORK_LINE_MAX
@@ -182,8 +181,8 @@ public:
     node_list_class* getCurrentNodeList(layer_class* layer);
     int getFirstActiveNodeListIndex(layer_class* layer);
     void resetNodeListIndexForCurrentLayer();
-    int getFirstActiveNodeIndex(node_list_class* list);
-    void resetNodeIndexForCurrentNodeList();
+    int getFirstActiveProcessIndex(node_list_class* list);
+    void resetProcessIndexForCurrentNodeList();
     base_process_class* getCurrentProcess(node_list_class* i_node_list);
 
     virtual void _delete();
@@ -204,7 +203,7 @@ public:
     int mNumActiveLayers;
     int mCurrentLayerIndex;
     int mCurrentNodeListIndex;
-    int mCurrentNodeIndex;
+    int mCurrentProcessIndex;
 };
 
 

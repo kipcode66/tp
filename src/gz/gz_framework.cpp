@@ -5,6 +5,7 @@
 
 gzMenu_c::gzCursor gzFrameworkMenu_c::mCursor = {0, 0};
 
+// Helper to find first active node list in a layer
 int gzFrameworkMenu_c::getFirstActiveNodeListIndex(layer_class* layer) {
     if (layer == NULL || layer->node_tree.mNumLists <= 0 || layer->node_tree.mpLists == NULL) {
         return -1;
@@ -17,12 +18,14 @@ int gzFrameworkMenu_c::getFirstActiveNodeListIndex(layer_class* layer) {
     return -1;
 }
 
+// Reset node list index to first active in current layer
 void gzFrameworkMenu_c::resetNodeListIndexForCurrentLayer() {
     layer_class* current_layer = getCurrentLayer();
     mCurrentNodeListIndex = getFirstActiveNodeListIndex(current_layer);
 }
 
-int gzFrameworkMenu_c::getFirstActiveNodeIndex(node_list_class* list) {
+// Helper to find first valid process index in a node list
+int gzFrameworkMenu_c::getFirstActiveProcessIndex(node_list_class* list) {
     if (list == NULL || list->mSize <= 0) {
         return -1;
     }
@@ -40,24 +43,25 @@ int gzFrameworkMenu_c::getFirstActiveNodeIndex(node_list_class* list) {
     return -1;
 }
 
-void gzFrameworkMenu_c::resetNodeIndexForCurrentNodeList() {
+// Reset process index to first valid in current node list
+void gzFrameworkMenu_c::resetProcessIndexForCurrentNodeList() {
     node_list_class* current_list = getCurrentNodeList(getCurrentLayer());
-    mCurrentNodeIndex = getFirstActiveNodeIndex(current_list);
+    mCurrentProcessIndex = getFirstActiveProcessIndex(current_list);
 }
 
+// Get current layer
 layer_class* gzFrameworkMenu_c::getCurrentLayer() {
     if (mNumActiveLayers > 0) {
         return mpActiveLayers[mCurrentLayerIndex];
     }
-
     return NULL;
 }
 
+// Get current node list from layer
 node_list_class* gzFrameworkMenu_c::getCurrentNodeList(layer_class* i_layer) {
     if (i_layer == NULL || i_layer->node_tree.mNumLists == 0 || i_layer->node_tree.mpLists == NULL) {
         return NULL;
     }
-
     int clamped_idx = mCurrentNodeListIndex;
     if (clamped_idx < 0) {
         return NULL;
@@ -68,23 +72,22 @@ node_list_class* gzFrameworkMenu_c::getCurrentNodeList(layer_class* i_layer) {
     return &i_layer->node_tree.mpLists[clamped_idx];
 }
 
+// Get current process from node list
 base_process_class* gzFrameworkMenu_c::getCurrentProcess(node_list_class* i_node_list) {
-    if (i_node_list == NULL || i_node_list->mSize <= 0 || mCurrentNodeIndex < 0 || mCurrentNodeIndex >= i_node_list->mSize) {
+    if (i_node_list == NULL || i_node_list->mSize <= 0 || mCurrentProcessIndex < 0 || mCurrentProcessIndex >= i_node_list->mSize) {
         return NULL;
     }
-
     node_class* node = i_node_list->mpHead;
-    for (int i = 0; i < mCurrentNodeIndex; ++i) {
+    for (int i = 0; i < mCurrentProcessIndex; ++i) {
         if (node == NULL) return NULL;
         node = node->mpNextNode;
     }
-
     if (node == NULL) return NULL;
-
     create_tag_class* tag = (create_tag_class*)node;
     return (base_process_class*)tag->mpTagData;
 }
 
+// Update dynamic menu lines
 void gzFrameworkMenu_c::updateDynamicLines() {
     OSReport("updating dynamic lines!\n");
     layer_class* current_layer = getCurrentLayer();
@@ -97,32 +100,23 @@ void gzFrameworkMenu_c::updateDynamicLines() {
                 OSReport("setting current process: %d\n", current_node_list_process->name);
                 mpLineOptions[FRAMEWORK_LINE_LAYER]->setStringf("%u", current_layer->layer_id);
                 mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setStringf("%d", mCurrentNodeListIndex);
-                mpLineOptions[FRAMEWORK_LINE_NODE]->setStringf("%u", current_node_list_process->id);
                 mpLineOptions[FRAMEWORK_LINE_PROCESS]->setStringf("%d", current_node_list_process->name);
             } else {
-                mpLineOptions[FRAMEWORK_LINE_NODE]->setString("n/a");
                 mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
             }
         } else {
             mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setString("n/a");
-            mpLineOptions[FRAMEWORK_LINE_NODE]->setString("n/a");
             mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
         }
     } else {
         mpLineOptions[FRAMEWORK_LINE_LAYER]->setString("n/a");
         mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setString("n/a");
-        mpLineOptions[FRAMEWORK_LINE_NODE]->setString("n/a");
         mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
     }
 
     J2DTextBox::TFontSize font_size;
-
-    // update option box bounds
     for (int i = 0; i < LINE_NUM; i++) {
         mpLineOptions[i]->getFontSize(font_size);
-        // applying font_size.mSizeX against a scaling factor 
-        // to create a linear relationship between string length 
-        // and text box bound size
         font_size.mSizeX *= 0.5f;
         mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
     }
@@ -134,12 +128,11 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
     mCurrentLayerIndex = 0;
     mNumActiveLayers = 0;
     mCurrentNodeListIndex = 0;
-    mCurrentNodeIndex = 0;
+    mCurrentProcessIndex = 0;
     memset(mpActiveLayers, 0, sizeof(mpActiveLayers));
 
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = new gzTextBox();
-
         mpLineOptions[i] = new gzTextBox();
         mpLineOptions[i]->mBounds.f.y = 10.0f;
     }
@@ -148,7 +141,6 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
 
     mpLines[FRAMEWORK_LINE_LAYER]->setStringDesc("layer", "layer containing node lists");
     mpLines[FRAMEWORK_LINE_NODE_LIST]->setStringDesc("node list", "node lists in this layer");
-    mpLines[FRAMEWORK_LINE_NODE]->setStringDesc("node", "nodes in this node list");
     mpLines[FRAMEWORK_LINE_PROCESS]->setStringDesc("process", "processes in this node");
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
@@ -184,6 +176,7 @@ void gzFrameworkMenu_c::_delete() {
 }
 
 void gzFrameworkMenu_c::execute() {
+    // Update active layers
     mNumActiveLayers = 0;
     memset(mpActiveLayers, 0, sizeof(mpActiveLayers));
 
@@ -201,6 +194,7 @@ void gzFrameworkMenu_c::execute() {
         layer = (layer_class*)layer->node.mpNextNode;
     }
 
+    // Clamp layer index
     if (mNumActiveLayers == 0) {
         mCurrentLayerIndex = 0;
     } else {
@@ -209,7 +203,7 @@ void gzFrameworkMenu_c::execute() {
         }
     }
 
-    // Conditional reset for node list
+    // Conditional reset for node list if invalid
     layer_class* cur_layer = getCurrentLayer();
     bool need_list_reset = true;
     if (cur_layer != NULL && cur_layer->node_tree.mpLists != NULL &&
@@ -221,14 +215,15 @@ void gzFrameworkMenu_c::execute() {
         resetNodeListIndexForCurrentLayer();
     }
 
-    // Conditional reset for node
+    // Conditional reset for process if invalid
     node_list_class* cur_list = getCurrentNodeList(cur_layer);
-    bool need_node_reset = true;
-    if (cur_list != NULL && mCurrentNodeIndex >= 0 && mCurrentNodeIndex < cur_list->mSize) {
+    bool need_process_reset = true;
+    
+    if (cur_list != NULL && mCurrentProcessIndex >= 0 && mCurrentProcessIndex < cur_list->mSize) {
         node_class* node = cur_list->mpHead;
-        for (int i = 0; i < mCurrentNodeIndex; ++i) {
+        for (int i = 0; i < mCurrentProcessIndex; ++i) {
             if (node == NULL) {
-                need_node_reset = true;
+                need_process_reset = true;
                 break;
             }
             node = node->mpNextNode;
@@ -237,14 +232,16 @@ void gzFrameworkMenu_c::execute() {
             create_tag_class* tag = (create_tag_class*)node;
             base_process_class* process = (base_process_class*)tag->mpTagData;
             if (process != NULL) {
-                need_node_reset = false;
+                need_process_reset = false;
             }
         }
     }
-    if (need_node_reset) {
-        resetNodeIndexForCurrentNodeList();
+
+    if (need_process_reset) {
+        resetProcessIndexForCurrentNodeList();
     }
 
+    // Handle vertical cursor movement
     if (gzPad::getTrigDown() && mCursor.y < LINE_NUM) {
         mCursor.y++;
     }
@@ -259,13 +256,14 @@ void gzFrameworkMenu_c::execute() {
         mCursor.y = 0;
     }
 
+    // Handle right trigger input
     if (gzPad::getTrigRight()) {
         switch (mCursor.y) {
         case FRAMEWORK_LINE_LAYER:
             if (mNumActiveLayers > 0) {
                 mCurrentLayerIndex = (mCurrentLayerIndex + 1) % mNumActiveLayers;
                 resetNodeListIndexForCurrentLayer();
-                resetNodeIndexForCurrentNodeList();
+                resetProcessIndexForCurrentNodeList();
             }
             break;
         case FRAMEWORK_LINE_NODE_LIST: {
@@ -282,7 +280,7 @@ void gzFrameworkMenu_c::execute() {
                     steps++;
                     if (cur_layer->node_tree.mpLists[idx].mSize > 0) {
                         mCurrentNodeListIndex = idx;
-                        resetNodeIndexForCurrentNodeList();
+                        resetProcessIndexForCurrentNodeList();
                         break;
                     }
                 }
@@ -292,42 +290,10 @@ void gzFrameworkMenu_c::execute() {
             }
             break;
         }
-        case FRAMEWORK_LINE_NODE: {
-            node_list_class* cur_list = getCurrentNodeList(getCurrentLayer());
-            if (cur_list != NULL && cur_list->mSize > 0) {
-                int idx = mCurrentNodeIndex;
-                if (idx < 0) {
-                    idx = -1;
-                }
-                int num_nodes = cur_list->mSize;
-                int steps = 0;
-                while (steps < num_nodes) {
-                    idx = (idx + 1 + num_nodes) % num_nodes;
-                    steps++;
-                    node_class* node = cur_list->mpHead;
-                    for (int j = 0; j < idx; ++j) {
-                        if (node == NULL) break;
-                        node = node->mpNextNode;
-                    }
-                    if (node != NULL) {
-                        create_tag_class* tag = (create_tag_class*)node;
-                        base_process_class* process = (base_process_class*)tag->mpTagData;
-                        if (process != NULL) {
-                            mCurrentNodeIndex = idx;
-                            break;
-                        }
-                    }
-                }
-                if (steps == num_nodes) {
-                    mCurrentNodeIndex = -1;
-                }
-            }
-            break;
-        }
         case FRAMEWORK_LINE_PROCESS: {
             node_list_class* cur_list = getCurrentNodeList(getCurrentLayer());
             if (cur_list != NULL && cur_list->mSize > 0) {
-                int idx = mCurrentNodeIndex;
+                int idx = mCurrentProcessIndex;
                 if (idx < 0) {
                     idx = -1;
                 }
@@ -345,13 +311,13 @@ void gzFrameworkMenu_c::execute() {
                         create_tag_class* tag = (create_tag_class*)node;
                         base_process_class* process = (base_process_class*)tag->mpTagData;
                         if (process != NULL) {
-                            mCurrentNodeIndex = idx;
+                            mCurrentProcessIndex = idx;
                             break;
                         }
                     }
                 }
                 if (steps == num_nodes) {
-                    mCurrentNodeIndex = -1;
+                    mCurrentProcessIndex = -1;
                 }
             }
             break;
@@ -359,6 +325,7 @@ void gzFrameworkMenu_c::execute() {
         }
     }
 
+    // Handle left trigger input
     if (gzPad::getTrigLeft()) {
         switch (mCursor.y) {
         case FRAMEWORK_LINE_LAYER:
@@ -366,7 +333,7 @@ void gzFrameworkMenu_c::execute() {
                 mCurrentLayerIndex--;
                 if (mCurrentLayerIndex < 0) mCurrentLayerIndex = mNumActiveLayers - 1;
                 resetNodeListIndexForCurrentLayer();
-                resetNodeIndexForCurrentNodeList();
+                resetProcessIndexForCurrentNodeList();
             }
             break;
         case FRAMEWORK_LINE_NODE_LIST: {
@@ -383,7 +350,7 @@ void gzFrameworkMenu_c::execute() {
                     steps++;
                     if (cur_layer->node_tree.mpLists[idx].mSize > 0) {
                         mCurrentNodeListIndex = idx;
-                        resetNodeIndexForCurrentNodeList();
+                        resetProcessIndexForCurrentNodeList();
                         break;
                     }
                 }
@@ -393,42 +360,10 @@ void gzFrameworkMenu_c::execute() {
             }
             break;
         }
-        case FRAMEWORK_LINE_NODE: {
-            node_list_class* cur_list = getCurrentNodeList(getCurrentLayer());
-            if (cur_list != NULL && cur_list->mSize > 0) {
-                int idx = mCurrentNodeIndex;
-                if (idx < 0) {
-                    idx = cur_list->mSize;
-                }
-                int num_nodes = cur_list->mSize;
-                int steps = 0;
-                while (steps < num_nodes) {
-                    idx = (idx - 1 + num_nodes) % num_nodes;
-                    steps++;
-                    node_class* node = cur_list->mpHead;
-                    for (int j = 0; j < idx; ++j) {
-                        if (node == NULL) break;
-                        node = node->mpNextNode;
-                    }
-                    if (node != NULL) {
-                        create_tag_class* tag = (create_tag_class*)node;
-                        base_process_class* process = (base_process_class*)tag->mpTagData;
-                        if (process != NULL) {
-                            mCurrentNodeIndex = idx;
-                            break;
-                        }
-                    }
-                }
-                if (steps == num_nodes) {
-                    mCurrentNodeIndex = -1;
-                }
-            }
-            break;
-        }
         case FRAMEWORK_LINE_PROCESS: {
             node_list_class* cur_list = getCurrentNodeList(getCurrentLayer());
             if (cur_list != NULL && cur_list->mSize > 0) {
-                int idx = mCurrentNodeIndex;
+                int idx = mCurrentProcessIndex;
                 if (idx < 0) {
                     idx = cur_list->mSize;
                 }
@@ -446,13 +381,13 @@ void gzFrameworkMenu_c::execute() {
                         create_tag_class* tag = (create_tag_class*)node;
                         base_process_class* process = (base_process_class*)tag->mpTagData;
                         if (process != NULL) {
-                            mCurrentNodeIndex = idx;
+                            mCurrentProcessIndex = idx;
                             break;
                         }
                     }
                 }
                 if (steps == num_nodes) {
-                    mCurrentNodeIndex = -1;
+                    mCurrentProcessIndex = -1;
                 }
             }
             break;
