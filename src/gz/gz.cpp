@@ -154,7 +154,7 @@ int gzInfo_c::storeSettingsMemcard() {
             ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
             if (ret == CARD_RESULT_READY) {
                 OSReport("stored tpgz settings to memcard!\n");
-                g_gzInfo.sendNotification("settings saved!");
+                gzInfo_sendNotification("settings saved!");
             }
 
             CARDClose(&file);
@@ -178,7 +178,7 @@ int gzInfo_c::loadSettingsMemcard() {
         ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
         if (ret == CARD_RESULT_READY) {
             OSReport("loaded tpgz settings from memcard!\n");
-            g_gzInfo.sendNotification("settings loaded!");
+            gzInfo_sendNotification("settings loaded!");
             gzSettings_s settings;
             memcpy(&settings, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzSettings_s));
 
@@ -192,6 +192,8 @@ int gzInfo_c::loadSettingsMemcard() {
         }
 
         CARDClose(&file);
+    } else {
+        gzInfo_sendNotification("no stored settings found!");
     }
 
     return ret;
@@ -209,7 +211,7 @@ int gzInfo_c::deleteSettingsMemcard() {
     ret = CARDDelete(0, "tpgzcfg");
     if (ret == CARD_RESULT_READY) {
         OSReport("deleted tpgz settings from memcard!\n");
-        g_gzInfo.sendNotification("settings deleted!");
+        gzInfo_sendNotification("settings deleted!");
     } else {
         OSReport_Error("failed to delete tpgz settings from memcard!\n");
     }

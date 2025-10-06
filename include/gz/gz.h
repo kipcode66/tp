@@ -12,6 +12,8 @@ class gzTextBox;
 class gzMainMenu_c;
 class gzNotification_c;
 
+#define COLOR_WHITE 0xFFFFFFFF
+
 struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
     bool mDropShadows;
@@ -46,19 +48,25 @@ public:
     bool isDisplay() const { return mDisplay; }
     u32 getTextColor() const { return mSettings.mTextColor; }
     void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
-    bool getDropShadows() const { return mSettings.mDropShadows; }
+    bool isDropShadows() const { return mSettings.mDropShadows; }
     void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
-    bool getSwapEquips() const { return mSettings.mSwapEquips; }
+    bool isSwapEquips() const { return mSettings.mSwapEquips; }
     void setSwapEquips(bool i_swapEquips) { mSettings.mSwapEquips = i_swapEquips; }
-    bool getAreaReload() const { return mSettings.mAreaReload; }
+    bool isAreaReload() const { return mSettings.mAreaReload; }
     void setAreaReload(bool i_areaReload) { mSettings.mAreaReload = i_areaReload; }
     u8 getCursorType() const { return mSettings.mCursorType; }
     void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
+    // TODO(Pheenoh): store this as u8 instead
     bool getDisplayMode() const { return mSettings.mDisplayMode; }
     void setDisplayMode(bool i_mode) { mSettings.mDisplayMode = i_mode; }
+    JUTFont* getFont() { return mpFont; }
     void setFont(JUTFont* i_font) { mpFont = i_font; }
-    bool getMenuPausesGame() const { return mSettings.mMenuPausesGame; }
+    bool isMenuPausesGame() const { return mSettings.mMenuPausesGame; }
     void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
+    u32 getCursorColor() { return getCursorType() & CURSOR_CLASSIC ? getTextColor() : COLOR_WHITE; }
+    bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
+    bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
+    
 
     u8 nextCursorType() {
         switch (getCursorType()) {
@@ -84,9 +92,7 @@ public:
         default:
             return CURSOR_CLASSIC;
         }
-    }
-
-    JUTFont* getFont() { return mpFont; }
+    }    
 
     J2DPicture* mpIcon;
     gzTextBox* mpHeader;
@@ -101,6 +107,30 @@ public:
 };
 
 extern gzInfo_c g_gzInfo;
+
+inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
+inline bool gzInfo_isCursorTypeTP() { return g_gzInfo.isCursorTypeTP(); }
+inline u32 gzInfo_getCursorColor() { return g_gzInfo.getCursorColor(); }
+inline const u32 gzInfo_getTextColor() { return g_gzInfo.getTextColor(); }
+inline const u8 gzInfo_getCursorType() { return g_gzInfo.getCursorType(); }
+inline const bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
+inline const bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
+inline const bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
+inline const bool gzInfo_isAreaReload() { return g_gzInfo.isAreaReload(); }
+inline u8 gzInfo_previousCursorType() { return g_gzInfo.previousCursorType(); }
+inline u8 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
+inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
+inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcard(); }
+inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
+
+inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
+inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
+inline void gzInfo_setDropShadows(bool dropShadows) { g_gzInfo.setDropShadows(dropShadows); }
+inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapEquips); }
+inline void gzInfo_setAreaReload(bool areaReload) { g_gzInfo.setAreaReload(areaReload); }
+inline void gzInfo_setCursorType(u8 type) { g_gzInfo.setCursorType(type); }
+inline void gzInfo_setDisplayMode(bool mode) { g_gzInfo.setDisplayMode(mode); }
+inline void gzInfo_setMenuPausesGame(bool opt) { g_gzInfo.setMenuPausesGame(opt); }
 
 namespace gzPad {
     inline u32 getTrig() { return mDoCPd_c::m_gzPadInfo.mPressedButtonFlags; }
@@ -188,7 +218,7 @@ public:
     }
 
     void draw(f32 x, f32 y, u32 color) {
-        if (g_gzInfo.getDropShadows()) {
+        if (gzInfo_isDropShadows()) {
             setCharColor(0x00000080);
             setGradColor(0x00000080);
             J2DTextBox::draw(x + 2, y + 2, 608.0f, HBIND_LEFT);
@@ -200,7 +230,7 @@ public:
     }
 
     void draw(f32 x, f32 y, u32 color, J2DTextBoxHBinding binding) {
-        if (g_gzInfo.getDropShadows()) {
+        if (gzInfo_isDropShadows()) {
             setCharColor(0x00000080);
             setGradColor(0x00000080);
             J2DTextBox::draw(x + 2, y + 2, 608.0f, binding);

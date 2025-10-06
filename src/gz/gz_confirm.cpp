@@ -18,6 +18,7 @@ gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback) {
     mpLines[CONFIRM_YES]->setString("yes");
 
     mpConfirmCallback = i_callback;
+    mCursor.x = 0; // always put the cursor on "no" when the menu pops up
 }
 
 gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback, const char* msg) {
@@ -33,6 +34,7 @@ gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback, const char* msg) {
     mpLines[CONFIRM_YES]->setString("yes");
 
     mpConfirmCallback = i_callback;
+    mCursor.x = 0; // always put the cursor on "no" when the menu pops up
 }
 
 
@@ -90,7 +92,7 @@ void gzConfirmMenu_c::draw() {
 
     for (int i = 0; i < LINE_NUM; i++) {
         if (mCursor.x == i) {
-            mpLines[i]->draw(20.0f + ((i - 1) * 60.0f), 120.0f, g_gzInfo.getTextColor(), HBIND_CENTER);
+            mpLines[i]->draw(20.0f + ((i - 1) * 60.0f), 120.0f, gzInfo_getTextColor(), HBIND_CENTER);
         } else {
             mpLines[i]->draw(20.0f + ((i - 1) * 60.0f), 120.0f, COLOR_WHITE, HBIND_CENTER);
         }

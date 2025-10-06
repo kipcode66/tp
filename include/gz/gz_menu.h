@@ -7,8 +7,6 @@
 #include "f_pc/f_pc_layer.h"
 #include "gz/gz.h"
 
-#define COLOR_WHITE 0xFFFFFFFF
-
 class dSelect_cursor_c;
 class dMeterHaihai_c;
 
@@ -90,7 +88,7 @@ public:
     virtual void draw();
 
     char* getCursorTypeText() {
-        switch (g_gzInfo.getCursorType()) {
+        switch (gzInfo_getCursorType()) {
         case g_gzInfo.CURSOR_CLASSIC:
             return "classic";
         case g_gzInfo.CURSOR_TP:
@@ -102,9 +100,10 @@ public:
         }
     }
 
-    const char* getDropShadowsText() { return g_gzInfo.getDropShadows() ? "enabled" : "disabled"; }
-    const char* getSwapEquipsText() { return g_gzInfo.getSwapEquips() ? "yes" : "no"; }
-    const char* getDisplayModeText() { return g_gzInfo.getDisplayMode() ? "progressive" : "interlaced"; }
+    const char* getAreaReloadText() { return gzInfo_isAreaReload() ? "load area" : "load file"; }
+    const char* getDropShadowsText() { return gzInfo_isDropShadows() ? "enabled" : "disabled"; }
+    const char* getSwapEquipsText() { return gzInfo_isSwapEquips() ? "yes" : "no"; }
+    const char* getDisplayModeText() { return gzInfo_getDisplayMode() ? "progressive" : "interlaced"; }
     // TODO(Pheenoh): Finish writing this functionality
     const char* getMenuPausesGameText() { return "no"; }
 
@@ -142,6 +141,7 @@ public:
         CONFIRM_MAX
     };
 
+    gzConfirmMenu_c();
     gzConfirmMenu_c(confirmCallback);
     gzConfirmMenu_c(confirmCallback, const char* msg);
     ~gzConfirmMenu_c();
@@ -159,6 +159,9 @@ public:
     confirmCallback mpConfirmCallback;
 };
 
+
+// Validity callback type
+typedef bool (*IndexValidityFunc)(int idx, void* context);
 class gzFrameworkMenu_c : public gzMenu_c {
 public:
     enum gzFrameworkMenu_Settings_e {
@@ -184,6 +187,9 @@ public:
     int getFirstActiveProcessIndex(node_list_class* list);
     void resetProcessIndexForCurrentNodeList();
     base_process_class* getCurrentProcess(node_list_class* i_node_list);
+    void cycleValidIndex(int& idx, int max, int dir, IndexValidityFunc isValid, void* context);
+    static bool isNodeListValid(int idx, void* ctx);
+    static bool isProcessValid(int idx, void* ctx);
 
     virtual void _delete();
     virtual void execute();

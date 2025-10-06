@@ -125,9 +125,8 @@ static void myMemoryErrorRoutine(void* p_heap, u32 size, int alignment) {
     }
 
     if (notSolidHeap) {
-        // "Error: Can't allocate memory %d(0x%x)Bytes, %d Byte Alignment from %08x\n"
         OSReport_Error(
-            "エラー: メモリを確保できません %d(0x%x)バイト、 %d バイトアライメント from %08x\n",
+            "Error: Can't allocate memory %d(0x%x)Bytes, %d Byte Alignment from %08x\n",
             size, size, alignment, p_heap);
     }
 
@@ -236,14 +235,14 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
     mDoMain::sHungUpTime = OSGetTime();
     OSReportEnable();
     cAPICPad_recalibrate();
-    // "Vibration stopping & resetting to default\n"
-    OSReport("振動停止＆原点復帰\n");
+    OSReport("-------------\n");
+    OSReport("tpgz crashed!\n");
+    OSReport("Vibration stopping & resetting to default\n");
 
     JUTException* manager = JUTException::getManager();
 
     if (manager == NULL) {
-        // "Exception Manager doesn't exist\n"
-        OSReport("例外マネージャがありません\n");
+        OSReport("Exception Manager doesn't exist\n");
         PPCHalt();
     } else {
         manager->setTraceSuppress(0x80);
@@ -253,8 +252,7 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
 
             if (manager != NULL) {
                 OSEnableInterrupts();
-                // "Accepting Key input\n"
-                OSReport("キー入力を受け付けています\n");
+                OSReport("Accepting Key input\n");
                 while (mDoMain::developmentMode == 0) {
                     exceptionReadPad(&btnTrig, &btnHold);
                     developKeyCheck(btnTrig, btnHold);
@@ -263,8 +261,7 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
                         exceptionRestart();
                     }
                 }
-                // "JUTAssertion is visible\n"
-                OSReport("JUTAssertionを可視化しました\n");
+                OSReport("JUTAssertion is visible\n");
                 JUTAssertion::setVisible(true);
                 JUTDbPrint::getManager()->setVisible(true);
                 JFWSystem::getSystemConsole()->setOutput(JUTConsole::OUTPUT_OSREPORT |
@@ -273,8 +270,7 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
                 PPCHalt();
             }
         } else {
-            // "Wait for 3 seconds\n"
-            OSReport("3秒間停止\n");
+            OSReport("Wait for 3 seconds\n");
             JUTException::waitTime(3000);
         }
     }
@@ -628,21 +624,21 @@ int mDoMch_Create() {
 
     JKRHeap* rootHeap = JKRGetRootHeap();
     // Command Heap size: 4 KB
-    my_SysPrintHeap("コマンドヒープ", mDoExt_createCommandHeap(0x1000, rootHeap), 0x1000);
+    my_SysPrintHeap("Command Heap", mDoExt_createCommandHeap(0x1000, rootHeap), 0x1000);
 
     // Archive Heap size: 9085 KB
-    my_SysPrintHeap("アーカイブヒープ", mDoExt_createArchiveHeap(0x8DF400, rootHeap), 0x8DF400);
+    my_SysPrintHeap("Archive Heap", mDoExt_createArchiveHeap(0x8DF400, rootHeap), 0x8DF400);
 
     // J2D Heap size: 500 KB
-    my_SysPrintHeap("Ｊ２Ｄ用ヒープ", mDoExt_createJ2dHeap(0x7D000, rootHeap), 0x7D000);
+    my_SysPrintHeap("J2D Heap", mDoExt_createJ2dHeap(0x7D000, rootHeap), 0x7D000);
 
     // Game Heap size: 4408 KB
-    my_SysPrintHeap("ゲームヒープ", mDoExt_createGameHeap(0x44E000, rootHeap), 0x44E000);
+    my_SysPrintHeap("Game Heap", mDoExt_createGameHeap(0x44E000, rootHeap), 0x44E000);
 
     JKRHeap* sysHeap = JKRGetSystemHeap();
     u32 zeldaHeapSize = sysHeap->getFreeSize() - 0x10000;
     JKRHeap* zeldaHeap = mDoExt_createZeldaHeap(zeldaHeapSize, sysHeap);
-    my_SysPrintHeap("ゼルダヒープ", zeldaHeap, zeldaHeapSize);
+    my_SysPrintHeap("Zelda Heap", zeldaHeap, zeldaHeapSize);
     zeldaHeap->becomeCurrentHeap();
 
     JKRAramStream::setTransBuffer(NULL, 0x2000, JKRGetSystemHeap());

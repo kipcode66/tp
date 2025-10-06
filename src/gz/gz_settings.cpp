@@ -98,7 +98,7 @@ u32 cycleTextColor(bool forward) {
     // Find current color index
     int currentIndex = -1;
     for (int i = 0; i < COLOR_COUNT; i++) {
-        if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
+        if (gzInfo_getTextColor() == l_textColorValue[i]) {
             currentIndex = i;
             break;
         }
@@ -118,22 +118,22 @@ u32 cycleTextColor(bool forward) {
 // Have to wrap since mwcc doesn't support lambdas
 // Is there a better way to do this?
 int storeSettingsCallbackWrapper() {
-    return g_gzInfo.storeSettingsMemcard();
+    return gzInfo_storeSettingsMemcard();
 }
 
 int deleteSettingsCallbackWrapper() {
-    return g_gzInfo.deleteSettingsMemcard();
+    return gzInfo_deleteSettingsMemcard();
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
-    mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->setStringf("%s", g_gzInfo.getAreaReload() ? "load area" : "load file");
+    mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->setStringf("%s", getAreaReloadText());
     mpLineOptions[SETTING_CURSOR_TYPE]->setStringf("%s", getCursorTypeText());
 
     // Find current color name
     char* currentColorName = "unknown";
 
     for (int i = 0; i < COLOR_COUNT; i++) {
-        if (g_gzInfo.getTextColor() == l_textColorValue[i]) {
+        if (gzInfo_getTextColor() == l_textColorValue[i]) {
             currentColorName = l_textColorName[i];
             break;
         }
@@ -225,19 +225,8 @@ void gzSettingsMenu_c::_delete() {
 }
 
 void gzSettingsMenu_c::execute() {
-    if (gzPad::getTrigDown() && mCursor.y < LINE_NUM) {
-        mCursor.y++;
-    }
-
-    if (gzPad::getTrigUp() && mCursor.y >= 0) {
-        mCursor.y--;
-    }
-
-    if (mCursor.y < 0) {
-        mCursor.y = LINE_NUM - 1;
-    } else if (mCursor.y > LINE_NUM - 1) {
-        mCursor.y = 0;
-    }
+    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigB()) {
         gzChangeMenu<gzMainMenu_c>();
@@ -247,16 +236,16 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
         case SETTING_SAVE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, "are you sure you want to save your settings?");
-            break;
+            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, "save settings?");
+            return;
         case SETTING_LOAD_CARD:
-            g_gzInfo.loadSettingsMemcard();
+            gzInfo_loadSettingsMemcard();
             break;
         case SETTING_DELETE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, "are you sure you want to delete your settings?");
-            break;
+            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, "delete settings?");
+            return;
         case SETTING_MENU_POSITIONS:
-            g_gzInfo.sendNotification("test!");
+            gzInfo_sendNotification("test!");
             break;
         case SETTING_CREDITS:
             gzChangeMenu<gzCreditsMenu_c>();
@@ -267,27 +256,27 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigRight()) {
         switch (mCursor.y) {
         case SETTING_AREA_RELOAD_BEHAVIOR:
-            g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
+            gzInfo_setAreaReload(!gzInfo_isAreaReload());
             break;
         case SETTING_CURSOR_TYPE:
-            g_gzInfo.setCursorType(g_gzInfo.nextCursorType());
+            gzInfo_setCursorType(gzInfo_nextCursorType());
             break;
         case SETTING_DISPLAY_MODE: {
-            bool display_mode = g_gzInfo.getDisplayMode();
+            bool display_mode = gzInfo_getDisplayMode();
             display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-            g_gzInfo.setDisplayMode(!display_mode);
+            gzInfo_setDisplayMode(!display_mode);
             break;
         }
         case SETTING_DROP_SHADOW:
-            g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
+            gzInfo_setDropShadows(!gzInfo_isDropShadows());
             break;
         case SETTING_MENU_PAUSES_GAME:
             break;
         case SETTING_SWAP_EQUIPS:
-            g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
+            gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
             break;
         case SETTING_TEXT_COLOR:
-            g_gzInfo.setTextColor(cycleTextColor(true));
+            gzInfo_setTextColor(cycleTextColor(true));
             break;
         }
     }
@@ -295,30 +284,32 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigLeft()) {
         switch (mCursor.y) {
         case SETTING_AREA_RELOAD_BEHAVIOR:
-            g_gzInfo.setAreaReload(!g_gzInfo.getAreaReload());
+            gzInfo_setAreaReload(!gzInfo_isAreaReload());
             break;
         case SETTING_CURSOR_TYPE:
-            g_gzInfo.setCursorType(g_gzInfo.previousCursorType());
+            gzInfo_setCursorType(gzInfo_previousCursorType());
             break;
         case SETTING_DISPLAY_MODE: {
-            bool display_mode = g_gzInfo.getDisplayMode();
+            bool display_mode = gzInfo_getDisplayMode();
             display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-            g_gzInfo.setDisplayMode(!display_mode);
+            gzInfo_setDisplayMode(!display_mode);
             break;
         }
         case SETTING_DROP_SHADOW:
-            g_gzInfo.setDropShadows(!g_gzInfo.getDropShadows());
+            gzInfo_setDropShadows(!gzInfo_isDropShadows());
             break;
         case SETTING_MENU_PAUSES_GAME:
             break;
         case SETTING_SWAP_EQUIPS:
-            g_gzInfo.setSwapEquips(!g_gzInfo.getSwapEquips());
+            gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
             break;
         case SETTING_TEXT_COLOR:
-            g_gzInfo.setTextColor(cycleTextColor(false));
+            gzInfo_setTextColor(cycleTextColor(false));
             break;
         }
     }
+
+    mpMeterHaihai->_execute(0);
 }
 
 void gzSettingsMenu_c::draw() {
@@ -333,9 +324,8 @@ void gzSettingsMenu_c::draw() {
     J2DTextBox::TFontSize font_size;
     
     updateDynamicLines();
-    mpMeterHaihai->_execute(0);
 
-    u32 cursor_color = g_gzInfo.getCursorType() & g_gzInfo.CURSOR_CLASSIC ? g_gzInfo.getTextColor() : COLOR_WHITE;
+    u32 cursor_color = gzInfo_getCursorColor();
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL && mpLineOptions[i] != NULL && mpMeterHaihai != NULL) {
             mpLineOptions[i]->getFontSize(font_size);
@@ -364,5 +354,5 @@ void gzSettingsMenu_c::draw() {
         mpDescription->draw(30.0f, 420.0f, cursor_color);
     }
 
-    if (g_gzInfo.getCursorType() & g_gzInfo.CURSOR_TP) mpDrawCursor->draw();
+    if (gzInfo_isCursorTypeTP()) mpDrawCursor->draw();
 }

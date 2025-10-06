@@ -38,19 +38,8 @@ void gzMainMenu_c::_delete() {
 }
 
 void gzMainMenu_c::execute() {
-    if (gzPad::getTrigDown() && mCursor.y < LINE_NUM) {
-        mCursor.y++;
-    }
-
-    if (gzPad::getTrigUp() && mCursor.y >= 0) {
-        mCursor.y--;
-    }
-
-    if (mCursor.y < 0) {
-        mCursor.y = LINE_NUM - 1;
-    } else if (mCursor.y > LINE_NUM - 1) {
-        mCursor.y = 0;
-    }
+    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigB()) {
         g_gzInfo.mDisplay = false;
@@ -79,7 +68,7 @@ void gzMainMenu_c::draw() {
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL) {
             if (mCursor.y == i) {
-                mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), g_gzInfo.getTextColor());
+                mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), gzInfo_getTextColor());
             } else {
                 mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), 0xFFFFFFFF);
             }

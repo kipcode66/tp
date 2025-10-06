@@ -5,6 +5,52 @@
 
 gzMenu_c::gzCursor gzFrameworkMenu_c::mCursor = {0, 0};
 
+// Helper to cycle index to next valid one
+void gzFrameworkMenu_c::cycleValidIndex(int& idx, int max, int dir, IndexValidityFunc isValid, void* context) {
+    if (max <= 0) {
+        idx = -1;
+        return;
+    }
+    int original_idx = idx;
+    if (idx < 0) {
+        idx = (dir > 0) ? -1 : max;  // Adjust start for negative index
+    }
+    int steps = 0;
+    do {
+        idx = (idx + dir + max) % max;  // Wrap around
+        if (isValid(idx, context)) {
+            return;
+        }
+        steps++;
+    } while (steps < max && idx != original_idx);  // Prevent infinite loop
+    idx = -1;  // No valid found
+}
+
+bool gzFrameworkMenu_c::isNodeListValid(int idx, void* ctx) {
+    layer_class* layer = static_cast<layer_class*>(ctx);
+    if (layer && layer->node_tree.mpLists) {
+        return layer->node_tree.mpLists[idx].mSize > 0;
+    }
+    return false;
+}
+
+bool gzFrameworkMenu_c::isProcessValid(int idx, void* ctx) {
+    node_list_class* list = static_cast<node_list_class*>(ctx);
+    if (list && list->mSize > idx) {
+        node_class* node = list->mpHead;
+        for (int j = 0; j < idx; ++j) {
+            if (node == NULL) return false;
+            node = node->mpNextNode;
+        }
+        if (node) {
+            create_tag_class* tag = (create_tag_class*)node;
+            base_process_class* process = (base_process_class*)tag->mpTagData;
+            return process != NULL;
+        }
+    }
+    return false;
+}
+
 // Helper to find first active node list in a layer
 int gzFrameworkMenu_c::getFirstActiveNodeListIndex(layer_class* layer) {
     if (layer == NULL || layer->node_tree.mNumLists <= 0 || layer->node_tree.mpLists == NULL) {
@@ -89,29 +135,21 @@ base_process_class* gzFrameworkMenu_c::getCurrentProcess(node_list_class* i_node
 
 // Update dynamic menu lines
 void gzFrameworkMenu_c::updateDynamicLines() {
-    OSReport("updating dynamic lines!\n");
+    mpLineOptions[FRAMEWORK_LINE_LAYER]->setString("n/a");
+    mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setString("n/a");
+    mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
+    
     layer_class* current_layer = getCurrentLayer();
-    if (current_layer != NULL) {
-        node_list_class* current_layer_node_list = getCurrentNodeList(current_layer);
-        if (current_layer_node_list != NULL) {
-            OSReport("setting current node list idx: %d\n", mCurrentNodeListIndex);
-            base_process_class* current_node_list_process = getCurrentProcess(current_layer_node_list);
-            if (current_node_list_process != NULL) {
-                OSReport("setting current process: %d\n", current_node_list_process->name);
-                mpLineOptions[FRAMEWORK_LINE_LAYER]->setStringf("%u", current_layer->layer_id);
-                mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setStringf("%d", mCurrentNodeListIndex);
-                mpLineOptions[FRAMEWORK_LINE_PROCESS]->setStringf("%d", current_node_list_process->name);
-            } else {
-                mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
+    if (current_layer) {
+        mpLineOptions[FRAMEWORK_LINE_LAYER]->setStringf("%u", current_layer->layer_id);
+        node_list_class* current_list = getCurrentNodeList(current_layer);
+        if (current_list) {
+            mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setStringf("%d", mCurrentNodeListIndex);
+            base_process_class* process = getCurrentProcess(current_list);
+            if (process) {
+                mpLineOptions[FRAMEWORK_LINE_PROCESS]->setStringf("%d", process->name);
             }
-        } else {
-            mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setString("n/a");
-            mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
         }
-    } else {
-        mpLineOptions[FRAMEWORK_LINE_LAYER]->setString("n/a");
-        mpLineOptions[FRAMEWORK_LINE_NODE_LIST]->setString("n/a");
-        mpLineOptions[FRAMEWORK_LINE_PROCESS]->setString("n/a");
     }
 
     J2DTextBox::TFontSize font_size;
@@ -205,13 +243,9 @@ void gzFrameworkMenu_c::execute() {
 
     // Conditional reset for node list if invalid
     layer_class* cur_layer = getCurrentLayer();
-    bool need_list_reset = true;
-    if (cur_layer != NULL && cur_layer->node_tree.mpLists != NULL &&
-        mCurrentNodeListIndex >= 0 && mCurrentNodeListIndex < cur_layer->node_tree.mNumLists &&
-        cur_layer->node_tree.mpLists[mCurrentNodeListIndex].mSize > 0) {
-        need_list_reset = false;
-    }
-    if (need_list_reset) {
+    if (!cur_layer || !cur_layer->node_tree.mpLists || mCurrentNodeListIndex < 0 ||
+        mCurrentNodeListIndex >= cur_layer->node_tree.mNumLists ||
+        cur_layer->node_tree.mpLists[mCurrentNodeListIndex].mSize <= 0) {
         resetNodeListIndexForCurrentLayer();
     }
 
@@ -241,20 +275,8 @@ void gzFrameworkMenu_c::execute() {
         resetProcessIndexForCurrentNodeList();
     }
 
-    // Handle vertical cursor movement
-    if (gzPad::getTrigDown() && mCursor.y < LINE_NUM) {
-        mCursor.y++;
-    }
-
-    if (gzPad::getTrigUp() && mCursor.y >= 0) {
-        mCursor.y--;
-    }
-
-    if (mCursor.y < 0) {
-        mCursor.y = LINE_NUM - 1;
-    } else if (mCursor.y > LINE_NUM - 1) {
-        mCursor.y = 0;
-    }
+    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
 
     // Handle right trigger input
     if (gzPad::getTrigRight()) {
@@ -269,69 +291,27 @@ void gzFrameworkMenu_c::execute() {
         case FRAMEWORK_LINE_NODE_LIST: {
             layer_class* cur_layer = getCurrentLayer();
             if (cur_layer != NULL && cur_layer->node_tree.mNumLists > 0 && cur_layer->node_tree.mpLists != NULL) {
-                int idx = mCurrentNodeListIndex;
-                if (idx < 0) {
-                    idx = -1;
-                }
-                int num_lists = cur_layer->node_tree.mNumLists;
-                int steps = 0;
-                while (steps < num_lists) {
-                    idx = (idx + 1 + num_lists) % num_lists;
-                    steps++;
-                    if (cur_layer->node_tree.mpLists[idx].mSize > 0) {
-                        mCurrentNodeListIndex = idx;
-                        resetProcessIndexForCurrentNodeList();
-                        break;
-                    }
-                }
-                if (steps == num_lists) {
-                    mCurrentNodeListIndex = -1;
-                }
+                cycleValidIndex(mCurrentNodeListIndex, cur_layer->node_tree.mNumLists, 1, isNodeListValid, cur_layer);
+                resetProcessIndexForCurrentNodeList();
             }
             break;
         }
         case FRAMEWORK_LINE_PROCESS: {
             node_list_class* cur_list = getCurrentNodeList(getCurrentLayer());
             if (cur_list != NULL && cur_list->mSize > 0) {
-                int idx = mCurrentProcessIndex;
-                if (idx < 0) {
-                    idx = -1;
-                }
-                int num_nodes = cur_list->mSize;
-                int steps = 0;
-                while (steps < num_nodes) {
-                    idx = (idx + 1 + num_nodes) % num_nodes;
-                    steps++;
-                    node_class* node = cur_list->mpHead;
-                    for (int j = 0; j < idx; ++j) {
-                        if (node == NULL) break;
-                        node = node->mpNextNode;
-                    }
-                    if (node != NULL) {
-                        create_tag_class* tag = (create_tag_class*)node;
-                        base_process_class* process = (base_process_class*)tag->mpTagData;
-                        if (process != NULL) {
-                            mCurrentProcessIndex = idx;
-                            break;
-                        }
-                    }
-                }
-                if (steps == num_nodes) {
-                    mCurrentProcessIndex = -1;
-                }
+                cycleValidIndex(mCurrentProcessIndex, cur_list->mSize, 1, isProcessValid, cur_list);
             }
             break;
         }
         }
     }
 
-    // Handle left trigger input
+    // Handle left trigger input (dir = -1)
     if (gzPad::getTrigLeft()) {
         switch (mCursor.y) {
         case FRAMEWORK_LINE_LAYER:
             if (mNumActiveLayers > 0) {
-                mCurrentLayerIndex--;
-                if (mCurrentLayerIndex < 0) mCurrentLayerIndex = mNumActiveLayers - 1;
+                mCurrentLayerIndex = (mCurrentLayerIndex - 1 + mNumActiveLayers) % mNumActiveLayers;
                 resetNodeListIndexForCurrentLayer();
                 resetProcessIndexForCurrentNodeList();
             }
@@ -339,56 +319,15 @@ void gzFrameworkMenu_c::execute() {
         case FRAMEWORK_LINE_NODE_LIST: {
             layer_class* cur_layer = getCurrentLayer();
             if (cur_layer != NULL && cur_layer->node_tree.mNumLists > 0 && cur_layer->node_tree.mpLists != NULL) {
-                int idx = mCurrentNodeListIndex;
-                if (idx < 0) {
-                    idx = cur_layer->node_tree.mNumLists;
-                }
-                int num_lists = cur_layer->node_tree.mNumLists;
-                int steps = 0;
-                while (steps < num_lists) {
-                    idx = (idx - 1 + num_lists) % num_lists;
-                    steps++;
-                    if (cur_layer->node_tree.mpLists[idx].mSize > 0) {
-                        mCurrentNodeListIndex = idx;
-                        resetProcessIndexForCurrentNodeList();
-                        break;
-                    }
-                }
-                if (steps == num_lists) {
-                    mCurrentNodeListIndex = -1;
-                }
+                cycleValidIndex(mCurrentNodeListIndex, cur_layer->node_tree.mNumLists, -1, isNodeListValid, cur_layer);
+                resetProcessIndexForCurrentNodeList();
             }
             break;
         }
         case FRAMEWORK_LINE_PROCESS: {
             node_list_class* cur_list = getCurrentNodeList(getCurrentLayer());
             if (cur_list != NULL && cur_list->mSize > 0) {
-                int idx = mCurrentProcessIndex;
-                if (idx < 0) {
-                    idx = cur_list->mSize;
-                }
-                int num_nodes = cur_list->mSize;
-                int steps = 0;
-                while (steps < num_nodes) {
-                    idx = (idx - 1 + num_nodes) % num_nodes;
-                    steps++;
-                    node_class* node = cur_list->mpHead;
-                    for (int j = 0; j < idx; ++j) {
-                        if (node == NULL) break;
-                        node = node->mpNextNode;
-                    }
-                    if (node != NULL) {
-                        create_tag_class* tag = (create_tag_class*)node;
-                        base_process_class* process = (base_process_class*)tag->mpTagData;
-                        if (process != NULL) {
-                            mCurrentProcessIndex = idx;
-                            break;
-                        }
-                    }
-                }
-                if (steps == num_nodes) {
-                    mCurrentProcessIndex = -1;
-                }
+                cycleValidIndex(mCurrentProcessIndex, cur_list->mSize, -1, isProcessValid, cur_list);
             }
             break;
         }
@@ -401,51 +340,59 @@ void gzFrameworkMenu_c::execute() {
     }
 
     updateDynamicLines();
-    OSReport("-------\n");
+    mpMeterHaihai->_execute(0);
 }
 
 void gzFrameworkMenu_c::draw() {
-    f32 x_alignment = 30.0f;
-    f32 y_alignment = 90.0f;
-
-    f32 x_alignment_opts = x_alignment - 150.0f;
-
-    f32 x_alignment_haihai = x_alignment_opts + 305.0f;
-    f32 y_alignment_haihai = y_alignment - 7.0f;
+    static const f32 X_ALIGNMENT = 30.0f;
+    static const f32 Y_ALIGNMENT = 90.0f;
+    static const f32 LINE_SPACING = 22.0f;
+    static const f32 OPTIONS_X_OFFSET = -150.0f;
+    static const f32 HAIHAI_X_OFFSET = 305.0f;
+    static const f32 HAIHAI_Y_OFFSET = -7.0f;
+    static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
+    static const f32 HAIHAI_EXTRA_SPACING = 30.0f;
+    static const f32 CURSOR_X = 170.0f;
+    static const f32 CURSOR_Y_BASE = 82.5f;
+    static const f32 DESCRIPTION_Y = 420.0f;
 
     J2DTextBox::TFontSize font_size;
-    
-    mpMeterHaihai->_execute(0);
+    mpLineOptions[0]->getFontSize(font_size); // assume that all lines have the same font size
+    mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
 
-    u32 cursor_color = g_gzInfo.getCursorType() & g_gzInfo.CURSOR_CLASSIC ? g_gzInfo.getTextColor() : COLOR_WHITE;
+    u32 cursor_color = gzInfo_getCursorColor();
+
+    f32 x_alignment_opts = X_ALIGNMENT + OPTIONS_X_OFFSET;
+    f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
+    f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
 
     for (int i = 0; i < LINE_NUM; i++) {
-        if (mpLines[i] != NULL && mpLineOptions[i] != NULL && mpMeterHaihai != NULL && mpDrawCursor != NULL) {
-            mpLineOptions[i]->getFontSize(font_size);
-            mpMeterHaihai->setScale(font_size.mSizeY * 0.04f);
-        
-            if (mCursor.y == i) {
-                // spacing between arrows will be determined off text box bound size
-                f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + 30.0f;
-                
-                if (mpLineOptions[i]->mStringLength != 0) {
-                    mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_alignment_haihai + ((i - 1) * 22.0f), x_size_haihai, 0.0f);
-                }
+        f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+        f32 y_pos_haihai = y_alignment_haihai + ((i - 1) * LINE_SPACING);
+        f32 y_pos_cursor = CURSOR_Y_BASE + ((i - 1) * LINE_SPACING);
 
-                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), cursor_color);
-                mpDrawCursor->setPos(170.0f, 82.5f + ((i - 1) * 22.0f), (J2DPane*)mpLines[i], true);
-                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), cursor_color, HBIND_CENTER);
-            } else {
-                mpLines[i]->draw(x_alignment, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE);
-                mpLineOptions[i]->draw(x_alignment_opts, y_alignment + ((i - 1) * 22.0f), COLOR_WHITE, HBIND_CENTER);
+        if (mCursor.y == i) {
+            // Spacing between arrows determined by text box bound size
+            f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
+
+            if (mpLineOptions[i]->mStringLength != 0) {
+                mpMeterHaihai->drawHaihai((ARROW_LEFT | ARROW_RIGHT), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
             }
+
+            mpLines[i]->draw(X_ALIGNMENT, y_pos, cursor_color);
+            mpDrawCursor->setPos(CURSOR_X, y_pos_cursor, (J2DPane*)mpLines[i], true);
+            mpLineOptions[i]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
+        } else {
+            mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
+            mpLineOptions[i]->draw(x_alignment_opts, y_pos, COLOR_WHITE, HBIND_CENTER);
         }
     }
 
-    if (mpDescription != NULL && mpLines[mCursor.y] != NULL && *mpLines[mCursor.y]->m_description != 0) {
+    // Draw description if valid
+    if (mpLines[mCursor.y] && *mpLines[mCursor.y]->m_description != 0) {
         mpDescription->setString(mpLines[mCursor.y]->m_description);
-        mpDescription->draw(30.0f, 420.0f, cursor_color);
+        mpDescription->draw(X_ALIGNMENT, DESCRIPTION_Y, cursor_color);
     }
 
-    if (g_gzInfo.getCursorType() & g_gzInfo.CURSOR_TP) mpDrawCursor->draw();
+    if (gzInfo_isCursorTypeTP()) mpDrawCursor->draw();
 }
