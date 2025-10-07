@@ -39,6 +39,13 @@ public:
         MENU_MAX
     };
 
+    enum gzMainMenu_Haihai_e {
+        ARROW_LEFT = 1,
+        ARROW_DOWN = 2,
+        ARROW_RIGHT = 4,
+        ARROW_UP = 8
+    };
+
     gzMainMenu_c();
     ~gzMainMenu_c();
 
@@ -130,8 +137,13 @@ public:
     virtual void execute();
     virtual void draw();
 
+    static const int LINE_NUM = 50;
+    static gzCursor mCursor;
+
 public:
-    // gzTextBox* mpLines[LINE_NUM];
+    gzTextBox* mpLines[LINE_NUM];
+    dMeterHaihai_c* mpMeterHaihai;
+    int mTopLine;
 };
 
 typedef int (*confirmCallback)();
@@ -193,6 +205,10 @@ public:
     void cycleValidIndex(int& idx, int max, int dir, IndexValidityFunc isValid, void* context);
     static bool isNodeListValid(int idx, void* ctx);
     static bool isProcessValid(int idx, void* ctx);
+    void setMetadata();
+    int getActiveNodeLists(layer_class* layer);
+    char* getLayerType(layer_class* layer);
+    char* getProcessName(base_process_class* process);
 
     virtual void _delete();
     virtual void execute();
@@ -202,9 +218,13 @@ public:
     static const int MAX_LAYERS = 8; // arbitrary, there's usually max 3
     static gzCursor mCursor;
 
-public:
+private:
+    u8 getHaihaiFlags(int idx);
+
+private:
     gzTextBox* mpLines[LINE_NUM];
     gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpLinesMetadata[LINE_NUM];
     gzTextBox* mpDescription;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
@@ -213,9 +233,7 @@ public:
     int mCurrentLayerIndex;
     int mCurrentNodeListIndex;
     int mCurrentProcessIndex;
-
-private:
-    u8 getHaihaiFlags(int idx);
+    
 };
 
 

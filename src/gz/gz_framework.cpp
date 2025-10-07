@@ -5,6 +5,78 @@
 
 gzMenu_c::gzCursor gzFrameworkMenu_c::mCursor = {0, 0};
 
+char* gzFrameworkMenu_c::getLayerType(layer_class* layer) {
+    if (layer->process_node == NULL) {
+        return "root";
+    }
+
+    switch (layer->process_node->base.name) {
+    case PROC_OPENING_SCENE:
+        return "opening scene";
+    case PROC_PLAY_SCENE:
+        return "play scene";
+    case PROC_ROOM_SCENE:
+        return "room scene";
+    case PROC_NAME_SCENE:
+        return "name scene";
+    case PROC_LOGO_SCENE:
+        return "logo scene";
+    case PROC_MENU_SCENE:
+        return "menu scene";
+    default:
+        // shouldn't ever be reached, but just in case
+        return "unk?";
+    }
+}
+
+// TODO(Pheenoh): Replace these with lookup table that loads the name
+// off disk by using the proc name as the index into the table
+char* gzFrameworkMenu_c::getProcessName(base_process_class* process) {
+    switch (process->name) {
+    case PROC_OPENING_SCENE:
+        return "opening scene";
+    case PROC_PLAY_SCENE:
+        return "play scene";
+    case PROC_ROOM_SCENE:
+        return "room scene";
+    case PROC_NAME_SCENE:
+        return "name scene";
+    case PROC_LOGO_SCENE:
+        return "logo scene";
+    case PROC_MENU_SCENE:
+        return "menu scene";
+    default:
+        return "unk";
+    }
+}
+
+void gzFrameworkMenu_c::setMetadata() {
+    int active_node_lists = 0;
+
+    layer_class* curr_layer = getCurrentLayer();
+    if (curr_layer != NULL) {
+        char* layer_type = getLayerType(curr_layer);
+        active_node_lists = getActiveNodeLists(curr_layer);
+        mpLinesMetadata[FRAMEWORK_LINE_LAYER]->setStringf("layer type: %s -- active node lists: %d", layer_type, active_node_lists);
+    } else {
+        mpLinesMetadata[FRAMEWORK_LINE_LAYER]->setString("layer type: n/a -- active node lists: n/a");
+    }
+
+    node_list_class* curr_node_list = getCurrentNodeList(curr_layer);
+    if (curr_node_list != NULL) {
+        mpLinesMetadata[FRAMEWORK_LINE_NODE_LIST]->setStringf("active processes: %d", curr_node_list->mSize);
+    } else {
+        mpLinesMetadata[FRAMEWORK_LINE_NODE_LIST]->setString("active processes: n/a");
+    }
+
+    base_process_class* curr_proc = getCurrentProcess(curr_node_list);
+    if (curr_proc != NULL){
+        mpLinesMetadata[FRAMEWORK_LINE_PROCESS]->setStringf("process: %s -- paused: %s -- params: 0x%08X", getProcessName(curr_proc), curr_proc->pause_flag ? "yes" : "no", curr_proc->parameters);
+    } else {
+        mpLinesMetadata[FRAMEWORK_LINE_PROCESS]->setString("process: n/a -- paused: n/a -- params: n/a");
+    }
+}
+
 u8 gzFrameworkMenu_c::getHaihaiFlags(int i) {
     u8 haihai_flags = ARROW_LEFT | ARROW_RIGHT;
     switch (i) {
@@ -140,6 +212,16 @@ int gzFrameworkMenu_c::getFirstActiveNodeListIndex(layer_class* layer) {
     return -1;
 }
 
+int gzFrameworkMenu_c::getActiveNodeLists(layer_class* layer) {
+    int ret = 0;
+
+    for (int i = 0; i < layer->node_tree.mNumLists; i++) {
+        if (layer->node_tree.mpLists[i].mSize > 0) ret++;
+    }
+
+    return ret;
+}
+
 // Reset node list index to first active in current layer
 void gzFrameworkMenu_c::resetNodeListIndexForCurrentLayer() {
     layer_class* current_layer = getCurrentLayer();
@@ -234,6 +316,8 @@ void gzFrameworkMenu_c::updateDynamicLines() {
         font_size.mSizeX *= 0.5f;
         mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
     }
+
+    setMetadata();
 }
 
 gzFrameworkMenu_c::gzFrameworkMenu_c() {
@@ -247,6 +331,8 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
 
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = new gzTextBox();
+        mpLinesMetadata[i] = new gzTextBox();
+        mpLinesMetadata[i]->setFontSize(12.0f,12.0f);
         mpLineOptions[i] = new gzTextBox();
         mpLineOptions[i]->mBounds.f.y = 10.0f;
     }
@@ -277,6 +363,9 @@ void gzFrameworkMenu_c::_delete() {
 
         delete mpLineOptions[i];
         mpLineOptions[i] = NULL;
+
+        delete mpLinesMetadata[i];
+        mpLinesMetadata[i] = NULL;
     }
 
     delete mpDescription;
@@ -412,8 +501,8 @@ void gzFrameworkMenu_c::execute() {
 }
 
 void gzFrameworkMenu_c::draw() {
-    static const f32 X_ALIGNMENT = 30.0f;
-    static const f32 Y_ALIGNMENT = 90.0f;
+    static const f32 X_ALIGNMENT = 40.0f;
+    static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 OPTIONS_X_OFFSET = -150.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
@@ -423,6 +512,8 @@ void gzFrameworkMenu_c::draw() {
     static const f32 CURSOR_X = 170.0f;
     static const f32 CURSOR_Y_BASE = 82.5f;
     static const f32 DESCRIPTION_Y = 420.0f;
+    static const f32 METADATA_X_OFFSET = 200.0f;
+    static const f32 METADATA_Y_OFFSET = -25.0f;
 
     J2DTextBox::TFontSize font_size;
     mpLineOptions[0]->getFontSize(font_size); // assume that all lines have the same font size
@@ -433,11 +524,13 @@ void gzFrameworkMenu_c::draw() {
     f32 x_alignment_opts = X_ALIGNMENT + OPTIONS_X_OFFSET;
     f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
     f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
+    f32 x_alignment_metadata = X_ALIGNMENT + METADATA_X_OFFSET;
 
     for (int i = 0; i < LINE_NUM; i++) {
         f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
         f32 y_pos_haihai = y_alignment_haihai + ((i - 1) * LINE_SPACING);
         f32 y_pos_cursor = CURSOR_Y_BASE + ((i - 1) * LINE_SPACING);
+        f32 y_pos_metadata = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
 
         if (mCursor.y == i) {
             // Spacing between arrows determined by text box bound size
@@ -450,9 +543,11 @@ void gzFrameworkMenu_c::draw() {
             mpLines[i]->draw(X_ALIGNMENT, y_pos, cursor_color);
             mpDrawCursor->setPos(CURSOR_X, y_pos_cursor, (J2DPane*)mpLines[i], true);
             mpLineOptions[i]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
+            mpLinesMetadata[i]->draw(x_alignment_metadata, y_pos_metadata, COLOR_WHITE);
         } else {
             mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
             mpLineOptions[i]->draw(x_alignment_opts, y_pos, COLOR_WHITE, HBIND_CENTER);
+            mpLinesMetadata[i]->draw(x_alignment_metadata, y_pos_metadata, COLOR_WHITE);
         }
     }
 

@@ -3,10 +3,21 @@
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
 
-// gzMenu_c::gzCursor gzCreditsMenu_c::mCursor = {0, 0};
+gzMenu_c::gzCursor gzCreditsMenu_c::mCursor = {0, 0};
 
 gzCreditsMenu_c::gzCreditsMenu_c() {
     OSReport("creating gzCreditsMenu_c\n");
+
+    for (int i = 0; i < LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+        if (i % 2 == 0) mpLines[i]->setString("a");
+        if (i % 2 == 1) mpLines[i]->setString("b");
+        if (i > 20 && i % 2 == 1) mpLines[i]->setString("c");
+    }
+
+    mpMeterHaihai = new dMeterHaihai_c(3);
+    mpMeterHaihai->setScale(0.5f);
+    mTopLine = 0;
 }
 
 gzCreditsMenu_c::~gzCreditsMenu_c() {
@@ -15,15 +26,79 @@ gzCreditsMenu_c::~gzCreditsMenu_c() {
 
 void gzCreditsMenu_c::_delete() {
     OSReport("deleting gzCreditsMenu_c\n");
+
+    for (int i = 0; i < LINE_NUM; i++) {
+        delete mpLines[i];
+        mpLines[i] = NULL;
+    }
+
+    delete mpMeterHaihai;
+    mpMeterHaihai = NULL;
 }
 
 void gzCreditsMenu_c::execute() {
+    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
+
     if (gzPad::getTrigB()) {
         gzChangeMenu<gzSettingsMenu_c>();
         return;
     }
+
+    mpMeterHaihai->_execute(0);
 }
 
 void gzCreditsMenu_c::draw() {
+    static const f32 X_ALIGNMENT = 40.0f;
+    static const f32 Y_ALIGNMENT = 100.0f;
+    static const f32 LINE_SPACING = 22.0f;
+    static const f32 HAIHAI_X_OFFSET = 6.0f;
+    static const f32 HAIHAI_Y_OFFSET = 125.0f;
+    static const f32 HAIHAI_Y_SIZE = 355.0f; // TODO(Pheenoh): make this dynamic based on VISIBLE_LINES and mFontSizeY
+    static const int VISIBLE_LINES = 15;
+    u32 cursor_color = gzInfo_getCursorColor();
 
+    f32 x_alignment_haihai = X_ALIGNMENT + HAIHAI_X_OFFSET;
+    f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
+
+    if (mCursor.y < mTopLine) {
+        mTopLine = mCursor.y;
+    } else if (mCursor.y >= mTopLine + VISIBLE_LINES) {
+        mTopLine = mCursor.y - VISIBLE_LINES + 1;
+    }
+
+    // Clamp mTopLine to valid range
+    int maxTop = LINE_NUM - VISIBLE_LINES;
+    if (maxTop < 0) maxTop = 0;
+    if (mTopLine > maxTop) mTopLine = maxTop;
+    if (mTopLine < 0) mTopLine = 0;
+
+    for (int screenIdx = 0; screenIdx < VISIBLE_LINES; screenIdx++) {
+        int lineIdx = mTopLine + screenIdx;
+        if (lineIdx >= LINE_NUM) break;
+
+        if (mpLines[lineIdx] != NULL) {
+            f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
+
+            if (mCursor.y == lineIdx) {
+                mpLines[lineIdx]->draw(X_ALIGNMENT, y_pos, cursor_color);
+            } else {
+                mpLines[lineIdx]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
+            }
+        }
+    }
+
+    u32 arrows = 0;
+    if (LINE_NUM > VISIBLE_LINES) {
+        if (mTopLine > 0) {
+            arrows |= gzMainMenu_c::ARROW_UP;
+        }
+        if (mTopLine < maxTop) {
+            arrows |= gzMainMenu_c::ARROW_DOWN;
+        }
+    }
+
+    if (arrows != 0) {
+        mpMeterHaihai->drawHaihai(arrows, x_alignment_haihai, y_alignment_haihai, 0.0f, HAIHAI_Y_SIZE);
+    }
 }

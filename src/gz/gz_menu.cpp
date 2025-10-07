@@ -65,12 +65,18 @@ void gzMainMenu_c::execute() {
 }
 
 void gzMainMenu_c::draw() {
+    static const f32 X_ALIGNMENT = 40.0f;
+    static const f32 Y_ALIGNMENT = 100.0f;
+    static const f32 LINE_SPACING = 22.0f;
+
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL) {
+            f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+
             if (mCursor.y == i) {
-                mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), gzInfo_getTextColor());
+                mpLines[i]->draw(X_ALIGNMENT, y_pos, gzInfo_getTextColor());
             } else {
-                mpLines[i]->draw(30.0f, 90.0f + ((i - 1) * 22.0f), 0xFFFFFFFF);
+                mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
             }
         }
     }

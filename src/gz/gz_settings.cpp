@@ -374,12 +374,13 @@ void gzSettingsMenu_c::execute() {
         }
     }
 
+    updateDynamicLines();
     mpMeterHaihai->_execute(0);
 }
 
 void gzSettingsMenu_c::draw() {
-    static const f32 X_ALIGNMENT = 30.0f;
-    static const f32 Y_ALIGNMENT = 90.0f;
+    static const f32 X_ALIGNMENT = 40.0f;
+    static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 OPTIONS_X_OFFSET = -50.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
     static const f32 HAIHAI_Y_OFFSET = -7.0f;
@@ -388,10 +389,7 @@ void gzSettingsMenu_c::draw() {
     static const f32 CURSOR_X = 170.0f;
     static const f32 CURSOR_Y_BASE = 82.5f;
     static const f32 LINE_SPACING = 22.0f;
-    static const f32 DESCRIPTION_X = 30.0f;
     static const f32 DESCRIPTION_Y = 420.0f;
-
-    updateDynamicLines();
 
     J2DTextBox::TFontSize font_size;
     mpLineOptions[0]->getFontSize(font_size);  // assume that all lines have the same font size
@@ -427,7 +425,7 @@ void gzSettingsMenu_c::draw() {
     // Draw description if valid
     if (mpLines[mCursor.y] && *mpLines[mCursor.y]->m_description != 0) {
         mpDescription->setString(mpLines[mCursor.y]->m_description);
-        mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color);
+        mpDescription->draw(X_ALIGNMENT, DESCRIPTION_Y, cursor_color);
     }
 
     if (gzInfo_isCursorTypeTP()) {
