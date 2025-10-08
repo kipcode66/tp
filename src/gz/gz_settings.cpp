@@ -213,13 +213,14 @@ void gzSettingsMenu_c::updateDynamicLines() {
 
     J2DTextBox::TFontSize font_size;
 
-    // update option box bounds
+    // update box bounds
     for (int i = 0; i < LINE_NUM; i++) {
         mpLineOptions[i]->getFontSize(font_size);
         // applying font_size.mSizeX against a scaling factor 
         // to create a linear relationship between string length 
         // and text box bound size
         font_size.mSizeX *= 0.5f;
+        mpLines[i]->mBounds.f.x = mpLines[i]->mStringLength * font_size.mSizeX;
         mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
     }
 }
@@ -310,7 +311,9 @@ void gzSettingsMenu_c::execute() {
             gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, "delete settings?");
             return;
         case SETTING_MENU_POSITIONS:
-            gzInfo_sendNotification("test!");
+            gzInfo_sendNotification("test!", 1);
+            gzInfo_sendNotification("test!", 2);
+            gzInfo_sendNotification("test2!");
             break;
         case SETTING_CREDITS:
             gzChangeMenu<gzCreditsMenu_c>();
@@ -381,13 +384,13 @@ void gzSettingsMenu_c::execute() {
 void gzSettingsMenu_c::draw() {
     static const f32 X_ALIGNMENT = 40.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
-    static const f32 OPTIONS_X_OFFSET = -50.0f;
+    static const f32 OPTIONS_X_OFFSET = 0.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
     static const f32 HAIHAI_Y_OFFSET = -7.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
     static const f32 HAIHAI_EXTRA_SPACING = 30.0f;
-    static const f32 CURSOR_X = 170.0f;
-    static const f32 CURSOR_Y_BASE = 82.5f;
+    static const f32 TP_CURSOR_X_OFFSET = 20.0f;
+    static const f32 CURSOR_Y_BASE = 90.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 DESCRIPTION_Y = 420.0f;
 
@@ -400,6 +403,7 @@ void gzSettingsMenu_c::draw() {
     f32 x_alignment_opts = X_ALIGNMENT + OPTIONS_X_OFFSET;
     f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
     f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
+    f32 x_alignment_tp_cursor = X_ALIGNMENT + TP_CURSOR_X_OFFSET;
 
     for (int i = 0; i < LINE_NUM; i++) {
         f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
@@ -414,7 +418,7 @@ void gzSettingsMenu_c::draw() {
             }
 
             mpLines[i]->draw(X_ALIGNMENT, y_pos, cursor_color);
-            mpDrawCursor->setPos(CURSOR_X, y_pos_cursor, (J2DPane*)mpLines[i], true);
+            mpDrawCursor->setPos(x_alignment_tp_cursor, y_pos_cursor, (J2DPane*)mpLines[i], false);
             mpLineOptions[i]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
         } else {
             mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);

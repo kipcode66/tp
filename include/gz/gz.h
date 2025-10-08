@@ -44,6 +44,7 @@ public:
     int deleteSettingsMemcard();
     void showHeapUsage();
     void sendNotification(const char* msg);
+    void sendNotification(const char* msg, int i_notificationType);
 
     bool isDisplay() const { return mDisplay; }
     u32 getTextColor() const { return mSettings.mTextColor; }
@@ -124,6 +125,7 @@ inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcar
 inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
 
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
+inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
 inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
 inline void gzInfo_setDropShadows(bool dropShadows) { g_gzInfo.setDropShadows(dropShadows); }
 inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapEquips); }
@@ -246,10 +248,18 @@ public:
 
 class gzNotification_c {
 public:
+    enum NotificationType {
+        NOTIFY_INFO,
+        NOTIFY_WARNING,
+        NOTIFY_ERROR
+    };
+
     gzNotification_c();
+    gzNotification_c(NotificationType mType);
     ~gzNotification_c();
 
     void send(const char* message);
+    void send(const char* message, NotificationType notification);
     void draw();
     static const int NOTIFICATION_MAX = 3;
 
@@ -257,6 +267,7 @@ private:
     gzTextBox* mpNotifications[NOTIFICATION_MAX];
     int mNumNotifications;
     u32 mStartFrames[NOTIFICATION_MAX];
+    NotificationType mType;
 
     void removeExpired();
 };

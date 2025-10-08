@@ -222,3 +222,7 @@ int gzInfo_c::deleteSettingsMemcard() {
 void gzInfo_c::sendNotification(const char* msg) { 
     if (mpNotification != NULL) mpNotification->send(msg);
 }
+
+void gzInfo_c::sendNotification(const char* msg, int i_notificationType) { 
+    if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
+}
