@@ -37,7 +37,6 @@ gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback, const char* msg) {
     mCursor.x = 0; // always put the cursor on "no" when the menu pops up
 }
 
-
 gzConfirmMenu_c::~gzConfirmMenu_c() {
     _delete();
 }
@@ -64,7 +63,7 @@ void gzConfirmMenu_c::execute() {
             gzChangeMenu<gzSettingsMenu_c>();
             break;
         case CONFIRM_YES:
-            (*mpConfirmCallback)();
+            if (mpConfirmCallback != NULL) (*mpConfirmCallback)();
             gzChangeMenu<gzSettingsMenu_c>();
             break;
         }

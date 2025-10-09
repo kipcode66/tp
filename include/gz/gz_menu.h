@@ -174,66 +174,39 @@ public:
     confirmCallback mpConfirmCallback;
 };
 
-
-// Validity callback type
-typedef bool (*IndexValidityFunc)(int idx, void* context);
 class gzFrameworkMenu_c : public gzMenu_c {
 public:
-    enum gzFrameworkMenu_Settings_e {
-        FRAMEWORK_LINE_LAYER,
-        FRAMEWORK_LINE_NODE_LIST,
-        FRAMEWORK_LINE_PROCESS,
-
-        FRAMEWORK_LINE_MAX
+    struct ProcessInfo {
+        u32 layer_id;
+        int node_list_index;
+        base_process_class* process;
     };
 
-    enum gzSettingsMenu_Haihai_e {
-        ARROW_RIGHT = 4,
-        ARROW_LEFT = 1
-    };
+    static gzMenu_c::gzCursor mCursor;
 
     gzFrameworkMenu_c();
     ~gzFrameworkMenu_c();
-    void updateDynamicLines();
-    layer_class* getCurrentLayer();
-    node_list_class* getCurrentNodeList(layer_class* layer);
-    int getFirstActiveNodeListIndex(layer_class* layer);
-    void resetNodeListIndexForCurrentLayer();
-    int getFirstActiveProcessIndex(node_list_class* list);
-    void resetProcessIndexForCurrentNodeList();
-    base_process_class* getCurrentProcess(node_list_class* i_node_list);
-    void cycleValidIndex(int& idx, int max, int dir, IndexValidityFunc isValid, void* context);
-    static bool isNodeListValid(int idx, void* ctx);
-    static bool isProcessValid(int idx, void* ctx);
-    void setMetadata();
-    int getActiveNodeLists(layer_class* layer);
-    char* getLayerType(layer_class* layer);
-    char* getProcessName(base_process_class* process);
 
-    virtual void _delete();
-    virtual void execute();
-    virtual void draw();
+    void execute();
+    void draw();
+    void _delete();
 
-    static const int LINE_NUM = FRAMEWORK_LINE_MAX;
-    static const int MAX_LAYERS = 8; // arbitrary, there's usually max 3
-    static gzCursor mCursor;
+    static const int MAX_VISIBLE_ROWS = 10;
+    static const int NUM_COLUMNS = 5;
+    static const int MAX_PROCESSES = 128;  // Should be plenty?
 
 private:
-    u8 getHaihaiFlags(int idx);
+    static char* getProcessName(base_process_class* process);
 
-private:
-    gzTextBox* mpLines[LINE_NUM];
-    gzTextBox* mpLineOptions[LINE_NUM];
-    gzTextBox* mpLinesMetadata[LINE_NUM];
-    gzTextBox* mpDescription;
+    int mNumProcesses;
+    int mSelectedProcess;
+    int mScrollOffset;
+    gzTextBox* mpTitle;
+    gzTextBox* mpRowTexts[MAX_VISIBLE_ROWS * NUM_COLUMNS];
+    gzTextBox* mpHeaders[NUM_COLUMNS];
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
-    layer_class* mpActiveLayers[MAX_LAYERS];
-    int mNumActiveLayers;
-    int mCurrentLayerIndex;
-    int mCurrentNodeListIndex;
-    int mCurrentProcessIndex;
-    
+    ProcessInfo mProcessInfos[MAX_PROCESSES];
 };
 
 
