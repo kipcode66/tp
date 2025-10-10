@@ -182,12 +182,16 @@ u32 cycleTextColor(bool forward) {
 
 // Have to wrap since mwcc doesn't support lambdas
 // Is there a better way to do this?
-int storeSettingsCallbackWrapper() {
-    return gzInfo_storeSettingsMemcard();
+static void storeSettingsCallbackWrapper(void*) {
+    gzInfo_storeSettingsMemcard();
 }
 
-int deleteSettingsCallbackWrapper() {
-    return gzInfo_deleteSettingsMemcard();
+static void deleteSettingsCallbackWrapper(void*) {
+    gzInfo_deleteSettingsMemcard();
+}
+
+static void returnToSettings() {
+    gzChangeMenu<gzSettingsMenu_c>();
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
@@ -302,13 +306,13 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
         case SETTING_SAVE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, "save settings?");
+            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, NULL, returnToSettings, "save settings?");
             return;
         case SETTING_LOAD_CARD:
             gzInfo_loadSettingsMemcard();
             break;
         case SETTING_DELETE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, "delete settings?");
+            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, NULL, returnToSettings, "delete settings?");
             return;
         case SETTING_MENU_POSITIONS:
             gzInfo_sendNotification("test!", 1);

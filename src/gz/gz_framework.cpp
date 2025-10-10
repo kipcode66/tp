@@ -24,6 +24,14 @@ char* gzFrameworkMenu_c::getProcessName(base_process_class* process) {
     }
 }
 
+static void deleteProcess(void* proc) {
+    fpcBs_Delete((base_process_class*)proc);
+}
+
+static void returnToFramework() {
+    gzChangeMenu<gzFrameworkMenu_c>();
+}
+
 gzFrameworkMenu_c::gzFrameworkMenu_c() {
     OSReport("creating gzFrameworkMenu_c\n");
 
@@ -152,7 +160,10 @@ void gzFrameworkMenu_c::execute() {
     }
 
     if (gzPad::getTrigZ()) {
-        // delete logic
+        char* buf;
+        sprintf(buf, "delete %s?", getProcessName(mProcessInfos[mSelectedProcess].process));
+        gzChangeMenu<gzConfirmMenu_c>(deleteProcess, mProcessInfos[mSelectedProcess].process, returnToFramework, buf);
+        return;
     }
 
     // Clamp scroll offset

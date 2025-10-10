@@ -5,7 +5,7 @@
 
 gzMenu_c::gzCursor gzConfirmMenu_c::mCursor = {0, 0};
 
-gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback) {
+gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_confirmCallback, void* i_data, returnCallback i_returnCallback) {
     OSReport("creating gzConfirmMenu_c\n");
     mpLineConfirmPrompt = new gzTextBox();
 
@@ -17,11 +17,13 @@ gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback) {
     mpLines[CONFIRM_NO]->setString("no");
     mpLines[CONFIRM_YES]->setString("yes");
 
-    mpConfirmCallback = i_callback;
+    mpConfirmCallback = i_confirmCallback;
+    mCallbackData = i_data;
+    mpReturnCallback = i_returnCallback;
     mCursor.x = 0; // always put the cursor on "no" when the menu pops up
 }
 
-gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback, const char* msg) {
+gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_confirmCallback, void* i_data, returnCallback i_returnCallback, const char* msg) {
     OSReport("creating gzConfirmMenu_c\n");
     mpLineConfirmPrompt = new gzTextBox();
 
@@ -33,7 +35,9 @@ gzConfirmMenu_c::gzConfirmMenu_c(confirmCallback i_callback, const char* msg) {
     mpLines[CONFIRM_NO]->setString("no");
     mpLines[CONFIRM_YES]->setString("yes");
 
-    mpConfirmCallback = i_callback;
+    mpConfirmCallback = i_confirmCallback;
+    mCallbackData = i_data;
+    mpReturnCallback = i_returnCallback;
     mCursor.x = 0; // always put the cursor on "no" when the menu pops up
 }
 
@@ -60,17 +64,17 @@ void gzConfirmMenu_c::execute() {
     if (gzPad::getTrigA()) {
         switch (mCursor.x) {
         case CONFIRM_NO:
-            gzChangeMenu<gzSettingsMenu_c>();
-            break;
+            if (mpReturnCallback != NULL) (*mpReturnCallback)();
+            return;
         case CONFIRM_YES:
-            if (mpConfirmCallback != NULL) (*mpConfirmCallback)();
-            gzChangeMenu<gzSettingsMenu_c>();
-            break;
+            if (mpConfirmCallback != NULL) (*mpConfirmCallback)(mCallbackData);
+            if (mpReturnCallback != NULL) (*mpReturnCallback)();
+            return;
         }
     }
 
     if (gzPad::getTrigB()) {
-        gzChangeMenu<gzSettingsMenu_c>();
+        if (mpReturnCallback != NULL) (*mpReturnCallback)();;
         return;
     }
 }

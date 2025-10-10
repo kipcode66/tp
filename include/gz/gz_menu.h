@@ -146,7 +146,8 @@ public:
     int mTopLine;
 };
 
-typedef int (*confirmCallback)();
+typedef void (*confirmCallback)(void*);
+typedef void (*returnCallback)();
 class gzConfirmMenu_c : public gzMenu_c {
 public:
     enum gzConfirmMenu_Confirm_e {
@@ -157,8 +158,8 @@ public:
     };
 
     gzConfirmMenu_c();
-    gzConfirmMenu_c(confirmCallback);
-    gzConfirmMenu_c(confirmCallback, const char* msg);
+    gzConfirmMenu_c(confirmCallback, void*, returnCallback);
+    gzConfirmMenu_c(confirmCallback, void*, returnCallback, const char* msg);
     ~gzConfirmMenu_c();
 
     virtual void _delete();
@@ -172,6 +173,8 @@ public:
     gzTextBox* mpLineConfirmPrompt;
     gzTextBox* mpLines[LINE_NUM];
     confirmCallback mpConfirmCallback;
+    void* mCallbackData;
+    returnCallback mpReturnCallback;
 };
 
 class gzFrameworkMenu_c : public gzMenu_c {
@@ -221,8 +224,8 @@ inline void gzChangeMenu() {
 }
 
 template <typename T>
-inline void gzChangeMenu(confirmCallback i_callback) {
-    gzMenu_c* next = new T(i_callback);
+inline void gzChangeMenu(confirmCallback i_callback, void* i_data, returnCallback i_returnCallback) {
+    gzMenu_c* next = new T(i_callback, i_data, i_returnCallback);
     g_gzInfo.mpCurrentMenu->_delete();
     delete g_gzInfo.mpCurrentMenu;
     g_gzInfo.mpCurrentMenu = next;
@@ -231,8 +234,8 @@ inline void gzChangeMenu(confirmCallback i_callback) {
 }
 
 template <typename T>
-inline void gzChangeMenu(confirmCallback i_callback, const char* msg) {
-    gzMenu_c* next = new T(i_callback, msg);
+inline void gzChangeMenu(confirmCallback i_callback, void* i_data, returnCallback i_return_cb, const char* msg) {
+    gzMenu_c* next = new T(i_callback, i_data, i_return_cb, msg);
     g_gzInfo.mpCurrentMenu->_delete();
     delete g_gzInfo.mpCurrentMenu;
     g_gzInfo.mpCurrentMenu = next;
