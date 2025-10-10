@@ -4,7 +4,6 @@
 #include "d/d_drawlist.h"
 #include "d/d_meter_haihai.h"
 #include "d/d_select_cursor.h"
-#include "f_pc/f_pc_layer.h"
 #include "gz/gz.h"
 
 class dSelect_cursor_c;
@@ -142,6 +141,38 @@ public:
 
 public:
     gzTextBox* mpLines[LINE_NUM];
+    dMeterHaihai_c* mpMeterHaihai;
+    int mTopLine;
+};
+
+class gzToolsMenu_c : public gzMenu_c {
+public:
+    enum gzToolsMenu_Tools_e {
+        TOOL_MOVE_LINK,
+
+        TOOL_MAX
+    };
+
+    gzToolsMenu_c();
+    ~gzToolsMenu_c();
+    void updateDynamicLines();
+    const char* getMoveLinkText() { return gzInfo_isMoveLink() ? "enabled" : "disabled"; }
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+
+    static const int LINE_NUM = TOOL_MAX;
+    static gzCursor mCursor;
+
+private:
+    u8 getHaihaiFlags(int);
+    
+private:
+    gzTextBox* mpLines[LINE_NUM];
+    gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpDescription;
+    dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
 };

@@ -6,13 +6,47 @@
 #include "JSystem/JUtility/JUTDbPrint.h"
 #include "m_Do/m_Do_MemCard.h"
 #include "dolphin/card.h"
+#include "d/d_meter_HIO.h"
+#include "f_op/f_op_camera_mng.h"
+#include "d/actor/d_a_alink.h"
 
 gzInfo_c g_gzInfo;
 
-int gzInfo_c::_create() {
-    mSettings.mTextColor = 0xEE8000FF; // temp
+int gzPrint(int x, int y, u32 color, char const* string, ...) {
+    JUTDbPrint::getManager()->setVisible(true);
+    char buffer[256];
+
+    va_list list;
+    va_start(list, string);
+    vsnprintf(buffer, sizeof(buffer), string, list);
+    va_end(list);
+
+    JUTDbPrint::getManager()->flush();
+
+    static JUtility::TColor ShadowDarkColor(0, 0, 0, 0x80);
+    JUTDbPrint::getManager()->setCharColor(ShadowDarkColor);
+
+    JUTReport(x + 2, y + 2, buffer);
+    JUTDbPrint::getManager()->flush();
+
+    JUTDbPrint::getManager()->setCharColor(color);
+    JUTReport(x, y, buffer);
+
+    JUTDbPrint::getManager()->flush();
+    return 1;
+}
+
+void gzInfo_c::loadDefaultSettings() {
+    mSettings.mTextColor = 0xEE8000FF;
+    mSettings.mCommandCombos.mMoveLink = PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y;
     setCursorType(1);
     mpFont = mDoExt_getMesgFont();
+}
+
+
+int gzInfo_c::_create() {
+    OSReport("creating gzInfo_c\n");
+    loadDefaultSettings();
 
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
     mpIcon = new J2DPicture(icon);
@@ -25,11 +59,13 @@ int gzInfo_c::_create() {
     mGZInitialized = true;
 
     loadSettingsMemcard();
+
     // JUTDbPrint::getManager()->changeFont(mDoExt_getMesgFont());
     return 1;
 }
 
 int gzInfo_c::_delete() {
+    OSReport("deleting gzInfo_c\n");
     delete mpIcon;
     mpIcon = NULL;
 
@@ -60,6 +96,9 @@ int gzInfo_c::execute() {
         mpCurrentMenu->execute();
     }
 
+    setButtonFlags();
+    executeTools();
+
     return 1;
 }
 
@@ -84,30 +123,6 @@ int gzInfo_c::draw() {
         mpNotification->draw();
     }
 
-    return 1;
-}
-
-int gzPrint(int x, int y, u32 color, char const* string, ...) {
-    JUTDbPrint::getManager()->setVisible(true);
-    char buffer[256];
-
-    va_list list;
-    va_start(list, string);
-    vsnprintf(buffer, sizeof(buffer), string, list);
-    va_end(list);
-
-    JUTDbPrint::getManager()->flush();
-
-    static JUtility::TColor ShadowDarkColor(0, 0, 0, 0x80);
-    JUTDbPrint::getManager()->setCharColor(ShadowDarkColor);
-
-    JUTReport(x + 2, y + 2, buffer);
-    JUTDbPrint::getManager()->flush();
-
-    JUTDbPrint::getManager()->setCharColor(color);
-    JUTReport(x, y, buffer);
-
-    JUTDbPrint::getManager()->flush();
     return 1;
 }
 
@@ -225,4 +240,69 @@ void gzInfo_c::sendNotification(const char* msg) {
 
 void gzInfo_c::sendNotification(const char* msg, int i_notificationType) { 
     if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
+}
+
+void gzInfo_c::setButtonFlags() {
+    if (mSettings.mMoveLink) {
+        // TODO(Pheenoh): read this from combo button settings instead
+        if (gzPad::getHoldL() && gzPad::getHoldR() && gzPad::getTrigY()) {
+            mButtonFlags.mMoveLink = !mButtonFlags.mMoveLink;
+        }
+    }
+}
+
+void gzInfo_c::executeMoveLink() {
+    if (!mButtonFlags.mMoveLink) {
+        if (g_drawHIO.mParentAlpha == 0.0f) g_drawHIO.mParentAlpha = 1.0f;
+        if (dComIfGp_getEventManager().cameraPlay() == 1) dComIfGp_getEventManager().setCameraPlay(0);        
+        if (dComIfGp_getEvent().mEventStatus == 1) dComIfGp_getEvent().mEventStatus = 0;
+        if (daAlink_getAlinkActorClass() != NULL) {
+            daAlink_getAlinkActorClass()->mLinkAcch.ClrGrndNone();
+            daAlink_getAlinkActorClass()->mLinkAcch.ClrWallNone();
+            daAlink_getAlinkActorClass()->mLinkAcch.ClrRoofNone();
+            daAlink_getAlinkActorClass()->mLinkAcch.OffLineCheckNone();
+        }
+        return;
+    }
+
+    g_drawHIO.mParentAlpha = 0.0f;
+    dComIfGp_getEventManager().setCameraPlay(0);
+
+    daAlink_getAlinkActorClass()->mLinkAcch.SetGrndNone();
+    daAlink_getAlinkActorClass()->mLinkAcch.SetWallNone();
+    daAlink_getAlinkActorClass()->mLinkAcch.SetRoofNone();
+    daAlink_getAlinkActorClass()->mLinkAcch.OnLineCheckNone();
+
+    // halt all events
+    dComIfGp_getEvent().mEventStatus = 1;
+
+    // Fetch the camera position and target
+    camera_class* camera_p = dComIfGp_getCamera(0);
+    if (camera_p == NULL) return;
+
+    fopAc_ac_c* link = dComIfGp_getPlayer(0);
+    if (link == NULL) return;
+
+    static const f32 DIST_FROM_LINK = 20.0f;
+
+    cXyz& link_pos = link->current.pos;
+    s16& link_horizontal_angle = link->shape_angle.y;
+    s16& link_vertical_angle = link->shape_angle.x;
+    cXyz& cam_target = camera_p->mCamera.mEye;
+    cXyz& cam_pos = camera_p->mCamera.mCenter;
+
+    link->speed = cXyz(0.0f,0.0f,0.0f);
+
+    s16 angle = (float)link_horizontal_angle / 65536.f * (2 * M_PI);
+
+    cam_target.x = link_pos.x;
+    cam_target.y = link_pos.y + 200.0f;
+    cam_target.z = link_pos.z;
+    cam_pos.z = link_pos.z - DIST_FROM_LINK * cM_scos(angle);
+    cam_pos.x = link_pos.x - DIST_FROM_LINK * cM_ssin(angle);
+    cam_pos.y = link_pos.y + 200.f;
+}
+
+void gzInfo_c::executeTools() {
+     if (mSettings.mMoveLink) executeMoveLink();
 }

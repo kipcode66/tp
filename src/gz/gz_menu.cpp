@@ -50,10 +50,13 @@ void gzMainMenu_c::execute() {
         switch (mCursor.y) {
         case MENU_FRAMEWORK:
             gzChangeMenu<gzFrameworkMenu_c>();
-            break;
+            return;
         case MENU_SETTINGS:
             gzChangeMenu<gzSettingsMenu_c>();
-            break;
+            return;
+        case MENU_TOOLS:
+            gzChangeMenu<gzToolsMenu_c>();
+            return;
         case MENU_WARPING:
             scene_class* playScene = fopScnM_SearchByID(dStage_roomControl_c::getProcID());
             if (playScene != NULL)

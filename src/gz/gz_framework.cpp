@@ -25,7 +25,8 @@ char* gzFrameworkMenu_c::getProcessName(base_process_class* process) {
 }
 
 static void deleteProcess(void* proc) {
-    fpcBs_Delete((base_process_class*)proc);
+    base_process_class* i_proc = (base_process_class*)proc;
+    if (fpcBs_IsDelete(i_proc)) fpcBs_Delete(i_proc);
 }
 
 static void returnToFramework() {

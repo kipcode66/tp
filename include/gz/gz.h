@@ -14,6 +14,10 @@ class gzNotification_c;
 
 #define COLOR_WHITE 0xFFFFFFFF
 
+struct gzCommandCombos_s {
+    u32 mMoveLink;
+};
+
 struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
     bool mDropShadows;
@@ -22,6 +26,13 @@ struct gzSettings_s {
     u8 mCursorType;
     bool mDisplayMode;
     bool mMenuPausesGame;
+    bool mMoveLink;
+    gzCommandCombos_s mCommandCombos;
+};
+
+// used for checking whether or not to apply 
+struct gzButtonFlags_s {
+    bool mMoveLink;
 };
 
 class gzInfo_c {
@@ -39,12 +50,16 @@ public:
     int execute();
     int draw();
 
+    void loadDefaultSettings();
     int storeSettingsMemcard();
     int loadSettingsMemcard();
     int deleteSettingsMemcard();
     void showHeapUsage();
     void sendNotification(const char* msg);
     void sendNotification(const char* msg, int i_notificationType);
+    void setButtonFlags();
+    void executeTools();
+    void executeMoveLink();
 
     bool isDisplay() const { return mDisplay; }
     u32 getTextColor() const { return mSettings.mTextColor; }
@@ -67,6 +82,9 @@ public:
     u32 getCursorColor() { return getCursorType() & CURSOR_CLASSIC ? getTextColor() : COLOR_WHITE; }
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
+    bool isMoveLink() { return mSettings.mMoveLink; }
+    void onMoveLink() { mSettings.mMoveLink = true; }
+    void offMoveLink() { mSettings.mMoveLink = false; }
     
 
     u8 nextCursorType() {
@@ -105,6 +123,7 @@ public:
     bool mDisplay;
     bool mGZInitialized;
     gzSettings_s mSettings;
+    gzButtonFlags_s mButtonFlags;
 };
 
 extern gzInfo_c g_gzInfo;
@@ -118,6 +137,7 @@ inline const bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
 inline const bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
 inline const bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
 inline const bool gzInfo_isAreaReload() { return g_gzInfo.isAreaReload(); }
+inline const bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
 inline u8 gzInfo_previousCursorType() { return g_gzInfo.previousCursorType(); }
 inline u8 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
@@ -133,6 +153,8 @@ inline void gzInfo_setAreaReload(bool areaReload) { g_gzInfo.setAreaReload(areaR
 inline void gzInfo_setCursorType(u8 type) { g_gzInfo.setCursorType(type); }
 inline void gzInfo_setDisplayMode(bool mode) { g_gzInfo.setDisplayMode(mode); }
 inline void gzInfo_setMenuPausesGame(bool opt) { g_gzInfo.setMenuPausesGame(opt); }
+inline void gzInfo_onMoveLink() { g_gzInfo.onMoveLink(); }
+inline void gzInfo_offMoveLink() { g_gzInfo.offMoveLink(); }
 
 namespace gzPad {
     inline u32 getTrig() { return mDoCPd_c::m_gzPadInfo.mPressedButtonFlags; }
