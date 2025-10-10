@@ -115,7 +115,10 @@ public:
 
     J2DPicture* mpIcon;
     gzTextBox* mpHeader;
+
     gzMenu_c* mpCurrentMenu;
+    gzMenu_c* mpPrevMenu;
+    gzMainMenu_c* mpMainMenu;
     gzNotification_c* mpNotification;
 
     JUTFont* mpFont;

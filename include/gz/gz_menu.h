@@ -20,6 +20,10 @@ public:
     virtual void execute() {}
 };
 
+class gzFrameworkMenu_c;
+class gzSettingsMenu_c;
+class gzToolsMenu_c;
+
 class gzMainMenu_c : public gzMenu_c {
 public:
 
@@ -56,8 +60,12 @@ public:
     static gzCursor mCursor;
 
     gzTextBox* mpLines[LINE_NUM];
+    gzFrameworkMenu_c* mpFrameworkMenu;
+    gzSettingsMenu_c* mpSettingsMenu;
+    gzToolsMenu_c* mpToolsMenu;
 };
 
+class gzCreditsMenu_c;
 class gzSettingsMenu_c : public gzMenu_c {
 public:
     enum gzSettingsMenu_Settings_e {
@@ -122,6 +130,7 @@ public:
     gzTextBox* mpDescription;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
+    gzCreditsMenu_c* mpCreditsMenu;
 
 private:
     u8 getHaihaiFlags(int idx);
@@ -238,39 +247,15 @@ private:
     gzTextBox* mpTitle;
     gzTextBox* mpRowTexts[MAX_VISIBLE_ROWS * NUM_COLUMNS];
     gzTextBox* mpHeaders[NUM_COLUMNS];
+    //gzConfirmMenu_c* mpConfirmMenu;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
     ProcessInfo mProcessInfos[MAX_PROCESSES];
 };
 
-
-template <typename T>
-inline void gzChangeMenu() {
-    gzMenu_c* next = new T();
-    g_gzInfo.mpCurrentMenu->_delete();
-    delete g_gzInfo.mpCurrentMenu;
-    g_gzInfo.mpCurrentMenu = next;
-
-    g_gzInfo.mInputWaitTimer = 5;
-}
-
-template <typename T>
-inline void gzChangeMenu(confirmCallback i_callback, void* i_data, returnCallback i_returnCallback) {
-    gzMenu_c* next = new T(i_callback, i_data, i_returnCallback);
-    g_gzInfo.mpCurrentMenu->_delete();
-    delete g_gzInfo.mpCurrentMenu;
-    g_gzInfo.mpCurrentMenu = next;
-
-    g_gzInfo.mInputWaitTimer = 5;
-}
-
-template <typename T>
-inline void gzChangeMenu(confirmCallback i_callback, void* i_data, returnCallback i_return_cb, const char* msg) {
-    gzMenu_c* next = new T(i_callback, i_data, i_return_cb, msg);
-    g_gzInfo.mpCurrentMenu->_delete();
-    delete g_gzInfo.mpCurrentMenu;
-    g_gzInfo.mpCurrentMenu = next;
-
+inline void gzChangeMenu(gzMenu_c* i_menu) {
+    g_gzInfo.mpPrevMenu = g_gzInfo.mpCurrentMenu;
+    g_gzInfo.mpCurrentMenu = i_menu;
     g_gzInfo.mInputWaitTimer = 5;
 }
 

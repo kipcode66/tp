@@ -4,7 +4,7 @@
 #include "gz/gz_menu.h"
 
 static void returnToSettings() {
-    gzChangeMenu<gzToolsMenu_c>();
+    //gzChangeMenu<gzToolsMenu_c>();
 }
 
 u8 gzToolsMenu_c::getHaihaiFlags(int i) {
@@ -90,7 +90,7 @@ void gzToolsMenu_c::execute() {
     if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigB()) {
-        gzChangeMenu<gzMainMenu_c>();
+        gzChangeMenu(g_gzInfo.mpPrevMenu);
         return;
     }
 

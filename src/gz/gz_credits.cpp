@@ -41,7 +41,7 @@ void gzCreditsMenu_c::execute() {
     if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigB()) {
-        gzChangeMenu<gzSettingsMenu_c>();
+        gzChangeMenu(g_gzInfo.mpPrevMenu);
         return;
     }
 

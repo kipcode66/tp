@@ -9,6 +9,10 @@ gzMenu_c::gzCursor gzMainMenu_c::mCursor = {0, 0};
 gzMainMenu_c::gzMainMenu_c() {
     OSReport("creating gzMainMenu_c\n");
 
+    mpFrameworkMenu = new gzFrameworkMenu_c();
+    mpSettingsMenu = new gzSettingsMenu_c();
+    mpToolsMenu = new gzToolsMenu_c();
+
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = new gzTextBox();
     }
@@ -31,6 +35,10 @@ gzMainMenu_c::~gzMainMenu_c() {
 
 void gzMainMenu_c::_delete() {
     OSReport("deleting gzMainMenu_c\n");
+    delete mpFrameworkMenu;
+    delete mpSettingsMenu;
+    delete mpToolsMenu;
+
     for (int i = 0; i < LINE_NUM; i++) {
         delete mpLines[i];
         mpLines[i] = NULL;
@@ -49,13 +57,13 @@ void gzMainMenu_c::execute() {
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
         case MENU_FRAMEWORK:
-            gzChangeMenu<gzFrameworkMenu_c>();
+            gzChangeMenu(mpFrameworkMenu);
             return;
         case MENU_SETTINGS:
-            gzChangeMenu<gzSettingsMenu_c>();
+            gzChangeMenu(mpSettingsMenu);
             return;
         case MENU_TOOLS:
-            gzChangeMenu<gzToolsMenu_c>();
+            gzChangeMenu(mpToolsMenu);
             return;
         case MENU_WARPING:
             scene_class* playScene = fopScnM_SearchByID(dStage_roomControl_c::getProcID());

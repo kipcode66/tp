@@ -191,7 +191,7 @@ static void deleteSettingsCallbackWrapper(void*) {
 }
 
 static void returnToSettings() {
-    gzChangeMenu<gzSettingsMenu_c>();
+    //gzChangeMenu<gzSettingsMenu_c>();
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
@@ -233,6 +233,8 @@ gzMenu_c::gzCursor gzSettingsMenu_c::mCursor = {0, 0};
 
 gzSettingsMenu_c::gzSettingsMenu_c() {
     OSReport("creating gzSettingsMenu_c\n");
+
+    mpCreditsMenu = new gzCreditsMenu_c();
 
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = new gzTextBox();
@@ -284,6 +286,8 @@ void gzSettingsMenu_c::_delete() {
         mpLineOptions[i] = NULL;
     }
 
+    delete mpCreditsMenu;
+
     delete mpDescription;
     mpDescription = NULL;
 
@@ -299,20 +303,20 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigB()) {
-        gzChangeMenu<gzMainMenu_c>();
+        gzChangeMenu(g_gzInfo.mpPrevMenu);
         return;
     }
 
     if (gzPad::getTrigA()) {
         switch (mCursor.y) {
         case SETTING_SAVE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, NULL, returnToSettings, "save settings?");
+            //gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, NULL, returnToSettings, "save settings?");
             return;
         case SETTING_LOAD_CARD:
             gzInfo_loadSettingsMemcard();
             break;
         case SETTING_DELETE_CARD:
-            gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, NULL, returnToSettings, "delete settings?");
+            //gzChangeMenu<gzConfirmMenu_c>(deleteSettingsCallbackWrapper, NULL, returnToSettings, "delete settings?");
             return;
         case SETTING_MENU_POSITIONS:
             gzInfo_sendNotification("test!", 1);
@@ -320,7 +324,7 @@ void gzSettingsMenu_c::execute() {
             gzInfo_sendNotification("test2!");
             break;
         case SETTING_CREDITS:
-            gzChangeMenu<gzCreditsMenu_c>();
+            gzChangeMenu(mpCreditsMenu);
             return;
         }
     }

@@ -51,8 +51,15 @@ int gzInfo_c::_create() {
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
     mpIcon = new J2DPicture(icon);
     mpHeader = new gzTextBox("tpgz v1.2.0", mSettings.mTextColor);
+    
+    mpMainMenu = new gzMainMenu_c();
+    if (mpMainMenu == NULL) {
+        return 0;
+    }
 
-    mpCurrentMenu = new gzMainMenu_c();
+    mpCurrentMenu = mpMainMenu;
+    mpPrevMenu = mpCurrentMenu;
+
     mpNotification = new gzNotification_c();
 
     mInputWaitTimer = 5;
@@ -72,8 +79,13 @@ int gzInfo_c::_delete() {
     delete mpHeader;
     mpHeader = NULL;
 
-    delete mpCurrentMenu;
     mpCurrentMenu = NULL;
+
+    delete mpMainMenu;
+    mpMainMenu = NULL;
+
+    delete mpNotification;
+    mpNotification = NULL;
     return 1;
 }
 

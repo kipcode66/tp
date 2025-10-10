@@ -30,7 +30,7 @@ static void deleteProcess(void* proc) {
 }
 
 static void returnToFramework() {
-    gzChangeMenu<gzFrameworkMenu_c>();
+    // gzChangeMenu<gzFrameworkMenu_c>();
 }
 
 gzFrameworkMenu_c::gzFrameworkMenu_c() {
@@ -152,7 +152,7 @@ void gzFrameworkMenu_c::execute() {
     }
 
     if (gzPad::getTrigB()) {
-        gzChangeMenu<gzMainMenu_c>();
+        gzChangeMenu(g_gzInfo.mpPrevMenu);
         return;
     }
 
@@ -163,7 +163,7 @@ void gzFrameworkMenu_c::execute() {
     if (gzPad::getTrigZ()) {
         char* buf;
         sprintf(buf, "delete %s?", getProcessName(mProcessInfos[mSelectedProcess].process));
-        gzChangeMenu<gzConfirmMenu_c>(deleteProcess, mProcessInfos[mSelectedProcess].process, returnToFramework, buf);
+        //gzChangeMenu<gzConfirmMenu_c>(deleteProcess, mProcessInfos[mSelectedProcess].process, returnToFramework, buf);
         return;
     }
 
