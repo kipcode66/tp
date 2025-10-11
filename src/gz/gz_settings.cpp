@@ -3,7 +3,6 @@
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
 #include "m_Do/m_Do_machine.h"
-// #include "JSystem/J2DGraph/J2DTextBox.h"
 
 #define COLOR_AMETHYST 0x9966FFFF
 #define COLOR_AQUAMARINE 0x71D9E2FF
@@ -229,8 +228,6 @@ void gzSettingsMenu_c::updateDynamicLines() {
     }
 }
 
-gzMenu_c::gzCursor gzSettingsMenu_c::mCursor = {0, 0};
-
 gzSettingsMenu_c::gzSettingsMenu_c() {
     OSReport("creating gzSettingsMenu_c\n");
 
@@ -299,16 +296,21 @@ void gzSettingsMenu_c::_delete() {
 }
 
 void gzSettingsMenu_c::execute() {
-    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
-    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
+    gzCursor* l_cursor = gzInfo_getCursor();
 
-    if (gzPad::getTrigB()) {
-        gzChangeMenu(g_gzInfo.mpPrevMenu);
-        return;
-    }
+    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigA()) {
-        switch (mCursor.y) {
+        switch (l_cursor->y) {
+        case SETTING_AREA_RELOAD_BEHAVIOR:
+        case SETTING_CURSOR_TYPE:
+        case SETTING_DISPLAY_MODE:
+        case SETTING_DROP_SHADOW:
+        case SETTING_SWAP_EQUIPS:
+        case SETTING_TEXT_COLOR:
+            mOption = !mOption;
+            break;
         case SETTING_SAVE_CARD:
             //gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, NULL, returnToSettings, "save settings?");
             return;
@@ -324,41 +326,53 @@ void gzSettingsMenu_c::execute() {
             gzInfo_sendNotification("test2!");
             break;
         case SETTING_CREDITS:
-            gzChangeMenu(mpCreditsMenu);
+            // gzChangeMenu(mpCreditsMenu);
             return;
         }
     }
 
+    if (gzPad::getTrigB()) {
+        if (mOption) mOption = false;
+    }
+
     if (gzPad::getTrigRight()) {
-        switch (mCursor.y) {
-        case SETTING_AREA_RELOAD_BEHAVIOR:
-            gzInfo_setAreaReload(!gzInfo_isAreaReload());
-            break;
-        case SETTING_CURSOR_TYPE:
-            gzInfo_setCursorType(gzInfo_nextCursorType());
-            break;
-        case SETTING_DISPLAY_MODE: {
-            bool display_mode = gzInfo_getDisplayMode();
-            display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-            gzInfo_setDisplayMode(!display_mode);
-            break;
-        }
-        case SETTING_DROP_SHADOW:
-            gzInfo_setDropShadows(!gzInfo_isDropShadows());
-            break;
-        case SETTING_MENU_PAUSES_GAME:
-            break;
-        case SETTING_SWAP_EQUIPS:
-            gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
-            break;
-        case SETTING_TEXT_COLOR:
-            gzInfo_setTextColor(cycleTextColor(true));
-            break;
+        if (mOption) {
+            switch (l_cursor->y) {
+            case SETTING_AREA_RELOAD_BEHAVIOR:
+                gzInfo_setAreaReload(!gzInfo_isAreaReload());
+                break;
+            case SETTING_CURSOR_TYPE:
+                gzInfo_setCursorType(gzInfo_nextCursorType());
+                break;
+            case SETTING_DISPLAY_MODE: {
+                bool display_mode = gzInfo_getDisplayMode();
+                display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
+                gzInfo_setDisplayMode(!display_mode);
+                break;
+            }
+            case SETTING_DROP_SHADOW:
+                gzInfo_setDropShadows(!gzInfo_isDropShadows());
+                break;
+            case SETTING_MENU_PAUSES_GAME:
+                break;
+            case SETTING_SWAP_EQUIPS:
+                gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
+                break;
+            case SETTING_TEXT_COLOR:
+                gzInfo_setTextColor(cycleTextColor(true));
+                break;
+            }
         }
     }
 
     if (gzPad::getTrigLeft()) {
-        switch (mCursor.y) {
+        if (!mOption) {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_SETTINGS;
+            return;
+        }
+
+        switch (l_cursor->y) {
         case SETTING_AREA_RELOAD_BEHAVIOR:
             gzInfo_setAreaReload(!gzInfo_isAreaReload());
             break;
@@ -385,14 +399,15 @@ void gzSettingsMenu_c::execute() {
         }
     }
 
-    updateDynamicLines();
     mpMeterHaihai->_execute(0);
 }
 
 void gzSettingsMenu_c::draw() {
-    static const f32 X_ALIGNMENT = 40.0f;
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    static const f32 X_ALIGNMENT = 200.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
-    static const f32 OPTIONS_X_OFFSET = 0.0f;
+    static const f32 OPTIONS_X_OFFSET = -20.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
     static const f32 HAIHAI_Y_OFFSET = -7.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
@@ -401,6 +416,8 @@ void gzSettingsMenu_c::draw() {
     static const f32 CURSOR_Y_BASE = 90.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 DESCRIPTION_Y = 420.0f;
+
+    updateDynamicLines();
 
     J2DTextBox::TFontSize font_size;
     mpLineOptions[0]->getFontSize(font_size);  // assume that all lines have the same font size
@@ -418,10 +435,10 @@ void gzSettingsMenu_c::draw() {
         f32 y_pos_haihai = y_alignment_haihai + ((i - 1) * LINE_SPACING);
         f32 y_pos_cursor = CURSOR_Y_BASE + ((i - 1) * LINE_SPACING);
 
-        if (mCursor.y == i) {
+        if (l_cursor->y == i && l_cursor->x > 0) {
             // Spacing between arrows determined by text box bound size
             f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
-            if (mpLineOptions[i]->mStringLength != 0) {
+            if (mpLineOptions[i]->mStringLength != 0 && mOption) {
                 mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
             }
 
@@ -434,10 +451,12 @@ void gzSettingsMenu_c::draw() {
         }
     }
 
-    // Draw description if valid
-    if (mpLines[mCursor.y] && *mpLines[mCursor.y]->m_description != 0) {
-        mpDescription->setString(mpLines[mCursor.y]->m_description);
-        mpDescription->draw(X_ALIGNMENT, DESCRIPTION_Y, cursor_color);
+    // Draw description if valid and on menu
+    if (l_cursor->x > 0) {
+        if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
+            mpDescription->setString(mpLines[l_cursor->y]->m_description);
+            mpDescription->draw(X_ALIGNMENT, DESCRIPTION_Y, cursor_color);
+        }
     }
 
     if (gzInfo_isCursorTypeTP()) {

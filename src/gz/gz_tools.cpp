@@ -35,8 +35,6 @@ void gzToolsMenu_c::updateDynamicLines() {
     }
 }
 
-gzMenu_c::gzCursor gzToolsMenu_c::mCursor = {0, 0};
-
 gzToolsMenu_c::gzToolsMenu_c() {
     OSReport("creating gzToolsMenu_c\n");
 
@@ -51,8 +49,7 @@ gzToolsMenu_c::gzToolsMenu_c() {
 
     mpDescription = new gzTextBox();
 
-    mpLines[TOOL_MOVE_LINK]->setString("move link");
-    mpDescription[TOOL_MOVE_LINK].setString("move link around freely. L+R+Y to activate");
+    mpLines[TOOL_MOVE_LINK]->setStringDesc("move link", "move link around freely. L+R+Y to activate");
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
@@ -86,42 +83,56 @@ void gzToolsMenu_c::_delete() {
 }
 
 void gzToolsMenu_c::execute() {
-    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
-    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
+    gzCursor* l_cursor = gzInfo_getCursor();
 
-    if (gzPad::getTrigB()) {
-        gzChangeMenu(g_gzInfo.mpPrevMenu);
-        return;
-    }
+    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
 
     if (gzPad::getTrigA()) {
-        switch (mCursor.y) {}
-    }
-
-    if (gzPad::getTrigRight()) {
-        switch (mCursor.y) {
+        switch (l_cursor->y) {
         case TOOL_MOVE_LINK:
-            gzInfo_onMoveLink();
+            mOption = !mOption;
             break;
         }
     }
 
+    if (gzPad::getTrigB()) {
+        if (mOption) mOption = false;
+    }
+
+    if (gzPad::getTrigRight()) {
+        if (mOption) {
+            switch (l_cursor->y) {
+            case TOOL_MOVE_LINK:
+                gzInfo_onMoveLink();
+                break;
+            }
+        }
+    }
+
     if (gzPad::getTrigLeft()) {
-        switch (mCursor.y) {
+        if (!mOption) {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_TOOLS;
+            return;
+        }
+
+        switch (l_cursor->y) {
         case TOOL_MOVE_LINK:
             gzInfo_offMoveLink();
             break;
         }
     }
 
-    updateDynamicLines();
     mpMeterHaihai->_execute(0);
 }
 
 void gzToolsMenu_c::draw() {
-    static const f32 X_ALIGNMENT = 40.0f;
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    static const f32 X_ALIGNMENT = 200.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
-    static const f32 OPTIONS_X_OFFSET = 0.0f;
+    static const f32 OPTIONS_X_OFFSET = -20.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
     static const f32 HAIHAI_Y_OFFSET = -7.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
@@ -129,7 +140,10 @@ void gzToolsMenu_c::draw() {
     static const f32 TP_CURSOR_X_OFFSET = 20.0f;
     static const f32 CURSOR_Y_BASE = 90.0f;
     static const f32 LINE_SPACING = 22.0f;
+    static const f32 DESCRIPTION_X = 0.0f;
     static const f32 DESCRIPTION_Y = 420.0f;
+
+    updateDynamicLines();
 
     J2DTextBox::TFontSize font_size;
     mpLineOptions[0]->getFontSize(font_size);  // assume that all lines have the same font size
@@ -147,10 +161,10 @@ void gzToolsMenu_c::draw() {
         f32 y_pos_haihai = y_alignment_haihai + ((i - 1) * LINE_SPACING);
         f32 y_pos_cursor = CURSOR_Y_BASE + ((i - 1) * LINE_SPACING);
 
-        if (mCursor.y == i) {
+        if (l_cursor->y == i && l_cursor->x > 0) {
             // Spacing between arrows determined by text box bound size
             f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
-            if (mpLineOptions[i]->mStringLength != 0) {
+            if (mpLineOptions[i]->mStringLength != 0 && mOption) {
                 mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
             }
 
@@ -163,10 +177,12 @@ void gzToolsMenu_c::draw() {
         }
     }
 
-    // Draw description if valid
-    if (mpLines[mCursor.y] && *mpLines[mCursor.y]->m_description != 0) {
-        mpDescription->setString(mpLines[mCursor.y]->m_description);
-        mpDescription->draw(X_ALIGNMENT, DESCRIPTION_Y, cursor_color);
+    // Draw description if valid and on menu
+    if (l_cursor->x > 0) {
+        if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
+            mpDescription->setString(mpLines[l_cursor->y]->m_description);
+            mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color, HBIND_CENTER);
+        }
     }
 
     if (gzInfo_isCursorTypeTP()) {

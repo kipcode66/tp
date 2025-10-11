@@ -4,14 +4,19 @@
 #include "gz/gz_menu.h"
 #include "f_op/f_op_scene_mng.h"
 
-gzMenu_c::gzCursor gzMainMenu_c::mCursor = {0, 0};
-
 gzMainMenu_c::gzMainMenu_c() {
     OSReport("creating gzMainMenu_c\n");
 
-    mpFrameworkMenu = new gzFrameworkMenu_c();
-    mpSettingsMenu = new gzSettingsMenu_c();
-    mpToolsMenu = new gzToolsMenu_c();
+    mpMenus[MENU_CHEATS] = NULL;
+    mpMenus[MENU_FLAGS] = NULL;
+    mpMenus[MENU_FRAMEWORK] = new gzFrameworkMenu_c();
+    mpMenus[MENU_INVENTORY] = NULL;
+    mpMenus[MENU_MEMORY] = NULL;
+    mpMenus[MENU_PRACTICE] = NULL;
+    mpMenus[MENU_SCENE] = NULL;
+    mpMenus[MENU_SETTINGS] = new gzSettingsMenu_c();
+    mpMenus[MENU_TOOLS] = new gzToolsMenu_c();
+    mpMenus[MENU_WARPING] = NULL;
 
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = new gzTextBox();
@@ -27,6 +32,12 @@ gzMainMenu_c::gzMainMenu_c() {
     mpLines[MENU_SETTINGS]->setString("settings");
     mpLines[MENU_TOOLS]->setString("tools");
     mpLines[MENU_WARPING]->setString("warping");
+
+    mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
+    mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
+    mpDrawCursor->setAlphaRate(1.0f);
+
+    mpMeterHaihai = new dMeterHaihai_c(3);
 }
 
 gzMainMenu_c::~gzMainMenu_c() {
@@ -35,19 +46,35 @@ gzMainMenu_c::~gzMainMenu_c() {
 
 void gzMainMenu_c::_delete() {
     OSReport("deleting gzMainMenu_c\n");
-    delete mpFrameworkMenu;
-    delete mpSettingsMenu;
-    delete mpToolsMenu;
 
     for (int i = 0; i < LINE_NUM; i++) {
         delete mpLines[i];
         mpLines[i] = NULL;
+
+        delete mpMenus[i];
+        mpMenus[i] = NULL;
     }
 }
 
 void gzMainMenu_c::execute() {
-    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
-    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (gzPad::getTrigDown()) {
+        l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+        gzChangeMenu(mpMenus[l_cursor->y]);
+    }
+
+    if (gzPad::getTrigUp()) {
+        l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
+        gzChangeMenu(mpMenus[l_cursor->y]);
+    }
+
+    if (gzPad::getTrigRight()) {
+        if (g_gzInfo.mpCurrentMenu != NULL) {
+            l_cursor->x++;
+            l_cursor->y = 0; // TODO(Pheenoh): QoL improvement - remember l_cursor->y in sub menu instead of always 0
+        }
+    }
 
     if (gzPad::getTrigB()) {
         g_gzInfo.mDisplay = false;
@@ -55,16 +82,7 @@ void gzMainMenu_c::execute() {
     }
 
     if (gzPad::getTrigA()) {
-        switch (mCursor.y) {
-        case MENU_FRAMEWORK:
-            gzChangeMenu(mpFrameworkMenu);
-            return;
-        case MENU_SETTINGS:
-            gzChangeMenu(mpSettingsMenu);
-            return;
-        case MENU_TOOLS:
-            gzChangeMenu(mpToolsMenu);
-            return;
+        switch (l_cursor->y) {
         case MENU_WARPING:
             scene_class* playScene = fopScnM_SearchByID(dStage_roomControl_c::getProcID());
             if (playScene != NULL)
@@ -76,18 +94,34 @@ void gzMainMenu_c::execute() {
 }
 
 void gzMainMenu_c::draw() {
+    gzCursor* l_cursor = gzInfo_getCursor();
     static const f32 X_ALIGNMENT = 40.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
+    static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
+    static const f32 HAIHAI_X = 160.0f;
+    static const f32 HAIHAI_Y = 160.0f;
+
+    mpMeterHaihai->_execute(0);
+
+    J2DTextBox::TFontSize font_size;
+    mpLines[0]->getFontSize(font_size); // assume all have the same font size
+    mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
 
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL) {
             f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
 
-            if (mCursor.y == i) {
+            if (l_cursor->y == i && l_cursor->x == 0) {
                 mpLines[i]->draw(X_ALIGNMENT, y_pos, gzInfo_getTextColor());
             } else {
                 mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
+            }
+
+            if (l_cursor->x == 0) {
+                mpMeterHaihai->drawHaihai(dMeterHaihai_c::DIR_RIGHT_e, HAIHAI_X, HAIHAI_Y, 0.0f, 0.0f);
+            } else {
+                mpMeterHaihai->drawHaihai(dMeterHaihai_c::DIR_LEFT_e, HAIHAI_X, HAIHAI_Y, 0.0f, 0.0f);
             }
         }
     }

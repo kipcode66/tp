@@ -3,8 +3,6 @@
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
 
-gzMenu_c::gzCursor gzCreditsMenu_c::mCursor = {0, 0};
-
 gzCreditsMenu_c::gzCreditsMenu_c() {
     OSReport("creating gzCreditsMenu_c\n");
 
@@ -37,18 +35,15 @@ void gzCreditsMenu_c::_delete() {
 }
 
 void gzCreditsMenu_c::execute() {
-    if (gzPad::getTrigDown()) mCursor.y = (mCursor.y + 1) % LINE_NUM;
-    if (gzPad::getTrigUp()) mCursor.y = (mCursor.y - 1 + LINE_NUM) % LINE_NUM;
-
-    if (gzPad::getTrigB()) {
-        gzChangeMenu(g_gzInfo.mpPrevMenu);
-        return;
-    }
+    gzCursor* l_cursor = gzInfo_getCursor();
+    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
 
     mpMeterHaihai->_execute(0);
 }
 
 void gzCreditsMenu_c::draw() {
+    gzCursor* l_cursor = gzInfo_getCursor();
     static const f32 X_ALIGNMENT = 40.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
@@ -61,10 +56,10 @@ void gzCreditsMenu_c::draw() {
     f32 x_alignment_haihai = X_ALIGNMENT + HAIHAI_X_OFFSET;
     f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
 
-    if (mCursor.y < mTopLine) {
-        mTopLine = mCursor.y;
-    } else if (mCursor.y >= mTopLine + VISIBLE_LINES) {
-        mTopLine = mCursor.y - VISIBLE_LINES + 1;
+    if (l_cursor->y < mTopLine) {
+        mTopLine = l_cursor->y;
+    } else if (l_cursor->y >= mTopLine + VISIBLE_LINES) {
+        mTopLine = l_cursor->y - VISIBLE_LINES + 1;
     }
 
     // Clamp mTopLine to valid range
@@ -80,7 +75,7 @@ void gzCreditsMenu_c::draw() {
         if (mpLines[lineIdx] != NULL) {
             f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
 
-            if (mCursor.y == lineIdx) {
+            if (l_cursor->y == lineIdx && l_cursor->x > 0) {
                 mpLines[lineIdx]->draw(X_ALIGNMENT, y_pos, cursor_color);
             } else {
                 mpLines[lineIdx]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);

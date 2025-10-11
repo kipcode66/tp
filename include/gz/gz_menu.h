@@ -11,11 +11,6 @@ class dMeterHaihai_c;
 
 class gzMenu_c : public dDlst_base_c {
 public:
-    struct gzCursor {
-        int x;
-        int y;
-    };
-
     virtual void _delete() {}
     virtual void execute() {}
 };
@@ -57,12 +52,15 @@ public:
     virtual void draw();
 
     static const int LINE_NUM = MENU_MAX;
-    static gzCursor mCursor;
 
     gzTextBox* mpLines[LINE_NUM];
+    gzMenu_c* mpMenus[LINE_NUM];
     gzFrameworkMenu_c* mpFrameworkMenu;
     gzSettingsMenu_c* mpSettingsMenu;
     gzToolsMenu_c* mpToolsMenu;
+
+    dSelect_cursor_c* mpDrawCursor;
+    dMeterHaihai_c* mpMeterHaihai;
 };
 
 class gzCreditsMenu_c;
@@ -122,7 +120,6 @@ public:
     const char* getMenuPausesGameText() { return "no"; }
 
     static const int LINE_NUM = SETTING_MAX;
-    static gzCursor mCursor;
 
 public:
     gzTextBox* mpLines[LINE_NUM];
@@ -131,6 +128,7 @@ public:
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
     gzCreditsMenu_c* mpCreditsMenu;
+    bool mOption;
 
 private:
     u8 getHaihaiFlags(int idx);
@@ -146,7 +144,6 @@ public:
     virtual void draw();
 
     static const int LINE_NUM = 50;
-    static gzCursor mCursor;
 
 public:
     gzTextBox* mpLines[LINE_NUM];
@@ -172,7 +169,6 @@ public:
     virtual void draw();
 
     static const int LINE_NUM = TOOL_MAX;
-    static gzCursor mCursor;
 
 private:
     u8 getHaihaiFlags(int);
@@ -184,6 +180,7 @@ private:
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
+    bool mOption;
 };
 
 typedef void (*confirmCallback)(void*);
@@ -207,7 +204,6 @@ public:
     virtual void draw();
 
     static const int LINE_NUM = CONFIRM_MAX;
-    static gzCursor mCursor;
 
 public:
     gzTextBox* mpLineConfirmPrompt;
@@ -225,8 +221,6 @@ public:
         base_process_class* process;
     };
 
-    static gzMenu_c::gzCursor mCursor;
-
     gzFrameworkMenu_c();
     ~gzFrameworkMenu_c();
 
@@ -235,11 +229,12 @@ public:
     void _delete();
 
     static const int MAX_VISIBLE_ROWS = 10;
-    static const int NUM_COLUMNS = 5;
+    static const int NUM_COLUMNS = 3;
     static const int MAX_PROCESSES = 128;  // Should be plenty?
 
 private:
     static char* getProcessName(base_process_class* process);
+    void setActiveProcesses();
 
     int mNumProcesses;
     int mSelectedProcess;
@@ -251,10 +246,10 @@ private:
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
     ProcessInfo mProcessInfos[MAX_PROCESSES];
+    bool mOption;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {
-    g_gzInfo.mpPrevMenu = g_gzInfo.mpCurrentMenu;
     g_gzInfo.mpCurrentMenu = i_menu;
     g_gzInfo.mInputWaitTimer = 5;
 }

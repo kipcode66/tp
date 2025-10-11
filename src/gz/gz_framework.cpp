@@ -3,8 +3,6 @@
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
 
-gzMenu_c::gzCursor gzFrameworkMenu_c::mCursor = {0, 0};
-
 char* gzFrameworkMenu_c::getProcessName(base_process_class* process) {
     switch (process->name) {
     case PROC_OPENING_SCENE:
@@ -48,11 +46,11 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
         mpHeaders[i] = new gzTextBox();
     }
 
-    mpHeaders[0]->setString("Process Name");
+    mpHeaders[0]->setString("Name");
     mpHeaders[1]->setString("PID");
     mpHeaders[2]->setString("Status");
-    mpHeaders[3]->setString("Node List");
-    mpHeaders[4]->setString("Layer");
+    // mpHeaders[3]->setString("Node List");
+    // mpHeaders[4]->setString("Layer");
     
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
@@ -90,7 +88,7 @@ void gzFrameworkMenu_c::_delete() {
     mpTitle = NULL;
 }
 
-void gzFrameworkMenu_c::execute() {
+void gzFrameworkMenu_c::setActiveProcesses() {
     // Collect all active processes
     mNumProcesses = 0;
     layer_class* layer = fpcLy_RootLayer();
@@ -124,6 +122,18 @@ void gzFrameworkMenu_c::execute() {
         mSelectedProcess = 0;
     }
 
+    // Clamp scroll offset
+    if (mScrollOffset > mNumProcesses - MAX_VISIBLE_ROWS) {
+        mScrollOffset = mNumProcesses - MAX_VISIBLE_ROWS;
+    }
+    if (mScrollOffset < 0) {
+        mScrollOffset = 0;
+    }
+}
+
+void gzFrameworkMenu_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
     if (gzPad::getTrigDown()) {
         if (mSelectedProcess < mNumProcesses - 1) {
             mSelectedProcess++;
@@ -135,6 +145,7 @@ void gzFrameworkMenu_c::execute() {
             mScrollOffset = 0;
         }
     }
+
     if (gzPad::getTrigUp()) {
         if (mSelectedProcess > 0) {
             mSelectedProcess--;
@@ -151,8 +162,9 @@ void gzFrameworkMenu_c::execute() {
         }
     }
 
-    if (gzPad::getTrigB()) {
-        gzChangeMenu(g_gzInfo.mpPrevMenu);
+    if (gzPad::getTrigLeft()) {
+        l_cursor->x--;
+        l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
         return;
     }
 
@@ -167,29 +179,21 @@ void gzFrameworkMenu_c::execute() {
         return;
     }
 
-    // Clamp scroll offset
-    if (mScrollOffset > mNumProcesses - MAX_VISIBLE_ROWS) {
-        mScrollOffset = mNumProcesses - MAX_VISIBLE_ROWS;
-    }
-    if (mScrollOffset < 0) {
-        mScrollOffset = 0;
-    }
-
-    mpTitle->setStringf("(%d processes)", mNumProcesses);
-
     mpMeterHaihai->_execute(0);
 }
 
 void gzFrameworkMenu_c::draw() {
-    static const f32 X_POS[NUM_COLUMNS] = {40.0f, 200.0f, 280.0f, 360.0f, 470.0f};
+    gzCursor* l_cursor = gzInfo_getCursor();
+    
+    static const f32 X_POS[NUM_COLUMNS] = {200.0f, 340.0f, 410.0f};
     static const f32 X_TITLE = 250.0f;
-    static const f32 Y_HEADER = 150.0f;
+    static const f32 Y_HEADER = 78.0f;
     static const f32 Y_TITLE = Y_HEADER - 25.0f;
     static const f32 Y_START = Y_HEADER + 22.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 CURSOR_X = 20.0f;
     static const f32 CURSOR_Y_OFFSET = -5.0f;
-    static const f32 HAIHAI_X = 30.0f;
+    static const f32 HAIHAI_X = 200.0f;
     static const f32 HAIHAI_Y = Y_START + 80.0f;
     static const f32 HAIHAI_Y_SIZE = MAX_VISIBLE_ROWS * 26.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
@@ -201,12 +205,16 @@ void gzFrameworkMenu_c::draw() {
     mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
 
     // Draw title
+    mpTitle->setStringf("(%d processes)", mNumProcesses);
     mpTitle->draw(X_TITLE, Y_TITLE, COLOR_WHITE);
 
     // Draw headers
     for (int c = 0; c < NUM_COLUMNS; c++) {
         mpHeaders[c]->draw(X_POS[c], Y_HEADER, COLOR_WHITE);
     }
+
+    // Set active processes
+    setActiveProcesses();
 
     // Draw visible rows
     for (int i = 0; i < MAX_VISIBLE_ROWS; i++) {
@@ -219,10 +227,10 @@ void gzFrameworkMenu_c::draw() {
         mpRowTexts[i * NUM_COLUMNS + 0]->setString(getProcessName(info.process));
         mpRowTexts[i * NUM_COLUMNS + 1]->setStringf("%d", info.process->name);
         mpRowTexts[i * NUM_COLUMNS + 2]->setString(info.process->pause_flag ? "paused" : "active");
-        mpRowTexts[i * NUM_COLUMNS + 3]->setStringf("%d", info.node_list_index);
-        mpRowTexts[i * NUM_COLUMNS + 4]->setStringf("%u", info.layer_id);
+        // mpRowTexts[i * NUM_COLUMNS + 3]->setStringf("%d", info.node_list_index);
+        // mpRowTexts[i * NUM_COLUMNS + 4]->setStringf("%u", info.layer_id);
         
-        u32 color = (proc_idx == mSelectedProcess) ? cursor_color : COLOR_WHITE;
+        u32 color = (proc_idx == mSelectedProcess && l_cursor->x > 0) ? cursor_color : COLOR_WHITE;
 
         for (int c = 0; c < NUM_COLUMNS; c++) {
             mpRowTexts[i * NUM_COLUMNS + c]->draw(X_POS[c], Y_START + (i * LINE_SPACING), color);
@@ -248,7 +256,7 @@ void gzFrameworkMenu_c::draw() {
         }
     }
 
-    if (arrows != 0) {
+    if (arrows != 0 && l_cursor->x > 0) {
         mpMeterHaihai->drawHaihai(arrows, HAIHAI_X, HAIHAI_Y, 0.0f, HAIHAI_Y_SIZE);
     }
 }

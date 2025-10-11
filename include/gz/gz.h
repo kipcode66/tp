@@ -35,6 +35,11 @@ struct gzButtonFlags_s {
     bool mMoveLink;
 };
 
+struct gzCursor {
+    int x;
+    int y;
+};
+
 class gzInfo_c {
 public:
     gzInfo_c() { mGZInitialized = false; };
@@ -85,6 +90,7 @@ public:
     bool isMoveLink() { return mSettings.mMoveLink; }
     void onMoveLink() { mSettings.mMoveLink = true; }
     void offMoveLink() { mSettings.mMoveLink = false; }
+    gzCursor* getCursor() { return &mCursor; }
     
 
     u8 nextCursorType() {
@@ -117,7 +123,6 @@ public:
     gzTextBox* mpHeader;
 
     gzMenu_c* mpCurrentMenu;
-    gzMenu_c* mpPrevMenu;
     gzMainMenu_c* mpMainMenu;
     gzNotification_c* mpNotification;
 
@@ -127,10 +132,12 @@ public:
     bool mGZInitialized;
     gzSettings_s mSettings;
     gzButtonFlags_s mButtonFlags;
+    gzCursor mCursor;
 };
 
 extern gzInfo_c g_gzInfo;
 
+inline gzCursor* gzInfo_getCursor() { return g_gzInfo.getCursor(); }
 inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
 inline bool gzInfo_isCursorTypeTP() { return g_gzInfo.isCursorTypeTP(); }
 inline u32 gzInfo_getCursorColor() { return g_gzInfo.getCursorColor(); }

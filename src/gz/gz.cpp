@@ -41,6 +41,8 @@ void gzInfo_c::loadDefaultSettings() {
     mSettings.mCommandCombos.mMoveLink = PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y;
     setCursorType(1);
     mpFont = mDoExt_getMesgFont();
+    mCursor.x = 0;
+    mCursor.y = 0;
 }
 
 
@@ -56,9 +58,6 @@ int gzInfo_c::_create() {
     if (mpMainMenu == NULL) {
         return 0;
     }
-
-    mpCurrentMenu = mpMainMenu;
-    mpPrevMenu = mpCurrentMenu;
 
     mpNotification = new gzNotification_c();
 
@@ -104,8 +103,8 @@ int gzInfo_c::execute() {
             mInputWaitTimer--;
             return 1;
         }
-
-        mpCurrentMenu->execute();
+        if (mpMainMenu != NULL && mCursor.x == 0) mpMainMenu->execute();
+        if (mpCurrentMenu != NULL && mCursor.x > 0) mpCurrentMenu->execute();
     }
 
     setButtonFlags();
@@ -118,22 +117,15 @@ int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
     if (mDisplay) {
-        if (mpIcon != NULL) {
-            mpIcon->draw(30.0f, 5.0f, 30.0f, 30.0f, false, false, false);
-        }
-
-        if (mpHeader != NULL) {
-            mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
-        }
-
-        dComIfGd_set2DOpaTop(mpCurrentMenu);
-
+        if (mpIcon != NULL) mpIcon->draw(30.0f, 5.0f, 30.0f, 30.0f, false, false, false);
+        if (mpHeader != NULL) mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
+        if (mpMainMenu != NULL) dComIfGd_set2DOpaTop(mpMainMenu);
+        if (mpCurrentMenu != NULL) dComIfGd_set2DOpaTop(mpCurrentMenu);
         // showHeapUsage();
     }
 
-    if (mpNotification != NULL) {
-        mpNotification->draw();
-    }
+    // Draw any notifications
+    if (mpNotification != NULL) mpNotification->draw();
 
     return 1;
 }
@@ -264,6 +256,7 @@ void gzInfo_c::setButtonFlags() {
 }
 
 void gzInfo_c::executeMoveLink() {
+    // TODO(Pheenoh): finish this
     if (!mButtonFlags.mMoveLink) {
         if (g_drawHIO.mParentAlpha == 0.0f) g_drawHIO.mParentAlpha = 1.0f;
         if (dComIfGp_getEventManager().cameraPlay() == 1) dComIfGp_getEventManager().setCameraPlay(0);        
