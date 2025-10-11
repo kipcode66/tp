@@ -1,0 +1,94 @@
+// gz_memory.cpp
+
+#include "d/dolzel.h" // IWYU pragma: keep
+
+#include "gz/gz.h"
+#include "gz/gz_menu.h"
+
+gzMemoryMenu_c::gzMemoryMenu_c() {
+    OSReport("creating gzMemoryMenu_c\n");
+
+    for (int i = 0; i < LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+        if (i % 2 == 0) mpLines[i]->setString("a");
+        if (i % 2 == 1) mpLines[i]->setString("b");
+    }
+
+    mTopLine = 0;
+    mXPos = 240.0f;
+}
+
+gzMemoryMenu_c::~gzMemoryMenu_c() {
+    _delete();
+}
+
+void gzMemoryMenu_c::_delete() {
+    OSReport("deleting gzMemoryMenu_c\n");
+
+    for (int i = 0; i < LINE_NUM; i++) {
+        delete mpLines[i];
+        mpLines[i] = NULL;
+    }
+}
+
+void gzMemoryMenu_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+    int current_max_line = LINE_NUM;
+
+    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % current_max_line;
+    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
+
+    if (gzPad::getTrigB()) {
+        l_cursor->x--;
+        l_cursor->y = gzMainMenu_c::MENU_MEMORY;
+
+        // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
+        mXPos = 240.0f;
+        ((gzMainMenu_c*)g_gzInfo.mpMainMenu)->setXPos(40.0f);
+        return;
+    }
+}
+
+void gzMemoryMenu_c::setXPos(f32 x) {
+    mXPos = x;
+}
+
+void gzMemoryMenu_c::draw() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    static const f32 Y_ALIGNMENT = 100.0f;
+    static const f32 LINE_SPACING = 22.0f;
+    static const int VISIBLE_LINES = 15;
+
+    u32 cursor_color = gzInfo_getCursorColor();
+
+    int current_max_line = LINE_NUM;
+    gzTextBox** currentLines = mpLines;
+
+    if (l_cursor->y < mTopLine) {
+        mTopLine = l_cursor->y;
+    } else if (l_cursor->y >= mTopLine + VISIBLE_LINES) {
+        mTopLine = l_cursor->y - VISIBLE_LINES + 1;
+    }
+
+    // Clamp mTopLine to valid range
+    int maxTop = current_max_line - VISIBLE_LINES;
+    if (maxTop < 0) maxTop = 0;
+    if (mTopLine > maxTop) mTopLine = maxTop;
+    if (mTopLine < 0) mTopLine = 0;
+
+    for (int screenIdx = 0; screenIdx < VISIBLE_LINES; screenIdx++) {
+        int lineIdx = mTopLine + screenIdx;
+        if (lineIdx >= current_max_line) break;
+
+        if (currentLines[lineIdx] != NULL) {
+            f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
+
+            if (l_cursor->y == lineIdx && l_cursor->x > 0) {
+                currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
+            } else {
+                currentLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);
+            }
+        }
+    }
+}

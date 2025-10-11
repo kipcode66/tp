@@ -19,10 +19,54 @@ class gzFrameworkMenu_c;
 class gzSettingsMenu_c;
 class gzToolsMenu_c;
 
+// class gzMainMenu_c : public gzMenu_c {
+// public:
+
+//     enum gzMainMenu_Menus_e {
+//         MENU_CHEATS,
+//         MENU_FLAGS,
+//         MENU_FRAMEWORK,
+//         MENU_INVENTORY,
+//         MENU_MEMORY,
+//         MENU_PRACTICE,
+//         MENU_SCENE,
+//         MENU_SETTINGS,
+//         MENU_TOOLS,
+//         MENU_WARPING,
+
+//         MENU_MAX
+//     };
+
+//     enum gzMainMenu_Haihai_e {
+//         ARROW_LEFT = 1,
+//         ARROW_DOWN = 2,
+//         ARROW_RIGHT = 4,
+//         ARROW_UP = 8
+//     };
+
+//     gzMainMenu_c();
+//     ~gzMainMenu_c();
+
+//     virtual void _delete();
+//     virtual void execute();
+//     virtual void draw();
+
+//     static const int LINE_NUM = MENU_MAX;
+
+//     gzTextBox* mpLines[LINE_NUM];
+//     gzMenu_c* mpMenus[LINE_NUM];
+//     gzFrameworkMenu_c* mpFrameworkMenu;
+//     gzSettingsMenu_c* mpSettingsMenu;
+//     gzToolsMenu_c* mpToolsMenu;
+
+//     dSelect_cursor_c* mpDrawCursor;
+//     dMeterHaihai_c* mpMeterHaihai;
+// };
+
 class gzMainMenu_c : public gzMenu_c {
 public:
 
-    enum gzMainMenu_Menus_e {
+    enum {
         MENU_CHEATS,
         MENU_FLAGS,
         MENU_FRAMEWORK,
@@ -51,7 +95,10 @@ public:
     virtual void execute();
     virtual void draw();
 
+    void setXPos(f32 i_pos) { mXPos = i_pos; }
+
     static const int LINE_NUM = MENU_MAX;
+private:
 
     gzTextBox* mpLines[LINE_NUM];
     gzMenu_c* mpMenus[LINE_NUM];
@@ -61,6 +108,13 @@ public:
 
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
+
+    f32 mXPos;
+    bool mTransitioning;
+    u32 mTransitionStart;
+    u32 mTransitionAge;
+    u32 mTransitionDuration;
+    
 };
 
 class gzCreditsMenu_c;
@@ -266,9 +320,62 @@ public:
     char mString[MAX_STRING_LEN];
 };
 
+class gzPracticeMenu_c : public gzMenu_c {
+public:
+    gzPracticeMenu_c();
+    ~gzPracticeMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+
+    static const int ANY_LINE_NUM = 20;
+    static const int ALL_DUNGEONS_LINE_NUM = 20;
+    static const int HUNDO_LINE_NUM = 20;
+
+    enum gzPracticeMenu_Tab_e {
+        TAB_ANY,
+        TAB_ALLDUNGEONS,
+        TAB_HUNDO,
+
+        TAB_MAX
+    };
+
+private:
+    gzTextBox* mpTabHeaders[TAB_MAX];
+    gzTextBox* mpLinesAny[ANY_LINE_NUM];
+    gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
+    gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
+    int mTopLine;
+    int mCurrentTab;
+};
+
+// gz_memory.h
+
+class gzMemoryMenu_c : public gzMenu_c {
+public:
+    gzMemoryMenu_c();
+    ~gzMemoryMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+
+    void setXPos(f32 x);
+
+    static const int LINE_NUM = 20;
+
+private:
+    gzTextBox* mpLines[LINE_NUM];
+    int mTopLine;
+    f32 mXPos;
+};
+
 inline void gzChangeMenu(gzMenu_c* i_menu) {
     g_gzInfo.mpCurrentMenu = i_menu;
     g_gzInfo.mInputWaitTimer = 5;
 }
+
+
 
 #endif
