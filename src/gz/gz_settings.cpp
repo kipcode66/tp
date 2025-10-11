@@ -296,6 +296,11 @@ void gzSettingsMenu_c::_delete() {
 }
 
 void gzSettingsMenu_c::execute() {
+    if (g_gzInfo.mInputWaitTimer != 0) {
+        g_gzInfo.mInputWaitTimer--;
+        return;
+    }
+    
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
@@ -332,7 +337,13 @@ void gzSettingsMenu_c::execute() {
     }
 
     if (gzPad::getTrigB()) {
-        if (mOption) mOption = false;
+        if (mOption) {
+            mOption = false;
+        } else {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_SETTINGS;
+            return;
+        }
     }
 
     if (gzPad::getTrigRight()) {
@@ -366,36 +377,32 @@ void gzSettingsMenu_c::execute() {
     }
 
     if (gzPad::getTrigLeft()) {
-        if (!mOption) {
-            l_cursor->x--;
-            l_cursor->y = gzMainMenu_c::MENU_SETTINGS;
-            return;
-        }
-
-        switch (l_cursor->y) {
-        case SETTING_AREA_RELOAD_BEHAVIOR:
-            gzInfo_setAreaReload(!gzInfo_isAreaReload());
-            break;
-        case SETTING_CURSOR_TYPE:
-            gzInfo_setCursorType(gzInfo_previousCursorType());
-            break;
-        case SETTING_DISPLAY_MODE: {
-            bool display_mode = gzInfo_getDisplayMode();
-            display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-            gzInfo_setDisplayMode(!display_mode);
-            break;
-        }
-        case SETTING_DROP_SHADOW:
-            gzInfo_setDropShadows(!gzInfo_isDropShadows());
-            break;
-        case SETTING_MENU_PAUSES_GAME:
-            break;
-        case SETTING_SWAP_EQUIPS:
-            gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
-            break;
-        case SETTING_TEXT_COLOR:
-            gzInfo_setTextColor(cycleTextColor(false));
-            break;
+        if (mOption) {
+            switch (l_cursor->y) {
+            case SETTING_AREA_RELOAD_BEHAVIOR:
+                gzInfo_setAreaReload(!gzInfo_isAreaReload());
+                break;
+            case SETTING_CURSOR_TYPE:
+                gzInfo_setCursorType(gzInfo_previousCursorType());
+                break;
+            case SETTING_DISPLAY_MODE: {
+                bool display_mode = gzInfo_getDisplayMode();
+                display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
+                gzInfo_setDisplayMode(!display_mode);
+                break;
+            }
+            case SETTING_DROP_SHADOW:
+                gzInfo_setDropShadows(!gzInfo_isDropShadows());
+                break;
+            case SETTING_MENU_PAUSES_GAME:
+                break;
+            case SETTING_SWAP_EQUIPS:
+                gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
+                break;
+            case SETTING_TEXT_COLOR:
+                gzInfo_setTextColor(cycleTextColor(false));
+                break;
+            }
         }
     }
 

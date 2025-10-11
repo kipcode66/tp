@@ -132,6 +132,11 @@ void gzFrameworkMenu_c::setActiveProcesses() {
 }
 
 void gzFrameworkMenu_c::execute() {
+    if (g_gzInfo.mInputWaitTimer != 0) {
+        g_gzInfo.mInputWaitTimer--;
+        return;
+    }
+    
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (gzPad::getTrigDown()) {
@@ -162,7 +167,7 @@ void gzFrameworkMenu_c::execute() {
         }
     }
 
-    if (gzPad::getTrigLeft()) {
+    if (gzPad::getTrigB()) {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
         return;

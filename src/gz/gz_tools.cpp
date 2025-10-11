@@ -83,6 +83,11 @@ void gzToolsMenu_c::_delete() {
 }
 
 void gzToolsMenu_c::execute() {
+    if (g_gzInfo.mInputWaitTimer != 0) {
+        g_gzInfo.mInputWaitTimer--;
+        return;
+    }
+    
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
@@ -97,7 +102,13 @@ void gzToolsMenu_c::execute() {
     }
 
     if (gzPad::getTrigB()) {
-        if (mOption) mOption = false;
+        if (mOption) {
+            mOption = false;
+        } else {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_TOOLS;
+            return;
+        }
     }
 
     if (gzPad::getTrigRight()) {
@@ -111,16 +122,12 @@ void gzToolsMenu_c::execute() {
     }
 
     if (gzPad::getTrigLeft()) {
-        if (!mOption) {
-            l_cursor->x--;
-            l_cursor->y = gzMainMenu_c::MENU_TOOLS;
-            return;
-        }
-
-        switch (l_cursor->y) {
-        case TOOL_MOVE_LINK:
-            gzInfo_offMoveLink();
-            break;
+        if (mOption) {
+            switch (l_cursor->y) {
+            case TOOL_MOVE_LINK:
+                gzInfo_offMoveLink();
+                break;
+            }
         }
     }
 

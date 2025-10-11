@@ -69,19 +69,18 @@ void gzMainMenu_c::execute() {
         gzChangeMenu(mpMenus[l_cursor->y]);
     }
 
-    if (gzPad::getTrigRight()) {
-        if (g_gzInfo.mpCurrentMenu != NULL) {
-            l_cursor->x++;
-            l_cursor->y = 0; // TODO(Pheenoh): QoL improvement - remember l_cursor->y in sub menu instead of always 0
-        }
-    }
-
     if (gzPad::getTrigB()) {
         g_gzInfo.mDisplay = false;
         return;
     }
 
     if (gzPad::getTrigA()) {
+        if (g_gzInfo.mpCurrentMenu != NULL) {
+            l_cursor->x++;
+            l_cursor->y = 0; // TODO(Pheenoh): QoL improvement - remember l_cursor->y in sub menu instead of always 0
+            g_gzInfo.mInputWaitTimer = 2;
+        }
+        
         switch (l_cursor->y) {
         case MENU_WARPING:
             scene_class* playScene = fopScnM_SearchByID(dStage_roomControl_c::getProcID());
@@ -98,15 +97,6 @@ void gzMainMenu_c::draw() {
     static const f32 X_ALIGNMENT = 40.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
-    static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
-    static const f32 HAIHAI_X = 160.0f;
-    static const f32 HAIHAI_Y = 160.0f;
-
-    mpMeterHaihai->_execute(0);
-
-    J2DTextBox::TFontSize font_size;
-    mpLines[0]->getFontSize(font_size); // assume all have the same font size
-    mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
 
     for (int i = 0; i < LINE_NUM; i++) {
         if (mpLines[i] != NULL) {
@@ -116,12 +106,6 @@ void gzMainMenu_c::draw() {
                 mpLines[i]->draw(X_ALIGNMENT, y_pos, gzInfo_getTextColor());
             } else {
                 mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
-            }
-
-            if (l_cursor->x == 0) {
-                mpMeterHaihai->drawHaihai(dMeterHaihai_c::DIR_RIGHT_e, HAIHAI_X, HAIHAI_Y, 0.0f, 0.0f);
-            } else {
-                mpMeterHaihai->drawHaihai(dMeterHaihai_c::DIR_LEFT_e, HAIHAI_X, HAIHAI_Y, 0.0f, 0.0f);
             }
         }
     }
