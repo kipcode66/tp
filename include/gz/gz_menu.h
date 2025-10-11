@@ -249,6 +249,23 @@ private:
     bool mOption;
 };
 
+class gzKeyboardMenu_c : public gzMenu_c {
+public:
+    gzKeyboardMenu_c();
+    ~gzKeyboardMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+
+    static const int MAX_STRING_LEN = 20;
+
+    gzTextBox* mpCharacters[65];
+    gzTextBox* mpStringBox;
+    int mStringIndex;
+    char mString[MAX_STRING_LEN];
+};
+
 inline void gzChangeMenu(gzMenu_c* i_menu) {
     g_gzInfo.mpCurrentMenu = i_menu;
     g_gzInfo.mInputWaitTimer = 5;
