@@ -329,14 +329,19 @@ public:
     virtual void execute();
     virtual void draw();
 
+    static const int VISIBLE_TABS = 3;
+
     static const int ANY_LINE_NUM = 20;
     static const int ALL_DUNGEONS_LINE_NUM = 20;
     static const int HUNDO_LINE_NUM = 20;
 
     enum gzPracticeMenu_Tab_e {
         TAB_ANY,
-        TAB_ALLDUNGEONS,
+        TAB_BITE,
         TAB_HUNDO,
+        TAB_ALLDUNGEONS,
+        TAB_GLITCHLESS,
+        TAB_MEMFILES,
 
         TAB_MAX
     };
@@ -346,6 +351,7 @@ private:
     gzTextBox* mpLinesAny[ANY_LINE_NUM];
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
     gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
+    dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
     int mCurrentTab;
 };
