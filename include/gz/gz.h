@@ -30,6 +30,14 @@ struct gzSettings_s {
     gzCommandCombos_s mCommandCombos;
 };
 
+// tpgz config file header
+struct gzConfigHeader_s {
+    u32 version;
+    u32 settingsOffset;
+
+    u8 reserved[0x20 - 0x8];
+};
+
 // used for checking whether or not to apply 
 struct gzButtonFlags_s {
     bool mMoveLink;
@@ -42,6 +50,8 @@ struct gzCursor {
 
 class gzInfo_c {
 public:
+    static const int GZ_SAVE_VERSION = 1;
+
     gzInfo_c() { mGZInitialized = false; };
 
     enum gzInfoMenu_CursorType_e {

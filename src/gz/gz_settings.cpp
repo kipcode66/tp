@@ -318,6 +318,7 @@ void gzSettingsMenu_c::execute() {
             break;
         case SETTING_SAVE_CARD:
             //gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, NULL, returnToSettings, "save settings?");
+            g_gzInfo.storeSettingsMemcard(); // temp
             return;
         case SETTING_LOAD_CARD:
             gzInfo_loadSettingsMemcard();
