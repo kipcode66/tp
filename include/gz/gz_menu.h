@@ -341,6 +341,9 @@ public:
     virtual void execute();
     virtual void draw();
 
+    int readMemfileNames();
+    int deleteMemfile(int i_slotNo);
+
     static const int VISIBLE_TABS = 3;
 
     static const int ANY_LINE_NUM = 20;
