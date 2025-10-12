@@ -57,12 +57,12 @@ void gzKeyboardMenu_c::_delete() {
     mpStringBox = NULL;
 }
 
-void gzKeyboardMenu_c::execute() {
+int gzKeyboardMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (g_gzInfo.mInputWaitTimer != 0) {
         g_gzInfo.mInputWaitTimer--;
-        return;
+        return 0;
     }
 
     if (gzPad::getTrigRight()) {
@@ -100,12 +100,11 @@ void gzKeyboardMenu_c::execute() {
         }
     }
 
-    // TODO: have actual handling for returning to menu where keyboard was entered from
     if (gzPad::getTrigB()) {
-        l_cursor->x--;
-        l_cursor->y = 0;
-        return;
+        return 1;
     }
+
+    return 0;
 }
 
 void gzKeyboardMenu_c::draw() {

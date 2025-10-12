@@ -303,14 +303,14 @@ private:
     bool mOption;
 };
 
-class gzKeyboardMenu_c : public gzMenu_c {
+class gzKeyboardMenu_c {
 public:
     gzKeyboardMenu_c();
     ~gzKeyboardMenu_c();
 
-    virtual void _delete();
-    virtual void execute();
-    virtual void draw();
+    void _delete();
+    int execute();
+    void draw();
 
     static const int MAX_STRING_LEN = 20;
 
@@ -335,6 +335,8 @@ public:
     static const int ALL_DUNGEONS_LINE_NUM = 20;
     static const int HUNDO_LINE_NUM = 20;
 
+    static const int MEMFILE_MAX_NUM = 20;  // TODO: should this be variable or capped?
+
     enum gzPracticeMenu_Tab_e {
         TAB_ANY,
         TAB_BITE,
@@ -351,9 +353,13 @@ private:
     gzTextBox* mpLinesAny[ANY_LINE_NUM];
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
     gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
+    gzTextBox* mpLinesMemfiles[MEMFILE_MAX_NUM];
+    gzTextBox* mpLinesNewMemfile;
+    gzKeyboardMenu_c* mpKeyboard;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
     int mCurrentTab;
+    int mMemfileNum;
 };
 
 // gz_memory.h
