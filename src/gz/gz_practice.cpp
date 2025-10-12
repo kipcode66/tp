@@ -35,9 +35,15 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
         if (i % 2 == 1) mpLinesHundo[i]->setString("d");
     }
 
+    for (int i = 0; i < MEMFILE_MAX_NUM; i++) {
+        mpLinesMemfiles[i] = new gzTextBox;
+        mpLinesMemfiles[i]->setStringf("%d. -- empty --", i + 1);
+    }
+
     mTopLine = 0;
 
     mpMeterHaihai = new dMeterHaihai_c(3);
+    mpKeyboard = NULL;
 }
 
 gzPracticeMenu_c::~gzPracticeMenu_c() {
@@ -68,6 +74,14 @@ void gzPracticeMenu_c::_delete() {
     }
 }
 
+static int memfileNameFinishCb(gzKeyboardMenu_c* i_keyboard, void* i_data) {
+    gzPracticeMenu_c* menu = (gzPracticeMenu_c*)i_data;
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    menu->mpLinesMemfiles[l_cursor->y]->setStringf("%d. %s", l_cursor->y + 1, i_keyboard->mString);
+    return 1;
+}
+
 void gzPracticeMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
     int current_max_line;
@@ -82,10 +96,33 @@ void gzPracticeMenu_c::execute() {
     case TAB_HUNDO:
         current_max_line = HUNDO_LINE_NUM;
         break;
+    case TAB_MEMFILES:
+        // temp for debugging, these should be handled by dedicated tab execute functions
+        if (mpKeyboard != NULL) {
+            int rt = mpKeyboard->execute();
+            if (rt == 1 || rt == 2) {
+                delete mpKeyboard;
+                mpKeyboard = NULL;
+            }
+            return;
+        }
+
+        if (gzPad::getTrigA()) {
+            mpKeyboard = new gzKeyboardMenu_c(memfileNameFinishCb, NULL, this);
+        }
+
+        if (gzPad::getTrigZ()) {
+            // TODO: handle actual memfile deletion
+            mpLinesMemfiles[l_cursor->y]->setString("");
+        }
+
+        current_max_line = MEMFILE_MAX_NUM;
+        break;
+    default:  // temp
+        current_max_line = ANY_LINE_NUM;
+        break;
     }
 
-    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % current_max_line;
-    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
     if (gzPad::getTrigRight()) mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
     if (gzPad::getTrigLeft()) mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
 
@@ -96,6 +133,12 @@ void gzPracticeMenu_c::execute() {
     }
 
     mpMeterHaihai->_execute(0);
+
+    if (current_max_line == 0)
+        return;
+
+    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % current_max_line;
+    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
 }
 
 void gzPracticeMenu_c::draw() {
@@ -119,6 +162,11 @@ void gzPracticeMenu_c::draw() {
     int current_max_line;
     gzTextBox** currentLines;
 
+    if (mpKeyboard != NULL) {
+        mpKeyboard->draw();
+        return;
+    }
+
     // Draw tab headers
     for (int i = 0; i < VISIBLE_TABS; i++) {
         // TODO: normalize x positions so text doesn't overwrite itself
@@ -137,6 +185,10 @@ void gzPracticeMenu_c::draw() {
     case TAB_HUNDO:
         current_max_line = HUNDO_LINE_NUM;
         currentLines = mpLinesHundo;
+        break;
+    case TAB_MEMFILES:
+        current_max_line = MEMFILE_MAX_NUM;
+        currentLines = mpLinesMemfiles;
         break;
     default: // temp
         current_max_line = ANY_LINE_NUM;

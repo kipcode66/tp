@@ -255,19 +255,31 @@ private:
     bool mOption;
 };
 
-class gzKeyboardMenu_c : public gzMenu_c {
+class gzKeyboardMenu_c {
 public:
-    gzKeyboardMenu_c();
+    typedef int (*kbCallback)(gzKeyboardMenu_c* i_keyboard, void* i_data);
+
+    gzKeyboardMenu_c() {}
+    gzKeyboardMenu_c(kbCallback finishCb, kbCallback returnCb, void* cbData);
     ~gzKeyboardMenu_c();
 
-    virtual void _delete();
-    virtual void execute();
-    virtual void draw();
+    void _delete();
+    int execute();
+    void draw();
+
+    void setCallbacks(kbCallback finishCb, kbCallback returnCb, void* cbData) {
+        mFinishCb = finishCb;
+        mReturnCb = returnCb;
+        mpCbData = cbData;
+    }
 
     static const int MAX_STRING_LEN = 20;
 
     gzTextBox* mpCharacters[65];
     gzTextBox* mpStringBox;
+    kbCallback mFinishCb;
+    kbCallback mReturnCb;
+    void* mpCbData;
     int mStringIndex;
     char mString[MAX_STRING_LEN];
 };
@@ -287,6 +299,8 @@ public:
     static const int ALL_DUNGEONS_LINE_NUM = 20;
     static const int HUNDO_LINE_NUM = 20;
 
+    static const int MEMFILE_MAX_NUM = 20;  // TODO: should this be variable or capped?
+
     enum gzPracticeMenu_Tab_e {
         TAB_ANY,
         TAB_BITE,
@@ -298,11 +312,12 @@ public:
         TAB_MAX
     };
 
-private:
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzTextBox* mpLinesAny[ANY_LINE_NUM];
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
     gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
+    gzTextBox* mpLinesMemfiles[MEMFILE_MAX_NUM];
+    gzKeyboardMenu_c* mpKeyboard;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
     int mCurrentTab;

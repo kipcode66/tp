@@ -24,7 +24,7 @@ static char l_keyboard[] = {
 
 static gzCursor l_key_cursor = {0, 0};
 
-gzKeyboardMenu_c::gzKeyboardMenu_c() {
+gzKeyboardMenu_c::gzKeyboardMenu_c(kbCallback finishCb, kbCallback returnCb, void* cbData) {
     gzCursor* l_cursor = gzInfo_getCursor();
     OSReport("creating gzKeyboardMenu_c\n");
 
@@ -39,6 +39,8 @@ gzKeyboardMenu_c::gzKeyboardMenu_c() {
     mpStringBox = new gzTextBox();
     memset(mString, 0, sizeof(mString));
     mStringIndex = 0;
+
+    setCallbacks(finishCb, returnCb, cbData);
 }
 
 gzKeyboardMenu_c::~gzKeyboardMenu_c() {
@@ -57,12 +59,12 @@ void gzKeyboardMenu_c::_delete() {
     mpStringBox = NULL;
 }
 
-void gzKeyboardMenu_c::execute() {
+int gzKeyboardMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (g_gzInfo.mInputWaitTimer != 0) {
         g_gzInfo.mInputWaitTimer--;
-        return;
+        return 0;
     }
 
     if (gzPad::getTrigRight()) {
@@ -100,12 +102,19 @@ void gzKeyboardMenu_c::execute() {
         }
     }
 
-    // TODO: have actual handling for returning to menu where keyboard was entered from
-    if (gzPad::getTrigB()) {
-        l_cursor->x--;
-        l_cursor->y = 0;
-        return;
+    if (gzPad::getTrigStart()) {
+        if (mFinishCb != NULL)
+            mFinishCb(this, mpCbData);
+        return 2;
     }
+
+    if (gzPad::getTrigB()) {
+        if (mReturnCb != NULL)
+            mReturnCb(this, mpCbData);
+        return 1;
+    }
+
+    return 0;
 }
 
 void gzKeyboardMenu_c::draw() {
