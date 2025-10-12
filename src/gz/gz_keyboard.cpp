@@ -69,18 +69,22 @@ int gzKeyboardMenu_c::execute() {
 
     if (gzPad::getTrigRight()) {
         l_key_cursor.x = (l_key_cursor.x + 1) % CHARACTER_COLUMNS;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
     
     if (gzPad::getTrigLeft()) {
         l_key_cursor.x = (l_key_cursor.x - 1 + CHARACTER_COLUMNS) % CHARACTER_COLUMNS;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
 
     if (gzPad::getTrigDown()) {
         l_key_cursor.y = (l_key_cursor.y + 1) % CHARACTER_ROWS;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
 
     if (gzPad::getTrigUp()) {
         l_key_cursor.y = (l_key_cursor.y - 1 + CHARACTER_ROWS) % CHARACTER_ROWS;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
 
     // Add selected character when A is pressed
@@ -89,6 +93,7 @@ int gzKeyboardMenu_c::execute() {
             mString[mStringIndex] = l_keyboard[l_key_cursor.y + l_key_cursor.x * CHARACTER_ROWS];
             mpStringBox->setString(mString);
             mStringIndex++;
+            gzInfo_seStart(Z2SE_SY_NAME_INPUT);
         }
     }
 
@@ -99,18 +104,21 @@ int gzKeyboardMenu_c::execute() {
             mStringIndex--;
             mString[mStringIndex] = '\0';
             mpStringBox->setString(mString);
+            gzInfo_seStart(Z2SE_SY_NAME_DELETE);
         }
     }
 
     if (gzPad::getTrigStart()) {
         if (mFinishCb != NULL)
             mFinishCb(this, mpCbData);
+        gzInfo_seStart(Z2SE_SY_NAME_OK);
         return 2;
     }
 
     if (gzPad::getTrigB()) {
         if (mReturnCb != NULL)
             mReturnCb(this, mpCbData);
+        gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         return 1;
     }
 
