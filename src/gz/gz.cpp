@@ -158,17 +158,12 @@ int gzInfo_c::storeSettingsMemcard() {
     if (ret == CARD_RESULT_READY || ret == CARD_RESULT_EXIST) {
         ret = CARDOpen(0, "tpgzcfg", &file);
         if (ret == CARD_RESULT_READY) {
+            gzConfigHeader_s cfg;
+            cfg.version = GZ_SAVE_VERSION;
+            cfg.settingsOffset = sizeof(gzConfigHeader_s);
 
-            gzSettings_s settings;
-            settings.mTextColor = mSettings.mTextColor;
-            settings.mAreaReload = mSettings.mAreaReload;
-            settings.mCursorType = mSettings.mCursorType;
-            settings.mDropShadows = mSettings.mDropShadows;
-            settings.mSwapEquips = mSettings.mSwapEquips;
-            settings.mDisplayMode = mSettings.mDisplayMode;
-            settings.mMenuPausesGame = mSettings.mMenuPausesGame;
-
-            memcpy(mDoMemCd_Ctrl_c::sTmpBuf, &settings, sizeof(gzSettings_s));
+            memcpy(mDoMemCd_Ctrl_c::sTmpBuf, &cfg, sizeof(gzConfigHeader_s));
+            memcpy(mDoMemCd_Ctrl_c::sTmpBuf + cfg.settingsOffset, &mSettings, sizeof(gzSettings_s));
 
             ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
             if (ret == CARD_RESULT_READY) {
@@ -198,16 +193,16 @@ int gzInfo_c::loadSettingsMemcard() {
         if (ret == CARD_RESULT_READY) {
             OSReport("loaded tpgz settings from memcard!\n");
             gzInfo_sendNotification("settings loaded!");
-            gzSettings_s settings;
-            memcpy(&settings, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzSettings_s));
 
-            mSettings.mTextColor = settings.mTextColor;
-            mSettings.mAreaReload = settings.mAreaReload;
-            mSettings.mCursorType = settings.mCursorType;
-            mSettings.mDropShadows = settings.mDropShadows;
-            mSettings.mSwapEquips = settings.mSwapEquips;
-            mSettings.mDisplayMode = settings.mDisplayMode;
-            mSettings.mMenuPausesGame = settings.mMenuPausesGame;
+            gzConfigHeader_s cfg;
+            memcpy(&cfg, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzConfigHeader_s));
+            if (cfg.version != GZ_SAVE_VERSION) {
+                OSReport("outdated tpgz save version!\n");
+                return -1;
+            }
+
+            gzSettings_s settings;
+            memcpy(&mSettings, mDoMemCd_Ctrl_c::sTmpBuf + cfg.settingsOffset, sizeof(gzSettings_s));
         }
 
         CARDClose(&file);

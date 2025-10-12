@@ -11,8 +11,11 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     }
 
     mpTabHeaders[TAB_ANY]->setString("any%");
+    mpTabHeaders[TAB_BITE]->setString("any% bite");
+    mpTabHeaders[TAB_HUNDO]->setString("100%");
     mpTabHeaders[TAB_ALLDUNGEONS]->setString("all dungeons");
-    mpTabHeaders[TAB_HUNDO]->setString("hundo");
+    mpTabHeaders[TAB_GLITCHLESS]->setString("glitchless");
+    mpTabHeaders[TAB_MEMFILES]->setString("memfiles");
 
     for (int i = 0; i < ANY_LINE_NUM; i++) {
         mpLinesAny[i] = new gzTextBox;
@@ -33,6 +36,8 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     }
 
     mTopLine = 0;
+
+    mpMeterHaihai = new dMeterHaihai_c(3);
 }
 
 gzPracticeMenu_c::~gzPracticeMenu_c() {
@@ -81,14 +86,16 @@ void gzPracticeMenu_c::execute() {
 
     if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % current_max_line;
     if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
-    if (gzPad::getTrigR()) mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
-    if (gzPad::getTrigL()) mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
+    if (gzPad::getTrigRight()) mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
+    if (gzPad::getTrigLeft()) mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
 
     if (gzPad::getTrigB()) {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_PRACTICE;
         return;
     }
+
+    mpMeterHaihai->_execute(0);
 }
 
 void gzPracticeMenu_c::draw() {
@@ -113,8 +120,9 @@ void gzPracticeMenu_c::draw() {
     gzTextBox** currentLines;
 
     // Draw tab headers
-    for (int c = 0; c < TAB_MAX; c++) {
-        mpTabHeaders[c]->draw(X_POS[c], Y_HEADER, c == mCurrentTab ? cursor_color : COLOR_WHITE);
+    for (int i = 0; i < VISIBLE_TABS; i++) {
+        // TODO: normalize x positions so text doesn't overwrite itself
+        mpTabHeaders[(mCurrentTab + i) % TAB_MAX]->draw(X_POS[i], Y_HEADER, i == 0 ? cursor_color : COLOR_WHITE);
     }
 
     switch (mCurrentTab) {
@@ -129,6 +137,10 @@ void gzPracticeMenu_c::draw() {
     case TAB_HUNDO:
         current_max_line = HUNDO_LINE_NUM;
         currentLines = mpLinesHundo;
+        break;
+    default: // temp
+        current_max_line = ANY_LINE_NUM;
+        currentLines = mpLinesAny;
         break;
     }
 
@@ -152,10 +164,15 @@ void gzPracticeMenu_c::draw() {
             f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
 
             if (l_cursor->y == lineIdx && l_cursor->x > 0) {
-                currentLines[lineIdx]->draw(X_ALIGNMENT, y_pos, cursor_color, HBIND_CENTER);
+                currentLines[lineIdx]->draw(200.0f, y_pos, cursor_color);
             } else {
-                currentLines[lineIdx]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE, HBIND_CENTER);
+                currentLines[lineIdx]->draw(200.0f, y_pos, COLOR_WHITE);
             }
         }
+    }
+
+    if (mpMeterHaihai != NULL && l_cursor->x > 0) {
+        // TODO: make sure haihai always fits tabs
+        mpMeterHaihai->drawHaihai(gzMainMenu_c::ARROW_LEFT | gzMainMenu_c::ARROW_RIGHT, 335.0f, 50.0f, 320.0f, 0.0f);
     }
 }
