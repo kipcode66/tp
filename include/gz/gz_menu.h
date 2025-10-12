@@ -295,9 +295,6 @@ public:
     virtual void execute();
     virtual void draw();
 
-    int readMemfileNames();
-    int deleteMemfile(int i_slotNo);
-
     static const int VISIBLE_TABS = 3;
 
     static const int ANY_LINE_NUM = 20;
@@ -317,12 +314,25 @@ public:
         TAB_MAX
     };
 
+    class gzMemfileTab_c {
+    public:
+        void create();
+        int execute();
+        void draw();
+
+        int readMemfileNames();
+        int deleteMemfile(int i_slotNo);
+        static int memfileNameFinishCb(gzKeyboardMenu_c* i_keyboard, void* i_data);
+
+        gzTextBox* mpLines[MEMFILE_MAX_NUM];
+        gzKeyboardMenu_c* mpKeyboard;
+    };
+
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzTextBox* mpLinesAny[ANY_LINE_NUM];
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
     gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
-    gzTextBox* mpLinesMemfiles[MEMFILE_MAX_NUM];
-    gzKeyboardMenu_c* mpKeyboard;
+    gzMemfileTab_c mMemfileTab;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
     int mCurrentTab;
