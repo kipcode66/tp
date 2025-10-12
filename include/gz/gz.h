@@ -103,7 +103,7 @@ public:
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
     bool isMoveLink() { return mSettings.mMoveLink; }
-    bool setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
+    void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
     gzCursor* getCursor() { return &mCursor; }
 
     void seStart(u32 i_sfxID) {
