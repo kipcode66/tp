@@ -35,8 +35,15 @@ void gzMemoryMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
     int current_max_line = LINE_NUM;
 
-    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % current_max_line;
-    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
+    if (gzPad::getTrigDown()) {
+        l_cursor->y = (l_cursor->y + 1) % current_max_line;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
+
+    if (gzPad::getTrigUp()) {
+        l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
 
     if (gzPad::getTrigB()) {
         l_cursor->x--;
@@ -45,6 +52,7 @@ void gzMemoryMenu_c::execute() {
         // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
         mXPos = 240.0f;
         ((gzMainMenu_c*)g_gzInfo.mpMainMenu)->setXPos(40.0f);
+        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
         return;
     }
 }

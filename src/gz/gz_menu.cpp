@@ -43,7 +43,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mXPos = 40.0f;
     mTransitioning = false;
     mTransitionStart = 0;
-    mTransitionDuration = 10.0f;
+    mTransitionDuration = 5.0f;
 }
 
 gzMainMenu_c::~gzMainMenu_c() {
@@ -67,11 +67,13 @@ void gzMainMenu_c::execute() {
 
     if (gzPad::getTrigDown()) {
         l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
         gzChangeMenu(mpMenus[l_cursor->y]);
     }
 
     if (gzPad::getTrigUp()) {
         l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
         gzChangeMenu(mpMenus[l_cursor->y]);
     }
 
@@ -89,6 +91,7 @@ void gzMainMenu_c::execute() {
             l_cursor->x++;
             l_cursor->y = 0; // TODO(Pheenoh): QoL improvement - remember l_cursor->y in sub menu instead of always 0
             g_gzInfo.mInputWaitTimer = 2;
+            gzInfo_seStart(Z2SE_SY_EXP_WIN_OPEN);
         }
 
         switch (l_cursor->y) {

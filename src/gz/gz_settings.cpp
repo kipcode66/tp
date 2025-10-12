@@ -2,7 +2,6 @@
 
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
-#include "m_Do/m_Do_machine.h"
 
 #define COLOR_AMETHYST 0x9966FFFF
 #define COLOR_AQUAMARINE 0x71D9E2FF
@@ -95,62 +94,33 @@ static u32 l_textColorValue[] = {
 
 u8 gzSettingsMenu_c::getHaihaiFlags(int i) {
     u8 haihai_flags = ARROW_LEFT | ARROW_RIGHT;
+
     switch (i) {
-    case SETTING_AREA_RELOAD_BEHAVIOR:
-        if (!gzInfo_isAreaReload()) {
-            haihai_flags &= ~ARROW_LEFT;
-        } else {
-            haihai_flags &= ~ARROW_RIGHT;
-        }
+    case SETTING_RELOAD_TYPE:
+        !gzInfo_getReloadType() ? haihai_flags &= ~ARROW_LEFT : haihai_flags &= ~ARROW_RIGHT;
         break;
     case SETTING_CURSOR_TYPE: {
-        u8 type = gzInfo_getCursorType();
-        if (type == gzInfo_c::CURSOR_CLASSIC) {
-            haihai_flags &= ~ARROW_LEFT;
-        } else if (type == gzInfo_c::CURSOR_BOTH) {
-            haihai_flags &= ~ARROW_RIGHT;
-        }
         break;
     }
     case SETTING_DISPLAY_MODE:
-        if (!gzInfo_getDisplayMode()) {
-            haihai_flags &= ~ARROW_LEFT;
-        } else {
-            haihai_flags &= ~ARROW_RIGHT;
-        }
+        !gzInfo_getDisplayMode() ? haihai_flags &= ~ARROW_LEFT : haihai_flags &= ~ARROW_RIGHT;
         break;
     case SETTING_DROP_SHADOW:
-        if (!gzInfo_isDropShadows()) {
-            haihai_flags &= ~ARROW_LEFT;
-        } else {
-            haihai_flags &= ~ARROW_RIGHT;
-        }
+        !gzInfo_isDropShadows() ? haihai_flags &= ~ARROW_LEFT : haihai_flags &= ~ARROW_RIGHT;
         break;
     case SETTING_MENU_PAUSES_GAME:
+        haihai_flags = 0;
+        break;
+    case SETTING_MENU_SFX:
+        !gzInfo_isMenuSfx() ? haihai_flags &= ~ARROW_LEFT : haihai_flags &= ~ARROW_RIGHT;
+        break;
     case SETTING_FONT:
         haihai_flags = 0;
         break;
     case SETTING_SWAP_EQUIPS:
-        if (!gzInfo_isSwapEquips()) {
-            haihai_flags &= ~ARROW_LEFT;
-        } else {
-            haihai_flags &= ~ARROW_RIGHT;
-        }
+        !gzInfo_isSwapEquips() ? haihai_flags &= ~ARROW_LEFT : haihai_flags &= ~ARROW_RIGHT;
         break;
     case SETTING_TEXT_COLOR: {
-        int currentIndex = -1;
-        for (int j = 0; j < COLOR_COUNT; ++j) {
-            if (gzInfo_getTextColor() == l_textColorValue[j]) {
-                currentIndex = j;
-                break;
-            }
-        }
-        if (currentIndex == 0) {
-            haihai_flags &= ~ARROW_LEFT;
-        }
-        if (currentIndex == COLOR_COUNT - 1) {
-            haihai_flags &= ~ARROW_RIGHT;
-        }
         break;
     }
     }
@@ -194,7 +164,7 @@ static void returnToSettings() {
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
-    mpLineOptions[SETTING_AREA_RELOAD_BEHAVIOR]->setStringf("%s", getAreaReloadText());
+    mpLineOptions[SETTING_RELOAD_TYPE]->setStringf("%s", getReloadTypeText());
     mpLineOptions[SETTING_CURSOR_TYPE]->setStringf("%s", getCursorTypeText());
 
     // Find current color name
@@ -212,6 +182,7 @@ void gzSettingsMenu_c::updateDynamicLines() {
     mpLineOptions[SETTING_SWAP_EQUIPS]->setStringf("%s", getSwapEquipsText());
     mpLineOptions[SETTING_DISPLAY_MODE]->setStringf("%s", getDisplayModeText());
     mpLineOptions[SETTING_MENU_PAUSES_GAME]->setStringf("%s", getMenuPausesGameText());
+    mpLineOptions[SETTING_MENU_SFX]->setStringf("%s", getMenuSfxText());
     mpLineOptions[SETTING_FONT]->setString("rodan");
 
     J2DTextBox::TFontSize font_size;
@@ -245,22 +216,21 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
 
     mpDescription = new gzTextBox();
 
-    // NOTE(Pheenoh): was this really being used? can we delete it?
-    mpLines[SETTING_AREA_RELOAD_BEHAVIOR]->setString("area reload behavior");
-
     mpLines[SETTING_CURSOR_TYPE]->setStringDesc("cursor type", "sets the cursor type to classic, tp or both");
     mpLines[SETTING_DISPLAY_MODE]->setStringDesc("display mode", "change between progressive and interlaced display modes");
     mpLines[SETTING_DROP_SHADOW]->setStringDesc("drop shadows", "adds drop shadows to tpgz menu text");
     mpLines[SETTING_FONT]->setStringDesc("font", "changes tpgz menu font");
-    mpLines[SETTING_MENU_PAUSES_GAME]->setStringDesc("menu pauses game", "whether or not opening the gz menu pauses the game");
+    mpLines[SETTING_MENU_PAUSES_GAME]->setStringDesc("menu pauses game", "opening gz menu pauses game");
+    mpLines[SETTING_MENU_SFX]->setStringDesc("menu sfx", "turn on/off gz menu sound effects");
+    mpLines[SETTING_RELOAD_TYPE]->setStringDesc("reload type", "changes reload type to last file or last area");
     mpLines[SETTING_TEXT_COLOR]->setStringDesc("text color", "changes tpgz menu text color");
     mpLines[SETTING_SWAP_EQUIPS]->setStringDesc("swap equips", "swaps equips when loading practice saves");
     mpLines[SETTING_SAVE_CARD]->setStringDesc("save card", "saves tpgz settings to memory card");
     mpLines[SETTING_LOAD_CARD]->setStringDesc("load card", "loads tpgz settings from memory card");
     mpLines[SETTING_DELETE_CARD]->setStringDesc("delete card", "deletes tpgz settings from memory card");
-    mpLines[SETTING_COMMAND_COMBOS]->setString("command combos");
-    mpLines[SETTING_MENU_POSITIONS]->setString("menu positions");
-    mpLines[SETTING_CREDITS]->setString("credits", "show the tpgz credits");
+    mpLines[SETTING_COMMAND_COMBOS]->setStringDesc("command combos", "change default command combos");
+    mpLines[SETTING_MENU_POSITIONS]->setStringDesc("menu positions", "set positions of overlay menus");
+    mpLines[SETTING_CREDITS]->setStringDesc("credits", "show the tpgz credits");
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
@@ -303,18 +273,27 @@ void gzSettingsMenu_c::execute() {
     
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
-    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
+    if (gzPad::getTrigDown() && !mOption) {
+        l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
+
+    if (gzPad::getTrigUp() && !mOption) {
+        l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
 
     if (gzPad::getTrigA()) {
         switch (l_cursor->y) {
-        case SETTING_AREA_RELOAD_BEHAVIOR:
+        case SETTING_RELOAD_TYPE:
         case SETTING_CURSOR_TYPE:
         case SETTING_DISPLAY_MODE:
         case SETTING_DROP_SHADOW:
         case SETTING_SWAP_EQUIPS:
+        case SETTING_MENU_SFX:
         case SETTING_TEXT_COLOR:
             mOption = !mOption;
+            mOption ? gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK) : gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
             break;
         case SETTING_SAVE_CARD:
             //gzChangeMenu<gzConfirmMenu_c>(storeSettingsCallbackWrapper, NULL, returnToSettings, "save settings?");
@@ -340,9 +319,11 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigB()) {
         if (mOption) {
             mOption = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         } else {
             l_cursor->x--;
             l_cursor->y = gzMainMenu_c::MENU_SETTINGS;
+            gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
             return;
         }
     }
@@ -350,28 +331,46 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigRight()) {
         if (mOption) {
             switch (l_cursor->y) {
-            case SETTING_AREA_RELOAD_BEHAVIOR:
-                gzInfo_setAreaReload(!gzInfo_isAreaReload());
+            case SETTING_RELOAD_TYPE:
+                if (gzInfo_isReloadFile()) {
+                    gzInfo_setReloadArea();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             case SETTING_CURSOR_TYPE:
                 gzInfo_setCursorType(gzInfo_nextCursorType());
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 break;
             case SETTING_DISPLAY_MODE: {
-                bool display_mode = gzInfo_getDisplayMode();
-                display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-                gzInfo_setDisplayMode(!display_mode);
+                if (gzInfo_isDisplayModeInterlaced()) {
+                    gzInfo_setDisplayModeProgressive();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             }
             case SETTING_DROP_SHADOW:
-                gzInfo_setDropShadows(!gzInfo_isDropShadows());
+                if (!gzInfo_isDropShadows()) {
+                    gzInfo_onDropShadows();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             case SETTING_MENU_PAUSES_GAME:
                 break;
+            case SETTING_MENU_SFX:
+                if (!gzInfo_isMenuSfx()) {
+                    gzInfo_onMenuSfx(); 
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
+                break;
             case SETTING_SWAP_EQUIPS:
-                gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
+                if (!gzInfo_isSwapEquips()) {
+                    gzInfo_onSwapEquips(); 
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             case SETTING_TEXT_COLOR:
                 gzInfo_setTextColor(cycleTextColor(true));
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 break;
             }
         }
@@ -380,28 +379,45 @@ void gzSettingsMenu_c::execute() {
     if (gzPad::getTrigLeft()) {
         if (mOption) {
             switch (l_cursor->y) {
-            case SETTING_AREA_RELOAD_BEHAVIOR:
-                gzInfo_setAreaReload(!gzInfo_isAreaReload());
+            case SETTING_RELOAD_TYPE:
+                if (gzInfo_isReloadArea()) {
+                    gzInfo_setReloadFile();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             case SETTING_CURSOR_TYPE:
                 gzInfo_setCursorType(gzInfo_previousCursorType());
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 break;
-            case SETTING_DISPLAY_MODE: {
-                bool display_mode = gzInfo_getDisplayMode();
-                display_mode ? mDoMch_render_c::setProgressiveMode() : mDoMch_render_c::setInterlacedMode();
-                gzInfo_setDisplayMode(!display_mode);
+            case SETTING_DISPLAY_MODE:
+                if (gzInfo_isDisplayModeProgressive()) {
+                    gzInfo_setDisplayModeInterlaced();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
-            }
             case SETTING_DROP_SHADOW:
-                gzInfo_setDropShadows(!gzInfo_isDropShadows());
+                if (gzInfo_isDropShadows()) {
+                    gzInfo_offDropShadows();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             case SETTING_MENU_PAUSES_GAME:
                 break;
+            case SETTING_MENU_SFX:
+                if (gzInfo_isMenuSfx()) {
+                    gzInfo_offMenuSfx();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
+                break;
             case SETTING_SWAP_EQUIPS:
-                gzInfo_setSwapEquips(!gzInfo_isSwapEquips());
+                if (gzInfo_isSwapEquips()) {
+                    gzInfo_offSwapEquips();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             case SETTING_TEXT_COLOR:
                 gzInfo_setTextColor(cycleTextColor(false));
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 break;
             }
         }
@@ -423,6 +439,7 @@ void gzSettingsMenu_c::draw() {
     static const f32 TP_CURSOR_X_OFFSET = 20.0f;
     static const f32 CURSOR_Y_BASE = 90.0f;
     static const f32 LINE_SPACING = 22.0f;
+    static const f32 DESCRIPTION_X = 0.0f;
     static const f32 DESCRIPTION_Y = 420.0f;
 
     updateDynamicLines();
@@ -463,7 +480,7 @@ void gzSettingsMenu_c::draw() {
     if (l_cursor->x > 0) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
             mpDescription->setString(mpLines[l_cursor->y]->m_description);
-            mpDescription->draw(X_ALIGNMENT, DESCRIPTION_Y, cursor_color);
+            mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color, HBIND_CENTER);
         }
     }
 

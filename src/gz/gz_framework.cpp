@@ -149,6 +149,8 @@ void gzFrameworkMenu_c::execute() {
             mSelectedProcess = 0;
             mScrollOffset = 0;
         }
+
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
 
     if (gzPad::getTrigUp()) {
@@ -165,23 +167,28 @@ void gzFrameworkMenu_c::execute() {
                 mScrollOffset = 0;
             }
         }
+
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
 
     if (gzPad::getTrigB()) {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
+        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
         return;
     }
 
     if (gzPad::getTrigA()) {
         mProcessInfos[mSelectedProcess].process->pause_flag = !mProcessInfos[mSelectedProcess].process->pause_flag;
+        gzInfo_seStart(Z2SE_SY_OPTION_SWITCH);
     }
 
     if (gzPad::getTrigZ()) {
-        char* buf;
-        sprintf(buf, "delete %s?", getProcessName(mProcessInfos[mSelectedProcess].process));
-        //gzChangeMenu<gzConfirmMenu_c>(deleteProcess, mProcessInfos[mSelectedProcess].process, returnToFramework, buf);
-        return;
+        // char* buf;
+        // sprintf(buf, "delete %s?", getProcessName(mProcessInfos[mSelectedProcess].process));
+        gzInfo_seStart(Z2SE_SY_FILE_DELETE_OK);
+        // gzChangeMenu<gzConfirmMenu_c>(deleteProcess, mProcessInfos[mSelectedProcess].process, returnToFramework, buf);
+        // return;
     }
 
     mpMeterHaihai->_execute(0);

@@ -1,7 +1,9 @@
 #ifndef GZ_H
 #define GZ_H
 
+#include "d/d_com_inf_game.h"
 #include "m_Do/m_Do_controller_pad.h"
+#include "m_Do/m_Do_machine.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
@@ -22,12 +24,13 @@ struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
     bool mDropShadows;
     bool mSwapEquips;
-    bool mAreaReload;
+    bool mReloadType;
     u8 mCursorType;
     bool mDisplayMode;
     bool mMenuPausesGame;
     bool mMoveLink;
     gzCommandCombos_s mCommandCombos;
+    bool mMenuSfx;
 };
 
 // tpgz config file header
@@ -83,8 +86,9 @@ public:
     void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
     bool isSwapEquips() const { return mSettings.mSwapEquips; }
     void setSwapEquips(bool i_swapEquips) { mSettings.mSwapEquips = i_swapEquips; }
-    bool isAreaReload() const { return mSettings.mAreaReload; }
-    void setAreaReload(bool i_areaReload) { mSettings.mAreaReload = i_areaReload; }
+    bool getReloadType() const { return mSettings.mReloadType; }
+    bool isMenuSfx() const { return mSettings.mMenuSfx; }
+    void setReloadType(bool i_type) { mSettings.mReloadType = i_type; }
     u8 getCursorType() const { return mSettings.mCursorType; }
     void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
     // TODO(Pheenoh): store this as u8 instead
@@ -94,14 +98,17 @@ public:
     void setFont(JUTFont* i_font) { mpFont = i_font; }
     bool isMenuPausesGame() const { return mSettings.mMenuPausesGame; }
     void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
+    void setMenuSfx(bool sfx) { mSettings.mMenuSfx = sfx; }
     u32 getCursorColor() { return getCursorType() & CURSOR_CLASSIC ? getTextColor() : COLOR_WHITE; }
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
     bool isMoveLink() { return mSettings.mMoveLink; }
-    void onMoveLink() { mSettings.mMoveLink = true; }
-    void offMoveLink() { mSettings.mMoveLink = false; }
+    bool setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
     gzCursor* getCursor() { return &mCursor; }
-    
+
+    void seStart(u32 i_sfxID) {
+        if (mSettings.mMenuSfx) mDoAud_seStart(i_sfxID, 0, 0, 0);
+    }
 
     u8 nextCursorType() {
         switch (getCursorType()) {
@@ -151,12 +158,17 @@ inline gzCursor* gzInfo_getCursor() { return g_gzInfo.getCursor(); }
 inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
 inline bool gzInfo_isCursorTypeTP() { return g_gzInfo.isCursorTypeTP(); }
 inline u32 gzInfo_getCursorColor() { return g_gzInfo.getCursorColor(); }
+inline bool gzInfo_isDisplayModeInterlaced() { return g_gzInfo.getDisplayMode() == false; }
+inline bool gzInfo_isDisplayModeProgressive() { return g_gzInfo.getDisplayMode() == true; }
+inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
+inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
 inline const u32 gzInfo_getTextColor() { return g_gzInfo.getTextColor(); }
 inline const u8 gzInfo_getCursorType() { return g_gzInfo.getCursorType(); }
 inline const bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
 inline const bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
 inline const bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
-inline const bool gzInfo_isAreaReload() { return g_gzInfo.isAreaReload(); }
+inline const bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
+inline const bool gzInfo_isMenuSfx() { return g_gzInfo.isMenuSfx(); }
 inline const bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
 inline u8 gzInfo_previousCursorType() { return g_gzInfo.previousCursorType(); }
 inline u8 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
@@ -166,15 +178,28 @@ inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard();
 
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
+inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
 inline void gzInfo_setDropShadows(bool dropShadows) { g_gzInfo.setDropShadows(dropShadows); }
 inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapEquips); }
-inline void gzInfo_setAreaReload(bool areaReload) { g_gzInfo.setAreaReload(areaReload); }
+inline void gzInfo_setReloadType(bool i_type) { g_gzInfo.setReloadType(i_type); }
+inline void gzInfo_setReloadArea() { gzInfo_setReloadType(true); }
+inline void gzInfo_setReloadFile() { gzInfo_setReloadType(false); }
 inline void gzInfo_setCursorType(u8 type) { g_gzInfo.setCursorType(type); }
 inline void gzInfo_setDisplayMode(bool mode) { g_gzInfo.setDisplayMode(mode); }
+inline void gzInfo_setDisplayModeInterlaced() { mDoMch_render_c::setInterlacedMode(); gzInfo_setDisplayMode(false); }
+inline void gzInfo_setDisplayModeProgressive() { mDoMch_render_c::setProgressiveMode(); gzInfo_setDisplayMode(true); }
 inline void gzInfo_setMenuPausesGame(bool opt) { g_gzInfo.setMenuPausesGame(opt); }
-inline void gzInfo_onMoveLink() { g_gzInfo.onMoveLink(); }
-inline void gzInfo_offMoveLink() { g_gzInfo.offMoveLink(); }
+inline void gzInfo_setMenuSfx(bool sfx) { g_gzInfo.setMenuSfx(sfx); }
+inline void gzInfo_setMoveLink(bool i_opt) { g_gzInfo.setMoveLink(i_opt); }
+inline void gzInfo_onMoveLink() { gzInfo_setMoveLink(true); }
+inline void gzInfo_onSwapEquips() { gzInfo_setSwapEquips(true); }
+inline void gzInfo_onDropShadows() { gzInfo_setDropShadows(true); }
+inline void gzInfo_onMenuSfx() { gzInfo_setMenuSfx(true); }
+inline void gzInfo_offMoveLink() { gzInfo_setMoveLink(false); }
+inline void gzInfo_offSwapEquips() { gzInfo_setSwapEquips(false); }
+inline void gzInfo_offDropShadows() { gzInfo_setDropShadows(false); }
+inline void gzInfo_offMenuSfx() { gzInfo_setMenuSfx(false); }
 
 namespace gzPad {
     inline u32 getTrig() { return mDoCPd_c::m_gzPadInfo.mPressedButtonFlags; }

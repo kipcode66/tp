@@ -90,13 +90,21 @@ void gzToolsMenu_c::execute() {
     
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
-    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
+    if (gzPad::getTrigDown() && !mOption) {
+        l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
+
+    if (gzPad::getTrigUp() && !mOption) {
+        l_cursor->y = (l_cursor->y - 1 + LINE_NUM) % LINE_NUM;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
 
     if (gzPad::getTrigA()) {
         switch (l_cursor->y) {
         case TOOL_MOVE_LINK:
             mOption = !mOption;
+            mOption ? gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK) : gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
             break;
         }
     }
@@ -104,9 +112,11 @@ void gzToolsMenu_c::execute() {
     if (gzPad::getTrigB()) {
         if (mOption) {
             mOption = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         } else {
             l_cursor->x--;
             l_cursor->y = gzMainMenu_c::MENU_TOOLS;
+            gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
             return;
         }
     }
@@ -115,7 +125,10 @@ void gzToolsMenu_c::execute() {
         if (mOption) {
             switch (l_cursor->y) {
             case TOOL_MOVE_LINK:
-                gzInfo_onMoveLink();
+                if (!gzInfo_isMoveLink()) {
+                    gzInfo_onMoveLink();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             }
         }
@@ -125,7 +138,10 @@ void gzToolsMenu_c::execute() {
         if (mOption) {
             switch (l_cursor->y) {
             case TOOL_MOVE_LINK:
-                gzInfo_offMoveLink();
+                if (gzInfo_isMoveLink()) {
+                    gzInfo_offMoveLink();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                }
                 break;
             }
         }

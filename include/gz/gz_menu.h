@@ -73,12 +73,13 @@ class gzCreditsMenu_c;
 class gzSettingsMenu_c : public gzMenu_c {
 public:
     enum gzSettingsMenu_Settings_e {
-        SETTING_AREA_RELOAD_BEHAVIOR,
         SETTING_CURSOR_TYPE,
         SETTING_DISPLAY_MODE,
         SETTING_DROP_SHADOW,
         SETTING_FONT,
         SETTING_MENU_PAUSES_GAME,
+        SETTING_MENU_SFX,
+        SETTING_RELOAD_TYPE,
         SETTING_TEXT_COLOR,
         SETTING_SWAP_EQUIPS,
         
@@ -118,12 +119,13 @@ public:
         }
     }
 
-    const char* getAreaReloadText() { return gzInfo_isAreaReload() ? "load area" : "load file"; }
+    const char* getReloadTypeText() { return gzInfo_getReloadType() ? "load area" : "load file"; }
     const char* getDropShadowsText() { return gzInfo_isDropShadows() ? "enabled" : "disabled"; }
     const char* getSwapEquipsText() { return gzInfo_isSwapEquips() ? "yes" : "no"; }
     const char* getDisplayModeText() { return gzInfo_getDisplayMode() ? "progressive" : "interlaced"; }
     // TODO(Pheenoh): Finish writing this functionality
     const char* getMenuPausesGameText() { return "no"; }
+    const char* getMenuSfxText() { return gzInfo_isMenuSfx() ? "enabled" : "disabled"; }
 
     static const int LINE_NUM = SETTING_MAX;
 
@@ -346,7 +348,7 @@ private:
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {
     g_gzInfo.mpCurrentMenu = i_menu;
-    g_gzInfo.mInputWaitTimer = 5;
+    g_gzInfo.mInputWaitTimer = 2;
 }
 
 

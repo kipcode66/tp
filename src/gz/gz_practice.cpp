@@ -109,11 +109,13 @@ void gzPracticeMenu_c::execute() {
 
         if (gzPad::getTrigA()) {
             mpKeyboard = new gzKeyboardMenu_c(memfileNameFinishCb, NULL, this);
+            gzInfo_seStart(Z2SE_SY_CURSOR_OK);
         }
 
         if (gzPad::getTrigZ()) {
             // TODO: handle actual memfile deletion
-            mpLinesMemfiles[l_cursor->y]->setString("");
+            mpLinesMemfiles[l_cursor->y]->setStringf("%d. -- empty --", l_cursor->y + 1);
+            gzInfo_seStart(Z2SE_SY_FILE_DELETE_OK);
         }
 
         current_max_line = MEMFILE_MAX_NUM;
@@ -123,12 +125,20 @@ void gzPracticeMenu_c::execute() {
         break;
     }
 
-    if (gzPad::getTrigRight()) mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
-    if (gzPad::getTrigLeft()) mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
+    if (gzPad::getTrigRight()) {
+        mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    if (gzPad::getTrigLeft())  {
+        mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
 
     if (gzPad::getTrigB()) {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_PRACTICE;
+        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
         return;
     }
 
@@ -137,8 +147,15 @@ void gzPracticeMenu_c::execute() {
     if (current_max_line == 0)
         return;
 
-    if (gzPad::getTrigDown()) l_cursor->y = (l_cursor->y + 1) % current_max_line;
-    if (gzPad::getTrigUp()) l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
+    if (gzPad::getTrigDown()) {
+        l_cursor->y = (l_cursor->y + 1) % current_max_line;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
+
+    if (gzPad::getTrigUp()) {
+        l_cursor->y = (l_cursor->y - 1 + current_max_line) % current_max_line;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
 }
 
 void gzPracticeMenu_c::draw() {

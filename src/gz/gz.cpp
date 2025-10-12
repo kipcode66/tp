@@ -43,6 +43,7 @@ void gzInfo_c::loadDefaultSettings() {
     mpFont = mDoExt_getMesgFont();
     mCursor.x = 0;
     mCursor.y = 0;
+    mSettings.mMenuSfx = true;
 }
 
 
@@ -95,7 +96,7 @@ int gzInfo_c::execute() {
         mDisplay = !mDisplay;
 
         if (mDisplay)
-            mInputWaitTimer = 5;
+            mInputWaitTimer = 2;
     }
 
     if (mDisplay) {
