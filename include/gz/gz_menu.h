@@ -8,6 +8,9 @@
 
 class dSelect_cursor_c;
 class dMeterHaihai_c;
+class gzFrameworkMenu_c;
+class gzSettingsMenu_c;
+class gzToolsMenu_c;
 
 class gzMenu_c : public dDlst_base_c {
 public:
@@ -15,58 +18,10 @@ public:
     virtual void execute() {}
 };
 
-class gzFrameworkMenu_c;
-class gzSettingsMenu_c;
-class gzToolsMenu_c;
-
-// class gzMainMenu_c : public gzMenu_c {
-// public:
-
-//     enum gzMainMenu_Menus_e {
-//         MENU_CHEATS,
-//         MENU_FLAGS,
-//         MENU_FRAMEWORK,
-//         MENU_INVENTORY,
-//         MENU_MEMORY,
-//         MENU_PRACTICE,
-//         MENU_SCENE,
-//         MENU_SETTINGS,
-//         MENU_TOOLS,
-//         MENU_WARPING,
-
-//         MENU_MAX
-//     };
-
-//     enum gzMainMenu_Haihai_e {
-//         ARROW_LEFT = 1,
-//         ARROW_DOWN = 2,
-//         ARROW_RIGHT = 4,
-//         ARROW_UP = 8
-//     };
-
-//     gzMainMenu_c();
-//     ~gzMainMenu_c();
-
-//     virtual void _delete();
-//     virtual void execute();
-//     virtual void draw();
-
-//     static const int LINE_NUM = MENU_MAX;
-
-//     gzTextBox* mpLines[LINE_NUM];
-//     gzMenu_c* mpMenus[LINE_NUM];
-//     gzFrameworkMenu_c* mpFrameworkMenu;
-//     gzSettingsMenu_c* mpSettingsMenu;
-//     gzToolsMenu_c* mpToolsMenu;
-
-//     dSelect_cursor_c* mpDrawCursor;
-//     dMeterHaihai_c* mpMeterHaihai;
-// };
-
 class gzMainMenu_c : public gzMenu_c {
 public:
 
-    enum {
+    enum gzMainMenu_Menus_e {
         MENU_CHEATS,
         MENU_FLAGS,
         MENU_FRAMEWORK,
@@ -90,31 +45,28 @@ public:
 
     gzMainMenu_c();
     ~gzMainMenu_c();
+    
+    void setXPos(f32 i_pos) { mXPos = i_pos; }
 
     virtual void _delete();
     virtual void execute();
     virtual void draw();
 
-    void setXPos(f32 i_pos) { mXPos = i_pos; }
-
     static const int LINE_NUM = MENU_MAX;
+    
 private:
-
     gzTextBox* mpLines[LINE_NUM];
     gzMenu_c* mpMenus[LINE_NUM];
     gzFrameworkMenu_c* mpFrameworkMenu;
     gzSettingsMenu_c* mpSettingsMenu;
     gzToolsMenu_c* mpToolsMenu;
-
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
-
     f32 mXPos;
     bool mTransitioning;
     u32 mTransitionStart;
     u32 mTransitionAge;
     u32 mTransitionDuration;
-    
 };
 
 class gzCreditsMenu_c;
@@ -175,7 +127,7 @@ public:
 
     static const int LINE_NUM = SETTING_MAX;
 
-public:
+private:
     gzTextBox* mpLines[LINE_NUM];
     gzTextBox* mpLineOptions[LINE_NUM];
     gzTextBox* mpDescription;
@@ -199,7 +151,7 @@ public:
 
     static const int LINE_NUM = 50;
 
-public:
+private:
     gzTextBox* mpLines[LINE_NUM];
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
@@ -259,7 +211,7 @@ public:
 
     static const int LINE_NUM = CONFIRM_MAX;
 
-public:
+private:
     gzTextBox* mpLineConfirmPrompt;
     gzTextBox* mpLines[LINE_NUM];
     confirmCallback mpConfirmCallback;
