@@ -24,7 +24,7 @@ static char l_keyboard[] = {
 
 static gzCursor l_key_cursor = {0, 0};
 
-gzKeyboardMenu_c::gzKeyboardMenu_c() {
+gzKeyboardMenu_c::gzKeyboardMenu_c(kbCallback finishCb, kbCallback returnCb, void* cbData) {
     gzCursor* l_cursor = gzInfo_getCursor();
     OSReport("creating gzKeyboardMenu_c\n");
 
@@ -39,6 +39,8 @@ gzKeyboardMenu_c::gzKeyboardMenu_c() {
     mpStringBox = new gzTextBox();
     memset(mString, 0, sizeof(mString));
     mStringIndex = 0;
+
+    setCallbacks(finishCb, returnCb, cbData);
 }
 
 gzKeyboardMenu_c::~gzKeyboardMenu_c() {
@@ -100,7 +102,15 @@ int gzKeyboardMenu_c::execute() {
         }
     }
 
+    if (gzPad::getTrigStart()) {
+        if (mFinishCb != NULL)
+            mFinishCb(this, mpCbData);
+        return 2;
+    }
+
     if (gzPad::getTrigB()) {
+        if (mReturnCb != NULL)
+            mReturnCb(this, mpCbData);
         return 1;
     }
 

@@ -305,17 +305,29 @@ private:
 
 class gzKeyboardMenu_c {
 public:
-    gzKeyboardMenu_c();
+    typedef int (*kbCallback)(gzKeyboardMenu_c* i_keyboard, void* i_data);
+
+    gzKeyboardMenu_c() {}
+    gzKeyboardMenu_c(kbCallback finishCb, kbCallback returnCb, void* cbData);
     ~gzKeyboardMenu_c();
 
     void _delete();
     int execute();
     void draw();
 
+    void setCallbacks(kbCallback finishCb, kbCallback returnCb, void* cbData) {
+        mFinishCb = finishCb;
+        mReturnCb = returnCb;
+        mpCbData = cbData;
+    }
+
     static const int MAX_STRING_LEN = 20;
 
     gzTextBox* mpCharacters[65];
     gzTextBox* mpStringBox;
+    kbCallback mFinishCb;
+    kbCallback mReturnCb;
+    void* mpCbData;
     int mStringIndex;
     char mString[MAX_STRING_LEN];
 };
@@ -348,18 +360,15 @@ public:
         TAB_MAX
     };
 
-private:
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzTextBox* mpLinesAny[ANY_LINE_NUM];
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
     gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
     gzTextBox* mpLinesMemfiles[MEMFILE_MAX_NUM];
-    gzTextBox* mpLinesNewMemfile;
     gzKeyboardMenu_c* mpKeyboard;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
     int mCurrentTab;
-    int mMemfileNum;
 };
 
 // gz_memory.h
