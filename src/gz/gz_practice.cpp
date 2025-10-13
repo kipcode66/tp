@@ -2,6 +2,7 @@
 
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
+#include "m_Do/m_Do_MemCard.h"
 
 gzPracticeMenu_c::gzPracticeMenu_c() {
     OSReport("creating gzPracticeMenu_c\n");
@@ -35,15 +36,11 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
         if (i % 2 == 1) mpLinesHundo[i]->setString("d");
     }
 
-    for (int i = 0; i < MEMFILE_MAX_NUM; i++) {
-        mpLinesMemfiles[i] = new gzTextBox;
-        mpLinesMemfiles[i]->setStringf("%d. -- empty --", i + 1);
-    }
+    mMemfileTab.create();
 
     mTopLine = 0;
 
     mpMeterHaihai = new dMeterHaihai_c(3);
-    mpKeyboard = NULL;
 }
 
 gzPracticeMenu_c::~gzPracticeMenu_c() {
@@ -74,14 +71,6 @@ void gzPracticeMenu_c::_delete() {
     }
 }
 
-static int memfileNameFinishCb(gzKeyboardMenu_c* i_keyboard, void* i_data) {
-    gzPracticeMenu_c* menu = (gzPracticeMenu_c*)i_data;
-    gzCursor* l_cursor = gzInfo_getCursor();
-
-    menu->mpLinesMemfiles[l_cursor->y]->setStringf("%d. %s", l_cursor->y + 1, i_keyboard->mString);
-    return 1;
-}
-
 void gzPracticeMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
     int current_max_line;
@@ -97,27 +86,8 @@ void gzPracticeMenu_c::execute() {
         current_max_line = HUNDO_LINE_NUM;
         break;
     case TAB_MEMFILES:
-        // temp for debugging, these should be handled by dedicated tab execute functions
-        if (mpKeyboard != NULL) {
-            int rt = mpKeyboard->execute();
-            if (rt == 1 || rt == 2) {
-                delete mpKeyboard;
-                mpKeyboard = NULL;
-            }
+        if (mMemfileTab.execute() == 0)
             return;
-        }
-
-        if (gzPad::getTrigA()) {
-            mpKeyboard = new gzKeyboardMenu_c(memfileNameFinishCb, NULL, this);
-            gzInfo_seStart(Z2SE_SY_CURSOR_OK);
-        }
-
-        if (gzPad::getTrigZ()) {
-            // TODO: handle actual memfile deletion
-            mpLinesMemfiles[l_cursor->y]->setStringf("%d. -- empty --", l_cursor->y + 1);
-            gzInfo_seStart(Z2SE_SY_FILE_DELETE_OK);
-        }
-
         current_max_line = MEMFILE_MAX_NUM;
         break;
     default:  // temp
@@ -179,8 +149,9 @@ void gzPracticeMenu_c::draw() {
     int current_max_line;
     gzTextBox** currentLines;
 
-    if (mpKeyboard != NULL) {
-        mpKeyboard->draw();
+    // TODO: extract tab drawing to separate functions
+    if (mMemfileTab.mpKeyboard != NULL) {
+        mMemfileTab.mpKeyboard->draw();
         return;
     }
 
@@ -205,7 +176,7 @@ void gzPracticeMenu_c::draw() {
         break;
     case TAB_MEMFILES:
         current_max_line = MEMFILE_MAX_NUM;
-        currentLines = mpLinesMemfiles;
+        currentLines = mMemfileTab.mpLines;
         break;
     default: // temp
         current_max_line = ANY_LINE_NUM;
@@ -244,4 +215,133 @@ void gzPracticeMenu_c::draw() {
         // TODO: make sure haihai always fits tabs
         mpMeterHaihai->drawHaihai(gzMainMenu_c::ARROW_LEFT | gzMainMenu_c::ARROW_RIGHT, 335.0f, 50.0f, 320.0f, 0.0f);
     }
+}
+
+void gzPracticeMenu_c::gzMemfileTab_c::create() {
+    for (int i = 0; i < MEMFILE_MAX_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+        mpLines[i]->setStringf("%d. -- empty --", i + 1);
+    }
+
+    readMemfileNames();
+
+    mpKeyboard = NULL;
+}
+
+int gzPracticeMenu_c::gzMemfileTab_c::readMemfileNames() {
+    CARDFileInfo file;
+    int ret;
+
+    ret = CARDProbeEx(0, NULL, NULL);
+    if (ret != CARD_RESULT_READY) {
+        OSReport("readMemfileNames: card not ready\n");
+        return 0;
+    }
+
+    for (int i = 0; i < MEMFILE_MAX_NUM; i++) {
+        char filename_buf[9];
+        sprintf(filename_buf, "tpgz_s%02d", i + 1);
+
+        ret = CARDOpen(0, filename_buf, &file);
+        if (ret == CARD_RESULT_READY) {
+            // read name section from each memfile
+            // TODO: can this be optimized?
+            ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
+            if (ret == CARD_RESULT_READY) {
+                char* nameptr = (char*)mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c);
+                OSReport("read memfile name (%d. %s)\n", i + 1, nameptr);
+                mpLines[i]->setStringf("%d. %s", i + 1, nameptr);
+            } else {
+                OSReport("readMemfileNames: read error (%d)\n", ret);
+            }
+        }
+
+        CARDClose(&file);
+    }
+
+    return 1;
+}
+
+int gzPracticeMenu_c::gzMemfileTab_c::memfileNameFinishCb(gzKeyboardMenu_c* i_keyboard, void* i_data) {
+    gzPracticeMenu_c::gzMemfileTab_c* menu = (gzPracticeMenu_c::gzMemfileTab_c*)i_data;
+    gzCursor* l_cursor = gzInfo_getCursor();
+    int slot_no = l_cursor->y + 1;
+
+    CARDFileInfo file;
+    int ret;
+
+    ret = CARDProbeEx(0, NULL, NULL);
+    if (ret != CARD_RESULT_READY) {
+        return 0;
+    }
+
+    char filename_buf[9];
+    sprintf(filename_buf, "tpgz_s%02d", slot_no);
+
+    ret = CARDCreate(0, filename_buf, SECTOR_SIZE, &file);
+    if (ret == CARD_RESULT_READY || ret == CARD_RESULT_EXIST) {
+        ret = CARDOpen(0, filename_buf, &file);
+        if (ret == CARD_RESULT_READY) {
+            memcpy(mDoMemCd_Ctrl_c::sTmpBuf, dComIfGs_getSaveData(), sizeof(dSv_save_c));
+            memcpy(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c), i_keyboard->mString, sizeof(i_keyboard->mString));
+
+            ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
+            if (ret == CARD_RESULT_READY) {
+                OSReport("saved memfile (%d. %s) to memcard!\n", slot_no, i_keyboard->mString);
+                gzInfo_sendNotification("memfile saved!");
+                menu->mpLines[l_cursor->y]->setStringf("%d. %s", slot_no, i_keyboard->mString);
+            }
+
+            CARDClose(&file);
+        }
+    }
+
+    return 1;
+}
+
+int gzPracticeMenu_c::gzMemfileTab_c::deleteMemfile(int i_slotNo) {
+    CARDFileInfo file;
+    int ret;
+
+    ret = CARDProbeEx(0, NULL, NULL);
+    if (ret != CARD_RESULT_READY) {
+        return 0;
+    }
+
+    char filename_buf[9];
+    sprintf(filename_buf, "tpgz_s%02d", i_slotNo);
+
+    ret = CARDDelete(0, filename_buf);
+    if (ret == CARD_RESULT_READY) {
+        OSReport("deleted memfile %d\n", i_slotNo);
+        gzInfo_sendNotification("memfile deleted!");
+        mpLines[i_slotNo - 1]->setStringf("%d. -- empty --", i_slotNo);
+    }
+
+    return ret;
+}
+
+int gzPracticeMenu_c::gzMemfileTab_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (mpKeyboard != NULL) {
+        int rt = mpKeyboard->execute();
+        if (rt == 1 || rt == 2) {
+            delete mpKeyboard;
+            mpKeyboard = NULL;
+        }
+        return 0;
+    }
+
+    if (gzPad::getTrigA()) {
+        mpKeyboard = new gzKeyboardMenu_c(memfileNameFinishCb, NULL, this);
+        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+    }
+
+    if (gzPad::getTrigZ()) {
+        deleteMemfile(l_cursor->y + 1);
+        gzInfo_seStart(Z2SE_SY_FILE_DELETE_OK);
+    }
+
+    return 1;
 }
