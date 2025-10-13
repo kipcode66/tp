@@ -52,7 +52,11 @@ int gzInfo_c::_create() {
     loadDefaultSettings();
 
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
+    void* buf = JKRHeap::alloc(65608, 32, NULL);  // Larger size to fit your BTI; adjust as needed
+    loadFile("/gz/test.bti", buf, 65608, 0);
+    ResTIMG* bg = (ResTIMG*)buf;
     mpIcon = new J2DPicture(icon);
+    mpBackground = new J2DPicture(bg);
     mpHeader = new gzTextBox("tpgz v1.2.0", mSettings.mTextColor);
     
     mpMainMenu = new gzMainMenu_c();
@@ -62,7 +66,7 @@ int gzInfo_c::_create() {
 
     mpNotification = new gzNotification_c();
 
-    mInputWaitTimer = 5;
+    mInputWaitTimer = 2;
     mGZInitialized = true;
 
     loadSettingsMemcard();
@@ -78,6 +82,9 @@ int gzInfo_c::_delete() {
 
     delete mpHeader;
     mpHeader = NULL;
+
+    delete mpBackground;
+    mpBackground = NULL;
 
     mpCurrentMenu = NULL;
 
@@ -120,6 +127,10 @@ int gzInfo_c::draw() {
     if (mDisplay) {
         if (mpIcon != NULL) mpIcon->draw(30.0f, 5.0f, 30.0f, 30.0f, false, false, false);
         if (mpHeader != NULL) mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
+        // if (mpBackground != NULL) {
+        //     OSReport("drawing bg\n");
+        //     mpBackground->draw(30.0f, 5.0f, 500.0f, 500.0f, false, false, false);
+        // }
         if (mpMainMenu != NULL) dComIfGd_set2DOpaTop(mpMainMenu);
         if (mpCurrentMenu != NULL) dComIfGd_set2DOpaTop(mpCurrentMenu);
         // showHeapUsage();

@@ -103,7 +103,7 @@ public:
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
     bool isMoveLink() { return mSettings.mMoveLink; }
-    bool setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
+    void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
     gzCursor* getCursor() { return &mCursor; }
 
     void seStart(u32 i_sfxID) {
@@ -134,9 +134,24 @@ public:
         default:
             return CURSOR_CLASSIC;
         }
-    }    
+    }
+
+    void loadFile(const char* filePath, void* buffer, int length, int offset) {
+        DVDFileInfo fileInfo;
+        if (DVDOpen(filePath, &fileInfo)) {
+            int bytesRead = DVDReadPrio(&fileInfo, buffer, length, offset, 2);
+            if (bytesRead > 0) {
+                DVDClose(&fileInfo);
+            } else {
+                OSReport("no bytes read!\n");
+            }
+        } else {
+            OSReport("failed to open file %s\n", filePath);
+        }
+    }
 
     J2DPicture* mpIcon;
+    J2DPicture* mpBackground;
     gzTextBox* mpHeader;
 
     gzMenu_c* mpCurrentMenu;
