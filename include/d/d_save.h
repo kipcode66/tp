@@ -728,7 +728,6 @@ public:
 
     void reset() { mStageNo = -1; }
 
-private:
     /* 0x00 */ s8 mStageNo;
     /* 0x01 */ u8 unk1;
     /* 0x02 */ u8 unk2[2];

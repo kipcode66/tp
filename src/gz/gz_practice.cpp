@@ -77,6 +77,11 @@ void gzPracticeMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
     int current_max_line;
 
+    if (g_gzInfo.mInputWaitTimer != 0) {
+        g_gzInfo.mInputWaitTimer--;
+        return;
+    }
+
     switch (mCurrentTab) {
     case TAB_ANY:
         current_max_line = ANY_LINE_NUM;
@@ -261,9 +266,11 @@ int gzPracticeMenu_c::gzMemfileTab_c::readMemfileNames() {
             // TODO: can this be optimized?
             ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
             if (ret == CARD_RESULT_READY) {
-                char* nameptr = (char*)mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c);
-                OSReport("read memfile name (%d. %s)\n", i + 1, nameptr);
-                mpLines[i]->setStringf("%d. %s", i + 1, nameptr);
+                gzSaveLoaderMng_c::memfileExData_s* exdata = (gzSaveLoaderMng_c::memfileExData_s*)(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c));
+
+                OSReport("read memfile name (%d. %s)\n", i + 1, exdata->name);
+                mpLines[i]->setStringf("%d. %s", i + 1, exdata->name);
+                setMemfileExists(i, true);
             } else {
                 OSReport("readMemfileNames: read error (%d)\n", ret);
             }
@@ -295,14 +302,26 @@ int gzPracticeMenu_c::gzMemfileTab_c::memfileNameFinishCb(gzKeyboardMenu_c* i_ke
     if (ret == CARD_RESULT_READY || ret == CARD_RESULT_EXIST) {
         ret = CARDOpen(0, filename_buf, &file);
         if (ret == CARD_RESULT_READY) {
+            // overwrite the save location to avoid the game trying to normalize it to something we dont want
+            dSv_save_c* savedata = dComIfGs_getSaveData();
+            savedata->getPlayer().getPlayerReturnPlace().set(dComIfGp_getStartStageName(), dComIfGp_roomControl_getStayNo(), 0);
+
+            // write main save data
             memcpy(mDoMemCd_Ctrl_c::sTmpBuf, dComIfGs_getSaveData(), sizeof(dSv_save_c));
-            memcpy(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c), i_keyboard->mString, sizeof(i_keyboard->mString));
+
+            // write any extra data we want
+            gzSaveLoaderMng_c::memfileExData_s exdata;
+            strcpy(exdata.name, i_keyboard->mString);
+            exdata.player_pos.set(dComIfGp_getPlayer(0)->current.pos);
+
+            memcpy(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c), &exdata, sizeof(gzSaveLoaderMng_c::memfileExData_s));
 
             ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
             if (ret == CARD_RESULT_READY) {
                 OSReport("saved memfile (%d. %s) to memcard!\n", slot_no, i_keyboard->mString);
                 gzInfo_sendNotification("memfile saved!");
                 menu->mpLines[l_cursor->y]->setStringf("%d. %s", slot_no, i_keyboard->mString);
+                menu->setMemfileExists(l_cursor->y, true);
             }
 
             CARDClose(&file);
@@ -310,6 +329,48 @@ int gzPracticeMenu_c::gzMemfileTab_c::memfileNameFinishCb(gzKeyboardMenu_c* i_ke
     }
 
     return 1;
+}
+
+int gzPracticeMenu_c::gzMemfileTab_c::loadMemfile(int i_no) {
+    CARDFileInfo file;
+    int ret;
+
+    ret = CARDProbeEx(0, NULL, NULL);
+    if (ret != CARD_RESULT_READY) {
+        return -1;
+    }
+
+    char filename_buf[9];
+    sprintf(filename_buf, "tpgz_s%02d", i_no + 1);
+
+    ret = CARDOpen(0, filename_buf, &file);
+    if (ret == CARD_RESULT_READY) {
+        ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
+        if (ret == CARD_RESULT_READY) {
+            OSReport("loadMemfile: read memfile from memcard\n");
+            gzInfo_sendNotification("memfile loaded!");
+            
+            dSv_save_c* savep = (dSv_save_c*)mDoMemCd_Ctrl_c::sTmpBuf;
+            dComIfGp_setNextStage(savep->getPlayer().getPlayerReturnPlace().getName(),
+                                savep->getPlayer().getPlayerReturnPlace().getPlayerStatus(),
+                                savep->getPlayer().getPlayerReturnPlace().getRoomNo(),
+                                -1);
+
+            OS_REPORT("attempting to load stage: [S]%s [R]%d [P]%d\n",
+                     savep->getPlayer().getPlayerReturnPlace().getName(),
+                     savep->getPlayer().getPlayerReturnPlace().getRoomNo(),
+                     savep->getPlayer().getPlayerReturnPlace().getPlayerStatus());
+
+            gzSaveLoaderMng_c::memfileExData_s* exdata = (gzSaveLoaderMng_c::memfileExData_s*)(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c));
+            memcpy(&g_gzInfo.mSaveLoaderMng.mMemfileExData, exdata, sizeof(gzSaveLoaderMng_c::memfileExData_s));
+
+            g_gzInfo.mSaveLoaderMng.start();
+        }
+
+        CARDClose(&file);
+    }
+
+    return ret;
 }
 
 int gzPracticeMenu_c::gzMemfileTab_c::deleteMemfile(int i_slotNo) {
@@ -329,6 +390,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::deleteMemfile(int i_slotNo) {
         OSReport("deleted memfile %d\n", i_slotNo);
         gzInfo_sendNotification("memfile deleted!");
         mpLines[i_slotNo - 1]->setStringf("%d. -- empty --", i_slotNo);
+        setMemfileExists(i_slotNo - 1, false);
     }
 
     return ret;
@@ -347,13 +409,19 @@ int gzPracticeMenu_c::gzMemfileTab_c::execute() {
     }
 
     if (gzPad::getTrigA()) {
-        mpKeyboard = new gzKeyboardMenu_c(memfileNameFinishCb, NULL, this);
-        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+        if (isMemfileExist(l_cursor->y)) {
+            loadMemfile(l_cursor->y);
+        } else {
+            mpKeyboard = new gzKeyboardMenu_c(memfileNameFinishCb, NULL, this);
+            gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+        }
     }
 
     if (gzPad::getTrigZ()) {
-        deleteMemfile(l_cursor->y + 1);
-        gzInfo_seStart(Z2SE_SY_FILE_DELETE_OK);
+        if (isMemfileExist(l_cursor->y)) {
+            deleteMemfile(l_cursor->y + 1);
+            gzInfo_seStart(Z2SE_SY_FILE_DELETE_OK);
+        }
     }
 
     return 1;

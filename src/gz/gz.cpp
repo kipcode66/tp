@@ -74,6 +74,11 @@ int gzInfo_c::_create() {
 
     loadSettingsMemcard();
 
+    // initialize oxygen now instead of waiting to go to the file select screen
+    dComIfGp_setOxygen(600);
+    dComIfGp_setNowOxygen(600);
+    dComIfGp_setMaxOxygen(600);
+
     // JUTDbPrint::getManager()->changeFont(mDoExt_getMesgFont());
     return 1;
 }
@@ -120,6 +125,7 @@ int gzInfo_c::execute() {
 
     setButtonFlags();
     executeTools();
+    mSaveLoaderMng.execute();
 
     return 1;
 }
