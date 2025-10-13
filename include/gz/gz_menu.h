@@ -50,6 +50,7 @@ public:
 
     gzMainMenu_c();
     ~gzMainMenu_c();
+    gzMenu_c* getMenu(int idx) { return mpMenus[idx]; }
 
     virtual void _delete();
     virtual void execute();
@@ -61,6 +62,7 @@ public:
 private:
     gzTextBox* mpLines[LINE_NUM];
     gzMenu_c* mpMenus[LINE_NUM];
+    gzTextBox* mpDescription;
     gzFrameworkMenu_c* mpFrameworkMenu;
     gzSettingsMenu_c* mpSettingsMenu;
     gzToolsMenu_c* mpToolsMenu;
@@ -360,8 +362,6 @@ public:
     int mCurrentTab;
 };
 
-// gz_memory.h
-
 class gzMemoryMenu_c : public gzMenu_c {
 public:
     gzMemoryMenu_c();
@@ -378,6 +378,84 @@ public:
 private:
     gzTextBox* mpLines[LINE_NUM];
     int mTopLine;
+};
+
+class gzCheatsMenu_c : public gzMenu_c {
+public:
+    enum gzCheatsMenu_e {
+        CHEAT_DISABLE_ITEM_TIMER,
+        CHEAT_DISABLE_WALLS,
+        CHEAT_INF_AIR,
+        CHEAT_INF_ARROWS,
+        CHEAT_INF_BOMBS,
+        CHEAT_INF_HEARTS,
+        CHEAT_INF_OIL,
+        CHEAT_INF_RUPEES,
+        CHEAT_INF_SLINGSHOT,
+        CHEAT_INVINCIBLE_LINK,
+        CHEAT_INVINCIBLE_ENEMIES,
+        CHEAT_MOON_JUMP,
+        CHEAT_SUPER_CLAWSHOT,
+        CHEAT_TRANSFORM_ANYWHERE,
+        CHEAT_UNRESTRICTED_ITEMS,
+
+        CHEAT_MAX
+    };
+
+    gzCheatsMenu_c();
+    ~gzCheatsMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
+
+    static const int LINE_NUM = CHEAT_MAX;
+
+private:
+    u8 getHaihaiFlags(int idx);
+    void updateDynamicLines();
+
+private:
+    gzTextBox* mpLines[LINE_NUM];
+    gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpDescription;
+    dSelect_cursor_c* mpDrawCursor;
+    dMeterHaihai_c* mpMeterHaihai;
+    bool mOption;
+};
+
+class gzFlagsMenu_c : public gzMenu_c {
+public:
+    enum gzFlagsMenu_e {
+        DUMMY,
+        
+        FLAG_MAX
+    };
+
+    gzFlagsMenu_c();
+    ~gzFlagsMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
+
+    static const int LINE_NUM = FLAG_MAX;
+    
+private:
+    u8 getHaihaiFlags(int idx);
+    void updateDynamicLines();
+
+private:
+    gzTextBox* mpLines[LINE_NUM];
+    gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpDescription;
+    dSelect_cursor_c* mpDrawCursor;
+    dMeterHaihai_c* mpMeterHaihai;
+    bool mOption;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

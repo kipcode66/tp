@@ -23,16 +23,18 @@ gzMainMenu_c::gzMainMenu_c() {
         mpLines[i] = new gzTextBox();
     }
 
-    mpLines[MENU_CHEATS]->setString("cheats");
-    mpLines[MENU_FLAGS]->setString("flags");
-    mpLines[MENU_FRAMEWORK]->setString("framework");
-    mpLines[MENU_INVENTORY]->setString("inventory");
-    mpLines[MENU_MEMORY]->setString("memory");
-    mpLines[MENU_PRACTICE]->setString("practice");
-    mpLines[MENU_SCENE]->setString("scene");
-    mpLines[MENU_SETTINGS]->setString("settings");
-    mpLines[MENU_TOOLS]->setString("tools");
-    mpLines[MENU_WARPING]->setString("warping");
+    mpDescription = new gzTextBox();
+
+    mpLines[MENU_CHEATS]->setStringDesc("cheats", "toggle cheats");
+    mpLines[MENU_FLAGS]->setStringDesc("flags", "toggle in-game flags");
+    mpLines[MENU_FRAMEWORK]->setStringDesc("framework", "view and edit running processes");
+    mpLines[MENU_INVENTORY]->setStringDesc("inventory", "set items and equipment");
+    mpLines[MENU_MEMORY]->setStringDesc("memory", "view and edit memory");
+    mpLines[MENU_PRACTICE]->setStringDesc("practice", "load practice files");
+    mpLines[MENU_SCENE]->setStringDesc("scene", "adjust current scene settings");
+    mpLines[MENU_SETTINGS]->setStringDesc("settings", "configure tpgz settings");
+    mpLines[MENU_TOOLS]->setStringDesc("tools", "use various tools for practice and testing");
+    mpLines[MENU_WARPING]->setStringDesc("warping", "warp to any area");
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
@@ -105,9 +107,15 @@ void gzMainMenu_c::execute() {
 
 void gzMainMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
+
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 SLIDE_DISTANCE = 80.0f;
+    static const f32 DESCRIPTION_X = 0.0f;
+    static const f32 DESCRIPTION_Y = 420.0f;
+
+    u32 cursor_color = gzInfo_getCursorColor();
+
     f32 mem_x_pos;
 
     if (mTransitioning) {
@@ -138,12 +146,16 @@ void gzMainMenu_c::draw() {
         // Draw main menu lines
         for (int i = 0; i < LINE_NUM; i++) {
             if (mpLines[i] != NULL) {
-                f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+                // only draw menu lines if they are within the bounds of the menu
+                // TODO: fetch from variable
+                if (mXPos >= 20.0f) {
+                    f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
 
-                if (l_cursor->y == i && l_cursor->x == 0) {
-                    mpLines[i]->draw(mXPos, y_pos, gzInfo_getTextColor());
-                } else {
-                    mpLines[i]->draw(mXPos, y_pos, COLOR_WHITE);
+                    if (l_cursor->y == i && l_cursor->x == 0) {
+                        mpLines[i]->draw(mXPos, y_pos, gzInfo_getTextColor());
+                    } else {
+                        mpLines[i]->draw(mXPos, y_pos, COLOR_WHITE);
+                    }
                 }
             }
         }
@@ -158,6 +170,20 @@ void gzMainMenu_c::draw() {
                     mpLines[i]->draw(mXPos, y_pos, COLOR_WHITE);
                 }
             }
+        }
+    }
+
+    // Draw description if valid and on menu
+    if (l_cursor->x == 0) {
+        if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
+            mpDescription->setString(mpLines[l_cursor->y]->m_description);
+            mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color, HBIND_CENTER);
+        }
+    }
+
+    if (gzInfo_isCursorTypeTP()) {
+        if (mpDrawCursor != NULL) {
+            mpDrawCursor->draw();
         }
     }
 }

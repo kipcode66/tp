@@ -60,7 +60,7 @@ int gzInfo_c::_create() {
     loadFile("/gz/bg.bti", buf, 108960, 0);
     ResTIMG* bg = (ResTIMG*)buf;
     mpBackground = new J2DPicture(bg);
-    mpHeader = new gzTextBox("tpgz v1.2.0", mSettings.mTextColor);
+    mpHeader = new gzTextBox("tpgz v2.0.0", mSettings.mTextColor);
     
     mpMainMenu = new gzMainMenu_c();
     if (mpMainMenu == NULL) {
@@ -80,6 +80,10 @@ int gzInfo_c::_create() {
     dComIfGp_setMaxOxygen(600);
 
     // JUTDbPrint::getManager()->changeFont(mDoExt_getMesgFont());
+    
+    // load the default menu
+    gzChangeMenu(mpMainMenu->getMenu(0));
+    
     return 1;
 }
 
@@ -134,8 +138,7 @@ int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
     if (mDisplay) {
-        
-        if (mpBackground != NULL) mpBackground->draw(30.0f, 5.0f, 550.0f, 400.0f, false, false, false);
+        if (mpBackground != NULL) mpBackground->draw(20.0f, 0.0f, 550.0f, 400.0f, false, false, false);
         if (mpIcon != NULL) mpIcon->draw(30.0f, 5.0f, 30.0f, 30.0f, false, false, false);
         if (mpHeader != NULL) mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
         if (mpMainMenu != NULL) dComIfGd_set2DOpaTop(mpMainMenu);

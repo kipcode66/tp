@@ -149,8 +149,6 @@ u32 cycleTextColor(bool forward) {
     return l_textColorValue[newIndex];
 }
 
-// Have to wrap since mwcc doesn't support lambdas
-// Is there a better way to do this?
 static void storeSettingsCallbackWrapper(void*) {
     gzInfo_storeSettingsMemcard();
 }

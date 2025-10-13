@@ -42,6 +42,7 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     mTopLine = 0;
 
     mpMeterHaihai = new dMeterHaihai_c(3);
+    mpMeterHaihai->setScale(0.3f);
     mXPos = 200.0f;
 }
 
@@ -144,9 +145,9 @@ void gzPracticeMenu_c::draw() {
     static const f32 Y_HEADER = 58.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
-    static const f32 HAIHAI_X_OFFSET = 237.0f;
+    static const f32 HAIHAI_X_OFFSET = 225.0f;
     static const f32 HAIHAI_X_SIZE = 460.0f;
-    static const f32 TAB_HEADER_OFFSET = 25.0f;
+    static const f32 TAB_HEADER_OFFSET = 15.0f;
     static const int VISIBLE_LINES = 15;
 
     // fixed width between tab header text

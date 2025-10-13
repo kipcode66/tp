@@ -207,13 +207,13 @@ void gzFrameworkMenu_c::draw() {
     static const f32 LINE_SPACING = 22.0f;
     static const f32 CURSOR_X = 20.0f;
     static const f32 CURSOR_Y_OFFSET = -5.0f;
-    static const f32 HAIHAI_X = 200.0f;
     static const f32 HAIHAI_Y = Y_START + 80.0f;
     static const f32 HAIHAI_Y_SIZE = MAX_VISIBLE_ROWS * 26.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
 
     f32 X_POS[NUM_COLUMNS] = {mXPos, mXPos+140.0f, mXPos+210.0f};
     f32 X_TITLE = mXPos+50.0f;
+    f32 HAIHAI_X = mXPos;
 
     u32 cursor_color = gzInfo_getCursorColor();
 

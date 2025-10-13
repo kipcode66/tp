@@ -10,12 +10,10 @@ gzMemoryMenu_c::gzMemoryMenu_c() {
 
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = new gzTextBox;
-        if (i % 2 == 0) mpLines[i]->setString("a");
-        if (i % 2 == 1) mpLines[i]->setString("b");
     }
 
     mTopLine = 0;
-    mXPos = 240.0f;
+    mXPos = 200.0f;
 }
 
 gzMemoryMenu_c::~gzMemoryMenu_c() {
@@ -50,7 +48,7 @@ void gzMemoryMenu_c::execute() {
         l_cursor->y = gzMainMenu_c::MENU_MEMORY;
 
         // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
-        mXPos = 240.0f;
+        mXPos = 200.0f;
         g_gzInfo.mpMainMenu->setXPos(40.0f);
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
         return;
