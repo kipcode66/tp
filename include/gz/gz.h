@@ -41,6 +41,47 @@ struct gzConfigHeader_s {
     u8 reserved[0x20 - 0x8];
 };
 
+class gzSaveLoaderMng_c {
+public:
+    gzSaveLoaderMng_c() {
+        mLoadPhase = PHASE_WAIT_e;
+        mTimer = 0;
+        mSaveInjectReady = false;
+    }
+
+    enum LoadPhase_e {
+        PHASE_WAIT_e,         // "do nothing" state
+        PHASE_INIT_e,         // file load process initialization
+        PHASE_STAGE_INIT_e,   // processes to be run during stage initialization
+        PHASE_PLAYER_INIT_e,  // processes to be run after player is initialized
+    };
+
+    // container for any extra data to store in the memfile after the main save data
+    struct memfileExData_s {
+        char name[20];
+        cXyz player_pos;
+    };
+
+    void execute();
+
+    void start() { mLoadPhase = PHASE_INIT_e; }
+    void onStageInit() { mLoadPhase = PHASE_STAGE_INIT_e; }
+    void onPlayerInit() { mLoadPhase = PHASE_PLAYER_INIT_e; }
+    void wait() { mLoadPhase = PHASE_WAIT_e; }
+
+    bool isSaveInject() { return mSaveInjectReady; }
+    
+    void end() {
+        mLoadPhase = PHASE_WAIT_e;
+        mSaveInjectReady = false;
+    }
+
+    memfileExData_s mMemfileExData;
+    int mLoadPhase;
+    bool mSaveInjectReady;
+    u8 mTimer;
+};
+
 // used for checking whether or not to apply 
 struct gzButtonFlags_s {
     bool mMoveLink;
@@ -79,8 +120,6 @@ public:
     void executeTools();
     void executeMoveLink();
 
-    void setMemfileData();
-
     bool isDisplay() const { return mDisplay; }
     u32 getTextColor() const { return mSettings.mTextColor; }
     void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
@@ -108,9 +147,6 @@ public:
     void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
     gzCursor* getCursor() { return &mCursor; }
 
-    void setSaveInjectReady() {
-        mSaveInjectReady = true;
-    }
 
     void seStart(u32 i_sfxID) {
         if (mSettings.mMenuSfx) mDoAud_seStart(i_sfxID, 0, 0, 0);
@@ -156,7 +192,7 @@ public:
     gzSettings_s mSettings;
     gzButtonFlags_s mButtonFlags;
     gzCursor mCursor;
-    bool mSaveInjectReady;
+    gzSaveLoaderMng_c mSaveLoaderMng;
 };
 
 extern gzInfo_c g_gzInfo;

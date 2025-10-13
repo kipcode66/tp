@@ -67,6 +67,11 @@ int gzInfo_c::_create() {
 
     loadSettingsMemcard();
 
+    // initialize oxygen now instead of waiting to go to the file select screen
+    dComIfGp_setOxygen(600);
+    dComIfGp_setNowOxygen(600);
+    dComIfGp_setMaxOxygen(600);
+
     // JUTDbPrint::getManager()->changeFont(mDoExt_getMesgFont());
     return 1;
 }
@@ -110,6 +115,7 @@ int gzInfo_c::execute() {
 
     setButtonFlags();
     executeTools();
+    mSaveLoaderMng.execute();
 
     return 1;
 }
@@ -345,11 +351,4 @@ void gzInfo_c::executeMoveLink() {
 
 void gzInfo_c::executeTools() {
      if (mSettings.mMoveLink) executeMoveLink();
-}
-
-void gzInfo_c::setMemfileData() {
-    if (mSaveInjectReady) {
-        memcpy(&g_dComIfG_gameInfo.info.mSavedata, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(dSv_save_c));
-        mSaveInjectReady = false;
-    }
 }

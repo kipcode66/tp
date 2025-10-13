@@ -387,7 +387,9 @@ static int phase_1(dScnPly_c* i_this) {
     u32 id = fopScnM_GetID(i_this);
     dStage_roomControl_c::setProcID(id);
 
-    g_gzInfo.setMemfileData();
+    if (g_gzInfo.mSaveLoaderMng.isSaveInject()) {
+        g_gzInfo.mSaveLoaderMng.onStageInit();
+    }
 
     dComIfGp_setStartStage(dComIfGp_getNextStartStage());
 
