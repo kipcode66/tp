@@ -49,9 +49,6 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
     mpHeaders[0]->setString("Name");
     mpHeaders[1]->setString("PID");
     mpHeaders[2]->setString("Status");
-    // mpHeaders[3]->setString("Node List");
-    // mpHeaders[4]->setString("Layer");
-    
 
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
@@ -59,6 +56,8 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
 
     mpMeterHaihai = new dMeterHaihai_c(3);
     mpTitle = new gzTextBox();
+
+    mXPos = 200.0f;
 }
 
 gzFrameworkMenu_c::~gzFrameworkMenu_c() {
@@ -175,6 +174,11 @@ void gzFrameworkMenu_c::execute() {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+
+        // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
+        mXPos = 200.0f;
+        g_gzInfo.mpMainMenu->setXPos(40.0f);
+        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
         return;
     }
 
@@ -196,9 +200,7 @@ void gzFrameworkMenu_c::execute() {
 
 void gzFrameworkMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
-    
-    static const f32 X_POS[NUM_COLUMNS] = {200.0f, 340.0f, 410.0f};
-    static const f32 X_TITLE = 250.0f;
+
     static const f32 Y_HEADER = 78.0f;
     static const f32 Y_TITLE = Y_HEADER - 25.0f;
     static const f32 Y_START = Y_HEADER + 22.0f;
@@ -209,6 +211,9 @@ void gzFrameworkMenu_c::draw() {
     static const f32 HAIHAI_Y = Y_START + 80.0f;
     static const f32 HAIHAI_Y_SIZE = MAX_VISIBLE_ROWS * 26.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
+
+    f32 X_POS[NUM_COLUMNS] = {mXPos, mXPos+140.0f, mXPos+210.0f};
+    f32 X_TITLE = mXPos+50.0f;
 
     u32 cursor_color = gzInfo_getCursorColor();
 
@@ -239,8 +244,6 @@ void gzFrameworkMenu_c::draw() {
         mpRowTexts[i * NUM_COLUMNS + 0]->setString(getProcessName(info.process));
         mpRowTexts[i * NUM_COLUMNS + 1]->setStringf("%d", info.process->name);
         mpRowTexts[i * NUM_COLUMNS + 2]->setString(info.process->pause_flag ? "paused" : "active");
-        // mpRowTexts[i * NUM_COLUMNS + 3]->setStringf("%d", info.node_list_index);
-        // mpRowTexts[i * NUM_COLUMNS + 4]->setStringf("%u", info.layer_id);
         
         u32 color = (proc_idx == mSelectedProcess && l_cursor->x > 0) ? cursor_color : COLOR_WHITE;
 

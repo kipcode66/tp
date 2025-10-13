@@ -52,10 +52,13 @@ int gzInfo_c::_create() {
     loadDefaultSettings();
 
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
-    void* buf = JKRHeap::alloc(65608, 32, NULL);  // Larger size to fit your BTI; adjust as needed
-    loadFile("/gz/test.bti", buf, 65608, 0);
-    ResTIMG* bg = (ResTIMG*)buf;
     mpIcon = new J2DPicture(icon);
+
+    // TODO: Once critical game setup code is pulled out of d_s_logo
+    // we should create our own heap and alloc an image buffer from that instead
+    void* buf = JKRHeap::alloc(108960, 32, NULL);
+    loadFile("/gz/bg.bti", buf, 108960, 0);
+    ResTIMG* bg = (ResTIMG*)buf;
     mpBackground = new J2DPicture(bg);
     mpHeader = new gzTextBox("tpgz v1.2.0", mSettings.mTextColor);
     
@@ -125,14 +128,16 @@ int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
     if (mDisplay) {
+        
+        if (mpBackground != NULL) mpBackground->draw(30.0f, 5.0f, 550.0f, 400.0f, false, false, false);
         if (mpIcon != NULL) mpIcon->draw(30.0f, 5.0f, 30.0f, 30.0f, false, false, false);
         if (mpHeader != NULL) mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
-        // if (mpBackground != NULL) {
-        //     OSReport("drawing bg\n");
-        //     mpBackground->draw(30.0f, 5.0f, 500.0f, 500.0f, false, false, false);
-        // }
         if (mpMainMenu != NULL) dComIfGd_set2DOpaTop(mpMainMenu);
         if (mpCurrentMenu != NULL) dComIfGd_set2DOpaTop(mpCurrentMenu);
+
+        // randomly crashes?
+        // if (mpCurrentMenu != NULL) mpCurrentMenu->draw();
+
         // showHeapUsage();
     }
 

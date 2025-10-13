@@ -84,10 +84,8 @@ void gzMainMenu_c::execute() {
 
     if (gzPad::getTrigA()) {
         if (g_gzInfo.mpCurrentMenu != NULL) {
-            if (l_cursor->y == MENU_MEMORY) {
-                mTransitioning = true;
-                mTransitionStart = cCt_getFrameCount();
-            }
+            mTransitioning = true;
+            mTransitionStart = cCt_getFrameCount();
             l_cursor->x++;
             l_cursor->y = 0; // TODO(Pheenoh): QoL improvement - remember l_cursor->y in sub menu instead of always 0
             g_gzInfo.mInputWaitTimer = 2;
@@ -115,26 +113,26 @@ void gzMainMenu_c::draw() {
     if (mTransitioning) {
         mTransitionAge = cCt_getFrameCount() - mTransitionStart;
 
-        if (mTransitionAge >= mTransitionDuration) {
+        if (mTransitionAge > mTransitionDuration) {
             mTransitioning = false;
         }
 
         f32 time0 = 0.0f;
         f32 value0 = 40.0f;
         f32 tan_out0 = 0.0f;
-        f32 value1 = -40.0f;
+        f32 value1 = -120.0f;
         f32 tan_in1 = 0.0f;
         f32 time1 = (f32)mTransitionDuration;
         f32 age = (f32)mTransitionAge;
-        f32 mem_value0 = 240.0f;
-        f32 mem_value1 = 140.0f;
+        f32 mem_value0 = g_gzInfo.mpCurrentMenu->getXPos();
+        f32 mem_value1 = 40.0f;
 
-        if (mTransitionAge < mTransitionDuration) {
+        if (mTransitionAge <= mTransitionDuration) {
             // Hermite for main menu (slide to left)
             mXPos = J2DHermiteInterpolation<f32>(age, &time0, &value0, &tan_out0, &time1, &value1, &tan_in1);
 
             // Hermite for memory menu (slide to left)
-            ((gzMemoryMenu_c*)g_gzInfo.mpCurrentMenu)->setXPos(J2DHermiteInterpolation<f32>(age, &time0, &mem_value0, &tan_out0, &time1, &mem_value1, &tan_in1));
+            g_gzInfo.mpCurrentMenu->setXPos(J2DHermiteInterpolation<f32>(age, &time0, &mem_value0, &tan_out0, &time1, &mem_value1, &tan_in1));
         }
 
         // Draw main menu lines

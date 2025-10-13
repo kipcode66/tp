@@ -56,6 +56,7 @@ gzToolsMenu_c::gzToolsMenu_c() {
     mpDrawCursor->setAlphaRate(1.0f);
 
     mpMeterHaihai = new dMeterHaihai_c(3);
+    mXPos = 200.0f;
 }
 
 gzToolsMenu_c::~gzToolsMenu_c() {
@@ -117,6 +118,9 @@ void gzToolsMenu_c::execute() {
             l_cursor->x--;
             l_cursor->y = gzMainMenu_c::MENU_TOOLS;
             gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+            // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
+            mXPos = 200.0f;
+            g_gzInfo.mpMainMenu->setXPos(40.0f);
             return;
         }
     }
@@ -153,7 +157,6 @@ void gzToolsMenu_c::execute() {
 void gzToolsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 X_ALIGNMENT = 200.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 OPTIONS_X_OFFSET = -20.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
@@ -174,10 +177,10 @@ void gzToolsMenu_c::draw() {
 
     u32 cursor_color = gzInfo_getCursorColor();
 
-    f32 x_alignment_opts = X_ALIGNMENT + OPTIONS_X_OFFSET;
+    f32 x_alignment_opts = mXPos + OPTIONS_X_OFFSET;
     f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
     f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
-    f32 x_alignment_tp_cursor = X_ALIGNMENT + TP_CURSOR_X_OFFSET;
+    f32 x_alignment_tp_cursor = mXPos + TP_CURSOR_X_OFFSET;
 
     for (int i = 0; i < LINE_NUM; i++) {
         f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
@@ -191,11 +194,11 @@ void gzToolsMenu_c::draw() {
                 mpMeterHaihai->drawHaihai(getHaihaiFlags(i), x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
             }
 
-            mpLines[i]->draw(X_ALIGNMENT, y_pos, cursor_color);
+            mpLines[i]->draw(mXPos, y_pos, cursor_color);
             mpDrawCursor->setPos(x_alignment_tp_cursor, y_pos_cursor, (J2DPane*)mpLines[i], false);
             mpLineOptions[i]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
         } else {
-            mpLines[i]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
+            mpLines[i]->draw(mXPos, y_pos, COLOR_WHITE);
             mpLineOptions[i]->draw(x_alignment_opts, y_pos, COLOR_WHITE, HBIND_CENTER);
         }
     }

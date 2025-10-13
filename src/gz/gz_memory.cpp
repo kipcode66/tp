@@ -51,14 +51,10 @@ void gzMemoryMenu_c::execute() {
 
         // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
         mXPos = 240.0f;
-        ((gzMainMenu_c*)g_gzInfo.mpMainMenu)->setXPos(40.0f);
+        g_gzInfo.mpMainMenu->setXPos(40.0f);
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
         return;
     }
-}
-
-void gzMemoryMenu_c::setXPos(f32 x) {
-    mXPos = x;
 }
 
 void gzMemoryMenu_c::draw() {

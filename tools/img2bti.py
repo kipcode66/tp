@@ -5,17 +5,13 @@ import argparse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Parse command-line arguments
 parser = argparse.ArgumentParser(description='Convert an image to BTI format.')
-parser.add_argument('input-image-path', help='Path to the input JPEG or PNG image')
-parser.add_argument('output-bti-path', help='Output path for the BTI file')
+parser.add_argument('input_image_path', help='Path to the input JPEG or PNG image')
+parser.add_argument('output_bti_path', help='Output path for the BTI file')
 args = parser.parse_args()
 
-# Create a new BTI object
 bti = BTI()
 
-# Set texture properties (customize as needed)
-bti.image_format = ImageFormat.RGB5A3  # Common format with no palette, supports alpha
 bti.mipmap_count = 1  # Set to 1 for no mipmaps, or higher for mipmaps
 bti.wrap_s = WrapMode.ClampToEdge
 bti.wrap_t = WrapMode.ClampToEdge
@@ -33,13 +29,9 @@ bti.palette_format = PaletteFormat.RGB5A3
 bti.num_colors = 256  # Up to 256 colors for C8
 
 try:
-    # Encode the image
     bti.replace_image_from_path(args.input_image_path)
-    
-    # Save the BTI data
     bti.save_changes()
     
-    # Write to file
     with open(args.output_bti_path, "wb") as f:
         bti.data.seek(0)
         f.write(bti.data.read())

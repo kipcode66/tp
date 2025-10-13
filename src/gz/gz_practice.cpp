@@ -9,6 +9,7 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
 
     for (int i = 0; i < TAB_MAX; i++) {
         mpTabHeaders[i] = new gzTextBox;
+        mpTabHeaders[i]->setFontSize(15.0f,15.0f);
     }
 
     mpTabHeaders[TAB_ANY]->setString("any%");
@@ -41,6 +42,7 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     mTopLine = 0;
 
     mpMeterHaihai = new dMeterHaihai_c(3);
+    mXPos = 200.0f;
 }
 
 gzPracticeMenu_c::~gzPracticeMenu_c() {
@@ -109,6 +111,9 @@ void gzPracticeMenu_c::execute() {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_PRACTICE;
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+        // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
+        mXPos = 200.0f;
+        g_gzInfo.mpMainMenu->setXPos(40.0f);
         return;
     }
 
@@ -131,20 +136,28 @@ void gzPracticeMenu_c::execute() {
 void gzPracticeMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 X_POS[TAB_MAX] = {200.0f, 280.0f, 420.0f};
     static const f32 Y_HEADER = 58.0f;
-    static const f32 X_ALIGNMENT = 0.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
-    static const f32 HAIHAI_X_OFFSET = 6.0f;
-    static const f32 HAIHAI_Y_OFFSET = 125.0f;
-    static const f32 HAIHAI_Y_SIZE = 355.0f; // TODO(Pheenoh): make this dynamic based on VISIBLE_LINES and mFontSizeY
+    static const f32 HAIHAI_X_OFFSET = 237.0f;
+    static const f32 HAIHAI_X_SIZE = 460.0f;
+    static const f32 TAB_HEADER_OFFSET = 25.0f;
     static const int VISIBLE_LINES = 15;
+
+    // fixed width between tab header text
+    f32 X_POS[TAB_MAX];
+    f32 tab_header_x_alignment = mXPos + TAB_HEADER_OFFSET;
+    X_POS[TAB_ANY] = tab_header_x_alignment;
+    X_POS[TAB_BITE] = tab_header_x_alignment + 50.0f;
+    X_POS[TAB_HUNDO] = tab_header_x_alignment + 130.0f;
+    X_POS[TAB_ALLDUNGEONS] = tab_header_x_alignment + 180.0f;
+    X_POS[TAB_GLITCHLESS] = tab_header_x_alignment + 280.0f;
+    X_POS[TAB_MEMFILES] = tab_header_x_alignment + 355.0f;
 
     u32 cursor_color = gzInfo_getCursorColor();
 
-    f32 x_alignment_haihai = X_ALIGNMENT + HAIHAI_X_OFFSET;
-    f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
+    f32 x_alignment_haihai = mXPos + HAIHAI_X_OFFSET;
+    f32 y_alignment_haihai = 53.0f;
 
     int current_max_line;
     gzTextBox** currentLines;
@@ -156,9 +169,10 @@ void gzPracticeMenu_c::draw() {
     }
 
     // Draw tab headers
-    for (int i = 0; i < VISIBLE_TABS; i++) {
-        // TODO: normalize x positions so text doesn't overwrite itself
-        mpTabHeaders[(mCurrentTab + i) % TAB_MAX]->draw(X_POS[i], Y_HEADER, i == 0 ? cursor_color : COLOR_WHITE);
+    for (int i = 0; i < TAB_MAX; i++) {
+        // only draw if it doesnt go past the bounds of the menu
+        // TODO: fetch this magic number from gzInfo instead
+        if (X_POS[i] <= 550.0f) mpTabHeaders[i]->draw(X_POS[i], Y_HEADER, i == mCurrentTab ? cursor_color : COLOR_WHITE);
     }
 
     switch (mCurrentTab) {
@@ -204,16 +218,15 @@ void gzPracticeMenu_c::draw() {
             f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
 
             if (l_cursor->y == lineIdx && l_cursor->x > 0) {
-                currentLines[lineIdx]->draw(200.0f, y_pos, cursor_color);
+                currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
             } else {
-                currentLines[lineIdx]->draw(200.0f, y_pos, COLOR_WHITE);
+                currentLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);
             }
         }
     }
 
     if (mpMeterHaihai != NULL && l_cursor->x > 0) {
-        // TODO: make sure haihai always fits tabs
-        mpMeterHaihai->drawHaihai(gzMainMenu_c::ARROW_LEFT | gzMainMenu_c::ARROW_RIGHT, 335.0f, 50.0f, 320.0f, 0.0f);
+        mpMeterHaihai->drawHaihai(gzMainMenu_c::ARROW_LEFT | gzMainMenu_c::ARROW_RIGHT, x_alignment_haihai, y_alignment_haihai, HAIHAI_X_SIZE, 0.0f);
     }
 }
 

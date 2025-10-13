@@ -44,7 +44,6 @@ void gzCreditsMenu_c::execute() {
 
 void gzCreditsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
-    static const f32 X_ALIGNMENT = 40.0f;
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 HAIHAI_X_OFFSET = 6.0f;
@@ -53,7 +52,7 @@ void gzCreditsMenu_c::draw() {
     static const int VISIBLE_LINES = 15;
     u32 cursor_color = gzInfo_getCursorColor();
 
-    f32 x_alignment_haihai = X_ALIGNMENT + HAIHAI_X_OFFSET;
+    f32 x_alignment_haihai = mXPos + HAIHAI_X_OFFSET;
     f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
 
     if (l_cursor->y < mTopLine) {
@@ -76,9 +75,9 @@ void gzCreditsMenu_c::draw() {
             f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
 
             if (l_cursor->y == lineIdx && l_cursor->x > 0) {
-                mpLines[lineIdx]->draw(X_ALIGNMENT, y_pos, cursor_color);
+                mpLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
             } else {
-                mpLines[lineIdx]->draw(X_ALIGNMENT, y_pos, COLOR_WHITE);
+                mpLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);
             }
         }
     }

@@ -16,6 +16,11 @@ class gzMenu_c : public dDlst_base_c {
 public:
     virtual void _delete() {}
     virtual void execute() {}
+    virtual f32 getXPos() {};
+    virtual void setXPos(f32 x) {};
+
+protected:
+    f32 mXPos;
 };
 
 class gzMainMenu_c : public gzMenu_c {
@@ -45,12 +50,11 @@ public:
 
     gzMainMenu_c();
     ~gzMainMenu_c();
-    
-    void setXPos(f32 i_pos) { mXPos = i_pos; }
 
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual void setXPos(f32 x) { mXPos = x; }
 
     static const int LINE_NUM = MENU_MAX;
     
@@ -105,6 +109,8 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
 
     char* getCursorTypeText() {
         switch (gzInfo_getCursorType()) {
@@ -150,6 +156,8 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
 
     static const int LINE_NUM = 50;
 
@@ -175,6 +183,8 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
 
     static const int LINE_NUM = TOOL_MAX;
 
@@ -235,6 +245,8 @@ public:
     void execute();
     void draw();
     void _delete();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
 
     static const int MAX_VISIBLE_ROWS = 10;
     static const int NUM_COLUMNS = 3;
@@ -294,8 +306,10 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
 
-    static const int VISIBLE_TABS = 3;
+    // static const int VISIBLE_TABS = 3;
 
     static const int ANY_LINE_NUM = 20;
     static const int ALL_DUNGEONS_LINE_NUM = 20;
@@ -348,15 +362,14 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
-
-    void setXPos(f32 x);
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
 
     static const int LINE_NUM = 20;
 
 private:
     gzTextBox* mpLines[LINE_NUM];
     int mTopLine;
-    f32 mXPos;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

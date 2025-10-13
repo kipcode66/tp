@@ -40,5 +40,10 @@ compile_commands.json
 # ISOs
 *.iso
 
-# ignoring mod assets for now
-mod_assets/*
+# proprietary mod assets
+mod_assets/gz/kanfont_fix16.bfn
+mod_assets/gz/Menu1.dat
+
+# intermediary images
+*.png
+*.jpg
