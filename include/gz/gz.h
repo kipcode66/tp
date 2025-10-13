@@ -79,6 +79,8 @@ public:
     void executeTools();
     void executeMoveLink();
 
+    void setMemfileData();
+
     bool isDisplay() const { return mDisplay; }
     u32 getTextColor() const { return mSettings.mTextColor; }
     void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
@@ -105,6 +107,10 @@ public:
     bool isMoveLink() { return mSettings.mMoveLink; }
     void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
     gzCursor* getCursor() { return &mCursor; }
+
+    void setSaveInjectReady() {
+        mSaveInjectReady = true;
+    }
 
     void seStart(u32 i_sfxID) {
         if (mSettings.mMenuSfx) mDoAud_seStart(i_sfxID, 0, 0, 0);
@@ -150,6 +156,7 @@ public:
     gzSettings_s mSettings;
     gzButtonFlags_s mButtonFlags;
     gzCursor mCursor;
+    bool mSaveInjectReady;
 };
 
 extern gzInfo_c g_gzInfo;

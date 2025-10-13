@@ -346,3 +346,10 @@ void gzInfo_c::executeMoveLink() {
 void gzInfo_c::executeTools() {
      if (mSettings.mMoveLink) executeMoveLink();
 }
+
+void gzInfo_c::setMemfileData() {
+    if (mSaveInjectReady) {
+        memcpy(&g_dComIfG_gameInfo.info.mSavedata, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(dSv_save_c));
+        mSaveInjectReady = false;
+    }
+}

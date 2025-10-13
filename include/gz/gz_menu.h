@@ -321,11 +321,19 @@ public:
         void draw();
 
         int readMemfileNames();
+        int loadMemfile(int i_no);
         int deleteMemfile(int i_slotNo);
         static int memfileNameFinishCb(gzKeyboardMenu_c* i_keyboard, void* i_data);
 
+        void setMemfileExists(int i_no, bool i_exists) {
+            mMemfileStates[i_no] = i_exists;
+        }
+
+        bool isMemfileExist(int i_no) { return mMemfileStates[i_no] == true; }
+
         gzTextBox* mpLines[MEMFILE_MAX_NUM];
         gzKeyboardMenu_c* mpKeyboard;
+        bool mMemfileStates[MEMFILE_MAX_NUM];  // TODO: optimize this
     };
 
     gzTextBox* mpTabHeaders[TAB_MAX];

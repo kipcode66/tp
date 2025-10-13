@@ -27,6 +27,8 @@
 #include "d/actor/d_a_suspend.h"
 #include "d/actor/d_a_ykgr.h"
 
+#include "gz/gz.h"
+
 static void dScnPly_Create(scene_class*);
 static int dScnPly_Delete(dScnPly_c*);
 static int dScnPly_IsDelete(dScnPly_c);
@@ -384,6 +386,8 @@ static int phase_0(dScnPly_c* i_this) {
 static int phase_1(dScnPly_c* i_this) {
     u32 id = fopScnM_GetID(i_this);
     dStage_roomControl_c::setProcID(id);
+
+    g_gzInfo.setMemfileData();
 
     dComIfGp_setStartStage(dComIfGp_getNextStartStage());
 
