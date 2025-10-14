@@ -46,11 +46,8 @@ void gzMemoryMenu_c::execute() {
     if (gzPad::getTrigB()) {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_MEMORY;
-
-        // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
-        mXPos = 200.0f;
-        g_gzInfo.mpMainMenu->setXPos(40.0f);
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+        g_gzInfo.mpMainMenu->startReverseTransition();
         return;
     }
 }

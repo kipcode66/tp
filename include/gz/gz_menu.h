@@ -51,6 +51,9 @@ public:
     gzMainMenu_c();
     ~gzMainMenu_c();
     gzMenu_c* getMenu(int idx) { return mpMenus[idx]; }
+    void startForwardTransition();
+    void startReverseTransition();
+    void setDefaultMenuXPos();
 
     virtual void _delete();
     virtual void execute();
@@ -68,11 +71,14 @@ private:
     gzToolsMenu_c* mpToolsMenu;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
-    f32 mXPos;
     bool mTransitioning;
+    bool mTransitionForward;
     u32 mTransitionStart;
-    u32 mTransitionAge;
-    u32 mTransitionDuration;
+    f32 mTransitionDuration;
+    f32 mMainStartX;
+    f32 mMainEndX;
+    f32 mSubStartX;
+    f32 mSubEndX;
 };
 
 class gzCreditsMenu_c;
@@ -461,6 +467,23 @@ private:
 inline void gzChangeMenu(gzMenu_c* i_menu) {
     g_gzInfo.mpCurrentMenu = i_menu;
     g_gzInfo.mInputWaitTimer = 2;
+}
+
+inline f32 calcSlidePosition(u32 currentFrame, u32 startFrame, f32 startPos, f32 endPos, f32 duration) {
+    f32 age = (f32)(currentFrame - startFrame);
+
+    if (age >= duration) {
+        return endPos;
+    }
+
+    f32 time0 = 0.0f;
+    f32 value0 = startPos;
+    f32 tan_out0 = 0.0f;
+    f32 time1 = duration;
+    f32 value1 = endPos;
+    f32 tan_in1 = 0.0f;
+
+    return J2DHermiteInterpolation<f32>(age, &time0, &value0, &tan_out0, &time1, &value1, &tan_in1);
 }
 
 

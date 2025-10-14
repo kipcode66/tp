@@ -44,6 +44,19 @@ void gzInfo_c::loadDefaultSettings() {
     mCursor.x = 0;
     mCursor.y = 0;
     mSettings.mMenuSfx = true;
+
+    mIconXPos = 30.0f;
+    mIconYPos = 25.0f;
+    mIconWidth = 30.0f;
+    mIconHeight = 30.0f;
+
+    mHeaderXPos = 65.0f;
+    mHeaderYPos = 50.0f;
+
+    mBackgroundXPos = 20.0f;
+    mBackgroundYPos = 20.0f;
+    mBackgroundWidth = 550.0f;
+    mBackgroundHeight = 400.0f;
 }
 
 
@@ -138,9 +151,9 @@ int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
     if (mDisplay) {
-        if (mpBackground != NULL) mpBackground->draw(20.0f, 0.0f, 550.0f, 400.0f, false, false, false);
-        if (mpIcon != NULL) mpIcon->draw(30.0f, 5.0f, 30.0f, 30.0f, false, false, false);
-        if (mpHeader != NULL) mpHeader->draw(65.0f, 30.0f, mSettings.mTextColor);
+        if (mpBackground != NULL) mpBackground->draw(mBackgroundXPos, mBackgroundYPos, mBackgroundWidth, mBackgroundHeight, false, false, false);
+        if (mpIcon != NULL) mpIcon->draw(mIconXPos, mIconYPos, mIconWidth, mIconHeight, false, false, false);
+        if (mpHeader != NULL) mpHeader->draw(mHeaderXPos, mHeaderYPos, mSettings.mTextColor);
         if (mpMainMenu != NULL) dComIfGd_set2DOpaTop(mpMainMenu);
         if (mpCurrentMenu != NULL) dComIfGd_set2DOpaTop(mpCurrentMenu);
 
@@ -330,7 +343,7 @@ void gzInfo_c::executeMoveLink() {
     link->speed = cXyz(0.0f,0.0f,0.0f);
 
     if (!lock_camera) {
-        angle = (float)link_horizontal_angle / 65536.f * (2 * M_PI);
+        angle = (f32)link_horizontal_angle / 65536.f * (2 * M_PI);
     }
 
     cam_target.x = link_pos.x;

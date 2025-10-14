@@ -174,11 +174,7 @@ void gzFrameworkMenu_c::execute() {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
-
-        // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
-        mXPos = 200.0f;
-        g_gzInfo.mpMainMenu->setXPos(40.0f);
-        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+        g_gzInfo.mpMainMenu->startReverseTransition();
         return;
     }
 
@@ -201,19 +197,20 @@ void gzFrameworkMenu_c::execute() {
 void gzFrameworkMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 Y_HEADER = 78.0f;
-    static const f32 Y_TITLE = Y_HEADER - 25.0f;
-    static const f32 Y_START = Y_HEADER + 22.0f;
+    
     static const f32 LINE_SPACING = 22.0f;
     static const f32 CURSOR_X = 20.0f;
     static const f32 CURSOR_Y_OFFSET = -5.0f;
-    static const f32 HAIHAI_Y = Y_START + 80.0f;
     static const f32 HAIHAI_Y_SIZE = MAX_VISIBLE_ROWS * 26.0f;
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
 
     f32 X_POS[NUM_COLUMNS] = {mXPos, mXPos+140.0f, mXPos+210.0f};
     f32 X_TITLE = mXPos+50.0f;
     f32 HAIHAI_X = mXPos;
+    f32 Y_HEADER = g_gzInfo.mBackgroundYPos + 78.0f;
+    f32 Y_TITLE = Y_HEADER - 25.0f;
+    f32 Y_START = Y_HEADER + 22.0f;
+    f32 HAIHAI_Y = Y_START + 80.0f;
 
     u32 cursor_color = gzInfo_getCursorColor();
 

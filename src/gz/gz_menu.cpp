@@ -5,6 +5,32 @@
 #include "f_op/f_op_scene_mng.h"
 #include "SSystem/SComponent/c_counter.h"
 
+static const f32 MAIN_VISIBLE_X = 40.0f;
+static const f32 MAIN_HIDDEN_X = -120.0f;
+static const f32 SUB_VISIBLE_X = 40.0f;
+static const f32 SUB_HIDDEN_X = 200.0f;
+
+void gzMainMenu_c::startForwardTransition() {
+    mTransitioning = true;
+    mTransitionForward = true;
+    mTransitionStart = cCt_getFrameCount();
+    mMainStartX = MAIN_VISIBLE_X;
+    mMainEndX = MAIN_HIDDEN_X;
+    mSubStartX = SUB_HIDDEN_X;
+    mSubEndX = SUB_VISIBLE_X;
+}
+
+void gzMainMenu_c::startReverseTransition() {
+    mTransitioning = true;
+    mTransitionForward = false;
+    mTransitionStart = cCt_getFrameCount();
+    mMainStartX = MAIN_HIDDEN_X;
+    mMainEndX = MAIN_VISIBLE_X;
+    mSubStartX = SUB_VISIBLE_X;
+    mSubEndX = SUB_HIDDEN_X;
+    g_gzInfo.mInputWaitTimer = 2;
+}
+
 gzMainMenu_c::gzMainMenu_c() {
     OSReport("creating gzMainMenu_c\n");
 
@@ -44,6 +70,7 @@ gzMainMenu_c::gzMainMenu_c() {
 
     mXPos = 40.0f;
     mTransitioning = false;
+    mTransitionForward = true;
     mTransitionStart = 0;
     mTransitionDuration = 5.0f;
 }
@@ -86,10 +113,9 @@ void gzMainMenu_c::execute() {
 
     if (gzPad::getTrigA()) {
         if (g_gzInfo.mpCurrentMenu != NULL) {
-            mTransitioning = true;
-            mTransitionStart = cCt_getFrameCount();
+            startForwardTransition();
             l_cursor->x++;
-            l_cursor->y = 0; // TODO(Pheenoh): QoL improvement - remember l_cursor->y in sub menu instead of always 0
+            l_cursor->y = 0;
             g_gzInfo.mInputWaitTimer = 2;
             gzInfo_seStart(Z2SE_SY_EXP_WIN_OPEN);
         }
@@ -110,53 +136,32 @@ void gzMainMenu_c::draw() {
 
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
-    static const f32 SLIDE_DISTANCE = 80.0f;
     static const f32 DESCRIPTION_X = 0.0f;
-    static const f32 DESCRIPTION_Y = 420.0f;
 
     u32 cursor_color = gzInfo_getCursorColor();
 
-    f32 mem_x_pos;
-
     if (mTransitioning) {
-        mTransitionAge = cCt_getFrameCount() - mTransitionStart;
+        u32 currentFrame = cCt_getFrameCount();
+        f32 age = (f32)(currentFrame - mTransitionStart);
 
-        if (mTransitionAge > mTransitionDuration) {
+        if (age >= mTransitionDuration) {
             mTransitioning = false;
+            mXPos = mMainEndX;
+            if (g_gzInfo.mpCurrentMenu) {
+                g_gzInfo.mpCurrentMenu->setXPos(mSubEndX);
+            }
+        } else {
+            mXPos = calcSlidePosition(currentFrame, mTransitionStart, mMainStartX, mMainEndX, mTransitionDuration);
+
+            if (g_gzInfo.mpCurrentMenu)
+                g_gzInfo.mpCurrentMenu->setXPos(calcSlidePosition(currentFrame, mTransitionStart, mSubStartX, mSubEndX, mTransitionDuration));
         }
 
-        f32 time0 = 0.0f;
-        f32 value0 = 40.0f;
-        f32 tan_out0 = 0.0f;
-        f32 value1 = -120.0f;
-        f32 tan_in1 = 0.0f;
-        f32 time1 = (f32)mTransitionDuration;
-        f32 age = (f32)mTransitionAge;
-        f32 mem_value0 = g_gzInfo.mpCurrentMenu->getXPos();
-        f32 mem_value1 = 40.0f;
-
-        if (mTransitionAge <= mTransitionDuration) {
-            // Hermite for main menu (slide to left)
-            mXPos = J2DHermiteInterpolation<f32>(age, &time0, &value0, &tan_out0, &time1, &value1, &tan_in1);
-
-            // Hermite for memory menu (slide to left)
-            g_gzInfo.mpCurrentMenu->setXPos(J2DHermiteInterpolation<f32>(age, &time0, &mem_value0, &tan_out0, &time1, &mem_value1, &tan_in1));
-        }
-
-        // Draw main menu lines
         for (int i = 0; i < LINE_NUM; i++) {
-            if (mpLines[i] != NULL) {
-                // only draw menu lines if they are within the bounds of the menu
-                // TODO: fetch from variable
-                if (mXPos >= 20.0f) {
-                    f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
-
-                    if (l_cursor->y == i && l_cursor->x == 0) {
-                        mpLines[i]->draw(mXPos, y_pos, gzInfo_getTextColor());
-                    } else {
-                        mpLines[i]->draw(mXPos, y_pos, COLOR_WHITE);
-                    }
-                }
+            if (mpLines[i] != NULL && mXPos >= g_gzInfo.mBackgroundXPos) {
+                f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+                u32 color = (l_cursor->y == i && l_cursor->x == 0) ? gzInfo_getTextColor() : COLOR_WHITE;
+                mpLines[i]->draw(mXPos, y_pos, color);
             }
         }
     } else {
@@ -176,8 +181,11 @@ void gzMainMenu_c::draw() {
     // Draw description if valid and on menu
     if (l_cursor->x == 0) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
+            f32 description_x = DESCRIPTION_X;
+            f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+
             mpDescription->setString(mpLines[l_cursor->y]->m_description);
-            mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color, HBIND_CENTER);
+            mpDescription->draw(DESCRIPTION_X, description_y, cursor_color, HBIND_CENTER);
         }
     }
 

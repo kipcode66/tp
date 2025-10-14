@@ -42,7 +42,7 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     mTopLine = 0;
 
     mpMeterHaihai = new dMeterHaihai_c(3);
-    mpMeterHaihai->setScale(0.3f);
+    mpMeterHaihai->setScale(0.04f);
     mXPos = 200.0f;
 }
 
@@ -117,9 +117,7 @@ void gzPracticeMenu_c::execute() {
         l_cursor->x--;
         l_cursor->y = gzMainMenu_c::MENU_PRACTICE;
         gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
-        // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
-        mXPos = 200.0f;
-        g_gzInfo.mpMainMenu->setXPos(40.0f);
+        g_gzInfo.mpMainMenu->startReverseTransition();
         return;
     }
 
@@ -142,15 +140,14 @@ void gzPracticeMenu_c::execute() {
 void gzPracticeMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 Y_HEADER = 58.0f;
-    static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 LINE_SPACING = 22.0f;
     static const f32 HAIHAI_X_OFFSET = 225.0f;
     static const f32 HAIHAI_X_SIZE = 460.0f;
     static const f32 TAB_HEADER_OFFSET = 15.0f;
     static const int VISIBLE_LINES = 15;
 
-    // fixed width between tab header text
+    // manually set tab header text distances for now
+    // need to support scrolling tabs at some point
     f32 X_POS[TAB_MAX];
     f32 tab_header_x_alignment = mXPos + TAB_HEADER_OFFSET;
     X_POS[TAB_ANY] = tab_header_x_alignment;
@@ -162,8 +159,10 @@ void gzPracticeMenu_c::draw() {
 
     u32 cursor_color = gzInfo_getCursorColor();
 
+    f32 y_header_alignment = g_gzInfo.mBackgroundYPos + 48.0f;
+    f32 y_lines_alignment = y_header_alignment + 42.0f;
     f32 x_alignment_haihai = mXPos + HAIHAI_X_OFFSET;
-    f32 y_alignment_haihai = 53.0f;
+    f32 y_alignment_haihai = y_header_alignment - 5.0f;
 
     int current_max_line;
     gzTextBox** currentLines;
@@ -178,7 +177,7 @@ void gzPracticeMenu_c::draw() {
     for (int i = 0; i < TAB_MAX; i++) {
         // only draw if it doesnt go past the bounds of the menu
         // TODO: fetch this magic number from gzInfo instead
-        if (X_POS[i] <= 550.0f) mpTabHeaders[i]->draw(X_POS[i], Y_HEADER, i == mCurrentTab ? cursor_color : COLOR_WHITE);
+        if (X_POS[i] <= 550.0f) mpTabHeaders[i]->draw(X_POS[i], y_header_alignment, i == mCurrentTab ? cursor_color : COLOR_WHITE);
     }
 
     switch (mCurrentTab) {
@@ -221,7 +220,7 @@ void gzPracticeMenu_c::draw() {
         if (lineIdx >= current_max_line) break;
 
         if (currentLines[lineIdx] != NULL) {
-            f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
+            f32 y_pos = y_lines_alignment + ((screenIdx - 1) * LINE_SPACING);
 
             if (l_cursor->y == lineIdx && l_cursor->x > 0) {
                 currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);

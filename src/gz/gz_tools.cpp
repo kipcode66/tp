@@ -118,9 +118,7 @@ void gzToolsMenu_c::execute() {
             l_cursor->x--;
             l_cursor->y = gzMainMenu_c::MENU_TOOLS;
             gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
-            // TODO(Pheenoh): Interpolate a slide back to the right instead of snapping back
-            mXPos = 200.0f;
-            g_gzInfo.mpMainMenu->setXPos(40.0f);
+            g_gzInfo.mpMainMenu->startReverseTransition();
             return;
         }
     }
@@ -206,8 +204,11 @@ void gzToolsMenu_c::draw() {
     // Draw description if valid and on menu
     if (l_cursor->x > 0) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
+            f32 description_x = DESCRIPTION_X;
+            f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+
             mpDescription->setString(mpLines[l_cursor->y]->m_description);
-            mpDescription->draw(DESCRIPTION_X, DESCRIPTION_Y, cursor_color, HBIND_CENTER);
+            mpDescription->draw(DESCRIPTION_X, description_y, cursor_color, HBIND_CENTER);
         }
     }
 

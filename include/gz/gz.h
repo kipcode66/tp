@@ -208,6 +208,19 @@ public:
     gzButtonFlags_s mButtonFlags;
     gzCursor mCursor;
     gzSaveLoaderMng_c mSaveLoaderMng;
+
+    f32 mIconXPos;
+    f32 mIconYPos;
+    f32 mIconWidth;
+    f32 mIconHeight;
+
+    f32 mHeaderXPos;
+    f32 mHeaderYPos;
+
+    f32 mBackgroundXPos;
+    f32 mBackgroundYPos;
+    f32 mBackgroundWidth;
+    f32 mBackgroundHeight;
 };
 
 extern gzInfo_c g_gzInfo;
