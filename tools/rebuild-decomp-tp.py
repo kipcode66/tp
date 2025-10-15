@@ -170,8 +170,16 @@ if __name__ == "__main__":
 
                 for file in dir.rglob('*'):
                     if file.is_file():
+                        relative_path = file.relative_to(dir)
+                        target_path = f"files/{dir.name}/{relative_path}"
+
+                        parent_parts = relative_path.parts[:-1]
+                        for i in range(len(parent_parts)):
+                            subdir_path = f"files/{dir.name}/{'/'.join(parent_parts[:i+1])}"
+                            gcm.add_new_directory(subdir_path)
+
                         with open(file, "rb") as f:
-                            gcm.add_new_file(f"files/{dir.name}/{file.name}", BytesIO(f.read()))
+                            gcm.add_new_file(target_path, BytesIO(f.read()))
         
         # Export the modified ISO
         for _ in gcm.export_disc_to_iso_with_changed_files(args.output_iso_path):

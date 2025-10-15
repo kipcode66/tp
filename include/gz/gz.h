@@ -56,13 +56,28 @@ public:
         PHASE_PLAYER_INIT_e,  // processes to be run after player is initialized
     };
 
+    enum SaveCategory_e {
+        CATEGORY_ANYP_e,
+        CATEGORY_ANYP_BITE_e,
+        CATEGORY_HUNDO_e,
+        CATEGORY_ALLDUNGEONS_e,
+        CATEGORY_GLITCHLESS_e,
+    };
+
     // container for any extra data to store in the memfile after the main save data
     struct memfileExData_s {
         char name[20];
         cXyz player_pos;
     };
 
+    struct saveMetadata_s {
+        char name[32];
+        char desc[64];
+    } ALIGN_DECL(32);
+
     void execute();
+    void getSaveMetadata(int i_category, int i_entryNo, saveMetadata_s* o_data);
+    int getSaveEntryNum(int i_category);
 
     void start() { mLoadPhase = PHASE_INIT_e; }
     void onStageInit() { mLoadPhase = PHASE_STAGE_INIT_e; }
@@ -175,20 +190,6 @@ public:
             return CURSOR_CLASSIC;
         default:
             return CURSOR_CLASSIC;
-        }
-    }
-
-    void loadFile(const char* filePath, void* buffer, int length, int offset) {
-        DVDFileInfo fileInfo;
-        if (DVDOpen(filePath, &fileInfo)) {
-            int bytesRead = DVDReadPrio(&fileInfo, buffer, length, offset, 2);
-            if (bytesRead > 0) {
-                DVDClose(&fileInfo);
-            } else {
-                OSReport("no bytes read!\n");
-            }
-        } else {
-            OSReport("failed to open file %s\n", filePath);
         }
     }
 
@@ -318,6 +319,7 @@ namespace gzPad {
 };
 
 int gzPrint(int x, int y, u32 color, char const* string, ...);
+void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
 
 class gzTextBox : public J2DTextBox {
 public:

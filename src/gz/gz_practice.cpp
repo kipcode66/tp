@@ -19,11 +19,7 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     mpTabHeaders[TAB_GLITCHLESS]->setString("glitchless");
     mpTabHeaders[TAB_MEMFILES]->setString("memfiles");
 
-    for (int i = 0; i < ANY_LINE_NUM; i++) {
-        mpLinesAny[i] = new gzTextBox;
-        if (i % 2 == 0) mpLinesAny[i]->setString("a");
-        if (i % 2 == 1) mpLinesAny[i]->setString("b");
-    }
+    mAnypSavesTab.create();
 
     for (int i = 0; i < ALL_DUNGEONS_LINE_NUM; i++) {
         mpLinesAllDungeons[i] = new gzTextBox;
@@ -38,6 +34,8 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     }
 
     mMemfileTab.create();
+
+    mpDescription = new gzTextBox();
 
     mTopLine = 0;
 
@@ -56,11 +54,6 @@ void gzPracticeMenu_c::_delete() {
     for (int i = 0; i < TAB_MAX; i++) {
         delete mpTabHeaders[i];
         mpTabHeaders[i] = NULL;
-    }
-
-    for (int i = 0; i < ANY_LINE_NUM; i++) {
-        delete mpLinesAny[i];
-        mpLinesAny[i] = NULL;
     }
 
     for (int i = 0; i < ALL_DUNGEONS_LINE_NUM; i++) {
@@ -85,6 +78,7 @@ void gzPracticeMenu_c::execute() {
 
     switch (mCurrentTab) {
     case TAB_ANY:
+        mAnypSavesTab.execute();
         current_max_line = ANY_LINE_NUM;
         break;
     case TAB_ALLDUNGEONS:
@@ -183,7 +177,7 @@ void gzPracticeMenu_c::draw() {
     switch (mCurrentTab) {
     case TAB_ANY:
         current_max_line = ANY_LINE_NUM;
-        currentLines = mpLinesAny;
+        currentLines = mAnypSavesTab.mpLines;
         break;
     case TAB_ALLDUNGEONS:
         current_max_line = ALL_DUNGEONS_LINE_NUM;
@@ -199,7 +193,7 @@ void gzPracticeMenu_c::draw() {
         break;
     default: // temp
         current_max_line = ANY_LINE_NUM;
-        currentLines = mpLinesAny;
+        currentLines = mAnypSavesTab.mpLines;
         break;
     }
 
@@ -227,6 +221,17 @@ void gzPracticeMenu_c::draw() {
             } else {
                 currentLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);
             }
+        }
+    }
+
+    // Draw description if valid and on menu
+    if (l_cursor->x > 0) {
+        if (currentLines[l_cursor->y] && *currentLines[l_cursor->y]->m_description != 0) {
+            f32 description_x = 0.0f;
+            f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+
+            mpDescription->setString(currentLines[l_cursor->y]->m_description);
+            mpDescription->draw(0.0f, description_y, cursor_color, HBIND_CENTER);
         }
     }
 
@@ -424,5 +429,24 @@ int gzPracticeMenu_c::gzMemfileTab_c::execute() {
         }
     }
 
+    return 1;
+}
+
+void gzPracticeMenu_c::gzAnypSavesTab_c::create() {
+    for (int i = 0; i < ANY_LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+    }
+
+    int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum(gzSaveLoaderMng_c::CATEGORY_ANYP_e);
+
+    gzSaveLoaderMng_c::saveMetadata_s metadata;
+    for (int i = 0; i < save_num; i++) {
+        g_gzInfo.mSaveLoaderMng.getSaveMetadata(gzSaveLoaderMng_c::CATEGORY_ANYP_e, i, &metadata);
+        mpLines[i]->setStringDesc(metadata.name, metadata.desc);
+    }
+}
+
+int gzPracticeMenu_c::gzAnypSavesTab_c::execute() {
+    
     return 1;
 }

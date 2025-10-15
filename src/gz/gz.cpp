@@ -36,6 +36,20 @@ int gzPrint(int x, int y, u32 color, char const* string, ...) {
     return 1;
 }
 
+void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
+    DVDFileInfo ALIGN_DECL(32) fileInfo;
+    if (DVDOpen(filePath, &fileInfo)) {
+        int bytesRead = DVDReadPrio(&fileInfo, buffer, length, offset, 2);
+        if (bytesRead > 0) {
+            DVDClose(&fileInfo);
+        } else {
+            OSReport("no bytes read!\n");
+        }
+    } else {
+        OSReport("failed to open file %s\n", filePath);
+    }
+}
+
 void gzInfo_c::loadDefaultSettings() {
     mSettings.mTextColor = 0xEE8000FF;
     mSettings.mCommandCombos.mMoveLink = PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y;
@@ -70,7 +84,7 @@ int gzInfo_c::_create() {
     // TODO: Once critical game setup code is pulled out of d_s_logo
     // we should create our own heap and alloc an image buffer from that instead
     void* buf = JKRHeap::alloc(108960, 32, NULL);
-    loadFile("/gz/bg.bti", buf, 108960, 0);
+    gzDVDLoadFile("/gz/bg.bti", buf, 108960, 0);
     ResTIMG* bg = (ResTIMG*)buf;
     mpBackground = new J2DPicture(bg);
     mpHeader = new gzTextBox("tpgz v2.0.0", mSettings.mTextColor);

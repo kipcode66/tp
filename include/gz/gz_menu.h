@@ -319,7 +319,7 @@ public:
 
     // static const int VISIBLE_TABS = 3;
 
-    static const int ANY_LINE_NUM = 20;
+    static const int ANY_LINE_NUM = 50;  // TODO: dont hardcode these?
     static const int ALL_DUNGEONS_LINE_NUM = 20;
     static const int HUNDO_LINE_NUM = 20;
 
@@ -334,6 +334,14 @@ public:
         TAB_MEMFILES,
 
         TAB_MAX
+    };
+
+    class gzAnypSavesTab_c {
+    public:
+        void create();
+        int execute();
+        
+        gzTextBox* mpLines[ANY_LINE_NUM];
     };
 
     class gzMemfileTab_c {
@@ -359,10 +367,11 @@ public:
     };
 
     gzTextBox* mpTabHeaders[TAB_MAX];
-    gzTextBox* mpLinesAny[ANY_LINE_NUM];
+    gzAnypSavesTab_c mAnypSavesTab;
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
     gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
     gzMemfileTab_c mMemfileTab;
+    gzTextBox* mpDescription;
     dMeterHaihai_c* mpMeterHaihai;
     int mTopLine;
     int mCurrentTab;
