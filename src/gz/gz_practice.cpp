@@ -13,21 +13,17 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
     }
 
     mpTabHeaders[TAB_ANY]->setString("any%");
-    mpTabHeaders[TAB_BITE]->setString("any% bite");
+    mpTabHeaders[TAB_NOSQ]->setString("no sq");
     mpTabHeaders[TAB_HUNDO]->setString("100%");
     mpTabHeaders[TAB_ALLDUNGEONS]->setString("all dungeons");
     mpTabHeaders[TAB_GLITCHLESS]->setString("glitchless");
     mpTabHeaders[TAB_MEMFILES]->setString("memfiles");
 
     mAnypSavesTab.create();
-
-    for (int i = 0; i < ALL_DUNGEONS_LINE_NUM; i++) {
-        mpLinesAllDungeons[i] = new gzTextBox;
-        if (i % 2 == 0) mpLinesAllDungeons[i]->setString("b");
-        if (i % 2 == 1) mpLinesAllDungeons[i]->setString("c");
-    }
-
+    mNoSQSavesTab.create();
+    mAllDungeonsSavesTab.create();
     mHundoSavesTab.create();
+    mGlitchlessSavesTab.create();
     mMemfileTab.create();
 
     mpDescription = new gzTextBox();
@@ -50,11 +46,6 @@ void gzPracticeMenu_c::_delete() {
         delete mpTabHeaders[i];
         mpTabHeaders[i] = NULL;
     }
-
-    for (int i = 0; i < ALL_DUNGEONS_LINE_NUM; i++) {
-        delete mpLinesAllDungeons[i];
-        mpLinesAllDungeons[i] = NULL;
-    }
 }
 
 void gzPracticeMenu_c::execute() {
@@ -71,20 +62,26 @@ void gzPracticeMenu_c::execute() {
         mAnypSavesTab.execute();
         current_max_line = ANY_LINE_NUM;
         break;
+    case TAB_NOSQ:
+        mNoSQSavesTab.execute();
+        current_max_line = NOSQ_LINE_NUM;
+        break;
     case TAB_ALLDUNGEONS:
+        mAllDungeonsSavesTab.execute();
         current_max_line = ALL_DUNGEONS_LINE_NUM;
         break;
     case TAB_HUNDO:
         mHundoSavesTab.execute();
         current_max_line = HUNDO_LINE_NUM;
         break;
+    case TAB_GLITCHLESS:
+        mGlitchlessSavesTab.execute();
+        current_max_line = GLITCHLESS_LINE_NUM;
+        break;
     case TAB_MEMFILES:
         if (mMemfileTab.execute() == 0)
             return;
         current_max_line = MEMFILE_MAX_NUM;
-        break;
-    default:  // temp
-        current_max_line = ANY_LINE_NUM;
         break;
     }
 
@@ -136,11 +133,11 @@ void gzPracticeMenu_c::draw() {
     f32 X_POS[TAB_MAX];
     f32 tab_header_x_alignment = mXPos + TAB_HEADER_OFFSET;
     X_POS[TAB_ANY] = tab_header_x_alignment;
-    X_POS[TAB_BITE] = tab_header_x_alignment + 50.0f;
-    X_POS[TAB_HUNDO] = tab_header_x_alignment + 130.0f;
-    X_POS[TAB_ALLDUNGEONS] = tab_header_x_alignment + 180.0f;
-    X_POS[TAB_GLITCHLESS] = tab_header_x_alignment + 280.0f;
-    X_POS[TAB_MEMFILES] = tab_header_x_alignment + 355.0f;
+    X_POS[TAB_NOSQ] = tab_header_x_alignment + 50.0f;
+    X_POS[TAB_HUNDO] = tab_header_x_alignment + 100.0f;
+    X_POS[TAB_ALLDUNGEONS] = tab_header_x_alignment + 150.0f;
+    X_POS[TAB_GLITCHLESS] = tab_header_x_alignment + 250.0f;
+    X_POS[TAB_MEMFILES] = tab_header_x_alignment + 325.0f;
 
     u32 cursor_color = gzInfo_getCursorColor();
 
@@ -170,21 +167,25 @@ void gzPracticeMenu_c::draw() {
         current_max_line = ANY_LINE_NUM;
         currentLines = mAnypSavesTab.mpLines;
         break;
+    case TAB_NOSQ:
+        current_max_line = NOSQ_LINE_NUM;
+        currentLines = mNoSQSavesTab.mpLines;
+        break;
     case TAB_ALLDUNGEONS:
         current_max_line = ALL_DUNGEONS_LINE_NUM;
-        currentLines = mpLinesAllDungeons;
+        currentLines = mAllDungeonsSavesTab.mpLines;
         break;
     case TAB_HUNDO:
         current_max_line = HUNDO_LINE_NUM;
         currentLines = mHundoSavesTab.mpLines;
         break;
+    case TAB_GLITCHLESS:
+        current_max_line = GLITCHLESS_LINE_NUM;
+        currentLines = mGlitchlessSavesTab.mpLines;
+        break;
     case TAB_MEMFILES:
         current_max_line = MEMFILE_MAX_NUM;
         currentLines = mMemfileTab.mpLines;
-        break;
-    default: // temp
-        current_max_line = ANY_LINE_NUM;
-        currentLines = mAnypSavesTab.mpLines;
         break;
     }
 
@@ -468,6 +469,81 @@ int gzPracticeMenu_c::gzHundoSavesTab_c::execute() {
 
     if (gzPad::getTrigA()) {
         g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_HUNDO_e, l_cursor->y);
+        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+    }
+
+    return 1;
+}
+
+void gzPracticeMenu_c::gzADSavesTab_c::create() {
+    for (int i = 0; i < ALL_DUNGEONS_LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+    }
+
+    int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum(gzSaveLoaderMng_c::CATEGORY_ALLDUNGEONS_e);
+
+    gzSaveLoaderMng_c::saveMetadata_s metadata;
+    for (int i = 0; i < save_num; i++) {
+        g_gzInfo.mSaveLoaderMng.getSaveMetadata(gzSaveLoaderMng_c::CATEGORY_ALLDUNGEONS_e, i, &metadata);
+        mpLines[i]->setStringDesc(metadata.name, metadata.desc);
+    }
+}
+
+int gzPracticeMenu_c::gzADSavesTab_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (gzPad::getTrigA()) {
+        g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_ALLDUNGEONS_e, l_cursor->y);
+        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+    }
+
+    return 1;
+}
+
+void gzPracticeMenu_c::gzGlitchlessSavesTab_c::create() {
+    for (int i = 0; i < GLITCHLESS_LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+    }
+
+    int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum(gzSaveLoaderMng_c::CATEGORY_GLITCHLESS_e);
+
+    gzSaveLoaderMng_c::saveMetadata_s metadata;
+    for (int i = 0; i < save_num; i++) {
+        g_gzInfo.mSaveLoaderMng.getSaveMetadata(gzSaveLoaderMng_c::CATEGORY_GLITCHLESS_e, i, &metadata);
+        mpLines[i]->setStringDesc(metadata.name, metadata.desc);
+    }
+}
+
+int gzPracticeMenu_c::gzGlitchlessSavesTab_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (gzPad::getTrigA()) {
+        g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_GLITCHLESS_e, l_cursor->y);
+        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+    }
+
+    return 1;
+}
+
+void gzPracticeMenu_c::gzNoSQSavesTab_c::create() {
+    for (int i = 0; i < NOSQ_LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+    }
+
+    int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum(gzSaveLoaderMng_c::CATEGORY_NOSQ_e);
+
+    gzSaveLoaderMng_c::saveMetadata_s metadata;
+    for (int i = 0; i < save_num; i++) {
+        g_gzInfo.mSaveLoaderMng.getSaveMetadata(gzSaveLoaderMng_c::CATEGORY_NOSQ_e, i, &metadata);
+        mpLines[i]->setStringDesc(metadata.name, metadata.desc);
+    }
+}
+
+int gzPracticeMenu_c::gzNoSQSavesTab_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (gzPad::getTrigA()) {
+        g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_NOSQ_e, l_cursor->y);
         gzInfo_seStart(Z2SE_SY_CURSOR_OK);
     }
 

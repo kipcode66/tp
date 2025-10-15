@@ -78,7 +78,7 @@ public:
 
     enum SaveCategory_e {
         CATEGORY_ANYP_e,
-        CATEGORY_ANYP_BITE_e,
+        CATEGORY_NOSQ_e,
         CATEGORY_HUNDO_e,
         CATEGORY_ALLDUNGEONS_e,
         CATEGORY_GLITCHLESS_e,

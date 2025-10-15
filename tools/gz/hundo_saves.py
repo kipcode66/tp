@@ -155,7 +155,7 @@ HUNDO_SAVES = [
         'name': 'kb2 skip',
         'description': 'Clip to skip King Bulblin 2',
         'filename': 'kb2',
-        'setflags': SetFlags.POS | SetFlags.CAM,
+        'setflags': SetFlags.CAM,
         'angle': 14957,
         'cam': {
             'center': (-92795.1328, -5302.87988, 22505.3359),

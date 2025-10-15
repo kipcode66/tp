@@ -320,14 +320,16 @@ public:
     // static const int VISIBLE_TABS = 3;
 
     static const int ANY_LINE_NUM = 50;  // TODO: dont hardcode these?
-    static const int ALL_DUNGEONS_LINE_NUM = 20;
+    static const int ALL_DUNGEONS_LINE_NUM = 43;
     static const int HUNDO_LINE_NUM = 86;
+    static const int GLITCHLESS_LINE_NUM = 32;
+    static const int NOSQ_LINE_NUM = 30;
 
     static const int MEMFILE_MAX_NUM = 20;  // TODO: should this be variable or capped?
 
     enum gzPracticeMenu_Tab_e {
         TAB_ANY,
-        TAB_BITE,
+        TAB_NOSQ,
         TAB_HUNDO,
         TAB_ALLDUNGEONS,
         TAB_GLITCHLESS,
@@ -350,6 +352,30 @@ public:
         int execute();
         
         gzTextBox* mpLines[HUNDO_LINE_NUM];
+    };
+
+    class gzADSavesTab_c {
+    public:
+        void create();
+        int execute();
+        
+        gzTextBox* mpLines[ALL_DUNGEONS_LINE_NUM];
+    };
+
+    class gzGlitchlessSavesTab_c {
+    public:
+        void create();
+        int execute();
+        
+        gzTextBox* mpLines[GLITCHLESS_LINE_NUM];
+    };
+
+    class gzNoSQSavesTab_c {
+    public:
+        void create();
+        int execute();
+        
+        gzTextBox* mpLines[NOSQ_LINE_NUM];
     };
 
     class gzMemfileTab_c {
@@ -376,8 +402,10 @@ public:
 
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzAnypSavesTab_c mAnypSavesTab;
-    gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
+    gzNoSQSavesTab_c mNoSQSavesTab;
+    gzADSavesTab_c mAllDungeonsSavesTab;
     gzHundoSavesTab_c mHundoSavesTab;
+    gzGlitchlessSavesTab_c mGlitchlessSavesTab;
     gzMemfileTab_c mMemfileTab;
     gzTextBox* mpDescription;
     dMeterHaihai_c* mpMeterHaihai;

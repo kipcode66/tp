@@ -68,6 +68,7 @@ ANY_PERCENT_SAVES = [
         'name': 'forest escape',
         'description': 'LJA over S.Faron exit trigger',
         'filename': 'forest_escape',
+        'setflags': SetFlags.POS | SetFlags.CAM,
         'pos': (-12433.6016, -235.969193, -17103.998),
         'angle': 29553,
         'cam': {
@@ -191,7 +192,7 @@ ANY_PERCENT_SAVES = [
         'name': 'morpheel',
         'description': 'Morpheel fight (no Zora Armor)',
         'filename': 'onebomb',
-        'setflags': SetFlags.POS | SetFlags.CAM,
+        'setflags': SetFlags.POS,
         'pos': (-1193.0, -23999.00, -770.0),
         'angle': 10754,
     },

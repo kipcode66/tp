@@ -55,8 +55,8 @@ void gzSaveLoaderMng_c::loadSave(SaveCategory_e i_category, int i_entryNo) {
     default:
         category_str = "any_saves";
         break;
-    case CATEGORY_ANYP_BITE_e:
-        category_str = "bite_saves";
+    case CATEGORY_NOSQ_e:
+        category_str = "nosq_saves";
         break;
     case CATEGORY_HUNDO_e:
         category_str = "hundo_saves";
@@ -71,7 +71,7 @@ void gzSaveLoaderMng_c::loadSave(SaveCategory_e i_category, int i_entryNo) {
 
     getSaveMetadata(i_category, i_entryNo, &mSaveMetadata);
 
-    char pathbuf[32];
+    char pathbuf[64];
     sprintf(pathbuf, "/gz/%s/%s.bin", category_str, mSaveMetadata.filename);
     gzDVDLoadFile(pathbuf, mDoMemCd_Ctrl_c::sTmpBuf, SAVE_READ_SIZE, 0);
 
@@ -93,8 +93,8 @@ void gzSaveLoaderMng_c::getSaveMetadata(SaveCategory_e i_category, int i_entryNo
     default:
         category_str = "any_saves/any";
         break;
-    case CATEGORY_ANYP_BITE_e:
-        category_str = "bite_saves/bite";
+    case CATEGORY_NOSQ_e:
+        category_str = "nosq_saves/nosq";
         break;
     case CATEGORY_HUNDO_e:
         category_str = "hundo_saves/hundo";
@@ -107,7 +107,7 @@ void gzSaveLoaderMng_c::getSaveMetadata(SaveCategory_e i_category, int i_entryNo
         break;
     }
 
-    char pathbuf[32];
+    char pathbuf[64];
     sprintf(pathbuf, "/gz/%s.bin", category_str);
     gzDVDLoadFile(pathbuf, o_data, sizeof(saveMetadata_s), METADATA_OFFSET + (i_entryNo * sizeof(saveMetadata_s)));
 }
@@ -121,8 +121,8 @@ int gzSaveLoaderMng_c::getSaveEntryNum(SaveCategory_e i_category) {
     default:
         category_str = "any_saves/any";
         break;
-    case CATEGORY_ANYP_BITE_e:
-        category_str = "bite_saves/bite";
+    case CATEGORY_NOSQ_e:
+        category_str = "nosq_saves/nosq";
         break;
     case CATEGORY_HUNDO_e:
         category_str = "hundo_saves/hundo";
@@ -137,7 +137,7 @@ int gzSaveLoaderMng_c::getSaveEntryNum(SaveCategory_e i_category) {
 
     u8 ALIGN_DECL(32) read_buffer[MIN_READ_SIZE];
 
-    char pathbuf[32];
+    char pathbuf[64];
     sprintf(pathbuf, "/gz/%s.bin", category_str);
     gzDVDLoadFile(pathbuf, read_buffer, MIN_READ_SIZE, 0);
 

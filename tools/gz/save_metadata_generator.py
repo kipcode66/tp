@@ -7,6 +7,9 @@ import struct
 
 from any_saves import ANY_PERCENT_SAVES
 from hundo_saves import HUNDO_SAVES
+from ad_saves import ALL_DUNGEONS_SAVES
+from glitchless_saves import GLITCHLESS_SAVES
+from nosq_saves import NOSQ_SAVES
 
 @unique
 class Platform(IntEnum):
@@ -27,7 +30,7 @@ def main():
         "-c",
         "--category",
         type=str.lower,
-        choices=['any', 'hundo'],
+        choices=['any', 'nosq', 'hundo', 'ad', 'glitchless'],
         help="The category to generate for."
     )
     args = parser.parse_args()
@@ -55,8 +58,14 @@ def main():
     saves = []
     if args.category == 'any':
         saves = ANY_PERCENT_SAVES
+    elif args.category == 'nosq':
+        saves = NOSQ_SAVES
     elif args.category == 'hundo':
         saves = HUNDO_SAVES
+    elif args.category == 'ad':
+        saves = ALL_DUNGEONS_SAVES
+    elif args.category == 'glitchless':
+        saves = GLITCHLESS_SAVES
         
     save_count = len(saves)
     for e in saves:
@@ -65,7 +74,7 @@ def main():
     if (save_count == 0):
         return
 
-    file = open(f"{args.category}.bin", "wb")
+    file = open(f"../../mod_assets/gz/{args.category}_saves/{args.category}.bin", "wb")
 
     # save metadata aligned to 32 bytes for DVD API
     file.write(struct.pack(">i", save_count))
