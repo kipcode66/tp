@@ -419,6 +419,21 @@ public:
 
     gzCheatsMenu_c();
     ~gzCheatsMenu_c();
+    const char* getDisableItemTimerText() { return gzInfo_isDisableItemTimer() ? "on" : "off"; }
+    const char* getDisableWallsText() { return gzInfo_isDisableWalls() ? "on" : "off"; }
+    const char* getInfiniteAirText() { return gzInfo_isInfiniteAir() ? "on" : "off"; }
+    const char* getInfiniteArrowsText() { return gzInfo_isInfiniteArrows() ? "on" : "off"; }
+    const char* getInfiniteBombsText() { return gzInfo_isInfiniteBombs() ? "on" : "off"; }
+    const char* getInfiniteHeartsText() { return gzInfo_isInfiniteHearts() ? "on" : "off"; }
+    const char* getInfiniteOilText() { return gzInfo_isInfiniteOil() ? "on" : "off"; }
+    const char* getInfiniteRupeesText() { return gzInfo_isInfiniteRupees() ? "on" : "off"; }
+    const char* getInfiniteSlingshotText() { return gzInfo_isInfiniteSlingshot() ? "on" : "off"; }
+    const char* getInvincibleEnemiesText() { return gzInfo_isInvincibleEnemies() ? "on" : "off"; }
+    const char* getInvincibleLinkText() { return gzInfo_isInvincibleLink() ? "on" : "off"; }
+    const char* getMoonJumpText() { return gzInfo_isMoonJump() ? "on" : "off"; }
+    const char* getSuperClawshotText() { return gzInfo_isSuperClawshot() ? "on" : "off"; }
+    const char* getTransformAnywhereText() { return gzInfo_isTransformAnywhere() ? "on" : "off"; }
+    const char* getUnrestrictedItemsText() { return gzInfo_isUnrestrictedItems() ? "on" : "off"; }
 
     virtual void _delete();
     virtual void execute();
@@ -443,10 +458,77 @@ private:
 
 class gzFlagsMenu_c : public gzMenu_c {
 public:
-    enum gzFlagsMenu_e {
-        DUMMY,
-        
-        FLAG_MAX
+
+    enum gzFlagsMenu_Tabs_e {
+        TAB_GENERAL,
+        TAB_DUNGEON,
+        TAB_PORTAL,
+        TAB_RUPEE,
+
+        TAB_MAX
+    };
+
+    enum gzFlagsMenu_General_e {
+        G_FLAG_BOSS_FLAG,
+        G_FLAG_CORO_TD,
+        G_FLAG_EPONA_STOLEN,
+        G_FLAG_EPONA_TAMED,
+        G_FLAG_MALO_MART_CT,
+        G_FLAG_MAP_WARPING,
+        G_FLAG_MIDNA_CHARGE,
+        G_FLAG_MIDNA_HEALTHY,
+        G_FLAG_MIDNA_ON_BACK,
+        G_FLAG_MIDNA_Z,
+        G_FLAG_RUSL_TD,
+        G_FLAG_TRANSFORM_WARP,
+        G_FLAG_WOLF_SENSE,
+
+        G_FLAG_MAX
+    };
+
+    enum gzFlagsMenu_Dungeon_e {
+        D_FLAG_SELECT_DUNGEON,
+        D_FLAG_SMALL_KEY,
+        D_FLAG_MAP,
+        D_FLAG_COMPASS,
+        D_FLAG_BOSS_KEY,
+        D_FLAG_DEFEAT_MINIBOSS,
+        D_FLAG_DEFEAT_BOSS,
+        D_FLAG_CLEAR_DUNGEON,
+
+        D_FLAG_MAX
+    };
+
+    enum gzFlagsMenu_Portal_e {
+        P_FLAG_SELECT_REGION,
+        P_FLAG_REGION,
+        P_FLAG_SPRING_WARP,
+        P_FLAG_S_FARON_WARP,
+        P_FLAG_N_FARON_WARP,
+        P_FLAG_GROVE_WARP,
+        P_FLAG_GORGE_WARP,
+        P_FLAG_KAKARIKO_WARP,
+        P_FLAG_MOUNTAIN_WARP,
+        P_FLAG_BRIDGE_WARP,
+        P_FLAG_TOWN_WARP,
+        P_FLAG_LAKE_WARP,
+        P_FLAG_DOMAIN_WARP,
+        P_FLAG_UZR_WARP,
+        P_FLAG_SNOWPEAK_WARP,
+        P_FLAG_MESA_WARP,
+        P_FLAG_MIRROR_WARP,
+
+        P_FLAG_MAX
+    };
+
+    enum gzFlagsMenu_Rupee_e {
+        R_FLAG_DONATION_AMT,
+        R_FLAG_FUNDRAISING_AMT,
+        R_FLAG_FUNDRAISING_1,
+        R_FLAG_FUNDRAISING_2,
+        R_FLAG_RUPEE_CS_FLAG,
+
+        R_FLAG_MAX
     };
 
     gzFlagsMenu_c();
@@ -458,19 +540,31 @@ public:
     virtual f32 getXPos() { return mXPos; }
     virtual void setXPos(f32 x) { mXPos = x; }
 
-    static const int LINE_NUM = FLAG_MAX;
-    
 private:
-    u8 getHaihaiFlags(int idx);
     void updateDynamicLines();
+    u8 getHaihaiFlags(int idx);
+    int getCurrentLineNum();
 
 private:
-    gzTextBox* mpLines[LINE_NUM];
-    gzTextBox* mpLineOptions[LINE_NUM];
+    gzTextBox* mpTabHeaders[TAB_MAX];
+    gzTextBox* mpLinesGeneral[G_FLAG_MAX];
+    gzTextBox* mpLineOptionsGeneral[G_FLAG_MAX];
+    gzTextBox* mpLinesDungeon[D_FLAG_MAX];
+    gzTextBox* mpLineOptionsDungeon[D_FLAG_MAX];
+    gzTextBox* mpLinesPortal[P_FLAG_MAX];
+    gzTextBox* mpLineOptionsPortal[P_FLAG_MAX];
+    gzTextBox* mpLinesRupee[R_FLAG_MAX];
+    gzTextBox* mpLineOptionsRupee[R_FLAG_MAX];
     gzTextBox* mpDescription;
+
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
+    int mCurrentTab;
+    int mTopLine;
+    int mSelectedDungeon;
+    int mSelectedRegion;
     bool mOption;
+    f32 mXPos;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

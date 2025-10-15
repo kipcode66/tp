@@ -68,13 +68,13 @@ void gzPracticeMenu_c::_delete() {
 }
 
 void gzPracticeMenu_c::execute() {
-    gzCursor* l_cursor = gzInfo_getCursor();
-    int current_max_line;
-
     if (g_gzInfo.mInputWaitTimer != 0) {
         g_gzInfo.mInputWaitTimer--;
         return;
     }
+
+    gzCursor* l_cursor = gzInfo_getCursor();
+    int current_max_line;
 
     switch (mCurrentTab) {
     case TAB_ANY:

@@ -197,7 +197,6 @@ void gzFrameworkMenu_c::execute() {
 void gzFrameworkMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    
     static const f32 LINE_SPACING = 22.0f;
     static const f32 CURSOR_X = 20.0f;
     static const f32 CURSOR_Y_OFFSET = -5.0f;

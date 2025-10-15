@@ -450,7 +450,6 @@ void gzSettingsMenu_c::draw() {
 
     u32 cursor_color = gzInfo_getCursorColor();
 
-
     f32 x_alignment_opts = mXPos + OPTIONS_X_OFFSET;
     f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
     f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
@@ -477,7 +476,6 @@ void gzSettingsMenu_c::draw() {
         }
     }
 
-        // Draw description if valid and on menu
     if (l_cursor->x > 0) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
             f32 description_x = DESCRIPTION_X;

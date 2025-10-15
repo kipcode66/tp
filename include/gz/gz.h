@@ -31,6 +31,21 @@ struct gzSettings_s {
     bool mMoveLink;
     gzCommandCombos_s mCommandCombos;
     bool mMenuSfx;
+    bool mDisableItemTimer;
+    bool mDisableWalls;
+    bool mInfiniteAir;
+    bool mInfiniteArrows;
+    bool mInfiniteBombs;
+    bool mInfiniteHearts;
+    bool mInfiniteOil;
+    bool mInfiniteRupees;
+    bool mInfiniteSlingshot;
+    bool mInvincibleLink;
+    bool mInvincibleEnemies;
+    bool mMoonJump;
+    bool mSuperClawshot;
+    bool mTransformAnywhere;
+    bool mUnrestrictedItems;
 };
 
 // tpgz config file header
@@ -135,33 +150,61 @@ public:
     void executeTools();
     void executeMoveLink();
 
-    bool isDisplay() const { return mDisplay; }
-    u32 getTextColor() const { return mSettings.mTextColor; }
-    void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
-    bool isDropShadows() const { return mSettings.mDropShadows; }
-    void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
-    bool isSwapEquips() const { return mSettings.mSwapEquips; }
-    void setSwapEquips(bool i_swapEquips) { mSettings.mSwapEquips = i_swapEquips; }
-    bool getReloadType() const { return mSettings.mReloadType; }
-    bool isMenuSfx() const { return mSettings.mMenuSfx; }
-    void setReloadType(bool i_type) { mSettings.mReloadType = i_type; }
-    u8 getCursorType() const { return mSettings.mCursorType; }
-    void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
-    // TODO(Pheenoh): store this as u8 instead
-    bool getDisplayMode() const { return mSettings.mDisplayMode; }
-    void setDisplayMode(bool i_mode) { mSettings.mDisplayMode = i_mode; }
-    JUTFont* getFont() { return mpFont; }
-    void setFont(JUTFont* i_font) { mpFont = i_font; }
-    bool isMenuPausesGame() const { return mSettings.mMenuPausesGame; }
-    void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
-    void setMenuSfx(bool sfx) { mSettings.mMenuSfx = sfx; }
+    gzCursor* getCursor() { return &mCursor; }
     u32 getCursorColor() { return getCursorType() & CURSOR_CLASSIC ? getTextColor() : COLOR_WHITE; }
+    u8 getCursorType() const { return mSettings.mCursorType; }
+    bool getDisplayMode() const { return mSettings.mDisplayMode; }
+    JUTFont* getFont() { return mpFont; }
+    bool getReloadType() const { return mSettings.mReloadType; }
+    u32 getTextColor() const { return mSettings.mTextColor; }
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
+    bool isDisableItemTimer() { return mSettings.mDisableItemTimer; }
+    bool isDisableWalls() { return mSettings.mDisableWalls; }
+    bool isDisplay() const { return mDisplay; }
+    bool isDropShadows() const { return mSettings.mDropShadows; }
+    bool isInfiniteAir() {return mSettings.mInfiniteAir; }
+    bool isInfiniteArrows() { return mSettings.mInfiniteArrows; }
+    bool isInfiniteBombs() { return mSettings.mInfiniteBombs; }
+    bool isInfiniteHearts() { return mSettings.mInfiniteHearts; }
+    bool isInfiniteOil() { return mSettings.mInfiniteOil; }
+    bool isInfiniteRupees() { return mSettings.mInfiniteRupees; }
+    bool isInfiniteSlingshot() { return mSettings.mInfiniteSlingshot; }
+    bool isInvincibleEnemies() { return mSettings.mInvincibleEnemies; }
+    bool isInvincibleLink() { return mSettings.mInvincibleLink; }
+    bool isMenuPausesGame() const { return mSettings.mMenuPausesGame; }
+    bool isMenuSfx() const { return mSettings.mMenuSfx; }
+    bool isMoonJump() { return mSettings.mMoonJump; }
     bool isMoveLink() { return mSettings.mMoveLink; }
+    bool isSuperClawshot() { return mSettings.mSuperClawshot; }
+    bool isSwapEquips() const { return mSettings.mSwapEquips; }
+    bool isTransformAnywhere() { return mSettings.mTransformAnywhere; }
+    bool isUnrestrictedItems() { return mSettings.mUnrestrictedItems; }
+    void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
+    void setDisableItemTimer(bool i_opt) { mSettings.mDisableItemTimer = i_opt; }
+    void setDisableWalls(bool i_opt) { mSettings.mDisableWalls = i_opt; }
+    void setDisplayMode(bool i_mode) { mSettings.mDisplayMode = i_mode; }
+    void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
+    void setFont(JUTFont* i_font) { mpFont = i_font; }
+    void setInfiniteAir(bool i_opt) { mSettings.mInfiniteAir = i_opt; }
+    void setInfiniteArrows(bool i_opt) { mSettings.mInfiniteArrows = i_opt; }
+    void setInfiniteBombs(bool i_opt) { mSettings.mInfiniteBombs = i_opt; }
+    void setInfiniteHearts(bool i_opt) { mSettings.mInfiniteHearts = i_opt; }
+    void setInfiniteOil(bool i_opt) { mSettings.mInfiniteOil = i_opt; }
+    void setInfiniteRupees(bool i_opt) { mSettings.mInfiniteRupees = i_opt; }
+    void setInfiniteSlingshot(bool i_opt) { mSettings.mInfiniteSlingshot = i_opt; }
+    void setInvincibleEnemies(bool i_opt) { mSettings.mInvincibleEnemies = i_opt; }
+    void setInvincibleLink(bool i_opt) { mSettings.mInvincibleLink = i_opt; }
+    void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
+    void setMenuSfx(bool sfx) { mSettings.mMenuSfx = sfx; }
+    void setMoonJump(bool i_opt) { mSettings.mMoonJump = i_opt; }
     void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
-    gzCursor* getCursor() { return &mCursor; }
-
+    void setReloadType(bool i_type) { mSettings.mReloadType = i_type; }
+    void setSuperClawshot(bool i_opt) { mSettings.mSuperClawshot = i_opt; }
+    void setSwapEquips(bool i_swapEquips) { mSettings.mSwapEquips = i_swapEquips; }
+    void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
+    void setTransformAnywhere(bool i_opt) { mSettings.mTransformAnywhere = i_opt; }
+    void setUnrestrictedItems(bool i_opt) { mSettings.mUnrestrictedItems = i_opt; }
 
     void seStart(u32 i_sfxID) {
         if (mSettings.mMenuSfx) mDoAud_seStart(i_sfxID, 0, 0, 0);
@@ -227,51 +270,100 @@ public:
 extern gzInfo_c g_gzInfo;
 
 inline gzCursor* gzInfo_getCursor() { return g_gzInfo.getCursor(); }
-inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
-inline bool gzInfo_isCursorTypeTP() { return g_gzInfo.isCursorTypeTP(); }
 inline u32 gzInfo_getCursorColor() { return g_gzInfo.getCursorColor(); }
-inline bool gzInfo_isDisplayModeInterlaced() { return g_gzInfo.getDisplayMode() == false; }
-inline bool gzInfo_isDisplayModeProgressive() { return g_gzInfo.getDisplayMode() == true; }
-inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
-inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
 inline const u32 gzInfo_getTextColor() { return g_gzInfo.getTextColor(); }
 inline const u8 gzInfo_getCursorType() { return g_gzInfo.getCursorType(); }
-inline const bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
-inline const bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
 inline const bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
 inline const bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
-inline const bool gzInfo_isMenuSfx() { return g_gzInfo.isMenuSfx(); }
-inline const bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
-inline u8 gzInfo_previousCursorType() { return g_gzInfo.previousCursorType(); }
-inline u8 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
-inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
+
 inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcard(); }
 inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
-
+inline u8 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
+inline u8 gzInfo_previousCursorType() { return g_gzInfo.previousCursorType(); }
+inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
-inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
-inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
-inline void gzInfo_setDropShadows(bool dropShadows) { g_gzInfo.setDropShadows(dropShadows); }
-inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapEquips); }
-inline void gzInfo_setReloadType(bool i_type) { g_gzInfo.setReloadType(i_type); }
-inline void gzInfo_setReloadArea() { gzInfo_setReloadType(true); }
-inline void gzInfo_setReloadFile() { gzInfo_setReloadType(false); }
+inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
+
+inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
+inline bool gzInfo_isCursorTypeTP() { return g_gzInfo.isCursorTypeTP(); }
+inline bool gzInfo_isDisableItemTimer() { return g_gzInfo.isDisableItemTimer(); }
+inline bool gzInfo_isDisableWalls() { return g_gzInfo.isDisableWalls(); }
+inline bool gzInfo_isDisplayModeInterlaced() { return g_gzInfo.getDisplayMode() == false; }
+inline bool gzInfo_isDisplayModeProgressive() { return g_gzInfo.getDisplayMode() == true; }
+inline bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
+inline bool gzInfo_isInfiniteAir() { return g_gzInfo.isInfiniteAir(); }
+inline bool gzInfo_isInfiniteArrows() { return g_gzInfo.isInfiniteArrows(); }
+inline bool gzInfo_isInfiniteBombs() { return g_gzInfo.isInfiniteBombs(); }
+inline bool gzInfo_isInfiniteHearts() { return g_gzInfo.isInfiniteHearts(); }
+inline bool gzInfo_isInfiniteOil() { return g_gzInfo.isInfiniteOil(); }
+inline bool gzInfo_isInfiniteRupees() { return g_gzInfo.isInfiniteRupees(); }
+inline bool gzInfo_isInfiniteSlingshot() { return g_gzInfo.isInfiniteSlingshot(); }
+inline bool gzInfo_isInvincibleEnemies() { return g_gzInfo.isInvincibleEnemies(); }
+inline bool gzInfo_isInvincibleLink() { return g_gzInfo.isInvincibleLink(); }
+inline bool gzInfo_isMenuSfx() { return g_gzInfo.isMenuSfx(); }
+inline bool gzInfo_isMoonJump() { return g_gzInfo.isMoonJump(); }
+inline bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
+inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
+inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
+inline bool gzInfo_isSuperClawshot() { return g_gzInfo.isSuperClawshot(); }
+inline bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
+inline bool gzInfo_isTransformAnywhere() { return g_gzInfo.isTransformAnywhere(); }
+inline bool gzInfo_isUnrestrictedItems() { return g_gzInfo.isUnrestrictedItems(); }
+
 inline void gzInfo_setCursorType(u8 type) { g_gzInfo.setCursorType(type); }
 inline void gzInfo_setDisplayMode(bool mode) { g_gzInfo.setDisplayMode(mode); }
 inline void gzInfo_setDisplayModeInterlaced() { mDoMch_render_c::setInterlacedMode(); gzInfo_setDisplayMode(false); }
 inline void gzInfo_setDisplayModeProgressive() { mDoMch_render_c::setProgressiveMode(); gzInfo_setDisplayMode(true); }
+inline void gzInfo_setDropShadows(bool dropShadows) { g_gzInfo.setDropShadows(dropShadows); }
 inline void gzInfo_setMenuPausesGame(bool opt) { g_gzInfo.setMenuPausesGame(opt); }
 inline void gzInfo_setMenuSfx(bool sfx) { g_gzInfo.setMenuSfx(sfx); }
 inline void gzInfo_setMoveLink(bool i_opt) { g_gzInfo.setMoveLink(i_opt); }
-inline void gzInfo_onMoveLink() { gzInfo_setMoveLink(true); }
-inline void gzInfo_onSwapEquips() { gzInfo_setSwapEquips(true); }
-inline void gzInfo_onDropShadows() { gzInfo_setDropShadows(true); }
-inline void gzInfo_onMenuSfx() { gzInfo_setMenuSfx(true); }
-inline void gzInfo_offMoveLink() { gzInfo_setMoveLink(false); }
-inline void gzInfo_offSwapEquips() { gzInfo_setSwapEquips(false); }
+inline void gzInfo_setReloadType(bool i_type) { g_gzInfo.setReloadType(i_type); }
+inline void gzInfo_setReloadArea() { gzInfo_setReloadType(true); }
+inline void gzInfo_setReloadFile() { gzInfo_setReloadType(false); }
+inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapEquips); }
+inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
+
+inline void gzInfo_offDisableItemTimer() { g_gzInfo.setDisableItemTimer(false); }
+inline void gzInfo_offDisableWalls() { g_gzInfo.setDisableWalls(false); }
 inline void gzInfo_offDropShadows() { gzInfo_setDropShadows(false); }
+inline void gzInfo_offInfiniteAir() { g_gzInfo.setInfiniteAir(false); }
+inline void gzInfo_offInfiniteArrows() { g_gzInfo.setInfiniteArrows(false); }
+inline void gzInfo_offInfiniteBombs() { g_gzInfo.setInfiniteBombs(false); }
+inline void gzInfo_offInfiniteHearts() { g_gzInfo.setInfiniteHearts(false); }
+inline void gzInfo_offInfiniteOil() { g_gzInfo.setInfiniteOil(false); }
+inline void gzInfo_offInfiniteRupees() { g_gzInfo.setInfiniteRupees(false); }
+inline void gzInfo_offInfiniteSlingshot() { g_gzInfo.setInfiniteSlingshot(false); }
+inline void gzInfo_offInvincibleEnemies() { g_gzInfo.setInvincibleEnemies(false); }
+inline void gzInfo_offInvincibleLink() { g_gzInfo.setInvincibleLink(false); }
 inline void gzInfo_offMenuSfx() { gzInfo_setMenuSfx(false); }
+inline void gzInfo_offMoonJump() { g_gzInfo.setMoonJump(false); }
+inline void gzInfo_offMoveLink() { gzInfo_setMoveLink(false); }
+inline void gzInfo_offSuperClawshot() { g_gzInfo.setSuperClawshot(false); }
+inline void gzInfo_offSwapEquips() { gzInfo_setSwapEquips(false); }
+inline void gzInfo_offTransformAnywhere() { g_gzInfo.setTransformAnywhere(false); }
+inline void gzInfo_offUnrestrictedItems() { g_gzInfo.setUnrestrictedItems(false); }
+
+inline void gzInfo_onDisableItemTimer() { g_gzInfo.setDisableItemTimer(true); }
+inline void gzInfo_onDisableWalls() { g_gzInfo.setDisableWalls(true); }
+inline void gzInfo_onDropShadows() { gzInfo_setDropShadows(true); }
+inline void gzInfo_onInfiniteAir() { g_gzInfo.setInfiniteAir(true); }
+inline void gzInfo_onInfiniteArrows() { g_gzInfo.setInfiniteArrows(true); }
+inline void gzInfo_onInfiniteBombs() { g_gzInfo.setInfiniteBombs(true); }
+inline void gzInfo_onInfiniteHearts() { g_gzInfo.setInfiniteHearts(true); }
+inline void gzInfo_onInfiniteOil() { g_gzInfo.setInfiniteOil(true); }
+inline void gzInfo_onInfiniteRupees() { g_gzInfo.setInfiniteRupees(true); }
+inline void gzInfo_onInfiniteSlingshot() { g_gzInfo.setInfiniteSlingshot(true); }
+inline void gzInfo_onInvincibleEnemies() { g_gzInfo.setInvincibleEnemies(true); }
+inline void gzInfo_onInvincibleLink() { g_gzInfo.setInvincibleLink(true); }
+inline void gzInfo_onMenuSfx() { gzInfo_setMenuSfx(true); }
+inline void gzInfo_onMoonJump() { g_gzInfo.setMoonJump(true); }
+inline void gzInfo_onMoveLink() { gzInfo_setMoveLink(true); }
+inline void gzInfo_onSuperClawshot() { g_gzInfo.setSuperClawshot(true); }
+inline void gzInfo_onSwapEquips() { gzInfo_setSwapEquips(true); }
+inline void gzInfo_onTransformAnywhere() { g_gzInfo.setTransformAnywhere(true); }
+inline void gzInfo_onUnrestrictedItems() { g_gzInfo.setUnrestrictedItems(true); }
 
 namespace gzPad {
     inline u32 getTrig() { return mDoCPd_c::m_gzPadInfo.mPressedButtonFlags; }

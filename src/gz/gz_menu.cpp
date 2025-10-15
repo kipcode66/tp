@@ -34,8 +34,8 @@ void gzMainMenu_c::startReverseTransition() {
 gzMainMenu_c::gzMainMenu_c() {
     OSReport("creating gzMainMenu_c\n");
 
-    mpMenus[MENU_CHEATS] = NULL;
-    mpMenus[MENU_FLAGS] = NULL;
+    mpMenus[MENU_CHEATS] = new gzCheatsMenu_c();
+    mpMenus[MENU_FLAGS] = new gzFlagsMenu_c();
     mpMenus[MENU_FRAMEWORK] = new gzFrameworkMenu_c();
     mpMenus[MENU_INVENTORY] = NULL;
     mpMenus[MENU_MEMORY] = new gzMemoryMenu_c();
