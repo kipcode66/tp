@@ -369,6 +369,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::loadMemfile(int i_no) {
             gzSaveLoaderMng_c::memfileExData_s* exdata = (gzSaveLoaderMng_c::memfileExData_s*)(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c));
             memcpy(&g_gzInfo.mSaveLoaderMng.mMemfileExData, exdata, sizeof(gzSaveLoaderMng_c::memfileExData_s));
 
+            g_gzInfo.mSaveLoaderMng.setMode(gzSaveLoaderMng_c::MODE_MEMFILE_e);
             g_gzInfo.mSaveLoaderMng.start();
         }
 
@@ -447,6 +448,12 @@ void gzPracticeMenu_c::gzAnypSavesTab_c::create() {
 }
 
 int gzPracticeMenu_c::gzAnypSavesTab_c::execute() {
-    
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (gzPad::getTrigA()) {
+        g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_ANYP_e, l_cursor->y);
+        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+    }
+
     return 1;
 }

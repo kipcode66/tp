@@ -60,6 +60,8 @@ def main():
         return
 
     file = open(f"{args.category}.bin", "wb")
+
+    # save metadata aligned to 32 bytes for DVD API
     file.write(struct.pack(">i", save_count))
     file.write(int(0).to_bytes(28, "big", signed=False)) # padding
 
@@ -74,6 +76,7 @@ def main():
         file.write(struct.pack('>fff', *entry["pos"]))
         file.write(struct.pack('>fff', *entry["cam"]["center"]))
         file.write(struct.pack('>fff', *entry["cam"]["eye"]))
+        file.write(int(0).to_bytes(0x18, "big", signed=False)) # padding
 
 if __name__ == "__main__":
     main()
