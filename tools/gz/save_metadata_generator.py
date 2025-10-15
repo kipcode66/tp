@@ -6,6 +6,7 @@ from enum import IntEnum, unique
 import struct
 
 from any_saves import ANY_PERCENT_SAVES
+from hundo_saves import HUNDO_SAVES
 
 @unique
 class Platform(IntEnum):
@@ -26,7 +27,7 @@ def main():
         "-c",
         "--category",
         type=str.lower,
-        choices=['any'],
+        choices=['any', 'hundo'],
         help="The category to generate for."
     )
     args = parser.parse_args()
@@ -50,11 +51,16 @@ def main():
         entries.append(e)
 
     save_count = 0
-
+    
+    saves = []
     if args.category == 'any':
-        save_count = len(ANY_PERCENT_SAVES)
-        for e in ANY_PERCENT_SAVES:
-            add_entry(e)
+        saves = ANY_PERCENT_SAVES
+    elif args.category == 'hundo':
+        saves = HUNDO_SAVES
+        
+    save_count = len(saves)
+    for e in saves:
+        add_entry(e)
 
     if (save_count == 0):
         return

@@ -321,7 +321,7 @@ public:
 
     static const int ANY_LINE_NUM = 50;  // TODO: dont hardcode these?
     static const int ALL_DUNGEONS_LINE_NUM = 20;
-    static const int HUNDO_LINE_NUM = 20;
+    static const int HUNDO_LINE_NUM = 86;
 
     static const int MEMFILE_MAX_NUM = 20;  // TODO: should this be variable or capped?
 
@@ -342,6 +342,14 @@ public:
         int execute();
         
         gzTextBox* mpLines[ANY_LINE_NUM];
+    };
+
+    class gzHundoSavesTab_c {
+    public:
+        void create();
+        int execute();
+        
+        gzTextBox* mpLines[HUNDO_LINE_NUM];
     };
 
     class gzMemfileTab_c {
@@ -369,7 +377,7 @@ public:
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzAnypSavesTab_c mAnypSavesTab;
     gzTextBox* mpLinesAllDungeons[ALL_DUNGEONS_LINE_NUM];
-    gzTextBox* mpLinesHundo[HUNDO_LINE_NUM];
+    gzHundoSavesTab_c mHundoSavesTab;
     gzMemfileTab_c mMemfileTab;
     gzTextBox* mpDescription;
     dMeterHaihai_c* mpMeterHaihai;

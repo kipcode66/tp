@@ -27,12 +27,7 @@ gzPracticeMenu_c::gzPracticeMenu_c() {
         if (i % 2 == 1) mpLinesAllDungeons[i]->setString("c");
     }
 
-    for (int i = 0; i < HUNDO_LINE_NUM; i++) {
-        mpLinesHundo[i] = new gzTextBox;
-        if (i % 2 == 0) mpLinesHundo[i]->setString("c");
-        if (i % 2 == 1) mpLinesHundo[i]->setString("d");
-    }
-
+    mHundoSavesTab.create();
     mMemfileTab.create();
 
     mpDescription = new gzTextBox();
@@ -60,11 +55,6 @@ void gzPracticeMenu_c::_delete() {
         delete mpLinesAllDungeons[i];
         mpLinesAllDungeons[i] = NULL;
     }
-
-    for (int i = 0; i < HUNDO_LINE_NUM; i++) {
-        delete mpLinesHundo[i];
-        mpLinesHundo[i] = NULL;
-    }
 }
 
 void gzPracticeMenu_c::execute() {
@@ -85,6 +75,7 @@ void gzPracticeMenu_c::execute() {
         current_max_line = ALL_DUNGEONS_LINE_NUM;
         break;
     case TAB_HUNDO:
+        mHundoSavesTab.execute();
         current_max_line = HUNDO_LINE_NUM;
         break;
     case TAB_MEMFILES:
@@ -185,7 +176,7 @@ void gzPracticeMenu_c::draw() {
         break;
     case TAB_HUNDO:
         current_max_line = HUNDO_LINE_NUM;
-        currentLines = mpLinesHundo;
+        currentLines = mHundoSavesTab.mpLines;
         break;
     case TAB_MEMFILES:
         current_max_line = MEMFILE_MAX_NUM;
@@ -452,6 +443,31 @@ int gzPracticeMenu_c::gzAnypSavesTab_c::execute() {
 
     if (gzPad::getTrigA()) {
         g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_ANYP_e, l_cursor->y);
+        gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+    }
+
+    return 1;
+}
+
+void gzPracticeMenu_c::gzHundoSavesTab_c::create() {
+    for (int i = 0; i < HUNDO_LINE_NUM; i++) {
+        mpLines[i] = new gzTextBox;
+    }
+
+    int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum(gzSaveLoaderMng_c::CATEGORY_HUNDO_e);
+
+    gzSaveLoaderMng_c::saveMetadata_s metadata;
+    for (int i = 0; i < save_num; i++) {
+        g_gzInfo.mSaveLoaderMng.getSaveMetadata(gzSaveLoaderMng_c::CATEGORY_HUNDO_e, i, &metadata);
+        mpLines[i]->setStringDesc(metadata.name, metadata.desc);
+    }
+}
+
+int gzPracticeMenu_c::gzHundoSavesTab_c::execute() {
+    gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (gzPad::getTrigA()) {
+        g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_HUNDO_e, l_cursor->y);
         gzInfo_seStart(Z2SE_SY_CURSOR_OK);
     }
 
