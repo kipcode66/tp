@@ -97,7 +97,7 @@ public:
     /* 0x6D */ u8 mCurrentGroupId;
     /* 0x6E */ bool field_0x6e;
 
-private:
+public:
     /* 0x70 */ void* field_0x70;
     /* 0x74 */ u32 field_0x74;
     /* 0x78 */ CMemBlock* mHeadFreeList;

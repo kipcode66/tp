@@ -192,7 +192,7 @@ void gzCheatsMenu_c::execute() {
         }
     }
 
-    if (gzPad::getTrigLeft()) {
+    if (gzPad::getTrigLeft() && mOption) {
         switch (l_cursor->y) {
         case CHEAT_DISABLE_ITEM_TIMER:
             if (gzInfo_isDisableItemTimer()) {
@@ -286,7 +286,7 @@ void gzCheatsMenu_c::execute() {
         }
     }
 
-    if (gzPad::getTrigRight()) {
+    if (gzPad::getTrigRight() && mOption) {
         switch (l_cursor->y) {
         case CHEAT_DISABLE_ITEM_TIMER:
             if (!gzInfo_isDisableItemTimer()) {

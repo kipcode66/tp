@@ -2320,6 +2320,7 @@ config.libs = [
             Object(Custom, "gz/gz_memory.cpp"),
             Object(Custom, "gz/gz_cheats.cpp"),
             Object(Custom, "gz/gz_flags.cpp"),
+            Object(Custom, "gz/gz_heaps.cpp"),
             Object(Custom, "gz/gz_savemgr.cpp"),
         ],
     },
@@ -2406,6 +2407,7 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
                 "gz/gz_memory.cpp",
                 "gz/gz_cheats.cpp",
                 "gz/gz_flags.cpp",
+                "gz/gz_heaps.cpp",
                 "gz/gz_savemgr.cpp",
             ]
     return objects

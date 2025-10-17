@@ -5,6 +5,7 @@
 #include "d/d_meter_haihai.h"
 #include "d/d_select_cursor.h"
 #include "gz/gz.h"
+#include "JSystem/JKernel/JKRExpHeap.h"
 
 class dSelect_cursor_c;
 class dMeterHaihai_c;
@@ -30,6 +31,7 @@ public:
         MENU_CHEATS,
         MENU_FLAGS,
         MENU_FRAMEWORK,
+        MENU_HEAPS,
         MENU_INVENTORY,
         MENU_MEMORY,
         MENU_PRACTICE,
@@ -601,6 +603,69 @@ private:
     int mSelectedRegion;
     bool mOption;
     f32 mXPos;
+};
+
+class gzHeapsMenu_c : public gzMenu_c {
+public:
+    gzHeapsMenu_c();
+    ~gzHeapsMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
+    void drawMagic(s16 i_max, s16 i_magic, f32 i_posX, f32 i_posY);
+    void setAlphaMagicChange(bool i_forceSet);
+    void drawHeapText();
+    void drawFragmentationOverlay(s16 currentMagic);
+
+    class HeapTracker_c {
+    public:
+        HeapTracker_c() {
+            mpHeap = NULL;
+            mpTitle = new gzTextBox();
+            mpTotalBlocks = new gzTextBox();
+            mpUsedBlocks = new gzTextBox();
+            mpFreeBlocks = new gzTextBox();
+        }
+
+        ~HeapTracker_c() {
+            delete mpHeap;
+            mpHeap = NULL;
+
+            delete mpTitle;
+            mpTitle = NULL;
+
+            delete mpTotalBlocks;
+            mpTotalBlocks = NULL;
+
+            delete mpUsedBlocks;
+            mpUsedBlocks = NULL;
+
+            delete mpFreeBlocks;
+            mpFreeBlocks = NULL;
+        }
+    
+    public:
+        JKRExpHeap* mpHeap;
+        gzTextBox* mpTitle;
+        gzTextBox* mpTotalBlocks;
+        gzTextBox* mpUsedBlocks;
+        gzTextBox* mpFreeBlocks;
+        int mTotalBlocks;
+        int mUsedBlocks;
+        int mFreeBlocks;
+        JKRExpHeap::CMemBlock* mBlocks[1024];
+        u32 mStarts[1024];
+    };
+private:
+    void updateDynamicLines();
+    void drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, f32 width);
+    void populateHeapTracker(HeapTracker_c* tracker);
+
+private:
+    HeapTracker_c* mJ2DTracker;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

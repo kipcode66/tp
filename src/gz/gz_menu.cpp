@@ -37,6 +37,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mpMenus[MENU_CHEATS] = new gzCheatsMenu_c();
     mpMenus[MENU_FLAGS] = new gzFlagsMenu_c();
     mpMenus[MENU_FRAMEWORK] = new gzFrameworkMenu_c();
+    mpMenus[MENU_HEAPS] = new gzHeapsMenu_c();
     mpMenus[MENU_INVENTORY] = NULL;
     mpMenus[MENU_MEMORY] = new gzMemoryMenu_c();
     mpMenus[MENU_PRACTICE] = new gzPracticeMenu_c();
@@ -54,6 +55,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mpLines[MENU_CHEATS]->setStringDesc("cheats", "toggle cheats");
     mpLines[MENU_FLAGS]->setStringDesc("flags", "toggle in-game flags");
     mpLines[MENU_FRAMEWORK]->setStringDesc("framework", "view and edit running processes");
+    mpLines[MENU_HEAPS]->setStringDesc("heaps", "see how cooked we are");
     mpLines[MENU_INVENTORY]->setStringDesc("inventory", "set items and equipment");
     mpLines[MENU_MEMORY]->setStringDesc("memory", "view and edit memory");
     mpLines[MENU_PRACTICE]->setStringDesc("practice", "load practice files");
