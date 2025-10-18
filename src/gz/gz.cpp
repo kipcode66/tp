@@ -76,13 +76,24 @@ void gzInfo_c::loadDefaultSettings() {
 
 int gzInfo_c::_create() {
     OSReport("creating gzInfo_c\n");
+
+    // Store current heap settings until gz is done allocating
+    JKRHeap* oldHeap = mDoExt_getCurrentHeap();
+    JKRExpHeap* gameExpHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
+    u8 oldGroupId = gameExpHeap->mCurrentGroupId;
+
+    // Alloc on archive heap
+    // Set group ID for identifying gz allocations in heaps menu
+    mDoExt_setCurrentHeap(gameExpHeap);    
+    gameExpHeap->mCurrentGroupId = mGzGroupID = 0x69;
+
+    // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
 
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
     mpIcon = new J2DPicture(icon);
 
-    // TODO: Once critical game setup code is pulled out of d_s_logo
-    // we should create our own heap and alloc an image buffer from that instead
+    // TODO: replace this with something better or alloc it on ARAM
     void* buf = JKRHeap::alloc(108960, 32, NULL);
     gzDVDLoadFile("/gz/bg.bti", buf, 108960, 0);
     ResTIMG* bg = (ResTIMG*)buf;
@@ -110,6 +121,10 @@ int gzInfo_c::_create() {
     
     // load the default menu
     gzChangeMenu(mpMainMenu->getMenu(0));
+
+    // Restore original group ID and heap
+    gameExpHeap->mCurrentGroupId = oldGroupId;
+    mDoExt_setCurrentHeap(oldHeap);
     
     return 1;
 }

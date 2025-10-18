@@ -616,18 +616,23 @@ private:
 class gzHeapsMenu_c : public gzMenu_c {
 public:
 
-    enum gzHeaps_HeapList_e {
+    enum gzHeaps_HeapInfoList_e {
+        HEAP_ROOT_e,   
+        HEAP_SYSTEM_e,
+
+        HEAP_INFO_MAX_e
+    };
+
+    enum gzHeaps_HeapTrackerList_e {
         HEAP_ARCHIVE_e,
         HEAP_GAME_e,
         HEAP_J2D_e,
         HEAP_ZELDA_e,
-        // HEAP_ROOT_e,   /* doesn't change much after boot */
-        // HEAP_SYSTEM_e, /* doesn't change much after boot */
-        // HEAP_COMMAND_e, /* small, rarely used */
-        // HEAP_HOSTIO_e,  /* not used in retail */
-        // HEAP_DBPRINT_e, /* small, rarely used */
+        // HEAP_COMMAND_e,
+        // HEAP_HOSTIO_e,
+        // HEAP_DBPRINT_e,
 
-        HEAP_MAX_e
+        HEAP_TRACKER_MAX_e
     };
 
     gzHeapsMenu_c();
@@ -733,6 +738,8 @@ public:
         gzTextBox* mpFreeSize;
         gzTextBox* mpTotalSize;
         gzTextBox* mpLargestFree;
+        gzTextBox* mpUsedPercent;
+        gzTextBox* mpFreePercent;
     };
 private:
     void updateDynamicLines();
@@ -742,7 +749,8 @@ private:
 
 private:
     bool mShowKB;
-    HeapTracker_c* mTrackers[HEAP_MAX_e];
+    int mViewMode;
+    HeapTracker_c* mTrackers[HEAP_TRACKER_MAX_e];
     gzTextBox* mpDescription;
     gzTextBox* mpLegendUsed;
     gzTextBox* mpLegendMenuUsed;

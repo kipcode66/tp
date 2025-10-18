@@ -287,6 +287,8 @@ public:
     f32 mBackgroundYPos;
     f32 mBackgroundWidth;
     f32 mBackgroundHeight;
+
+    u8 mGzGroupID;
 };
 
 extern gzInfo_c g_gzInfo;
