@@ -67,7 +67,7 @@ void gzInfo_c::loadDefaultSettings() {
     mHeaderXPos = 65.0f;
     mHeaderYPos = 50.0f;
 
-    mBackgroundXPos = 20.0f;
+    mBackgroundXPos = 0.0f;
     mBackgroundYPos = 20.0f;
     mBackgroundWidth = 550.0f;
     mBackgroundHeight = 400.0f;

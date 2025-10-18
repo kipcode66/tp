@@ -443,6 +443,12 @@ public:
         m_description[0] = 0;
     }
 
+    gzTextBox(f32 sizeX, f32 sizeY) : J2DTextBox() {
+        setFont(g_gzInfo.mpFont);
+        setFontSize(sizeX, sizeY);
+        m_description[0] = 0;
+    }
+
     gzTextBox(const char* string, u32 color) : J2DTextBox() {
         setFont(g_gzInfo.mpFont);
         setFontSize(18.0f, 18.0f);

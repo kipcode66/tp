@@ -2,18 +2,115 @@
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
 #include "m_Do/m_Do_ext.h"
+#include "SSystem/SComponent/c_counter.h"
+
+static const u8 MENU_GROUP_ID = 0x80;  // Arbitrary unique value
+
+static int partition(u32* starts, JKRExpHeap::CMemBlock** blocks, int low, int high) {
+    u32 pivot = starts[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (starts[j] < pivot) {
+            i++;
+            // Swap starts
+            u32 temp_start = starts[i];
+            starts[i] = starts[j];
+            starts[j] = temp_start;
+            // Swap blocks
+            JKRExpHeap::CMemBlock* temp_block = blocks[i];
+            blocks[i] = blocks[j];
+            blocks[j] = temp_block;
+        }
+    }
+    // Swap pivot
+    u32 temp_start = starts[i + 1];
+    starts[i + 1] = starts[high];
+    starts[high] = temp_start;
+    JKRExpHeap::CMemBlock* temp_block = blocks[i + 1];
+    blocks[i + 1] = blocks[high];
+    blocks[high] = temp_block;
+    return i + 1;
+}
+
+static void quicksort(u32* starts, JKRExpHeap::CMemBlock** blocks, int low, int high) {
+    if (low < high) {
+        int pi = partition(starts, blocks, low, high);
+        quicksort(starts, blocks, low, pi - 1);
+        quicksort(starts, blocks, pi + 1, high);
+    }
+}
 
 void gzHeapsMenu_c::updateDynamicLines() {
-    mJ2DTracker->mpTotalBlocks->setStringf("total blocks %d", mJ2DTracker->mTotalBlocks);
-    mJ2DTracker->mpUsedBlocks->setStringf("used blocks %d", mJ2DTracker->mUsedBlocks);
-    mJ2DTracker->mpFreeBlocks->setStringf("free blocks %d", mJ2DTracker->mFreeBlocks);
+    for (int i = 0; i < HEAP_MAX_e; i++) {
+        mTrackers[i]->mpTotalBlocks->setStringf("total blocks %d", mTrackers[i]->mNumBlocks);
+        mTrackers[i]->mpUsedBlocks->setStringf("used blocks %d", mTrackers[i]->mUsedBlocks);
+        mTrackers[i]->mpFreeBlocks->setStringf("free blocks %d", mTrackers[i]->mFreeBlocks);
+        mTrackers[i]->mpFragmentation->setStringf("frag %.2f%%", mTrackers[i]->mFragmentation);
+        mTrackers[i]->mpUsedSize->setStringf("used %d kb", mTrackers[i]->mUsedSizeKB);
+        mTrackers[i]->mpFreeSize->setStringf("free %d kb", mTrackers[i]->mFreeSizeKB);
+        mTrackers[i]->mpTotalSize->setStringf("total %d kb", mTrackers[i]->mTotalSizeKB);
+        mTrackers[i]->mpLargestFree->setStringf("largest free %d kb", mTrackers[i]->mLargestFreeKB);    
+    }
+
+    if (mShowKB) {
+        mpDescription->setString("Press Y to switch to blocks view");
+    } else {
+        mpDescription->setString("Press Y to switch to KB view");
+    }
 }
 
 gzHeapsMenu_c::gzHeapsMenu_c() {
     OSReport("creating gzHeapsMenu_c\n");
-    mJ2DTracker = new HeapTracker_c();
-    mJ2DTracker->mpHeap = mDoExt_getJ2dHeap();
-    mJ2DTracker->mpTitle->setString("j2d heap");
+
+    JKRHeap* oldHeap = mDoExt_getCurrentHeap();
+    mDoExt_setCurrentHeap(mDoExt_getGameHeap());
+
+    // Set group ID for menu allocations
+    JKRExpHeap* gameExpHeap = (JKRExpHeap*)mDoExt_getGameHeap();
+    u8 oldGroupId = gameExpHeap->mCurrentGroupId;
+    gameExpHeap->mCurrentGroupId = MENU_GROUP_ID;
+
+    for (int i = 0; i < HEAP_MAX_e; i++) {
+        mTrackers[i] = new HeapTracker_c(256);
+    }
+
+    // Restore group ID
+    gameExpHeap->mCurrentGroupId = oldGroupId;
+
+    // Restore original heap
+    mDoExt_setCurrentHeap(oldHeap);
+
+    // ... (rest unchanged, including mpDescription allocation—if you want it tagged, move it inside the group set block and ensure it's on game heap)
+
+    // mTrackers[HEAP_ROOT_e]->mpHeap = (JKRExpHeap*)JKRHeap::getRootHeap();
+    // mTrackers[HEAP_ROOT_e]->mpTitle->setString("root heap");
+
+    mTrackers[HEAP_J2D_e]->mpHeap = mDoExt_getJ2dHeap();
+    mTrackers[HEAP_J2D_e]->mpTitle->setString("j2d heap");
+    
+    mTrackers[HEAP_ARCHIVE_e]->mpHeap = mDoExt_getArchiveHeap();
+    mTrackers[HEAP_ARCHIVE_e]->mpTitle->setString("archive heap");
+
+    mTrackers[HEAP_GAME_e]->mpHeap = mDoExt_getGameHeap();
+    mTrackers[HEAP_GAME_e]->mpTitle->setString("game heap");
+
+    // mTrackers[HEAP_HOSTIO_e]->mpHeap = mDoExt_getHostIOHeap();
+    // mTrackers[HEAP_HOSTIO_e]->mpTitle->setString("hostio heap");
+
+    // mTrackers[HEAP_DBPRINT_e]->mpHeap = mDoExt_getDbPrintHeap();
+    // mTrackers[HEAP_DBPRINT_e]->mpTitle->setString("db print heap");
+
+    // mTrackers[HEAP_COMMAND_e]->mpHeap = mDoExt_getCommandHeap();
+    // mTrackers[HEAP_COMMAND_e]->mpTitle->setString("command heap");
+
+    // mTrackers[HEAP_SYSTEM_e]->mpHeap = (JKRExpHeap*)JKRHeap::getSystemHeap();
+    // mTrackers[HEAP_SYSTEM_e]->mpTitle->setString("system heap");
+
+    mTrackers[HEAP_ZELDA_e]->mpHeap = mDoExt_getZeldaHeap();
+    mTrackers[HEAP_ZELDA_e]->mpTitle->setString("zelda heap");
+
+    mShowKB = true;
+    mpDescription = new gzTextBox();
 
     mXPos = 200.0f;
 }
@@ -26,76 +123,86 @@ void gzHeapsMenu_c::_delete() {
     OSReport("deleting gzHeapsMenu_c\n");
 }
 
-void gzHeapsMenu_c::populateHeapTracker(HeapTracker_c* tracker) {
+void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
     tracker->mpHeap->lock();
 
-    const int MAX_BLOCKS = 1024;
-    JKRExpHeap::CMemBlock* blocks[MAX_BLOCKS];
-    u32 starts[MAX_BLOCKS];
-
     int usedCount = 0;
-    int freeCount = 0;
-    int totalCount = 0;
-
     for (JKRExpHeap::CMemBlock* block = tracker->mpHeap->mHeadUsedList; block != NULL; block = block->getNextBlock()) {
-        if (totalCount >= MAX_BLOCKS) {
-            OSReport("Too many blocks\n");
-            tracker->mpHeap->unlock();
-            return;
-        }
-        blocks[totalCount] = block;
         usedCount++;
-        totalCount++;
+    }
+
+    int freeCount = 0;
+    for (JKRExpHeap::CMemBlock* block = tracker->mpHeap->mHeadFreeList; block != NULL; block = block->getNextBlock()) {
+        freeCount++;
+    }
+
+    int totalCount = usedCount + freeCount;
+
+    if (totalCount > tracker->mMaxBlocks) {
+        int newMax = totalCount * 3 / 2;
+        if (newMax < 256) newMax = 256;
+
+        JKRHeap* oldHeap = mDoExt_getCurrentHeap();
+        mDoExt_setCurrentHeap(mDoExt_getGameHeap());  // Or root
+
+        JKRExpHeap* gameExpHeap = (JKRExpHeap*)mDoExt_getGameHeap();
+        u8 oldGroupId = gameExpHeap->mCurrentGroupId;
+        gameExpHeap->mCurrentGroupId = MENU_GROUP_ID;
+
+        JKRExpHeap::CMemBlock** newBlocks = new JKRExpHeap::CMemBlock*[newMax];
+        for (int i = 0; i < newMax; ++i) {
+            newBlocks[i] = NULL;
+        }
+        u32* newStarts = new u32[newMax];
+
+        gameExpHeap->mCurrentGroupId = oldGroupId;
+
+        delete[] tracker->mBlocks;
+        delete[] tracker->mStarts;
+
+        tracker->mBlocks = newBlocks;
+        tracker->mStarts = newStarts;
+        tracker->mMaxBlocks = newMax;
+
+        mDoExt_setCurrentHeap(oldHeap);
+    }
+
+    int idx = 0;
+    for (JKRExpHeap::CMemBlock* block = tracker->mpHeap->mHeadUsedList; block != NULL; block = block->getNextBlock()) {
+        tracker->mBlocks[idx++] = block;
+    }
+    for (JKRExpHeap::CMemBlock* block = tracker->mpHeap->mHeadFreeList; block != NULL; block = block->getNextBlock()) {
+        tracker->mBlocks[idx++] = block;
     }
 
     tracker->mUsedBlocks = usedCount;
-
-    for (JKRExpHeap::CMemBlock* block = tracker->mpHeap->mHeadFreeList; block != NULL; block = block->getNextBlock()) {
-        if (totalCount >= MAX_BLOCKS) {
-            OSReport("Too many blocks\n");
-            tracker->mpHeap->unlock();
-            return;
-        }
-        blocks[totalCount] = block;
-        freeCount++;
-        totalCount++;
-    }
-
     tracker->mFreeBlocks = freeCount;
-    tracker->mTotalBlocks = totalCount;
+    tracker->mNumBlocks = totalCount;
 
     for (int i = 0; i < totalCount; i++) {
-        JKRExpHeap::CMemBlock* b = blocks[i];
+        JKRExpHeap::CMemBlock* b = tracker->mBlocks[i];
         u8 align = b->getAlignment();
         if (b->_isTempMemBlock()) {
-            starts[i] = (u32)((u8*)b - align);
+            tracker->mStarts[i] = (u32)((u8*)b - align);
         } else {
-            starts[i] = (u32)b;
+            tracker->mStarts[i] = (u32)b;
         }
     }
 
-    // bubble sort the blocks 
-    int swapped;    
-    do {
-        swapped = 0;
-        for (int i = 0; i < totalCount - 1; i++) {
-            if (starts[i] > starts[i + 1]) {
-                u32 temp_start = starts[i];
-                starts[i] = starts[i + 1];
-                starts[i + 1] = temp_start;
+    quicksort(tracker->mStarts, tracker->mBlocks, 0, totalCount - 1);
 
-                JKRExpHeap::CMemBlock* temp_block = blocks[i];
-                blocks[i] = blocks[i + 1];
-                blocks[i + 1] = temp_block;
+    tracker->mTotalSizeKB = tracker->mpHeap->getSize() / 1024;
+    tracker->mUsedSizeKB = tracker->mpHeap->getTotalUsedSize() / 1024;
+    tracker->mFreeSizeKB = tracker->mpHeap->do_getTotalFreeSize() / 1024;
+    tracker->mLargestFreeKB = tracker->mpHeap->do_getFreeSize() / 1024;
 
-                swapped = 1;
-            }
-        }
-    } while (swapped);
+    int total_free = tracker->mpHeap->do_getTotalFreeSize();
+    int largest_free = tracker->mpHeap->do_getFreeSize();
 
-    for (int i = 0; i < totalCount; i++) {
-        tracker->mBlocks[i] = blocks[i];
-        tracker->mStarts[i] = starts[i];
+    if (total_free > 0 && tracker->mFreeBlocks > 1) {
+        tracker->mFragmentation = (1.0f - (float)largest_free / (float)total_free) * 100.0f;
+    } else {
+        tracker->mFragmentation = 0.0f;
     }
 
     tracker->mpHeap->unlock();
@@ -108,9 +215,17 @@ void gzHeapsMenu_c::execute() {
     }
 
     gzCursor* l_cursor = gzInfo_getCursor();
-    
-    if (mJ2DTracker != NULL && mJ2DTracker->mpHeap != NULL) {
-        populateHeapTracker(mJ2DTracker);
+
+    if (cCt_getFrameCount() % 5 == 0) {
+        for (int i = 0; i < HEAP_MAX_e; i++) {
+            if (mTrackers[i] != NULL && mTrackers[i]->mpHeap != NULL) {
+                updateHeapTracker(mTrackers[i]);
+            }
+        }
+    }
+
+    if (gzPad::getTrigY()) {
+        mShowKB = !mShowKB;
     }
 
     if (gzPad::getTrigB()) {
@@ -177,10 +292,9 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
     GXColor4u8(0, 0, 0, 255);
     GXEnd();
 
-    // Draw red rectangles for used blocks
-    for (int i = 0; i < tracker->mTotalBlocks; i++) {
+    // Draw all blocks with appropriate colors (red for regular used, blue for menu used, green for free)
+    for (int i = 0; i < tracker->mNumBlocks; i++) {
         JKRExpHeap::CMemBlock* b = tracker->mBlocks[i];
-        if (!b->isValid()) continue;  // Skip free blocks
 
         u32 block_start_byte = tracker->mStarts[i] - heap_start_addr;
         u32 header_addr = (u32)b;
@@ -190,15 +304,26 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
         f32 pixel_x = x + ((f32)block_start_byte / (f32)heap_size) * width;
         f32 pixel_w = ((f32)block_byte_size / (f32)heap_size) * width;
 
+        u8 r, g, blue, a = 255;
+        if (b->isValid()) {
+            if (b->mGroupId == MENU_GROUP_ID) {
+                r = 0; g = 0; blue = 255;
+            } else {
+                r = 255; g = 0; blue = 0;
+            }
+        } else {
+            r = 0; g = 255; blue = 0;
+        }
+
         GXBegin(GX_QUADS, GX_VTXFMT0, 4);
         GXPosition2f32(pixel_x, y);
-        GXColor4u8(255, 0, 0, 255);
+        GXColor4u8(r, g, blue, a);
         GXPosition2f32(pixel_x + pixel_w, y);
-        GXColor4u8(255, 0, 0, 255);
+        GXColor4u8(r, g, blue, a);
         GXPosition2f32(pixel_x + pixel_w, y + bar_h);
-        GXColor4u8(255, 0, 0, 255);
+        GXColor4u8(r, g, blue, a);
         GXPosition2f32(pixel_x, y + bar_h);
-        GXColor4u8(255, 0, 0, 255);
+        GXColor4u8(r, g, blue, a);
         GXEnd();
     }
 
@@ -208,12 +333,48 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
 void gzHeapsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
+    static const f32 Y_ALIGNMENT = 110.0f;
+    static const f32 LINE_SPACING = 60.0f;
+    static const f32 DESCRIPTION_X = 0.0f;
+    static const f32 MAX_VIS_WIDTH = 500.0f;
+
     updateDynamicLines();
 
-    mJ2DTracker->mpTitle->draw(mXPos+100.0f,70.0f, COLOR_WHITE);
-    mJ2DTracker->mpUsedBlocks->draw(mXPos,120.0f, COLOR_WHITE);
-    mJ2DTracker->mpFreeBlocks->draw(mXPos+160.0f,120.0f, COLOR_WHITE);
-    mJ2DTracker->mpTotalBlocks->draw(mXPos+100.0f,140.0f, COLOR_WHITE);
+    // Find the maximum heap size for scaling
+    int max_size_kb = 0;
+    for (int i = 0; i < HEAP_MAX_e; i++) {
+        if (mTrackers[i]->mpHeap != NULL && mTrackers[i]->mTotalSizeKB > max_size_kb) {
+            max_size_kb = mTrackers[i]->mTotalSizeKB;
+        }
+    }
 
-    drawHeapVisualization(mJ2DTracker, mXPos, 80.0f, 300.0f);
+    for (int i = 0; i < HEAP_MAX_e; i++) {
+        if (mTrackers[i]->mpHeap != NULL) {
+            f32 y_pos = Y_ALIGNMENT + (i * LINE_SPACING);
+
+            mTrackers[i]->mpTitle->draw(mXPos, y_pos - 40.0f, COLOR_WHITE);
+
+            if (mShowKB) {
+                mTrackers[i]->mpUsedSize->draw(mXPos, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpFreeSize->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpTotalSize->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);        
+            } else {
+                mTrackers[i]->mpUsedBlocks->draw(mXPos, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpFreeBlocks->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpTotalBlocks->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);
+            }
+
+            mTrackers[i]->mpFragmentation->draw(mXPos + 300.0f, y_pos, COLOR_WHITE);
+            mTrackers[i]->mpLargestFree->draw(mXPos + 380.0f, y_pos, COLOR_WHITE);
+
+            f32 vis_width = (max_size_kb > 0) ? (mTrackers[i]->mTotalSizeKB / (f32)max_size_kb) * MAX_VIS_WIDTH : MAX_VIS_WIDTH;
+
+            drawHeapVisualization(mTrackers[i], mXPos, y_pos - 35.0f, vis_width);  // Scaled width
+        }
+    }
+
+    if (l_cursor->x > 0 && mpDescription != NULL) {
+        f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+        mpDescription->draw(0.0f, description_y, COLOR_WHITE, HBIND_CENTER);
+    }
 }

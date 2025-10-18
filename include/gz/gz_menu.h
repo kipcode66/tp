@@ -607,6 +607,21 @@ private:
 
 class gzHeapsMenu_c : public gzMenu_c {
 public:
+
+    enum gzHeaps_HeapList_e {
+        HEAP_ARCHIVE_e,
+        HEAP_GAME_e,
+        HEAP_J2D_e,
+        HEAP_ZELDA_e,
+        // HEAP_ROOT_e,   /* doesn't change much after boot */
+        // HEAP_SYSTEM_e, /* doesn't change much after boot */
+        // HEAP_COMMAND_e, /* small, rarely used */
+        // HEAP_HOSTIO_e,  /* not used in retail */
+        // HEAP_DBPRINT_e, /* small, rarely used */
+
+        HEAP_MAX_e
+    };
+
     gzHeapsMenu_c();
     ~gzHeapsMenu_c();
 
@@ -622,17 +637,43 @@ public:
 
     class HeapTracker_c {
     public:
-        HeapTracker_c() {
-            mpHeap = NULL;
-            mpTitle = new gzTextBox();
-            mpTotalBlocks = new gzTextBox();
-            mpUsedBlocks = new gzTextBox();
-            mpFreeBlocks = new gzTextBox();
+        HeapTracker_c(int block_max)
+            : mpHeap(NULL),
+              mpTitle(new gzTextBox(12.0f,12.0f)),
+              mpTotalBlocks(new gzTextBox(12.0f,12.0f)),
+              mpUsedBlocks(new gzTextBox(12.0f,12.0f)),
+              mpFreeBlocks(new gzTextBox(12.0f,12.0f)),
+              mpFragmentation(new gzTextBox(12.0f,12.0f)),
+              mpUsedSize(new gzTextBox(12.0f,12.0f)),
+              mpFreeSize(new gzTextBox(12.0f,12.0f)),
+              mpTotalSize(new gzTextBox(12.0f,12.0f)),
+              mpLargestFree(new gzTextBox(12.0f,12.0f)),
+              mNumBlocks(0),
+              mUsedBlocks(0),
+              mFreeBlocks(0),
+              mBlocks(NULL),
+              mStarts(NULL),
+              mFragmentation(0.0f),
+              mUsedSizeKB(0),
+              mFreeSizeKB(0),
+              mTotalSizeKB(0),
+              mLargestFreeKB(0),
+              mMaxBlocks(block_max) {
+
+            mBlocks = new JKRExpHeap::CMemBlock*[mMaxBlocks];
+            for (int i = 0; i < mMaxBlocks; ++i) {
+                mBlocks[i] = NULL;
+            }
+
+            mStarts = new u32[mMaxBlocks];
         }
 
         ~HeapTracker_c() {
-            delete mpHeap;
-            mpHeap = NULL;
+            delete[] mBlocks;
+            mBlocks = NULL;
+
+            delete[] mStarts;
+            mStarts = NULL;
 
             delete mpTitle;
             mpTitle = NULL;
@@ -645,27 +686,55 @@ public:
 
             delete mpFreeBlocks;
             mpFreeBlocks = NULL;
+
+            delete mpFragmentation;
+            mpFragmentation = NULL;
+
+            delete mpUsedSize;
+            mpUsedSize = NULL;
+
+            delete mpFreeSize;
+            mpFreeSize = NULL;
+
+            delete mpTotalSize;
+            mpTotalSize = NULL;
+
+            delete mpLargestFree;
+            mpLargestFree = NULL;
         }
-    
+
     public:
         JKRExpHeap* mpHeap;
         gzTextBox* mpTitle;
         gzTextBox* mpTotalBlocks;
         gzTextBox* mpUsedBlocks;
         gzTextBox* mpFreeBlocks;
-        int mTotalBlocks;
+        int mNumBlocks;
         int mUsedBlocks;
         int mFreeBlocks;
-        JKRExpHeap::CMemBlock* mBlocks[1024];
-        u32 mStarts[1024];
+        int mMaxBlocks;
+        JKRExpHeap::CMemBlock** mBlocks;
+        u32* mStarts;
+        f32 mFragmentation;
+        int mUsedSizeKB;
+        int mFreeSizeKB;
+        int mTotalSizeKB;
+        int mLargestFreeKB;
+        gzTextBox* mpFragmentation;
+        gzTextBox* mpUsedSize;
+        gzTextBox* mpFreeSize;
+        gzTextBox* mpTotalSize;
+        gzTextBox* mpLargestFree;
     };
 private:
     void updateDynamicLines();
+    void updateHeapTracker(HeapTracker_c* tracker);
     void drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, f32 width);
-    void populateHeapTracker(HeapTracker_c* tracker);
 
 private:
-    HeapTracker_c* mJ2DTracker;
+    bool mShowKB;
+    HeapTracker_c* mTrackers[HEAP_MAX_e];
+    gzTextBox* mpDescription;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

@@ -37,7 +37,7 @@ public:
         u8 getGroupId() const { return mGroupId; }
         static CMemBlock* getBlock(void* data) { return (CMemBlock*)((uintptr_t)data + -0x10); }
 
-    private:
+    public:
         /* 0x0 */ u16 mMagic;
         /* 0x2 */ u8 mFlags;  // a|bbbbbbb a=temporary b=alignment
         /* 0x3 */ u8 mGroupId;
