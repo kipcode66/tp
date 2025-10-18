@@ -74,13 +74,20 @@ gzHeapsMenu_c::gzHeapsMenu_c() {
         mTrackers[i] = new HeapTracker_c(256);
     }
 
+    mpLegendUsed = new gzTextBox(12.0f,12.0f);
+    mpLegendUsed->setString("used");
+
+    mpLegendMenuUsed = new gzTextBox(12.0f,12.0f);
+    mpLegendMenuUsed->setString("menu used");
+
+    mpLegendFree = new gzTextBox(12.0f,12.0f);
+    mpLegendFree->setString("free");
+
     // Restore group ID
     gameExpHeap->mCurrentGroupId = oldGroupId;
 
     // Restore original heap
     mDoExt_setCurrentHeap(oldHeap);
-
-    // ... (rest unchanged, including mpDescription allocation—if you want it tagged, move it inside the group set block and ensure it's on game heap)
 
     // mTrackers[HEAP_ROOT_e]->mpHeap = (JKRExpHeap*)JKRHeap::getRootHeap();
     // mTrackers[HEAP_ROOT_e]->mpTitle->setString("root heap");
@@ -121,6 +128,9 @@ gzHeapsMenu_c::~gzHeapsMenu_c() {
 
 void gzHeapsMenu_c::_delete() {
     OSReport("deleting gzHeapsMenu_c\n");
+    delete mpLegendUsed;
+    delete mpLegendMenuUsed;
+    delete mpLegendFree;
 }
 
 void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
@@ -330,6 +340,93 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
     GXFlush();
 }
 
+void gzHeapsMenu_c::drawLegend(f32 legend_x, f32 legend_y) {
+    f32 swatch_size = 10.0f;
+    f32 item_spacing = 100.0f;
+
+    Mtx44 proj;
+    MTXOrtho(proj, 0, 480, 0, 640, 0, 1);
+    GXSetProjection(proj, GX_ORTHOGRAPHIC);
+
+    GXSetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+    GXSetScissor(0, 0, 640, 480);
+
+    Mtx model;
+    MTXIdentity(model);
+    GXLoadPosMtxImm(model, 0);
+    GXSetCurrentMtx(0);
+
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_VTX, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetCullMode(GX_CULL_NONE);
+    GXSetBlendMode(GX_BM_NONE, GX_BL_ONE, GX_BL_ZERO, GX_LO_CLEAR);
+
+    GXSetColorUpdate(GX_TRUE);
+    GXSetAlphaUpdate(GX_FALSE);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    GXInvalidateVtxCache();
+    GXPixModeSync();
+
+    f32 start_x = legend_x;
+
+    // Draw used swatch (red)
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(legend_x, legend_y);
+    GXColor4u8(255, 0, 0, 255);
+    GXPosition2f32(legend_x + swatch_size, legend_y);
+    GXColor4u8(255, 0, 0, 255);
+    GXPosition2f32(legend_x + swatch_size, legend_y + swatch_size);
+    GXColor4u8(255, 0, 0, 255);
+    GXPosition2f32(legend_x, legend_y + swatch_size);
+    GXColor4u8(255, 0, 0, 255);
+    GXEnd();
+
+    // Draw menu used swatch (blue) to the right
+    legend_x += item_spacing;
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(legend_x, legend_y);
+    GXColor4u8(0, 0, 255, 255);
+    GXPosition2f32(legend_x + swatch_size, legend_y);
+    GXColor4u8(0, 0, 255, 255);
+    GXPosition2f32(legend_x + swatch_size, legend_y + swatch_size);
+    GXColor4u8(0, 0, 255, 255);
+    GXPosition2f32(legend_x, legend_y + swatch_size);
+    GXColor4u8(0, 0, 255, 255);
+    GXEnd();
+
+    // Draw free swatch (green) to the right
+    legend_x += item_spacing;
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(legend_x, legend_y);
+    GXColor4u8(0, 255, 0, 255);
+    GXPosition2f32(legend_x + swatch_size, legend_y);
+    GXColor4u8(0, 255, 0, 255);
+    GXPosition2f32(legend_x + swatch_size, legend_y + swatch_size);
+    GXColor4u8(0, 255, 0, 255);
+    GXPosition2f32(legend_x, legend_y + swatch_size);
+    GXColor4u8(0, 255, 0, 255);
+    GXEnd();
+
+    GXFlush();
+
+    f32 text_offset = swatch_size + 5.0f;
+    mpLegendUsed->draw(start_x + text_offset, legend_y, COLOR_WHITE);
+    mpLegendMenuUsed->draw(start_x + item_spacing + text_offset, legend_y, COLOR_WHITE);
+    mpLegendFree->draw(start_x + (item_spacing * 2) + text_offset, legend_y, COLOR_WHITE);
+}
+
 void gzHeapsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
@@ -356,22 +453,32 @@ void gzHeapsMenu_c::draw() {
 
             if (mShowKB) {
                 mTrackers[i]->mpUsedSize->draw(mXPos, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpFreeSize->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpTotalSize->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);        
+                mTrackers[i]->mpFreeSize->draw(mXPos + 100.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpTotalSize->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);
             } else {
                 mTrackers[i]->mpUsedBlocks->draw(mXPos, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpFreeBlocks->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpFreeBlocks->draw(mXPos + 100.0f, y_pos, COLOR_WHITE);
                 mTrackers[i]->mpTotalBlocks->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);
             }
 
-            mTrackers[i]->mpFragmentation->draw(mXPos + 300.0f, y_pos, COLOR_WHITE);
-            mTrackers[i]->mpLargestFree->draw(mXPos + 380.0f, y_pos, COLOR_WHITE);
+            mTrackers[i]->mpFragmentation->draw(mXPos + 320.0f, y_pos, COLOR_WHITE);
+            mTrackers[i]->mpLargestFree->draw(mXPos + 400.0f, y_pos, COLOR_WHITE);
 
             f32 vis_width = (max_size_kb > 0) ? (mTrackers[i]->mTotalSizeKB / (f32)max_size_kb) * MAX_VIS_WIDTH : MAX_VIS_WIDTH;
 
-            drawHeapVisualization(mTrackers[i], mXPos, y_pos - 35.0f, vis_width);  // Scaled width
+            drawHeapVisualization(mTrackers[i], mXPos, y_pos - 35.0f, vis_width);
         }
     }
+
+    if (l_cursor->x > 0 && mpDescription != NULL) {
+        f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+        mpDescription->draw(0.0f, description_y, COLOR_WHITE, HBIND_CENTER);
+    }
+
+    // Draw legend after heaps to avoid overwrite
+    f32 legend_x = mXPos + 200.0f;
+    f32 legend_y = Y_ALIGNMENT - 80.0f;
+    drawLegend(legend_x, legend_y);
 
     if (l_cursor->x > 0 && mpDescription != NULL) {
         f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;

@@ -5,29 +5,24 @@
 #include "f_op/f_op_scene_mng.h"
 #include "SSystem/SComponent/c_counter.h"
 
-static const f32 MAIN_VISIBLE_X = 40.0f;
-static const f32 MAIN_HIDDEN_X = -120.0f;
-static const f32 SUB_VISIBLE_X = 40.0f;
-static const f32 SUB_HIDDEN_X = 200.0f;
-
 void gzMainMenu_c::startForwardTransition() {
     mTransitioning = true;
     mTransitionForward = true;
     mTransitionStart = cCt_getFrameCount();
-    mMainStartX = MAIN_VISIBLE_X;
-    mMainEndX = MAIN_HIDDEN_X;
-    mSubStartX = SUB_HIDDEN_X;
-    mSubEndX = SUB_VISIBLE_X;
+    mMainStartX = mMainVisibleX;
+    mMainEndX = mMainHiddenX;
+    mSubStartX = mSubHiddenX;
+    mSubEndX = mSubVisibleX;
 }
 
 void gzMainMenu_c::startReverseTransition() {
     mTransitioning = true;
     mTransitionForward = false;
     mTransitionStart = cCt_getFrameCount();
-    mMainStartX = MAIN_HIDDEN_X;
-    mMainEndX = MAIN_VISIBLE_X;
-    mSubStartX = SUB_VISIBLE_X;
-    mSubEndX = SUB_HIDDEN_X;
+    mMainStartX = mMainHiddenX;
+    mMainEndX = mMainVisibleX;
+    mSubStartX = mSubVisibleX;
+    mSubEndX = mSubHiddenX;
     g_gzInfo.mInputWaitTimer = 2;
 }
 
@@ -70,12 +65,16 @@ gzMainMenu_c::gzMainMenu_c() {
 
     mpMeterHaihai = new dMeterHaihai_c(3);
 
-    mXPos = 40.0f;
     mTransitioning = false;
     mTransitionForward = true;
     mTransitionStart = 0;
     mTransitionDuration = 5.0f;
+
+    mXPos = mMainVisibleX = mSubVisibleX = g_gzInfo.mBackgroundXPos + 15.0f;
+    mMainHiddenX = mXPos - 160.0f;
+    mSubHiddenX = mXPos + 180.0f;
 }
+
 
 gzMainMenu_c::~gzMainMenu_c() {
     _delete();
@@ -184,7 +183,7 @@ void gzMainMenu_c::draw() {
     if (l_cursor->x == 0) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
             f32 description_x = DESCRIPTION_X;
-            f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+            f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
 
             mpDescription->setString(mpLines[l_cursor->y]->m_description);
             mpDescription->draw(DESCRIPTION_X, description_y, cursor_color, HBIND_CENTER);

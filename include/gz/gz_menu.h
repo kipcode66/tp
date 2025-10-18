@@ -61,6 +61,10 @@ public:
     virtual void execute();
     virtual void draw();
     virtual void setXPos(f32 x) { mXPos = x; }
+    void setMainVisibleX(f32 x) { mMainVisibleX = x; }
+    void setMainHiddenX(f32 x) { mMainHiddenX = x; }
+    void setSubVisibleX(f32 x) { mSubVisibleX = x; }
+    void setSubHiddenX(f32 x) { mSubHiddenX = x; }
 
     static const int LINE_NUM = MENU_MAX;
     
@@ -81,6 +85,10 @@ private:
     f32 mMainEndX;
     f32 mSubStartX;
     f32 mSubEndX;
+    f32 mMainVisibleX;
+    f32 mMainHiddenX;
+    f32 mSubVisibleX;
+    f32 mSubHiddenX;
 };
 
 class gzCreditsMenu_c;
@@ -730,11 +738,15 @@ private:
     void updateDynamicLines();
     void updateHeapTracker(HeapTracker_c* tracker);
     void drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, f32 width);
+    void drawLegend(f32 legend_x, f32 legend_y);
 
 private:
     bool mShowKB;
     HeapTracker_c* mTrackers[HEAP_MAX_e];
     gzTextBox* mpDescription;
+    gzTextBox* mpLegendUsed;
+    gzTextBox* mpLegendMenuUsed;
+    gzTextBox* mpLegendFree;
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

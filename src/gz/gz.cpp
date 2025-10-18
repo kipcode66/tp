@@ -59,18 +59,18 @@ void gzInfo_c::loadDefaultSettings() {
     mCursor.y = 0;
     mSettings.mMenuSfx = true;
 
-    mIconXPos = 30.0f;
-    mIconYPos = 25.0f;
+    mBackgroundXPos = 5.0f;
+    mBackgroundYPos = 5.0f;
+    mBackgroundWidth = 595.0f;
+    mBackgroundHeight = 415.0f;
+
+    mIconXPos = mBackgroundXPos + 5.0f;
+    mIconYPos = mBackgroundYPos + 5.0f;
     mIconWidth = 30.0f;
     mIconHeight = 30.0f;
 
-    mHeaderXPos = 65.0f;
-    mHeaderYPos = 50.0f;
-
-    mBackgroundXPos = 0.0f;
-    mBackgroundYPos = 20.0f;
-    mBackgroundWidth = 550.0f;
-    mBackgroundHeight = 400.0f;
+    mHeaderXPos = mBackgroundXPos + 35.0f;
+    mHeaderYPos = mBackgroundYPos + 25.0f;
 }
 
 
