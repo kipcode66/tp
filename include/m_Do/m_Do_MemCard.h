@@ -166,4 +166,8 @@ inline void mDoMemCd_setCardStatus(s32 fileNo, CARDStat* stat) {
     g_mDoMemCd_control.setCardStatus(fileNo, stat);
 }
 
+inline void mDoMemCd_UpDate() {
+    g_mDoMemCd_control.update();
+}
+
 #endif /* M_DO_M_DO_MEMCARD_H */

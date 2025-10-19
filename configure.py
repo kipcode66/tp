@@ -264,6 +264,22 @@ elif config.version == "RZDE01_00" or config.version == "RZDE01_02" or config.ve
 else:
     cflags_base.extend(["-O4,p", "-inline auto", "-RTTI off", "-str reuse", "-multibyte"])
 
+USE_REVOLUTION_SDK_VERSIONS = [
+    "RZDE01_00", # Wii USA Rev 0
+    "RZDE01_02", # Wii USA Rev 2
+    "RZDP01",    # Wii PAL
+    "RZDJ01",    # Wii JPN
+    "RZDK01",    # Wii KOR
+    "DZDE01",    # Wii USA Kiosk Demo
+    "DZDP01",    # Wii PAL Kiosk Demo
+    "Shield",    # Shield
+    "ShieldP",   # Shield Production
+    "ShieldD",   # Shield Debug
+]
+
+if config.version in USE_REVOLUTION_SDK_VERSIONS:
+    cflags_base.extend(["-D__REVOLUTION_SDK__"])
+
 # Debug flags
 if args.debug:
     # Or -sym dwarf-2 for Wii compilers
@@ -690,7 +706,7 @@ config.libs = [
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_menu_calibration.cpp"),
             Object(NonMatching, "d/d_menu_collect.cpp"),
             Object(NonMatching, "d/d_menu_dmap.cpp"),
-            Object(Equivalent, "d/d_menu_dmap_map.cpp"),
+            Object(MatchingFor("GZ2E01", "GZ2P01"), "d/d_menu_dmap_map.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_menu_map_common.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_menu_fishing.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_menu_fmap.cpp"),
@@ -717,7 +733,7 @@ config.libs = [
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_msg_out_font.cpp"),
             Object(NonMatching, "d/d_msg_class.cpp"),
             Object(Equivalent, "d/d_msg_object.cpp"),  # weak func order
-            Object(NonMatching, "d/d_msg_unit.cpp"),
+            Object(MatchingFor("GZ2P01"), "d/d_msg_unit.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_msg_scrn_3select.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_msg_scrn_arrow.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_msg_scrn_base.cpp"),
@@ -1686,7 +1702,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_b_ds"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_b_gg"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_b_gm"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_b_gnd"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_b_gnd"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_b_go"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_b_gos"),
     ActorRel(Equivalent, "d_a_b_mgn"), # extra mr/regalloc
@@ -1706,7 +1722,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_coach_fire"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_cow"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_cstatue"),
-    ActorRel(Equivalent, "d_a_do"), # Z2SoundObjSimple dtor
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_do"), # Z2SoundObjSimple dtor
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_door_boss"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_door_bossL5"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_door_mbossL1"),
@@ -1752,8 +1768,8 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_md"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_mf"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_mk"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_e_mk_bo"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_e_mm"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_e_mk_bo"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_e_mm"),
     ActorRel(NonMatching, "d_a_e_mm_mt"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_ms"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_nz"),
@@ -1769,7 +1785,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_rdy"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_s1"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_sb"),
-    ActorRel(NonMatching, "d_a_e_sf"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_sf"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_sg"),
     ActorRel(NonMatching, "d_a_e_sh"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_e_sm"),
@@ -1823,7 +1839,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_mirror"),
     ActorRel(NonMatching, "d_a_movie_player", extra_cflags=["-O3,p"]),
     ActorRel(Equivalent, "d_a_myna"),  # weird missing function issue
-    ActorRel(MatchingFor("GZ2E01"), "d_a_ni"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_ni"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_aru"),
     ActorRel(NonMatching, "d_a_npc_ash", extra_cflags=[DANPCF_C_HACK]),
     ActorRel(NonMatching, "d_a_npc_ashB", extra_cflags=[DANPCF_C_HACK]),
@@ -1832,7 +1848,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_bou"),
     ActorRel(NonMatching, "d_a_npc_bouS"),
     ActorRel(NonMatching, "d_a_npc_cdn3"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_npc_chat", extra_cflags=[DANPCF_C_HACK]),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_npc_chat", extra_cflags=[DANPCF_C_HACK]),
     ActorRel(NonMatching, "d_a_npc_chin"),
     ActorRel(NonMatching, "d_a_npc_clerka"),
     ActorRel(NonMatching, "d_a_npc_clerkb"),
@@ -1881,7 +1897,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_moi"),
     ActorRel(NonMatching, "d_a_npc_moir", extra_cflags=[DANPCF_C_HACK]),
     ActorRel(NonMatching, "d_a_npc_myna2"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_npc_ne"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_npc_ne"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_p2"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_pachi_besu"),
     ActorRel(NonMatching, "d_a_npc_pachi_maro"),
@@ -1897,8 +1913,8 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_seib"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_seic"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_seid"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_npc_seira"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_npc_seira2"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_npc_seira"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_npc_seira2"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_seirei"),
     ActorRel(Equivalent, "d_a_npc_shad", extra_cflags=[DANPCF_C_HACK]), # weak func order
     ActorRel(NonMatching, "d_a_npc_shaman"),
@@ -1915,7 +1931,7 @@ config.libs = [
     ActorRel(NonMatching, "d_a_npc_tkc"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_tkj2"),
     ActorRel(NonMatching, "d_a_npc_tks", extra_cflags=[DANPCF_C_HACK]),
-    ActorRel(NonMatching, "d_a_npc_toby"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_npc_toby"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_tr"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_uri"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_npc_worm"),
@@ -1995,7 +2011,7 @@ config.libs = [
     ActorRel(Equivalent, "d_a_obj_flag3"), # weak function order
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_food"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_fw"),
-    ActorRel(NonMatching, "d_a_obj_gadget"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_gadget"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_ganonwall"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_ganonwall2"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_gb"),
@@ -2086,9 +2102,9 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv5ychndlr"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv5yiblltray"),
     ActorRel(Equivalent, "d_a_obj_lv6ChangeGate"), # weak func order
-    ActorRel(NonMatching, "d_a_obj_lv6FurikoTrap"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6FurikoTrap"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6Lblock"),
-    ActorRel(NonMatching, "d_a_obj_lv6SwGate"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6SwGate"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6SzGate"),
     ActorRel(NonMatching, "d_a_obj_lv6Tenbin"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6TogeRoll"),
@@ -2097,7 +2113,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6bemos2"),
     ActorRel(NonMatching, "d_a_obj_lv6egate"),
     ActorRel(NonMatching, "d_a_obj_lv6elevta"),
-    ActorRel(NonMatching, "d_a_obj_lv6swturn"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_lv6swturn"),
     ActorRel(NonMatching, "d_a_obj_lv7BsGate"),
     ActorRel(NonMatching, "d_a_obj_lv7PropellerY"),
     ActorRel(NonMatching, "d_a_obj_lv7bridge"),
@@ -2117,11 +2133,11 @@ config.libs = [
     ActorRel(NonMatching, "d_a_obj_mirror_chain"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_mirror_sand"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_mirror_screw"),
-    ActorRel(NonMatching, "d_a_obj_mirror_table"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_obj_mirror_table"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_msima"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_mvstair"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_myogan"),
-    ActorRel(MatchingFor("GZ2E01"), "d_a_obj_nagaisu"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_obj_nagaisu"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_nan"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_ndoor"),
     ActorRel(NonMatching, "d_a_obj_nougu"),
@@ -2140,7 +2156,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_poFire"),
     ActorRel(NonMatching, "d_a_obj_poTbox"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_prop"),
-    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_pumpkin"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01"), "d_a_obj_pumpkin"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_rcircle"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_rfHole"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_rgate"),
@@ -2183,7 +2199,7 @@ config.libs = [
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_swBallB"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_swBallC"),
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_swLight"),
-    ActorRel(NonMatching, "d_a_obj_swchain"),
+    ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_swchain"),
     ActorRel(Equivalent, "d_a_obj_swhang"), # vtable order
     ActorRel(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d_a_obj_sword"),
     ActorRel(NonMatching, "d_a_obj_swpush2"),

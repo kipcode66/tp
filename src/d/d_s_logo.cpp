@@ -211,8 +211,8 @@ static int phase_1(dScnLogo_c* i_this) {
         return cPhs_INIT_e;
     }
 
-#if VERSION == VERSION_GCN_PAL
-    if (!SyncWidthSound) {
+    #if VERSION == VERSION_GCN_PAL
+    if (!mDoDvdThd::SyncWidthSound) {
         return cPhs_INIT_e;
     }
 #endif
