@@ -398,7 +398,7 @@ void gzFlagsMenu_c::draw() {
         if (lineIdx >= currentLineNum) break;
 
         f32 y_pos = Y_ALIGNMENT + (screenIdx * LINE_SPACING);
-        if (l_cursor->y == lineIdx && l_cursor->x > 0) {
+        if (l_cursor->y == lineIdx && gzInfo_isSubMenuVisible()) {
             currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
             f32 x_size_haihai = currentLineOptions[lineIdx]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
             mpMeterHaihai->drawHaihai(getHaihaiFlags(lineIdx), x_alignment_haihai, y_pos + HAIHAI_Y_OFFSET, x_size_haihai, 0.0f);
@@ -410,7 +410,7 @@ void gzFlagsMenu_c::draw() {
         }
     }
 
-    if (l_cursor->x > 0) {
+    if (gzInfo_isSubMenuVisible()) {
         if (currentLines[l_cursor->y] && *currentLines[l_cursor->y]->m_description != 0) {
             f32 description_x = DESCRIPTION_X;
             f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;

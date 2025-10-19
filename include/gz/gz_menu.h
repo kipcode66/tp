@@ -650,71 +650,8 @@ public:
 
     class HeapTracker_c {
     public:
-        HeapTracker_c(int block_max)
-            : mpHeap(NULL),
-              mpTitle(new gzTextBox(12.0f,12.0f)),
-              mpTotalBlocks(new gzTextBox(12.0f,12.0f)),
-              mpUsedBlocks(new gzTextBox(12.0f,12.0f)),
-              mpFreeBlocks(new gzTextBox(12.0f,12.0f)),
-              mpFragmentation(new gzTextBox(12.0f,12.0f)),
-              mpUsedSize(new gzTextBox(12.0f,12.0f)),
-              mpFreeSize(new gzTextBox(12.0f,12.0f)),
-              mpTotalSize(new gzTextBox(12.0f,12.0f)),
-              mpLargestFree(new gzTextBox(12.0f,12.0f)),
-              mNumBlocks(0),
-              mUsedBlocks(0),
-              mFreeBlocks(0),
-              mBlocks(NULL),
-              mStarts(NULL),
-              mFragmentation(0.0f),
-              mUsedSizeKB(0),
-              mFreeSizeKB(0),
-              mTotalSizeKB(0),
-              mLargestFreeKB(0),
-              mMaxBlocks(block_max) {
-
-            mBlocks = new JKRExpHeap::CMemBlock*[mMaxBlocks];
-            for (int i = 0; i < mMaxBlocks; ++i) {
-                mBlocks[i] = NULL;
-            }
-
-            mStarts = new u32[mMaxBlocks];
-        }
-
-        ~HeapTracker_c() {
-            delete[] mBlocks;
-            mBlocks = NULL;
-
-            delete[] mStarts;
-            mStarts = NULL;
-
-            delete mpTitle;
-            mpTitle = NULL;
-
-            delete mpTotalBlocks;
-            mpTotalBlocks = NULL;
-
-            delete mpUsedBlocks;
-            mpUsedBlocks = NULL;
-
-            delete mpFreeBlocks;
-            mpFreeBlocks = NULL;
-
-            delete mpFragmentation;
-            mpFragmentation = NULL;
-
-            delete mpUsedSize;
-            mpUsedSize = NULL;
-
-            delete mpFreeSize;
-            mpFreeSize = NULL;
-
-            delete mpTotalSize;
-            mpTotalSize = NULL;
-
-            delete mpLargestFree;
-            mpLargestFree = NULL;
-        }
+        HeapTracker_c(int);
+        ~HeapTracker_c();
 
     public:
         JKRExpHeap* mpHeap;
@@ -746,6 +683,7 @@ private:
     void updateHeapTracker(HeapTracker_c* tracker);
     void drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, f32 width);
     void drawLegend(f32 legend_x, f32 legend_y);
+    void drawSwatch(f32 x, f32 y, f32 size, u32 color);
 
 private:
     bool mShowKB;

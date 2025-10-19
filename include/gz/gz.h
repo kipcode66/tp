@@ -14,7 +14,10 @@ class gzTextBox;
 class gzMainMenu_c;
 class gzNotification_c;
 
-#define COLOR_WHITE 0xFFFFFFFF
+#define COLOR_WHITE 0xFFFFFFFFu
+#define COLOR_RED 0xFF0000FFu
+#define COLOR_BLUE 0x0000FFFFu
+#define COLOR_GREEN 0x00FF00FFu
 
 struct gzCommandCombos_s {
     u32 mMoveLink;
@@ -132,6 +135,12 @@ public:
     int mLoadPhase;
     bool mSaveInjectReady;
     u8 mTimer;
+};
+
+class gzToolsMng_c {
+public:
+    void execute();
+    void executeMoveLink();
 };
 
 // used for checking whether or not to apply 
@@ -274,6 +283,7 @@ public:
     gzButtonFlags_s mButtonFlags;
     gzCursor mCursor;
     gzSaveLoaderMng_c mSaveLoaderMng;
+    gzToolsMng_c mToolsMng;
 
     f32 mIconXPos;
     f32 mIconYPos;
@@ -330,6 +340,8 @@ inline bool gzInfo_isMoonJump() { return g_gzInfo.isMoonJump(); }
 inline bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
 inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
 inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
+inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}
+inline bool gzInfo_isSubMenuVisible() { return g_gzInfo.mCursor.x > 0;}
 inline bool gzInfo_isSuperClawshot() { return g_gzInfo.isSuperClawshot(); }
 inline bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
 inline bool gzInfo_isTransformAnywhere() { return g_gzInfo.isTransformAnywhere(); }

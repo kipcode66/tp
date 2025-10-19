@@ -74,7 +74,7 @@ void gzCreditsMenu_c::draw() {
         if (mpLines[lineIdx] != NULL) {
             f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
 
-            if (l_cursor->y == lineIdx && l_cursor->x > 0) {
+            if (l_cursor->y == lineIdx && gzInfo_isSubMenuVisible()) {
                 mpLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
             } else {
                 mpLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);

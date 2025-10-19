@@ -460,7 +460,7 @@ void gzSettingsMenu_c::draw() {
         f32 y_pos_haihai = y_alignment_haihai + ((i - 1) * LINE_SPACING);
         f32 y_pos_cursor = CURSOR_Y_BASE + ((i - 1) * LINE_SPACING);
 
-        if (l_cursor->y == i && l_cursor->x > 0) {
+        if (l_cursor->y == i && gzInfo_isSubMenuVisible()) {
             // Spacing between arrows determined by text box bound size
             f32 x_size_haihai = mpLineOptions[i]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
             if (mpLineOptions[i]->mStringLength != 0 && mOption) {
@@ -476,7 +476,7 @@ void gzSettingsMenu_c::draw() {
         }
     }
 
-    if (l_cursor->x > 0) {
+    if (gzInfo_isSubMenuVisible()) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
             f32 description_x = DESCRIPTION_X;
             f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;

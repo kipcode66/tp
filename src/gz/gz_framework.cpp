@@ -241,7 +241,7 @@ void gzFrameworkMenu_c::draw() {
         mpRowTexts[i * NUM_COLUMNS + 1]->setStringf("%d", info.process->name);
         mpRowTexts[i * NUM_COLUMNS + 2]->setString(info.process->pause_flag ? "paused" : "active");
         
-        u32 color = (proc_idx == mSelectedProcess && l_cursor->x > 0) ? cursor_color : COLOR_WHITE;
+        u32 color = (proc_idx == mSelectedProcess && gzInfo_isSubMenuVisible()) ? cursor_color : COLOR_WHITE;
 
         for (int c = 0; c < NUM_COLUMNS; c++) {
             mpRowTexts[i * NUM_COLUMNS + c]->draw(X_POS[c], Y_START + (i * LINE_SPACING), color);
@@ -267,7 +267,7 @@ void gzFrameworkMenu_c::draw() {
         }
     }
 
-    if (arrows != 0 && l_cursor->x > 0) {
+    if (arrows != 0 && gzInfo_isSubMenuVisible()) {
         mpMeterHaihai->drawHaihai(arrows, HAIHAI_X, HAIHAI_Y, 0.0f, HAIHAI_Y_SIZE);
     }
 }

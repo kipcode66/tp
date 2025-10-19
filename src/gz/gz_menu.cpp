@@ -161,7 +161,7 @@ void gzMainMenu_c::draw() {
         for (int i = 0; i < LINE_NUM; i++) {
             if (mpLines[i] != NULL && mXPos >= g_gzInfo.mBackgroundXPos) {
                 f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
-                u32 color = (l_cursor->y == i && l_cursor->x == 0) ? gzInfo_getTextColor() : COLOR_WHITE;
+                u32 color = (l_cursor->y == i && gzInfo_isMainMenuVisible()) ? gzInfo_getTextColor() : COLOR_WHITE;
                 mpLines[i]->draw(mXPos, y_pos, color);
             }
         }
@@ -170,7 +170,7 @@ void gzMainMenu_c::draw() {
             if (mpLines[i] != NULL) {
                 f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
 
-                if (l_cursor->y == i && l_cursor->x == 0) {
+                if (l_cursor->y == i && gzInfo_isMainMenuVisible()) {
                     mpLines[i]->draw(mXPos, y_pos, gzInfo_getTextColor());
                 } else {
                     mpLines[i]->draw(mXPos, y_pos, COLOR_WHITE);
@@ -180,7 +180,7 @@ void gzMainMenu_c::draw() {
     }
 
     // Draw description if valid and on menu
-    if (l_cursor->x == 0) {
+    if (gzInfo_isMainMenuVisible()) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
             f32 description_x = DESCRIPTION_X;
             f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;

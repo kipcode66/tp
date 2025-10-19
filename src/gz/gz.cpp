@@ -168,7 +168,7 @@ int gzInfo_c::execute() {
     }
 
     setButtonFlags();
-    executeTools();
+    mToolsMng.execute();
     mSaveLoaderMng.execute();
 
     return 1;
@@ -314,100 +314,4 @@ void gzInfo_c::setButtonFlags() {
             mButtonFlags.mMoveLink = !mButtonFlags.mMoveLink;
         }
     }
-}
-
-void gzInfo_c::executeMoveLink() {
-    // TODO(Pheenoh): finish this
-    if (!mButtonFlags.mMoveLink) {
-        if (g_drawHIO.mParentAlpha == 0.0f) g_drawHIO.mParentAlpha = 1.0f;
-        if (dComIfGp_getEventManager().cameraPlay() == 1) dComIfGp_getEventManager().setCameraPlay(0);        
-        if (dComIfGp_getEvent().mEventStatus == 1) dComIfGp_getEvent().mEventStatus = 0;
-        if (daAlink_getAlinkActorClass() != NULL) {
-            daAlink_getAlinkActorClass()->mLinkAcch.ClrGrndNone();
-            daAlink_getAlinkActorClass()->mLinkAcch.ClrWallNone();
-            daAlink_getAlinkActorClass()->mLinkAcch.ClrRoofNone();
-            daAlink_getAlinkActorClass()->mLinkAcch.OffLineCheckNone();
-        }
-        return;
-    }
-
-    g_drawHIO.mParentAlpha = 0.0f;
-    dComIfGp_getEventManager().setCameraPlay(0);
-
-    daAlink_getAlinkActorClass()->mLinkAcch.SetGrndNone();
-    daAlink_getAlinkActorClass()->mLinkAcch.SetWallNone();
-    daAlink_getAlinkActorClass()->mLinkAcch.SetRoofNone();
-    daAlink_getAlinkActorClass()->mLinkAcch.OnLineCheckNone();
-
-    // halt all events
-    dComIfGp_getEvent().mEventStatus = 1;
-
-    bool lock_camera = gzPad::getHoldL();
-    s16 angle;
-
-    f32 vertical_displacement = gzPad::getSubStickY();
-    f32 horizontal_displacement = -(gzPad::getSubStickX());
-    f32 stick_y = gzPad::getStickY();
-    f32 stick_x = gzPad::getStickX();
-    f32 speed_predicate = gzPad::getHoldZ() != 0 ? 2.5f : 1.0f;
-    f32 speed_predicateF = speed_predicate * (gzPad::getHoldR() != 0 ? 4.0f : 1.0f);
-
-    // Fetch the camera position and target
-    camera_class* camera_p = dComIfGp_getCamera(0);
-    if (camera_p == NULL) return;
-
-    fopAc_ac_c* link = dComIfGp_getPlayer(0);
-    if (link == NULL) return;
-
-    static const f32 DIST_FROM_LINK = 20.0f;
-
-    cXyz& link_pos = link->current.pos;
-    s16& link_horizontal_angle = link->shape_angle.y;
-    s16& link_vertical_angle = link->shape_angle.x;
-    cXyz& cam_target = camera_p->mCamera.mEye;
-    cXyz& cam_pos = camera_p->mCamera.mCenter;
-
-    link->speed = cXyz(0.0f,0.0f,0.0f);
-
-    if (!lock_camera) {
-        angle = (f32)link_horizontal_angle / 65536.f * (2 * M_PI);
-    }
-
-    cam_target.x = link_pos.x;
-    cam_target.y = link_pos.y + 200.0f;
-    cam_target.z = link_pos.z;
-    cam_pos.z = link_pos.z - DIST_FROM_LINK * cos(angle);
-    cam_pos.x = link_pos.x - DIST_FROM_LINK * sin(angle);
-    cam_pos.y = link_pos.y + 200.f;
-
-    // Calculate the pitch and yaw
-    s16 yaw = atan2(cam_target.z - cam_pos.z, cam_target.x - cam_pos.x);
-    double horizontal = sqrt((cam_target.x - cam_pos.x) * (cam_target.x - cam_pos.x) +
-                                (cam_target.z - cam_pos.z) * (cam_target.z - cam_pos.z));
-    s16 pitch = atan2(cam_target.y - cam_pos.y, horizontal);
-
-    // Calculate the translation
-    double dy = lock_camera ? 0.0f : vertical_displacement;
-    double dx = stick_y * cos(yaw) * cos(pitch) - stick_x * sin(yaw);
-    double dz = stick_y * sin(yaw) * cos(pitch) + stick_x * cos(yaw);
-
-    // auto move_speed = speed_predicateF;
-    // auto cam_speed = speed_predicateF;
-
-    // Apply the translation with a speed factor
-    link_pos.x += speed_predicateF * dx;
-    link_pos.y += speed_predicateF * dy;
-    link_pos.z += speed_predicateF * dz;
-
-    // Change facing angle with c stick
-    if (lock_camera) { 
-        link_vertical_angle -= -vertical_displacement * speed_predicateF;
-        link_horizontal_angle -= -horizontal_displacement * speed_predicateF;
-    } else {
-        link_horizontal_angle -= horizontal_displacement * speed_predicateF;
-    }
-}
-
-void gzInfo_c::executeTools() {
-     if (mSettings.mMoveLink) executeMoveLink();
 }

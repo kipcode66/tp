@@ -38,6 +38,71 @@ static void quicksort(u32* starts, JKRExpHeap::CMemBlock** blocks, int low, int 
     }
 }
 
+gzHeapsMenu_c::HeapTracker_c::HeapTracker_c(int block_max) : mpHeap(NULL),
+    mpTitle(new gzTextBox(12.0f,12.0f)),
+    mpTotalBlocks(new gzTextBox(12.0f,12.0f)),
+    mpUsedBlocks(new gzTextBox(12.0f,12.0f)),
+    mpFreeBlocks(new gzTextBox(12.0f,12.0f)),
+    mpFragmentation(new gzTextBox(12.0f,12.0f)),
+    mpUsedSize(new gzTextBox(12.0f,12.0f)),
+    mpFreeSize(new gzTextBox(12.0f,12.0f)),
+    mpTotalSize(new gzTextBox(12.0f,12.0f)),
+    mpLargestFree(new gzTextBox(12.0f,12.0f)),
+    mNumBlocks(0),
+    mUsedBlocks(0),
+    mFreeBlocks(0),
+    mBlocks(NULL),
+    mStarts(NULL),
+    mFragmentation(0.0f),
+    mUsedSizeKB(0),
+    mFreeSizeKB(0),
+    mTotalSizeKB(0),
+    mLargestFreeKB(0),
+    mMaxBlocks(block_max) {
+
+        mBlocks = new JKRExpHeap::CMemBlock*[mMaxBlocks];
+        for (int i = 0; i < mMaxBlocks; ++i) {
+            mBlocks[i] = NULL;
+        }
+
+        mStarts = new u32[mMaxBlocks];
+}
+
+gzHeapsMenu_c::HeapTracker_c::~HeapTracker_c() {
+    delete[] mBlocks;
+    mBlocks = NULL;
+
+    delete[] mStarts;
+    mStarts = NULL;
+
+    delete mpTitle;
+    mpTitle = NULL;
+
+    delete mpTotalBlocks;
+    mpTotalBlocks = NULL;
+
+    delete mpUsedBlocks;
+    mpUsedBlocks = NULL;
+
+    delete mpFreeBlocks;
+    mpFreeBlocks = NULL;
+
+    delete mpFragmentation;
+    mpFragmentation = NULL;
+
+    delete mpUsedSize;
+    mpUsedSize = NULL;
+
+    delete mpFreeSize;
+    mpFreeSize = NULL;
+
+    delete mpTotalSize;
+    mpTotalSize = NULL;
+
+    delete mpLargestFree;
+    mpLargestFree = NULL;
+}
+
 void gzHeapsMenu_c::updateDynamicLines() {
     for (int i = 0; i < HEAP_TRACKER_MAX_e; i++) {
         mTrackers[i]->mpTotalBlocks->setStringf("total blocks %d", mTrackers[i]->mNumBlocks);
@@ -340,6 +405,19 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
     GXFlush();
 }
 
+void gzHeapsMenu_c::drawSwatch(f32 x, f32 y, f32 size, u32 color) {
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x, y);
+    GXColor1u32(color);
+    GXPosition2f32(x + size, y);
+    GXColor1u32(color);
+    GXPosition2f32(x + size, y + size);
+    GXColor1u32(color);
+    GXPosition2f32(x, y + size);
+    GXColor1u32(color);
+    GXEnd();
+}
+
 void gzHeapsMenu_c::drawLegend(f32 legend_x, f32 legend_y) {
     f32 swatch_size = 10.0f;
     f32 item_spacing = 100.0f;
@@ -382,42 +460,15 @@ void gzHeapsMenu_c::drawLegend(f32 legend_x, f32 legend_y) {
     f32 start_x = legend_x;
 
     // Draw used swatch (red)
-    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-    GXPosition2f32(legend_x, legend_y);
-    GXColor4u8(255, 0, 0, 255);
-    GXPosition2f32(legend_x + swatch_size, legend_y);
-    GXColor4u8(255, 0, 0, 255);
-    GXPosition2f32(legend_x + swatch_size, legend_y + swatch_size);
-    GXColor4u8(255, 0, 0, 255);
-    GXPosition2f32(legend_x, legend_y + swatch_size);
-    GXColor4u8(255, 0, 0, 255);
-    GXEnd();
+    drawSwatch(legend_x, legend_y, swatch_size, COLOR_RED);
 
     // Draw menu used swatch (blue)
     legend_x += item_spacing;
-    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-    GXPosition2f32(legend_x, legend_y);
-    GXColor4u8(0, 0, 255, 255);
-    GXPosition2f32(legend_x + swatch_size, legend_y);
-    GXColor4u8(0, 0, 255, 255);
-    GXPosition2f32(legend_x + swatch_size, legend_y + swatch_size);
-    GXColor4u8(0, 0, 255, 255);
-    GXPosition2f32(legend_x, legend_y + swatch_size);
-    GXColor4u8(0, 0, 255, 255);
-    GXEnd();
+    drawSwatch(legend_x, legend_y, swatch_size, COLOR_BLUE);
 
     // Draw free swatch (green)
     legend_x += item_spacing;
-    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-    GXPosition2f32(legend_x, legend_y);
-    GXColor4u8(0, 255, 0, 255);
-    GXPosition2f32(legend_x + swatch_size, legend_y);
-    GXColor4u8(0, 255, 0, 255);
-    GXPosition2f32(legend_x + swatch_size, legend_y + swatch_size);
-    GXColor4u8(0, 255, 0, 255);
-    GXPosition2f32(legend_x, legend_y + swatch_size);
-    GXColor4u8(0, 255, 0, 255);
-    GXEnd();
+    drawSwatch(legend_x, legend_y, swatch_size, COLOR_GREEN);
 
     GXFlush();
 
@@ -435,8 +486,8 @@ void gzHeapsMenu_c::draw() {
 
     static const f32 Y_ALIGNMENT = 110.0f;
     static const f32 LINE_SPACING = 60.0f;
-    static const f32 MAX_VIS_WIDTH = 500.0f;
-    static const f32 MIN_PIXELS_PER_BLOCK = 0.0001f;
+    static const f32 MAX_VIS_WIDTH = 550.0f;
+    static const f32 MIN_PIXELS_PER_BLOCK = 1.0f;
 
     updateDynamicLines();
 
@@ -456,20 +507,20 @@ void gzHeapsMenu_c::draw() {
 
             if (mViewMode == 0) {
                 mTrackers[i]->mpUsedSize->draw(mXPos, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpFreeSize->draw(mXPos + 100.0f, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpTotalSize->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpFreeSize->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpTotalSize->draw(mXPos + 210.0f, y_pos, COLOR_WHITE);
             } else if (mViewMode == 1) {
                 mTrackers[i]->mpUsedBlocks->draw(mXPos, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpFreeBlocks->draw(mXPos + 100.0f, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpTotalBlocks->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpFreeBlocks->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpTotalBlocks->draw(mXPos + 210.0f, y_pos, COLOR_WHITE);
             } else {
                 mTrackers[i]->mpUsedPercent->draw(mXPos, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpFreePercent->draw(mXPos + 100.0f, y_pos, COLOR_WHITE);
-                mTrackers[i]->mpTotalSize->draw(mXPos + 200.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpFreePercent->draw(mXPos + 110.0f, y_pos, COLOR_WHITE);
+                mTrackers[i]->mpTotalSize->draw(mXPos + 210.0f, y_pos, COLOR_WHITE);
             }
 
             mTrackers[i]->mpFragmentation->draw(mXPos + 320.0f, y_pos, COLOR_WHITE);
-            mTrackers[i]->mpLargestFree->draw(mXPos + 400.0f, y_pos, COLOR_WHITE);
+            mTrackers[i]->mpLargestFree->draw(mXPos + 410.0f, y_pos, COLOR_WHITE);
 
             f32 size_based_width = (max_size_kb > 0) ? ((f32)mTrackers[i]->mTotalSizeKB / (f32)max_size_kb) * MAX_VIS_WIDTH : MAX_VIS_WIDTH;
             f32 block_based_min = (f32)mTrackers[i]->mNumBlocks * MIN_PIXELS_PER_BLOCK;
@@ -486,7 +537,7 @@ void gzHeapsMenu_c::draw() {
     f32 legend_y = Y_ALIGNMENT - 65.0f;
     drawLegend(legend_x, legend_y);
 
-    if (l_cursor->x > 0 && mpDescription != NULL) {
+    if (gzInfo_isSubMenuVisible() && mpDescription != NULL) {
         f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
         mpDescription->draw(0.0f, description_y, COLOR_WHITE, HBIND_CENTER);
     }

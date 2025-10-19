@@ -208,7 +208,7 @@ void gzPracticeMenu_c::draw() {
         if (currentLines[lineIdx] != NULL) {
             f32 y_pos = y_lines_alignment + ((screenIdx - 1) * LINE_SPACING);
 
-            if (l_cursor->y == lineIdx && l_cursor->x > 0) {
+            if (l_cursor->y == lineIdx && gzInfo_isSubMenuVisible()) {
                 currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
             } else {
                 currentLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);
@@ -217,7 +217,7 @@ void gzPracticeMenu_c::draw() {
     }
 
     // Draw description if valid and on menu
-    if (l_cursor->x > 0) {
+    if (gzInfo_isSubMenuVisible()) {
         if (currentLines[l_cursor->y] && *currentLines[l_cursor->y]->m_description != 0) {
             f32 description_x = 0.0f;
             f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
@@ -227,7 +227,7 @@ void gzPracticeMenu_c::draw() {
         }
     }
 
-    if (mpMeterHaihai != NULL && l_cursor->x > 0) {
+    if (mpMeterHaihai != NULL && gzInfo_isSubMenuVisible()) {
         mpMeterHaihai->drawHaihai(gzMainMenu_c::ARROW_LEFT | gzMainMenu_c::ARROW_RIGHT, x_alignment_haihai, y_alignment_haihai, HAIHAI_X_SIZE, 0.0f);
     }
 }
