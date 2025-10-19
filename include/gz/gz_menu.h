@@ -717,6 +717,4 @@ inline f32 calcSlidePosition(u32 currentFrame, u32 startFrame, f32 startPos, f32
     return J2DHermiteInterpolation<f32>(age, &time0, &value0, &tan_out0, &time1, &value1, &tan_in1);
 }
 
-
-
-#endif
+#endif // GZ_MENU_H

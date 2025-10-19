@@ -21,6 +21,7 @@ class gzNotification_c;
 
 struct gzCommandCombos_s {
     u32 mMoveLink;
+    u32 mMoonJump;
 };
 
 struct gzSettings_s {
@@ -137,13 +138,40 @@ public:
     u8 mTimer;
 };
 
+// if we don't end up adding members here, convert to namespace
 class gzToolsMng_c {
 public:
     void execute();
     void executeMoveLink();
 };
 
-// used for checking whether or not to apply 
+// if we don't end up adding members here, convert to namespace
+class gzCheatsMng_c {
+public:
+    void execute();
+    void executeDisableItemTimer();
+    void executeDisableWalls();
+    void executeEnableItemTimer();
+    void executeEnableWalls();
+    void executeInfiniteAir();
+    void executeInfiniteArrows();
+    void executeInfiniteBombs();
+    void executeInfiniteHearts();
+    void executeInfiniteOil();
+    void executeInfiniteRupees();
+    void executeInfiniteSlingshot();
+    void executeMoonJump();
+    void executeSuperClawshot();
+    void executeTransformAnywhere();
+    void executeUnrestrictedItems();
+
+private:
+    // for "run once" reenable checks
+    bool mDisableWalls;
+    bool mDisableItemTimer;
+};
+
+// used for tracking when certain button flags are set
 struct gzButtonFlags_s {
     bool mMoveLink;
 };
@@ -283,6 +311,7 @@ public:
     gzButtonFlags_s mButtonFlags;
     gzCursor mCursor;
     gzSaveLoaderMng_c mSaveLoaderMng;
+    gzCheatsMng_c mCheatsMng;
     gzToolsMng_c mToolsMng;
 
     f32 mIconXPos;

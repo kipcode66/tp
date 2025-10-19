@@ -67,7 +67,7 @@ int CheckFieldItemCreateHeap(fopAc_ac_c* i_this) {
 }
 
 /* 803792B0-803792E8 005910 0038+00 0/0 1/1 0/0 .rodata          m_data__12daItemBase_c */
-const daItemBase_data daItemBase_c::m_data = {
+daItemBase_data daItemBase_c::m_data = {
     -4.5f,  // mGravity
     0.62f,  // mGroundReflect
     45.0f,  // mLaunchSpeed

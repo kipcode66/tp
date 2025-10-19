@@ -163,11 +163,12 @@ int gzInfo_c::execute() {
             mInputWaitTimer--;
             return 1;
         }
+        
         if (mpMainMenu != NULL && mCursor.x == 0) mpMainMenu->execute();
         if (mpCurrentMenu != NULL && mCursor.x > 0) mpCurrentMenu->execute();
     }
 
-    setButtonFlags();
+    mCheatsMng.execute();
     mToolsMng.execute();
     mSaveLoaderMng.execute();
 
@@ -305,13 +306,4 @@ void gzInfo_c::sendNotification(const char* msg) {
 
 void gzInfo_c::sendNotification(const char* msg, int i_notificationType) { 
     if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
-}
-
-void gzInfo_c::setButtonFlags() {
-    if (mSettings.mMoveLink) {
-        // TODO(Pheenoh): read this from combo button settings instead
-        if (gzPad::getHoldL() && gzPad::getHoldR() && gzPad::getTrigY()) {
-            mButtonFlags.mMoveLink = !mButtonFlags.mMoveLink;
-        }
-    }
 }
