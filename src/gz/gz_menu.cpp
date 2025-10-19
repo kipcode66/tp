@@ -29,6 +29,7 @@ void gzMainMenu_c::startReverseTransition() {
 gzMainMenu_c::gzMainMenu_c() {
     OSReport("creating gzMainMenu_c\n");
 
+    mpMenus[MENU_ACTORS] = NULL;
     mpMenus[MENU_CHEATS] = new gzCheatsMenu_c();
     mpMenus[MENU_FLAGS] = new gzFlagsMenu_c();
     mpMenus[MENU_FRAMEWORK] = new gzFrameworkMenu_c();
@@ -47,6 +48,7 @@ gzMainMenu_c::gzMainMenu_c() {
 
     mpDescription = new gzTextBox();
 
+    mpLines[MENU_ACTORS]->setStringDesc("actors", "create, read, update or delete actors in the current scene");
     mpLines[MENU_CHEATS]->setStringDesc("cheats", "toggle cheats");
     mpLines[MENU_FLAGS]->setStringDesc("flags", "toggle in-game flags");
     mpLines[MENU_FRAMEWORK]->setStringDesc("framework", "view and edit running processes");

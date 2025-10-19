@@ -52,7 +52,8 @@ void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
 
 void gzInfo_c::loadDefaultSettings() {
     mSettings.mTextColor = 0xEE8000FF;
-    mSettings.mCommandCombos.mMoveLink = PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y;
+    mSettings.mCommandCombos.mMoveLink = (PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y);
+    mSettings.mCommandCombos.mMoonJump = (PAD_TRIGGER_R | PAD_BUTTON_A);
     setCursorType(1);
     mpFont = mDoExt_getMesgFont();
     mCursor.x = 0;

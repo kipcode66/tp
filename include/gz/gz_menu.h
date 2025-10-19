@@ -28,6 +28,7 @@ class gzMainMenu_c : public gzMenu_c {
 public:
 
     enum gzMainMenu_Menus_e {
+        MENU_ACTORS,
         MENU_CHEATS,
         MENU_FLAGS,
         MENU_FRAMEWORK,
@@ -678,6 +679,7 @@ public:
         gzTextBox* mpUsedPercent;
         gzTextBox* mpFreePercent;
     };
+
 private:
     void updateDynamicLines();
     void updateHeapTracker(HeapTracker_c* tracker);
@@ -693,6 +695,42 @@ private:
     gzTextBox* mpLegendUsed;
     gzTextBox* mpLegendMenuUsed;
     gzTextBox* mpLegendFree;
+};
+
+class gzActorsMenu_c : public gzMenu_c {
+public:
+    // struct ActorInfo {
+    //     u32 layer_id;
+    //     int node_list_index;
+    //     base_process_class* process;
+    // };
+
+    gzActorsMenu_c();
+    ~gzActorsMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
+
+    static const int MAX_VISIBLE_ROWS = 10;
+    static const int NUM_COLUMNS = 3;
+    static const int MAX_ACTORS = 64;  // Should be plenty?
+
+private:
+    static char* getActorName(base_process_class* process);
+
+    int mScrollOffset;
+    gzTextBox* mpTitle;
+    gzTextBox* mpRowTexts[MAX_VISIBLE_ROWS * NUM_COLUMNS];
+    gzTextBox* mpHeaders[NUM_COLUMNS];
+    //gzConfirmMenu_c* mpConfirmMenu;
+    dSelect_cursor_c* mpDrawCursor;
+    dMeterHaihai_c* mpMeterHaihai;
+    // ActorInfo mActorInfos[MAX_ACTORS];
+    bool mOption;
+
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {

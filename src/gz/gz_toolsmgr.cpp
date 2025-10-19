@@ -1,15 +1,18 @@
 #include "gz/gz.h"
-#include "gz/gz_menu.h"
 
 void gzToolsMng_c::executeMoveLink() {
     u32 combo = g_gzInfo.mSettings.mCommandCombos.mMoveLink;
     if (combo && ((gzPad::getTrig() & combo) == combo)) {
-        g_gzInfo.mButtonFlags.mMoveLink = !g_gzInfo.mButtonFlags.mMoveLink;
+        mMoveLink = !mMoveLink;
     }
     
-    if (g_gzInfo.mButtonFlags.mMoveLink) {}
+    if (mMoveLink) {}
 }
 
 void gzToolsMng_c::execute() {
-    if (gzInfo_isMoveLink()) executeMoveLink();
+    if (gzInfo_isMoveLink()) {
+        executeMoveLink();
+    } else if (mMoveLink) {
+        // finish
+    }
 }

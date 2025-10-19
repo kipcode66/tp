@@ -138,14 +138,16 @@ public:
     u8 mTimer;
 };
 
-// if we don't end up adding members here, convert to namespace
 class gzToolsMng_c {
 public:
     void execute();
     void executeMoveLink();
+
+private:
+    // for "run once" reenable checks
+    bool mMoveLink;
 };
 
-// if we don't end up adding members here, convert to namespace
 class gzCheatsMng_c {
 public:
     void execute();
@@ -171,11 +173,6 @@ private:
     // for "run once" reenable checks
     bool mDisableWalls;
     bool mDisableItemTimer;
-};
-
-// used for tracking when certain button flags are set
-struct gzButtonFlags_s {
-    bool mMoveLink;
 };
 
 struct gzCursor {
@@ -310,7 +307,6 @@ public:
     bool mDisplay;
     bool mGZInitialized;
     gzSettings_s mSettings;
-    gzButtonFlags_s mButtonFlags;
     gzCursor mCursor;
     gzSaveLoaderMng_c mSaveLoaderMng;
     gzCheatsMng_c mCheatsMng;

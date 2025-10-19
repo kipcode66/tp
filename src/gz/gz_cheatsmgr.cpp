@@ -1,8 +1,5 @@
 #include "gz/gz.h"
-#include "gz/gz_menu.h"
 #include "d/actor/d_a_alink.h"
-
-class daAlink_c;
 
 void gzCheatsMng_c::executeDisableItemTimer() {
     daItemBase_c::m_data.mWaitTime = 0x7FFF;
@@ -51,7 +48,8 @@ void gzCheatsMng_c::executeInfiniteBombs() {
 }
 
 void gzCheatsMng_c::executeInfiniteHearts() {
-    dComIfGs_setLife(80);
+    // needs to be maxLifeGauge for great spin to still work without modification
+    dComIfGs_setLife(dComIfGs_getMaxLifeGauge());
 }
 
 void gzCheatsMng_c::executeInfiniteOil() {
@@ -83,8 +81,11 @@ void gzCheatsMng_c::executeInvincibleLink() {
 
 void gzCheatsMng_c::executeMoonJump() {
     u32 combo = g_gzInfo.mSettings.mCommandCombos.mMoonJump;
-    if (combo && ((gzPad::getTrig() & combo) == combo)) {
-        // execute moon jump
+    if (combo && ((gzPad::getHold() & combo) == combo)) {
+        daAlink_c* link = daAlink_getAlinkActorClass();
+        if (link) {
+            fopAcM_GetSpeed_p(link)->y = 56.0f;
+        }
     }
 }
 
