@@ -106,7 +106,7 @@ gzCheatsMenu_c::gzCheatsMenu_c() {
     mpLines[CHEAT_INF_RUPEES]->setStringDesc("infinite rupees", "always have 1000 rupees");
     mpLines[CHEAT_INF_SLINGSHOT]->setStringDesc("infinite slingshot seeds", "always have 99 slingshot pellets");
     mpLines[CHEAT_INVINCIBLE_LINK]->setStringDesc("invincible link", "disables link's hurtbox");
-    mpLines[CHEAT_INVINCIBLE_ENEMIES]->setStringDesc("infinite enemies", "make some enemies invincible");
+    mpLines[CHEAT_INVINCIBLE_ENEMIES]->setStringDesc("invincible enemies", "make some enemies invincible");
     mpLines[CHEAT_MOON_JUMP]->setStringDesc("moon jump", "hold R+A to moon jump"); // todo: platform agnostic description
     mpLines[CHEAT_SUPER_CLAWSHOT]->setStringDesc("super clawshot", "super fast / long clawshot");
     mpLines[CHEAT_TRANSFORM_ANYWHERE]->setStringDesc("transform anywhere", "transform at any location");

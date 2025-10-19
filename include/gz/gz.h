@@ -160,6 +160,8 @@ public:
     void executeInfiniteOil();
     void executeInfiniteRupees();
     void executeInfiniteSlingshot();
+    void executeInvincibleLink();
+    void executeInvincibleEnemies();
     void executeMoonJump();
     void executeSuperClawshot();
     void executeTransformAnywhere();

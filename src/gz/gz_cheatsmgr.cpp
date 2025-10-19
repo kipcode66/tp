@@ -66,6 +66,21 @@ void gzCheatsMng_c::executeInfiniteSlingshot() {
     dComIfGs_setPachinkoNum(dComIfGs_getPachinkoMax());
 }
 
+void gzCheatsMng_c::executeInvincibleLink() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link != NULL) {
+        for (int i = 0; i < 3; i++) {
+            link->field_0x850[i].GetGObjInf()->OffTgSetBit();
+            link->field_0x850[i].GetGObjInf()->ClrTgHit();
+        }
+
+        if (link->checkWolf()) {
+            link->field_0xFB8.GetGObjInf()->OffTgSetBit();
+            link->field_0xFB8.GetGObjInf()->ClrTgHit();
+        }
+    }
+}
+
 void gzCheatsMng_c::executeMoonJump() {
     u32 combo = g_gzInfo.mSettings.mCommandCombos.mMoonJump;
     if (combo && ((gzPad::getTrig() & combo) == combo)) {
@@ -102,6 +117,7 @@ void gzCheatsMng_c::execute() {
     if (gzInfo_isInfiniteArrows()) executeInfiniteArrows();
     if (gzInfo_isInfiniteBombs()) executeInfiniteBombs();
     if (gzInfo_isInfiniteHearts()) executeInfiniteHearts();
+    if (gzInfo_isInvincibleLink()) executeInvincibleLink();
     if (gzInfo_isMoonJump()) executeMoonJump();
     if (gzInfo_isInfiniteOil()) executeInfiniteOil();
     if (gzInfo_isInfiniteRupees()) executeInfiniteRupees();

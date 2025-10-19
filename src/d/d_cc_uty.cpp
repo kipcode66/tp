@@ -13,6 +13,7 @@
 #include "d/d_s_play.h"
 #include "d/d_com_inf_game.h"
 #include "f_op/f_op_actor_mng.h"
+#include "gz/gz.h"
 
 /* 803AC418-803AC500 009538 00E8+00 1/1 0/0 0/0 .data            plCutLRC */
 static int plCutLRC[58] = {
@@ -438,7 +439,7 @@ fopAc_ac_c* cc_at_check(fopAc_ac_c* i_enemy, dCcU_AtInfo* i_AtInfo) {
             }
         }
 
-        if (i_AtInfo->mAttackPower != 0) {
+        if (i_AtInfo->mAttackPower != 0 && !gzInfo_isInvincibleEnemies()) {
             i_enemy->health -= i_AtInfo->mAttackPower;
         }
 
