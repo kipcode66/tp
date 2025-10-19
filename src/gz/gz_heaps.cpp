@@ -154,9 +154,9 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
         JKRHeap* oldHeap = mDoExt_getCurrentHeap();
         mDoExt_setCurrentHeap(mDoExt_getArchiveHeap());  // Or root
 
-        JKRExpHeap* gameExpHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
-        u8 oldGroupId = gameExpHeap->mCurrentGroupId;
-        gameExpHeap->mCurrentGroupId = g_gzInfo.mGzGroupID;
+        JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
+        u8 oldGroupId = archiveHeap->mCurrentGroupId;
+        archiveHeap->mCurrentGroupId = g_gzInfo.mGzGroupID;
 
         JKRExpHeap::CMemBlock** newBlocks = new JKRExpHeap::CMemBlock*[newMax];
         for (int i = 0; i < newMax; ++i) {
@@ -164,7 +164,7 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
         }
         u32* newStarts = new u32[newMax];
 
-        gameExpHeap->mCurrentGroupId = oldGroupId;
+        archiveHeap->mCurrentGroupId = oldGroupId;
 
         delete[] tracker->mBlocks;
         delete[] tracker->mStarts;

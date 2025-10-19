@@ -79,13 +79,13 @@ int gzInfo_c::_create() {
 
     // Store current heap settings until gz is done allocating
     JKRHeap* oldHeap = mDoExt_getCurrentHeap();
-    JKRExpHeap* gameExpHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
-    u8 oldGroupId = gameExpHeap->mCurrentGroupId;
+    JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
+    u8 oldGroupId = archiveHeap->mCurrentGroupId;
 
     // Alloc on archive heap
     // Set group ID for identifying gz allocations in heaps menu
-    mDoExt_setCurrentHeap(gameExpHeap);    
-    gameExpHeap->mCurrentGroupId = mGzGroupID = 0x69;
+    mDoExt_setCurrentHeap(archiveHeap);    
+    archiveHeap->mCurrentGroupId = mGzGroupID = 0x69;
 
     // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
@@ -116,14 +116,12 @@ int gzInfo_c::_create() {
     dComIfGp_setOxygen(600);
     dComIfGp_setNowOxygen(600);
     dComIfGp_setMaxOxygen(600);
-
-    // JUTDbPrint::getManager()->changeFont(mDoExt_getMesgFont());
     
     // load the default menu
     gzChangeMenu(mpMainMenu->getMenu(0));
 
     // Restore original group ID and heap
-    gameExpHeap->mCurrentGroupId = oldGroupId;
+    archiveHeap->mCurrentGroupId = oldGroupId;
     mDoExt_setCurrentHeap(oldHeap);
     
     return 1;
