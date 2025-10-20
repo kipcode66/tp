@@ -205,7 +205,7 @@ void gzToolsMenu_c::draw() {
     if (gzInfo_isSubMenuVisible()) {
         if (mpLines[l_cursor->y] && *mpLines[l_cursor->y]->m_description != 0) {
             f32 description_x = DESCRIPTION_X;
-            f32 description_y = g_gzInfo.mBackgroundHeight + 40.0f;
+            f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
 
             mpDescription->setString(mpLines[l_cursor->y]->m_description);
             mpDescription->draw(DESCRIPTION_X, description_y, cursor_color, HBIND_CENTER);
