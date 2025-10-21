@@ -35,8 +35,12 @@ struct gzSettings_s {
     bool mMoveLink;
     gzCommandCombos_s mCommandCombos;
     bool mMenuSfx;
+    bool mCoroTD;
     bool mDisableItemTimer;
     bool mDisableWalls;
+    bool mElevatorEscape;
+    bool mEndingBlowMoonBoots;
+    bool mGorgeVoid;
     bool mInfiniteAir;
     bool mInfiniteArrows;
     bool mInfiniteBombs;
@@ -46,10 +50,25 @@ struct gzSettings_s {
     bool mInfiniteSlingshot;
     bool mInvincibleLink;
     bool mInvincibleEnemies;
+    bool mLadderFreezardCancel;
     bool mMoonJump;
+    bool mRolling;
     bool mSuperClawshot;
     bool mTransformAnywhere;
+    bool mUniversalMapDelay;
     bool mUnrestrictedItems;
+    bool mAbMashRate;
+    bool mDisplacement;
+    bool mFastBonkRecovery;
+    bool mFastMovement;
+    bool mInGameTimer;
+    bool mInputViewer;
+    bool mLinkDebugInfo;
+    bool mLoadTimer;
+    bool mNoSinkingInSand;
+    bool mStageInfo;
+    bool mTeleport;
+    bool mTimer;
 };
 
 // tpgz config file header
@@ -215,35 +234,65 @@ public:
     JUTFont* getFont() { return mpFont; }
     bool getReloadType() const { return mSettings.mReloadType; }
     u32 getTextColor() const { return mSettings.mTextColor; }
+    bool isAbMashRate() { return mSettings.mAbMashRate; }
+
+    bool isCoroTD() { return mSettings.mCoroTD; }
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
     bool isDisableItemTimer() { return mSettings.mDisableItemTimer; }
     bool isDisableWalls() { return mSettings.mDisableWalls; }
-    bool isDisplay() const { return mDisplay; }
-    bool isDropShadows() const { return mSettings.mDropShadows; }
-    bool isInfiniteAir() {return mSettings.mInfiniteAir; }
+    bool isDisplacement() { return mSettings.mDisplacement; }
+    bool isDisplay() { return mDisplay; }
+    bool isDropShadows() { return mSettings.mDropShadows; }
+    bool isElevatorEscape() { return mSettings.mElevatorEscape; }
+    bool isEndingBlowMoonBoots() { return mSettings.mEndingBlowMoonBoots; }
+    bool isFastBonkRecovery() { return mSettings.mFastBonkRecovery; }
+    bool isFastMovement() { return mSettings.mFastMovement; }
+    bool isGorgeVoid() { return mSettings.mGorgeVoid; }
+    bool isInfiniteAir() { return mSettings.mInfiniteAir; }
     bool isInfiniteArrows() { return mSettings.mInfiniteArrows; }
     bool isInfiniteBombs() { return mSettings.mInfiniteBombs; }
     bool isInfiniteHearts() { return mSettings.mInfiniteHearts; }
     bool isInfiniteOil() { return mSettings.mInfiniteOil; }
     bool isInfiniteRupees() { return mSettings.mInfiniteRupees; }
     bool isInfiniteSlingshot() { return mSettings.mInfiniteSlingshot; }
+    bool isInGameTimer() { return mSettings.mInGameTimer; }
+    bool isInputViewer() { return mSettings.mInputViewer; }
     bool isInvincibleEnemies() { return mSettings.mInvincibleEnemies; }
     bool isInvincibleLink() { return mSettings.mInvincibleLink; }
+    bool isLadderFreezardCancel() { return mSettings.mLadderFreezardCancel; }
+    bool isLinkDebugInfo() { return mSettings.mLinkDebugInfo; }
+    bool isLoadTimer() { return mSettings.mLoadTimer; }
+   
     bool isMenuPausesGame() const { return mSettings.mMenuPausesGame; }
     bool isMenuSfx() const { return mSettings.mMenuSfx; }
     bool isMoonJump() { return mSettings.mMoonJump; }
     bool isMoveLink() { return mSettings.mMoveLink; }
+    bool isNoSinkingInSand() { return mSettings.mNoSinkingInSand; }
+    bool isRolling() { return mSettings.mRolling; }
+    bool isStageInfo() { return mSettings.mStageInfo; }
     bool isSuperClawshot() { return mSettings.mSuperClawshot; }
     bool isSwapEquips() const { return mSettings.mSwapEquips; }
+    bool isTeleport() { return mSettings.mTeleport; }
+    bool isTimer() { return mSettings.mTimer; }
     bool isTransformAnywhere() { return mSettings.mTransformAnywhere; }
+    bool isUniversalMapDelay() { return mSettings.mUniversalMapDelay; }
     bool isUnrestrictedItems() { return mSettings.mUnrestrictedItems; }
+    void setAbMashRate(bool i_opt) { mSettings.mAbMashRate = i_opt; }
+    void setCoroTD(bool i_opt) { mSettings.mCoroTD = i_opt; }
     void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
     void setDisableItemTimer(bool i_opt) { mSettings.mDisableItemTimer = i_opt; }
     void setDisableWalls(bool i_opt) { mSettings.mDisableWalls = i_opt; }
+    void setDisplacement(bool i_opt) { mSettings.mDisplacement = i_opt; }
     void setDisplayMode(bool i_mode) { mSettings.mDisplayMode = i_mode; }
     void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
+    void setElevatorEscape(bool i_opt) { mSettings.mElevatorEscape = i_opt; }
+    void setEndingBlowMoonBoots(bool i_opt) { mSettings.mEndingBlowMoonBoots = i_opt; }
+    void setFastBonkRecovery(bool i_opt) { mSettings.mFastBonkRecovery = i_opt; }
+    void setFastMovement(bool i_opt) { mSettings.mFastMovement = i_opt; }
     void setFont(JUTFont* i_font) { mpFont = i_font; }
+    void setGorgeVoid(bool i_opt) { mSettings.mGorgeVoid = i_opt; }
+    void setInGameTimer(bool i_opt) { mSettings.mInGameTimer = i_opt; }
     void setInfiniteAir(bool i_opt) { mSettings.mInfiniteAir = i_opt; }
     void setInfiniteArrows(bool i_opt) { mSettings.mInfiniteArrows = i_opt; }
     void setInfiniteBombs(bool i_opt) { mSettings.mInfiniteBombs = i_opt; }
@@ -251,17 +300,27 @@ public:
     void setInfiniteOil(bool i_opt) { mSettings.mInfiniteOil = i_opt; }
     void setInfiniteRupees(bool i_opt) { mSettings.mInfiniteRupees = i_opt; }
     void setInfiniteSlingshot(bool i_opt) { mSettings.mInfiniteSlingshot = i_opt; }
+    void setInputViewer(bool i_opt) { mSettings.mInputViewer = i_opt; }
     void setInvincibleEnemies(bool i_opt) { mSettings.mInvincibleEnemies = i_opt; }
     void setInvincibleLink(bool i_opt) { mSettings.mInvincibleLink = i_opt; }
+    void setLadderFreezardCancel(bool i_opt) { mSettings.mLadderFreezardCancel = i_opt; }
+    void setLinkDebugInfo(bool i_opt) { mSettings.mLinkDebugInfo = i_opt; }
+    void setLoadTimer(bool i_opt) { mSettings.mLoadTimer = i_opt; }
     void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
     void setMenuSfx(bool sfx) { mSettings.mMenuSfx = sfx; }
     void setMoonJump(bool i_opt) { mSettings.mMoonJump = i_opt; }
     void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
+    void setNoSinkingInSand(bool i_opt) { mSettings.mNoSinkingInSand = i_opt; }
     void setReloadType(bool i_type) { mSettings.mReloadType = i_type; }
+    void setRolling(bool i_opt) { mSettings.mRolling = i_opt; }
+    void setStageInfo(bool i_opt) { mSettings.mStageInfo = i_opt; }
     void setSuperClawshot(bool i_opt) { mSettings.mSuperClawshot = i_opt; }
     void setSwapEquips(bool i_swapEquips) { mSettings.mSwapEquips = i_swapEquips; }
+    void setTeleport(bool i_opt) { mSettings.mTeleport = i_opt; }
     void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
+    void setTimer(bool i_opt) { mSettings.mTimer = i_opt; }
     void setTransformAnywhere(bool i_opt) { mSettings.mTransformAnywhere = i_opt; }
+    void setUniversalMapDelay(bool i_opt) { mSettings.mUniversalMapDelay = i_opt; }
     void setUnrestrictedItems(bool i_opt) { mSettings.mUnrestrictedItems = i_opt; }
 
     void seStart(u32 i_sfxID) {
@@ -346,6 +405,7 @@ inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
 inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
 
+inline bool gzInfo_isCoroTD() { return g_gzInfo.isCoroTD(); }
 inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
 inline bool gzInfo_isCursorTypeTP() { return g_gzInfo.isCursorTypeTP(); }
 inline bool gzInfo_isDisableItemTimer() { return g_gzInfo.isDisableItemTimer(); }
@@ -353,6 +413,9 @@ inline bool gzInfo_isDisableWalls() { return g_gzInfo.isDisableWalls(); }
 inline bool gzInfo_isDisplayModeInterlaced() { return g_gzInfo.getDisplayMode() == false; }
 inline bool gzInfo_isDisplayModeProgressive() { return g_gzInfo.getDisplayMode() == true; }
 inline bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
+inline bool gzInfo_isElevatorEscape() { return g_gzInfo.isElevatorEscape(); }
+inline bool gzInfo_isEndingBlowMoonBoots() { return g_gzInfo.isEndingBlowMoonBoots(); }
+inline bool gzInfo_isGorgeVoid() { return g_gzInfo.isGorgeVoid(); }
 inline bool gzInfo_isInfiniteAir() { return g_gzInfo.isInfiniteAir(); }
 inline bool gzInfo_isInfiniteArrows() { return g_gzInfo.isInfiniteArrows(); }
 inline bool gzInfo_isInfiniteBombs() { return g_gzInfo.isInfiniteBombs(); }
@@ -362,17 +425,32 @@ inline bool gzInfo_isInfiniteRupees() { return g_gzInfo.isInfiniteRupees(); }
 inline bool gzInfo_isInfiniteSlingshot() { return g_gzInfo.isInfiniteSlingshot(); }
 inline bool gzInfo_isInvincibleEnemies() { return g_gzInfo.isInvincibleEnemies(); }
 inline bool gzInfo_isInvincibleLink() { return g_gzInfo.isInvincibleLink(); }
+inline bool gzInfo_isLadderFreezardCancel() { return g_gzInfo.isLadderFreezardCancel(); }
+inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}
 inline bool gzInfo_isMenuSfx() { return g_gzInfo.isMenuSfx(); }
 inline bool gzInfo_isMoonJump() { return g_gzInfo.isMoonJump(); }
 inline bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
 inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
 inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
-inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}
+inline bool gzInfo_isRolling() { return g_gzInfo.isRolling(); }
 inline bool gzInfo_isSubMenuVisible() { return g_gzInfo.mCursor.x > 0;}
 inline bool gzInfo_isSuperClawshot() { return g_gzInfo.isSuperClawshot(); }
 inline bool gzInfo_isSwapEquips() { return g_gzInfo.isSwapEquips(); }
 inline bool gzInfo_isTransformAnywhere() { return g_gzInfo.isTransformAnywhere(); }
+inline bool gzInfo_isUniversalMapDelay() { return g_gzInfo.isUniversalMapDelay(); }
 inline bool gzInfo_isUnrestrictedItems() { return g_gzInfo.isUnrestrictedItems(); }
+inline bool gzInfo_isAbMashRate() { return g_gzInfo.isAbMashRate(); }
+inline bool gzInfo_isLinkDebugInfo() { return g_gzInfo.isLinkDebugInfo(); }
+inline bool gzInfo_isInGameTimer() { return g_gzInfo.isInGameTimer(); }
+inline bool gzInfo_isInputViewer() { return g_gzInfo.isInputViewer(); }
+inline bool gzInfo_isLoadTimer() { return g_gzInfo.isLoadTimer(); }
+inline bool gzInfo_isStageInfo() { return g_gzInfo.isStageInfo(); }
+inline bool gzInfo_isTimer() { return g_gzInfo.isTimer(); }
+inline bool gzInfo_isFastBonkRecovery() { return g_gzInfo.isFastBonkRecovery(); }
+inline bool gzInfo_isFastMovement() { return g_gzInfo.isFastMovement(); }
+inline bool gzInfo_isNoSinkingInSand() { return g_gzInfo.isNoSinkingInSand(); }
+inline bool gzInfo_isTeleport() { return g_gzInfo.isTeleport(); }
+inline bool gzInfo_isDisplacement() { return g_gzInfo.isDisplacement(); }
 
 inline void gzInfo_setCursorType(u8 type) { g_gzInfo.setCursorType(type); }
 inline void gzInfo_setDisplayMode(bool mode) { g_gzInfo.setDisplayMode(mode); }
@@ -388,9 +466,18 @@ inline void gzInfo_setReloadFile() { gzInfo_setReloadType(false); }
 inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapEquips); }
 inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
 
+inline void gzInfo_offAbMashRate() { g_gzInfo.setAbMashRate(false); }
+inline void gzInfo_offCoroTD() { g_gzInfo.setCoroTD(false); }
 inline void gzInfo_offDisableItemTimer() { g_gzInfo.setDisableItemTimer(false); }
 inline void gzInfo_offDisableWalls() { g_gzInfo.setDisableWalls(false); }
-inline void gzInfo_offDropShadows() { gzInfo_setDropShadows(false); }
+inline void gzInfo_offDisplacement() { g_gzInfo.setDisplacement(false); }
+inline void gzInfo_offDropShadows() { g_gzInfo.setDropShadows(false); }
+inline void gzInfo_offElevatorEscape() { g_gzInfo.setElevatorEscape(false); }
+inline void gzInfo_offEndingBlowMoonBoots() { g_gzInfo.setEndingBlowMoonBoots(false); }
+inline void gzInfo_offFastBonkRecovery() { g_gzInfo.setFastBonkRecovery(false); }
+inline void gzInfo_offFastMovement() { g_gzInfo.setFastMovement(false); }
+inline void gzInfo_offGorgeVoid() { g_gzInfo.setGorgeVoid(false); }
+inline void gzInfo_offInGameTimer() { g_gzInfo.setInGameTimer(false); }
 inline void gzInfo_offInfiniteAir() { g_gzInfo.setInfiniteAir(false); }
 inline void gzInfo_offInfiniteArrows() { g_gzInfo.setInfiniteArrows(false); }
 inline void gzInfo_offInfiniteBombs() { g_gzInfo.setInfiniteBombs(false); }
@@ -398,19 +485,38 @@ inline void gzInfo_offInfiniteHearts() { g_gzInfo.setInfiniteHearts(false); }
 inline void gzInfo_offInfiniteOil() { g_gzInfo.setInfiniteOil(false); }
 inline void gzInfo_offInfiniteRupees() { g_gzInfo.setInfiniteRupees(false); }
 inline void gzInfo_offInfiniteSlingshot() { g_gzInfo.setInfiniteSlingshot(false); }
+inline void gzInfo_offInputViewer() { g_gzInfo.setInputViewer(false); }
 inline void gzInfo_offInvincibleEnemies() { g_gzInfo.setInvincibleEnemies(false); }
 inline void gzInfo_offInvincibleLink() { g_gzInfo.setInvincibleLink(false); }
-inline void gzInfo_offMenuSfx() { gzInfo_setMenuSfx(false); }
+inline void gzInfo_offLadderFreezardCancel() { g_gzInfo.setLadderFreezardCancel(false); }
+inline void gzInfo_offLinkDebugInfo() { g_gzInfo.setLinkDebugInfo(false); }
+inline void gzInfo_offLoadTimer() { g_gzInfo.setLoadTimer(false); }
+inline void gzInfo_offMenuSfx() { g_gzInfo.setMenuSfx(false); }
 inline void gzInfo_offMoonJump() { g_gzInfo.setMoonJump(false); }
-inline void gzInfo_offMoveLink() { gzInfo_setMoveLink(false); }
+inline void gzInfo_offMoveLink() { g_gzInfo.setMoveLink(false); }
+inline void gzInfo_offNoSinkingInSand() { g_gzInfo.setNoSinkingInSand(false); }
+inline void gzInfo_offRolling() { g_gzInfo.setRolling(false); }
+inline void gzInfo_offStageInfo() { g_gzInfo.setStageInfo(false); }
 inline void gzInfo_offSuperClawshot() { g_gzInfo.setSuperClawshot(false); }
-inline void gzInfo_offSwapEquips() { gzInfo_setSwapEquips(false); }
+inline void gzInfo_offSwapEquips() { g_gzInfo.setSwapEquips(false); }
+inline void gzInfo_offTeleport() { g_gzInfo.setTeleport(false); }
+inline void gzInfo_offTimer() { g_gzInfo.setTimer(false); }
 inline void gzInfo_offTransformAnywhere() { g_gzInfo.setTransformAnywhere(false); }
+inline void gzInfo_offUniversalMapDelay() { g_gzInfo.setUniversalMapDelay(false); }
 inline void gzInfo_offUnrestrictedItems() { g_gzInfo.setUnrestrictedItems(false); }
 
+inline void gzInfo_onAbMashRate() { g_gzInfo.setAbMashRate(true); }
+inline void gzInfo_onCoroTD() { g_gzInfo.setCoroTD(true); }
 inline void gzInfo_onDisableItemTimer() { g_gzInfo.setDisableItemTimer(true); }
 inline void gzInfo_onDisableWalls() { g_gzInfo.setDisableWalls(true); }
-inline void gzInfo_onDropShadows() { gzInfo_setDropShadows(true); }
+inline void gzInfo_onDisplacement() { g_gzInfo.setDisplacement(true); }
+inline void gzInfo_onDropShadows() { g_gzInfo.setDropShadows(true); }
+inline void gzInfo_onElevatorEscape() { g_gzInfo.setElevatorEscape(true); }
+inline void gzInfo_onEndingBlowMoonBoots() { g_gzInfo.setEndingBlowMoonBoots(true); }
+inline void gzInfo_onFastBonkRecovery() { g_gzInfo.setFastBonkRecovery(true); }
+inline void gzInfo_onFastMovement() { g_gzInfo.setFastMovement(true); }
+inline void gzInfo_onGorgeVoid() { g_gzInfo.setGorgeVoid(true); }
+inline void gzInfo_onInGameTimer() { g_gzInfo.setInGameTimer(true); }
 inline void gzInfo_onInfiniteAir() { g_gzInfo.setInfiniteAir(true); }
 inline void gzInfo_onInfiniteArrows() { g_gzInfo.setInfiniteArrows(true); }
 inline void gzInfo_onInfiniteBombs() { g_gzInfo.setInfiniteBombs(true); }
@@ -418,14 +524,24 @@ inline void gzInfo_onInfiniteHearts() { g_gzInfo.setInfiniteHearts(true); }
 inline void gzInfo_onInfiniteOil() { g_gzInfo.setInfiniteOil(true); }
 inline void gzInfo_onInfiniteRupees() { g_gzInfo.setInfiniteRupees(true); }
 inline void gzInfo_onInfiniteSlingshot() { g_gzInfo.setInfiniteSlingshot(true); }
+inline void gzInfo_onInputViewer() { g_gzInfo.setInputViewer(true); }
 inline void gzInfo_onInvincibleEnemies() { g_gzInfo.setInvincibleEnemies(true); }
 inline void gzInfo_onInvincibleLink() { g_gzInfo.setInvincibleLink(true); }
-inline void gzInfo_onMenuSfx() { gzInfo_setMenuSfx(true); }
+inline void gzInfo_onLadderFreezardCancel() { g_gzInfo.setLadderFreezardCancel(true); }
+inline void gzInfo_onLinkDebugInfo() { g_gzInfo.setLinkDebugInfo(true); }
+inline void gzInfo_onLoadTimer() { g_gzInfo.setLoadTimer(true); }
+inline void gzInfo_onMenuSfx() { g_gzInfo.setMenuSfx(true); }
 inline void gzInfo_onMoonJump() { g_gzInfo.setMoonJump(true); }
-inline void gzInfo_onMoveLink() { gzInfo_setMoveLink(true); }
+inline void gzInfo_onMoveLink() { g_gzInfo.setMoveLink(true); }
+inline void gzInfo_onNoSinkingInSand() { g_gzInfo.setNoSinkingInSand(true); }
+inline void gzInfo_onRolling() { g_gzInfo.setRolling(true); }
+inline void gzInfo_onStageInfo() { g_gzInfo.setStageInfo(true); }
 inline void gzInfo_onSuperClawshot() { g_gzInfo.setSuperClawshot(true); }
-inline void gzInfo_onSwapEquips() { gzInfo_setSwapEquips(true); }
+inline void gzInfo_onSwapEquips() { g_gzInfo.setSwapEquips(true); }
+inline void gzInfo_onTeleport() { g_gzInfo.setTeleport(true); }
+inline void gzInfo_onTimer() { g_gzInfo.setTimer(true); }
 inline void gzInfo_onTransformAnywhere() { g_gzInfo.setTransformAnywhere(true); }
+inline void gzInfo_onUniversalMapDelay() { g_gzInfo.setUniversalMapDelay(true); }
 inline void gzInfo_onUnrestrictedItems() { g_gzInfo.setUnrestrictedItems(true); }
 
 namespace gzPad {

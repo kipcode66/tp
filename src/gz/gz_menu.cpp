@@ -150,13 +150,13 @@ void gzMainMenu_c::draw() {
         if (age >= mTransitionDuration) {
             mTransitioning = false;
             mXPos = mMainEndX;
-            if (g_gzInfo.mpCurrentMenu) {
+            if (g_gzInfo.mpCurrentMenu != NULL) {
                 g_gzInfo.mpCurrentMenu->setXPos(mSubEndX);
             }
         } else {
             mXPos = calcSlidePosition(currentFrame, mTransitionStart, mMainStartX, mMainEndX, mTransitionDuration);
 
-            if (g_gzInfo.mpCurrentMenu)
+            if (g_gzInfo.mpCurrentMenu != NULL)
                 g_gzInfo.mpCurrentMenu->setXPos(calcSlidePosition(currentFrame, mTransitionStart, mSubStartX, mSubEndX, mTransitionDuration));
         }
 
