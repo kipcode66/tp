@@ -22,6 +22,8 @@ class gzNotification_c;
 struct gzCommandCombos_s {
     u32 mMoveLink;
     u32 mMoonJump;
+    u32 mTeleportSave;
+    u32 mTeleportLoad;
 };
 
 struct gzSettings_s {
@@ -157,14 +159,25 @@ public:
     u8 mTimer;
 };
 
+struct SavedCameraState {
+    cXyz center;
+    cXyz eye;
+    f32 fovy;
+    cSAngle bank;
+};
+
 class gzToolsMng_c {
 public:
     void execute();
     void executeMoveLink();
+    void executeTeleport();
 
 private:
     // for "run once" reenable checks
     bool mMoveLink;
+    SavedCameraState mCamera;
+    cXyz mLinkPos;
+    csXyz mLinkAngle;
 };
 
 class gzCheatsMng_c {
