@@ -120,6 +120,5 @@ void gzCheatsMng_c::execute() {
     if (gzInfo_isInfiniteRupees()) executeInfiniteRupees();
     if (gzInfo_isInfiniteSlingshot()) executeInfiniteSlingshot();
     if (gzInfo_isSuperClawshot()) executeSuperClawshot();
-    if (gzInfo_isTransformAnywhere()) executeTransformAnywhere();
     if (gzInfo_isUnrestrictedItems()) executeUnrestrictedItems();
 }
