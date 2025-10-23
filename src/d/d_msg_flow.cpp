@@ -13,6 +13,7 @@
 #include "d/actor/d_a_myna.h"
 #include "d/actor/d_a_obj_ss_base.h"
 #include "SSystem/SComponent/c_math.h"
+#include "gz/gz.h"
 
 /* 80249F00-80249F48 244840 0048+00 0/0 5/5 154/154 .text            __ct__10dMsgFlow_cFv */
 dMsgFlow_c::dMsgFlow_c() {
@@ -1624,6 +1625,7 @@ u16 dMsgFlow_c::query041(mesg_flow_node_branch* i_flowNode_p, fopAc_ac_c* i_spea
 /* 8024BFEC-8024C0A8 24692C 00BC+00 1/0 0/0 0/0 .text
  * query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ci */
 u16 dMsgFlow_c::query042(mesg_flow_node_branch* i_flowNode_p, fopAc_ac_c* i_speaker_p, int param_2) {
+    if (gzInfo_isTransformAnywhere()) return 0;
     daMidna_c* midna_p = daPy_py_c::getMidnaActor();
 
     u8 ret = 0;

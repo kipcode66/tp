@@ -203,7 +203,6 @@ public:
     void executeInvincibleEnemies();
     void executeMoonJump();
     void executeSuperClawshot();
-    void executeTransformAnywhere();
     void executeUnrestrictedItems();
 
 private:

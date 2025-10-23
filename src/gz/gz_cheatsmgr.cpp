@@ -93,10 +93,6 @@ void gzCheatsMng_c::executeSuperClawshot() {
     // d_a_alink nonmatching still
 }
 
-void gzCheatsMng_c::executeTransformAnywhere() {
-    // d_msg_flow nonmatching still
-}
-
 void gzCheatsMng_c::executeUnrestrictedItems() {
     // d_a_alink nonmatching still
 }
