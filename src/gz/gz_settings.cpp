@@ -32,6 +32,7 @@
 
 static const int COLOR_COUNT = 27;
 
+// TODO: load these from disk
 static char* l_textColorName[] = {
     "amethyst",
     "aquamarine",

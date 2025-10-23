@@ -4,7 +4,7 @@
 #include "d/d_drawlist.h"
 #include "d/d_meter_haihai.h"
 #include "d/d_select_cursor.h"
-#include "gz/gz.h"
+#include "gz/gz_tab.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 
 class dSelect_cursor_c;
@@ -196,78 +196,6 @@ public:
         TAB_MAX_e
     };
 
-    enum gzToolsMenuCheckersTab_e {
-        OPT_COROTD_e,
-        OPT_EBMB_e,
-        OPT_EE_e,
-        OPT_GORGE_VOID_e,
-        OPT_LFC_e,
-        OPT_ROLLING_e,
-        OPT_UMD_e,
-
-        OPT_CHECKERS_MAX_e
-    };
-
-    enum gzToolsMenuDisplaysTab_e {
-        OPT_AB_MASH_e,
-        OPT_LINK_DEBUG_e,
-        OPT_IGT_e,
-        OPT_INPUT_VIEWER_e,
-        OPT_LOAD_TIMER_e,
-        OPT_STAGE_INFO_e,
-        OPT_TIMER_e,
-
-        OPT_DISPLAYS_MAX_e
-    };
-
-    enum gzToolsMenuLink_e {
-        OPT_DISPLACEMENT_e,
-        OPT_FAST_BONK_e,
-        OPT_FAST_MOVEMENT_e,
-        OPT_MOVE_LINK_e,
-        OPT_NO_SINK_e,
-        OPT_TELEPORT_e,
-
-        OPT_LINK_MAX_e
-    };
-
-    class gzCheckersTab_c {
-    public:
-        void create();
-        void _delete();
-        int execute();
-        void updateDynamicLines();
-
-        gzToolsMenu_c* mParent;
-        gzTextBox* mpLines[7];
-        gzTextBox* mpLineOptions[7];
-    };
-
-    class gzDisplaysTab_c {
-    public:
-        void create();
-        void _delete();
-        int execute();
-        void updateDynamicLines();
-
-        gzToolsMenu_c* mParent;
-        gzTextBox* mpLines[7];
-        gzTextBox* mpLineOptions[7];
-    };
-    
-
-    class gzLinkTab_c {
-    public:
-        void create();
-        void _delete();
-        int execute();
-        void updateDynamicLines();
-
-        gzToolsMenu_c* mParent;
-        gzTextBox* mpLines[6];
-        gzTextBox* mpLineOptions[6];
-    };
-
     gzToolsMenu_c();
     ~gzToolsMenu_c();
     virtual void execute();
@@ -276,18 +204,12 @@ public:
 
     gzTextBox* mpTabHeaders[TAB_MAX_e];
     int mCurrentTab;
-    bool mOption;
     int mTopLine;
-    gzCheckersTab_c mCheckersTab;
-    gzDisplaysTab_c mDisplaysTab;
-    gzLinkTab_c mLinkTab;
+    gzTab_c mTabs[TAB_MAX_e];
     gzTextBox* mpDescription;
     dSelect_cursor_c* mpDrawCursor;
     dMeterHaihai_c* mpMeterHaihai;
     f32 mXPos;
-
-private:
-    u8 getHaihaiFlags(int tab, int line);
 };
 
 typedef void (*confirmCallback)(void*);

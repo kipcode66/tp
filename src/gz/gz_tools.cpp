@@ -1,7 +1,35 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
-#include "gz/gz.h"
 #include "gz/gz_menu.h"
+
+static gzOption_s checker_options[] = {
+    {"coro td", NULL, gzInfo_isCoroTD, gzInfo_onCoroTD, gzInfo_offCoroTD},
+    {"ending blow moon boots", NULL, gzInfo_isEndingBlowMoonBoots, gzInfo_onEndingBlowMoonBoots, gzInfo_offEndingBlowMoonBoots},
+    {"elevator escape", NULL, gzInfo_isElevatorEscape, gzInfo_onElevatorEscape, gzInfo_offElevatorEscape},
+    {"gorge void", NULL, gzInfo_isGorgeVoid, gzInfo_onGorgeVoid, gzInfo_offGorgeVoid},
+    {"ladder freezard cancel", NULL, gzInfo_isLadderFreezardCancel, gzInfo_onLadderFreezardCancel, gzInfo_offLadderFreezardCancel},
+    {"rolling", NULL, gzInfo_isRolling, gzInfo_onRolling, gzInfo_offRolling},
+    {"universal map delay", NULL, gzInfo_isUniversalMapDelay, gzInfo_onUniversalMapDelay, gzInfo_offUniversalMapDelay}
+};
+
+static gzOption_s display_options[] = {
+    {"a/b mash rate", NULL, gzInfo_isAbMashRate, gzInfo_onAbMashRate, gzInfo_offAbMashRate},
+    {"link debug info", NULL, gzInfo_isLinkDebugInfo, gzInfo_onLinkDebugInfo, gzInfo_offLinkDebugInfo},
+    {"in-game timer", NULL, gzInfo_isInGameTimer, gzInfo_onInGameTimer, gzInfo_offInGameTimer},
+    {"input viewer", NULL, gzInfo_isInputViewer, gzInfo_onInputViewer, gzInfo_offInputViewer},
+    {"load timer", NULL, gzInfo_isLoadTimer, gzInfo_onLoadTimer, gzInfo_offLoadTimer},
+    {"stage info", NULL, gzInfo_isStageInfo, gzInfo_onStageInfo, gzInfo_offStageInfo},
+    {"timer", NULL, gzInfo_isTimer, gzInfo_onTimer, gzInfo_offTimer}
+};
+
+static gzOption_s link_options[] = {
+    {"fast bonk recovery", NULL, gzInfo_isFastBonkRecovery, gzInfo_onFastBonkRecovery, gzInfo_offFastBonkRecovery},
+    {"fast movement", NULL, gzInfo_isFastMovement, gzInfo_onFastMovement, gzInfo_offFastMovement},
+    {"no sinking in sand", NULL, gzInfo_isNoSinkingInSand, gzInfo_onNoSinkingInSand, gzInfo_offNoSinkingInSand},
+    {"teleport", NULL, gzInfo_isTeleport, gzInfo_onTeleport, gzInfo_offTeleport},
+    {"displacement", NULL, gzInfo_isDisplacement, gzInfo_onDisplacement, gzInfo_offDisplacement},
+    {"move link", "move link around freely. L+R+Y to activate", gzInfo_isMoveLink, gzInfo_onMoveLink, gzInfo_offMoveLink}
+};
 
 gzToolsMenu_c::gzToolsMenu_c() {
     OSReport("creating gzToolsMenu_c\n");
@@ -15,12 +43,17 @@ gzToolsMenu_c::gzToolsMenu_c() {
     mpTabHeaders[TAB_DISPLAYS_e]->setString("displays");
     mpTabHeaders[TAB_LINK_e]->setString("link");
 
-    mCheckersTab.mParent = this;
-    mCheckersTab.create();
-    mDisplaysTab.mParent = this;
-    mDisplaysTab.create();
-    mLinkTab.mParent = this;
-    mLinkTab.create();
+    mTabs[TAB_CHECKERS_e].mOptions = checker_options;
+    mTabs[TAB_CHECKERS_e].mMax = sizeof(checker_options) / sizeof(gzOption_s);
+    mTabs[TAB_CHECKERS_e].create();
+
+    mTabs[TAB_DISPLAYS_e].mOptions = display_options;
+    mTabs[TAB_DISPLAYS_e].mMax = sizeof(display_options) / sizeof(gzOption_s);
+    mTabs[TAB_DISPLAYS_e].create();
+
+    mTabs[TAB_LINK_e].mOptions = link_options;
+    mTabs[TAB_LINK_e].mMax = sizeof(link_options) / sizeof(gzOption_s);
+    mTabs[TAB_LINK_e].create();
 
     mpDescription = new gzTextBox();
 
@@ -42,6 +75,10 @@ gzToolsMenu_c::~gzToolsMenu_c() {
         mpTabHeaders[i] = NULL;
     }
 
+    for (int i = 0; i < TAB_MAX_e; i++) {
+        mTabs[i]._delete();
+    }
+
     delete mpDescription;
     mpDescription = NULL;
 
@@ -59,38 +96,28 @@ void gzToolsMenu_c::execute() {
     }
 
     gzCursor* l_cursor = gzInfo_getCursor();
-    int current_max_line;
+    gzTab_c& curTab = mTabs[mCurrentTab];
+    int current_max_line = curTab.mMax;
 
-    switch (mCurrentTab) {
-    case TAB_CHECKERS_e:
-        if (mCheckersTab.execute() == 0) return;
-        current_max_line = OPT_CHECKERS_MAX_e;
-        break;
-    case TAB_DISPLAYS_e:
-        if (mDisplaysTab.execute() == 0) return;
-        current_max_line = OPT_DISPLAYS_MAX_e;
-        break;
-    case TAB_LINK_e:
-        if (mLinkTab.execute() == 0) return;
-        current_max_line = OPT_LINK_MAX_e;
-        break;
-    }
+    if (curTab.execute() == 0) return;
 
-    if (!mOption) {
+    if (!curTab.mOptionToggle) {
         if (gzPad::getTrigRight()) {
             mCurrentTab = (mCurrentTab + 1) % TAB_MAX_e;
+            l_cursor->y = 0;
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
         }
 
         if (gzPad::getTrigLeft()) {
             mCurrentTab = (mCurrentTab - 1 + TAB_MAX_e) % TAB_MAX_e;
+            l_cursor->y = 0;
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
         }
     }
 
     if (gzPad::getTrigB()) {
-        if (mOption) {
-            mOption = false;
+        if (curTab.mOptionToggle) {
+            curTab.mOptionToggle = false;
             gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         } else {
             l_cursor->x--;
@@ -106,7 +133,7 @@ void gzToolsMenu_c::execute() {
     if (current_max_line == 0)
         return;
 
-    if (!mOption) {
+    if (!curTab.mOptionToggle) {
         if (gzPad::getTrigDown()) {
             l_cursor->y = (l_cursor->y + 1) % current_max_line;
             gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
@@ -119,46 +146,9 @@ void gzToolsMenu_c::execute() {
     }
 }
 
-u8 gzToolsMenu_c::getHaihaiFlags(int tab, int line) {
-    switch (tab) {
-    case TAB_CHECKERS_e:
-        switch (line) {
-        case OPT_COROTD_e: return gzInfo_isCoroTD() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_EBMB_e: return gzInfo_isEndingBlowMoonBoots() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_EE_e: return gzInfo_isElevatorEscape() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_GORGE_VOID_e: return gzInfo_isGorgeVoid() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_LFC_e: return gzInfo_isLadderFreezardCancel() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_ROLLING_e: return gzInfo_isRolling() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_UMD_e: return gzInfo_isUniversalMapDelay() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        }
-        break;
-    case TAB_DISPLAYS_e:
-        switch (line) {
-        case OPT_AB_MASH_e: return gzInfo_isAbMashRate() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_LINK_DEBUG_e: return gzInfo_isLinkDebugInfo() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_IGT_e: return gzInfo_isInGameTimer() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_INPUT_VIEWER_e: return gzInfo_isInputViewer() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_LOAD_TIMER_e: return gzInfo_isLoadTimer() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_STAGE_INFO_e: return gzInfo_isStageInfo() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_TIMER_e: return gzInfo_isTimer() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        }
-        break;
-    case TAB_LINK_e:
-        switch (line) {
-        case OPT_DISPLACEMENT_e: return gzInfo_isDisplacement() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_FAST_BONK_e: return gzInfo_isFastBonkRecovery() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_FAST_MOVEMENT_e: return gzInfo_isFastMovement() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_MOVE_LINK_e: return gzInfo_isMoveLink() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_NO_SINK_e: return gzInfo_isNoSinkingInSand() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        case OPT_TELEPORT_e: return gzInfo_isTeleport() ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
-        }
-        break;
-    }
-    return mpMeterHaihai->DIR_LEFT_e | mpMeterHaihai->DIR_RIGHT_e;
-}
-
 void gzToolsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
+    gzTab_c& curTab = mTabs[mCurrentTab];
 
     static const f32 LINE_SPACING = 22.0f;
     static const f32 OPTIONS_X_OFFSET = -20.0f;
@@ -170,18 +160,7 @@ void gzToolsMenu_c::draw() {
     static const f32 TP_CURSOR_X_OFFSET = 20.0f;
     static const int VISIBLE_LINES = 15;
 
-    // Update dynamic lines for the current tab
-    switch (mCurrentTab) {
-    case TAB_CHECKERS_e:
-        mCheckersTab.updateDynamicLines();
-        break;
-    case TAB_DISPLAYS_e:
-        mDisplaysTab.updateDynamicLines();
-        break;
-    case TAB_LINK_e:
-        mLinkTab.updateDynamicLines();
-        break;
-    }
+    curTab.updateDynamicLines();
 
     f32 X_POS[TAB_MAX_e];
     f32 tab_header_x_alignment = mXPos + TAB_HEADER_OFFSET;
@@ -194,33 +173,15 @@ void gzToolsMenu_c::draw() {
     f32 y_header_alignment = g_gzInfo.mBackgroundYPos + 48.0f;
     f32 y_lines_alignment = y_header_alignment + 42.0f;
 
-    int current_max_line;
-    gzTextBox** currentLines;
-    gzTextBox** currentLineOptions;
+    int current_max_line = curTab.mMax;
+    gzTextBox** currentLines = curTab.mpLines;
+    gzTextBox** currentLineOptions = curTab.mpLineOptions;
 
     // Draw tab headers
     for (int i = 0; i < TAB_MAX_e; i++) {
         // only draw if it doesnt go past the bounds of the menu
         // TODO: fetch this magic number from gzInfo instead
         if (X_POS[i] <= 550.0f) mpTabHeaders[i]->draw(X_POS[i], y_header_alignment, i == mCurrentTab ? cursor_color : COLOR_WHITE);
-    }
-
-    switch (mCurrentTab) {
-    case TAB_CHECKERS_e:
-        current_max_line = OPT_CHECKERS_MAX_e;
-        currentLines = mCheckersTab.mpLines;
-        currentLineOptions = mCheckersTab.mpLineOptions;
-        break;
-    case TAB_DISPLAYS_e:
-        current_max_line = OPT_DISPLAYS_MAX_e;
-        currentLines = mDisplaysTab.mpLines;
-        currentLineOptions = mDisplaysTab.mpLineOptions;
-        break;
-    case TAB_LINK_e:
-        current_max_line = OPT_LINK_MAX_e;
-        currentLines = mLinkTab.mpLines;
-        currentLineOptions = mLinkTab.mpLineOptions;
-        break;
     }
 
     if (l_cursor->y < mTopLine) {
@@ -257,8 +218,9 @@ void gzToolsMenu_c::draw() {
                 currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
                 currentLineOptions[lineIdx]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
 
-                if (mOption && currentLineOptions[lineIdx]->mStringLength != 0) {
-                    u8 flags = getHaihaiFlags(mCurrentTab, lineIdx);
+                if (curTab.mOptionToggle && currentLineOptions[lineIdx]->mStringLength != 0) {
+                    bool is_on = curTab.mOptions[lineIdx].is();
+                    u8 flags = is_on ? mpMeterHaihai->DIR_LEFT_e : mpMeterHaihai->DIR_RIGHT_e;
                     f32 x_size_haihai = currentLineOptions[lineIdx]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
                     mpMeterHaihai->drawHaihai(flags, x_alignment_haihai, y_pos_haihai, x_size_haihai, 0.0f);
                 }
@@ -285,461 +247,5 @@ void gzToolsMenu_c::draw() {
 
     if (gzInfo_isCursorTypeTP()) {
         mpDrawCursor->draw();
-    }
-}
-
-void gzToolsMenu_c::gzCheckersTab_c::create() {
-    for (int i = 0; i < OPT_CHECKERS_MAX_e; i++) {
-        mpLines[i] = new gzTextBox();
-        mpLines[i]->mBounds.f.x = 430.0f;
-        mpLines[i]->mBounds.f.y = 10.0f;
-
-        mpLineOptions[i] = new gzTextBox();
-        mpLineOptions[i]->mBounds.f.y = 10.0f;
-    }
-
-    mpLines[0]->setString("coro td");
-    mpLines[1]->setString("ending blow moon boots");
-    mpLines[2]->setString("elevator escape");
-    mpLines[3]->setString("gorge void");
-    mpLines[4]->setString("ladder freezard cancel");
-    mpLines[5]->setString("rolling");
-    mpLines[6]->setString("universal map delay");
-}
-
-int gzToolsMenu_c::gzCheckersTab_c::execute() {
-    gzCursor* l_cursor = gzInfo_getCursor();
-
-    if (mParent->mOption) {
-        if (gzPad::getTrigA()) {
-            mParent->mOption = false;
-            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
-        }
-
-        if (gzPad::getTrigRight()) {
-            switch (l_cursor->y) {
-            case OPT_COROTD_e:
-                if (!gzInfo_isCoroTD()) {
-                    gzInfo_onCoroTD();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case OPT_EBMB_e:
-                if (!gzInfo_isEndingBlowMoonBoots()) {
-                    gzInfo_onEndingBlowMoonBoots();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case OPT_EE_e:
-                if (!gzInfo_isElevatorEscape()) {
-                    gzInfo_onElevatorEscape();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case OPT_GORGE_VOID_e:
-                if (!gzInfo_isGorgeVoid()) {
-                    gzInfo_onGorgeVoid();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case OPT_LFC_e:
-                if (!gzInfo_isLadderFreezardCancel()) {
-                    gzInfo_onLadderFreezardCancel();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case OPT_ROLLING_e:
-                if (!gzInfo_isRolling()) {
-                    gzInfo_onRolling();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case OPT_UMD_e:
-                if (!gzInfo_isUniversalMapDelay()) {
-                    gzInfo_onUniversalMapDelay();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            }
-        }
-
-        if (gzPad::getTrigLeft()) {
-            switch (l_cursor->y) {
-            case 0:
-                if (gzInfo_isCoroTD()) {
-                    gzInfo_offCoroTD();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 1:
-                if (gzInfo_isEndingBlowMoonBoots()) {
-                    gzInfo_offEndingBlowMoonBoots();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 2:
-                if (gzInfo_isElevatorEscape()) {
-                    gzInfo_offElevatorEscape();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 3:
-                if (gzInfo_isGorgeVoid()) {
-                    gzInfo_offGorgeVoid();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 4:
-                if (gzInfo_isLadderFreezardCancel()) {
-                    gzInfo_offLadderFreezardCancel();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 5:
-                if (gzInfo_isRolling()) {
-                    gzInfo_offRolling();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 6:
-                if (gzInfo_isUniversalMapDelay()) {
-                    gzInfo_offUniversalMapDelay();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            }
-        }
-    } else {
-        if (gzPad::getTrigA()) {
-            mParent->mOption = true;
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
-        }
-    }
-
-    return 1;
-}
-
-void gzToolsMenu_c::gzCheckersTab_c::updateDynamicLines() {
-    mpLineOptions[0]->setStringf("%s", gzInfo_isCoroTD() ? "on" : "off");
-    mpLineOptions[1]->setStringf("%s", gzInfo_isEndingBlowMoonBoots() ? "on" : "off");
-    mpLineOptions[2]->setStringf("%s", gzInfo_isElevatorEscape() ? "on" : "off");
-    mpLineOptions[3]->setStringf("%s", gzInfo_isGorgeVoid() ? "on" : "off");
-    mpLineOptions[4]->setStringf("%s", gzInfo_isLadderFreezardCancel() ? "on" : "off");
-    mpLineOptions[5]->setStringf("%s", gzInfo_isRolling() ? "on" : "off");
-    mpLineOptions[6]->setStringf("%s", gzInfo_isUniversalMapDelay() ? "on" : "off");
-
-    J2DTextBox::TFontSize font_size;
-
-    for (int i = 0; i < OPT_CHECKERS_MAX_e; i++) {
-        mpLineOptions[i]->getFontSize(font_size);
-        font_size.mSizeX *= 0.5f;
-        mpLines[i]->mBounds.f.x = mpLines[i]->mStringLength * font_size.mSizeX;
-        mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
-    }
-}
-
-void gzToolsMenu_c::gzDisplaysTab_c::create() {
-    for (int i = 0; i < OPT_DISPLAYS_MAX_e; i++) {
-        mpLines[i] = new gzTextBox();
-        mpLines[i]->mBounds.f.x = 430.0f;
-        mpLines[i]->mBounds.f.y = 10.0f;
-
-        mpLineOptions[i] = new gzTextBox();
-        mpLineOptions[i]->mBounds.f.y = 10.0f;
-    }
-
-    mpLines[0]->setString("a/b mash rate");
-    mpLines[1]->setString("link debug info");
-    mpLines[2]->setString("in-game timer");
-    mpLines[3]->setString("input viewer");
-    mpLines[4]->setString("load timer");
-    mpLines[5]->setString("stage info");
-    mpLines[6]->setString("timer");
-}
-
-void gzToolsMenu_c::gzDisplaysTab_c::_delete() {
-    for (int i = 0; i < OPT_LINK_MAX_e; i++) {
-        delete mpLines[i];
-        mpLines[i] = NULL;
-
-        delete mpLineOptions[i];
-        mpLineOptions[i] = NULL;
-    }
-}
-
-int gzToolsMenu_c::gzDisplaysTab_c::execute() {
-    gzCursor* l_cursor = gzInfo_getCursor();
-
-    if (mParent->mOption) {
-        if (gzPad::getTrigA()) {
-            mParent->mOption = false;
-            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
-        }
-
-        if (gzPad::getTrigRight()) {
-            switch (l_cursor->y) {
-            case 0:
-                if (!gzInfo_isAbMashRate()) {
-                    gzInfo_onAbMashRate();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 1:
-                if (!gzInfo_isLinkDebugInfo()) {
-                    gzInfo_onLinkDebugInfo();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 2:
-                if (!gzInfo_isInGameTimer()) {
-                    gzInfo_onInGameTimer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 3:
-                if (!gzInfo_isInputViewer()) {
-                    gzInfo_onInputViewer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 4:
-                if (!gzInfo_isLoadTimer()) {
-                    gzInfo_onLoadTimer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 5:
-                if (!gzInfo_isStageInfo()) {
-                    gzInfo_onStageInfo();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 6:
-                if (!gzInfo_isTimer()) {
-                    gzInfo_onTimer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            }
-        }
-
-        if (gzPad::getTrigLeft()) {
-            switch (l_cursor->y) {
-            case 0:
-                if (gzInfo_isAbMashRate()) {
-                    gzInfo_offAbMashRate();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 1:
-                if (gzInfo_isLinkDebugInfo()) {
-                    gzInfo_offLinkDebugInfo();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 2:
-                if (gzInfo_isInGameTimer()) {
-                    gzInfo_offInGameTimer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 3:
-                if (gzInfo_isInputViewer()) {
-                    gzInfo_offInputViewer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 4:
-                if (gzInfo_isLoadTimer()) {
-                    gzInfo_offLoadTimer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 5:
-                if (gzInfo_isStageInfo()) {
-                    gzInfo_offStageInfo();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 6:
-                if (gzInfo_isTimer()) {
-                    gzInfo_offTimer();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            }
-        }
-    } else {
-        if (gzPad::getTrigA()) {
-            mParent->mOption = true;
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
-        }
-    }
-
-    return 1;
-}
-
-void gzToolsMenu_c::gzDisplaysTab_c::updateDynamicLines() {
-    mpLineOptions[0]->setStringf("%s", gzInfo_isAbMashRate() ? "on" : "off");
-    mpLineOptions[1]->setStringf("%s", gzInfo_isLinkDebugInfo() ? "on" : "off");
-    mpLineOptions[2]->setStringf("%s", gzInfo_isInGameTimer() ? "on" : "off");
-    mpLineOptions[3]->setStringf("%s", gzInfo_isInputViewer() ? "on" : "off");
-    mpLineOptions[4]->setStringf("%s", gzInfo_isLoadTimer() ? "on" : "off");
-    mpLineOptions[5]->setStringf("%s", gzInfo_isStageInfo() ? "on" : "off");
-    mpLineOptions[6]->setStringf("%s", gzInfo_isTimer() ? "on" : "off");
-
-    J2DTextBox::TFontSize font_size;
-
-    for (int i = 0; i < OPT_DISPLAYS_MAX_e; i++) {
-        mpLineOptions[i]->getFontSize(font_size);
-        font_size.mSizeX *= 0.5f;
-        mpLines[i]->mBounds.f.x = mpLines[i]->mStringLength * font_size.mSizeX;
-        mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
-    }
-}
-
-void gzToolsMenu_c::gzLinkTab_c::create() {
-    for (int i = 0; i < OPT_LINK_MAX_e; i++) {
-        mpLines[i] = new gzTextBox();
-        mpLines[i]->mBounds.f.x = 430.0f;
-        mpLines[i]->mBounds.f.y = 10.0f;
-
-        mpLineOptions[i] = new gzTextBox();
-        mpLineOptions[i]->mBounds.f.y = 10.0f;
-    }
-
-    mpLines[0]->setString("fast bonk recovery");
-    mpLines[1]->setString("fast movement");
-    mpLines[2]->setString("no sinking in sand");
-    mpLines[3]->setString("teleport");
-    mpLines[4]->setString("displacement");
-    mpLines[5]->setStringDesc("move link", "move link around freely. L+R+Y to activate");
-}
-
-void gzToolsMenu_c::gzLinkTab_c::_delete() {
-    for (int i = 0; i < OPT_LINK_MAX_e; i++) {
-        delete mpLines[i];
-        mpLines[i] = NULL;
-
-        delete mpLineOptions[i];
-        mpLineOptions[i] = NULL;
-    }
-}
-
-int gzToolsMenu_c::gzLinkTab_c::execute() {
-    gzCursor* l_cursor = gzInfo_getCursor();
-
-    if (mParent->mOption) {
-        if (gzPad::getTrigA()) {
-            mParent->mOption = false;
-            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
-        }
-
-        if (gzPad::getTrigRight()) {
-            switch (l_cursor->y) {
-            case 0:
-                if (!gzInfo_isFastBonkRecovery()) {
-                    gzInfo_onFastBonkRecovery();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 1:
-                if (!gzInfo_isFastMovement()) {
-                    gzInfo_onFastMovement();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 2:
-                if (!gzInfo_isNoSinkingInSand()) {
-                    gzInfo_onNoSinkingInSand();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 3:
-                if (!gzInfo_isTeleport()) {
-                    gzInfo_onTeleport();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 4:
-                if (!gzInfo_isDisplacement()) {
-                    gzInfo_onDisplacement();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 5:
-                if (!gzInfo_isMoveLink()) {
-                    gzInfo_onMoveLink();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            }
-        }
-
-        if (gzPad::getTrigLeft()) {
-            switch (l_cursor->y) {
-            case 0:
-                if (gzInfo_isFastBonkRecovery()) {
-                    gzInfo_offFastBonkRecovery();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 1:
-                if (gzInfo_isFastMovement()) {
-                    gzInfo_offFastMovement();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 2:
-                if (gzInfo_isNoSinkingInSand()) {
-                    gzInfo_offNoSinkingInSand();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 3:
-                if (gzInfo_isTeleport()) {
-                    gzInfo_offTeleport();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 4:
-                if (gzInfo_isDisplacement()) {
-                    gzInfo_offDisplacement();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            case 5:
-                if (gzInfo_isMoveLink()) {
-                    gzInfo_offMoveLink();
-                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                }
-                break;
-            }
-        }
-    } else {
-        if (gzPad::getTrigA()) {
-            mParent->mOption = true;
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
-        }
-    }
-
-    return 1;
-}
-
-void gzToolsMenu_c::gzLinkTab_c::updateDynamicLines() {
-    mpLineOptions[0]->setStringf("%s", gzInfo_isFastBonkRecovery() ? "on" : "off");
-    mpLineOptions[1]->setStringf("%s", gzInfo_isFastMovement() ? "on" : "off");
-    mpLineOptions[2]->setStringf("%s", gzInfo_isNoSinkingInSand() ? "on" : "off");
-    mpLineOptions[3]->setStringf("%s", gzInfo_isTeleport() ? "on" : "off");
-    mpLineOptions[4]->setStringf("%s", gzInfo_isDisplacement() ? "on" : "off");
-    mpLineOptions[5]->setStringf("%s", gzInfo_isMoveLink() ? "on" : "off");
-
-    J2DTextBox::TFontSize font_size;
-
-    for (int i = 0; i < OPT_LINK_MAX_e; i++) {
-        mpLineOptions[i]->getFontSize(font_size);
-        font_size.mSizeX *= 0.5f;
-        mpLines[i]->mBounds.f.x = mpLines[i]->mStringLength * font_size.mSizeX;
-        mpLineOptions[i]->mBounds.f.x = mpLineOptions[i]->mStringLength * font_size.mSizeX;
     }
 }

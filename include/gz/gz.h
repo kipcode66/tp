@@ -169,15 +169,20 @@ struct SavedCameraState {
 class gzToolsMng_c {
 public:
     void execute();
+    void executeFastBonkRecovery();
+    void executeFastMovement();
     void executeMoveLink();
+    void executeNoSinkSand();
     void executeTeleport();
 
 private:
     // for "run once" reenable checks
-    bool mMoveLink;
     SavedCameraState mCamera;
+    bool mFastBonkRecovery;
+    bool mFastMovement;
     cXyz mLinkPos;
     csXyz mLinkAngle;
+    bool mMoveLink;
 };
 
 class gzCheatsMng_c {

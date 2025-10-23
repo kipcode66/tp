@@ -529,7 +529,7 @@ void gzHeapsMenu_c::draw() {
                 vis_width = MAX_VIS_WIDTH;
             }
 
-            drawHeapVisualization(mTrackers[i], mXPos, y_pos - 35.0f, vis_width);
+            drawHeapVisualization(mTrackers[i], mXPos, y_pos - 35.0f, 550.0f);
         }
     }
 
