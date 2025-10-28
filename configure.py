@@ -504,7 +504,7 @@ config.libs = [
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "m_Do/m_Do_graphic.cpp"),
             Object(Custom, "m_Do/m_Do_machine.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "m_Do/m_Do_mtx.cpp"),
-            Object(NonMatching, "m_Do/m_Do_ext.cpp"),
+            Object(Custom, "m_Do/m_Do_ext.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "m_Do/m_Do_lib.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "m_Do/m_Do_Reset.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "m_Do/m_Do_dvd_thread.cpp"),
@@ -674,7 +674,7 @@ config.libs = [
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_model.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_eye_hl.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/d_error_msg.cpp"),
-            Object(NonMatching, "d/d_debug_viewer.cpp"),
+            Object(Custom, "d/d_debug_viewer.cpp"),
             Object(NonMatching, "d/d_debug_camera.cpp"),
             Object(NonMatching, "d/actor/d_a_alink.cpp"),
             Object(MatchingFor("GZ2E01", "GZ2P01", "GZ2J01"), "d/actor/d_a_itembase.cpp"),
@@ -2414,6 +2414,7 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
     if module_id == 0:  # DOL
         return objects + [
                 "dolphin/card/CARDDelete.c",
+                "d/d_debug_viewer.cpp",
                 "gz/gz.cpp",
                 "gz/gz_menu.cpp",
                 "gz/gz_tab.cpp",

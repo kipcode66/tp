@@ -2907,7 +2907,6 @@ void mDoExt_3DlineMatSortPacket::draw() {
     J3DShape::resetVcdVatCache();
 }
 
-#ifdef DEBUG
 mDoExt_cube8pPacket::mDoExt_cube8pPacket(cXyz* i_points, const GXColor& i_color) {
     cXyz* pnt_array = mPoints;
 
@@ -3446,7 +3445,6 @@ void mDoExt_cylinderMPacket::draw() {
 
     GXDrawCylinder(8);
 }
-#endif
 
 /* 80014804-8001494C 00F144 0148+00 3/3 0/0 0/0 .text
  * mDoExt_initFontCommon__FPP7JUTFontPP7ResFONTP7JKRHeapPCcP10JKRArchiveUcUlUl */

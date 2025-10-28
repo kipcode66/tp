@@ -10,6 +10,8 @@
 #include "f_op/f_op_camera_mng.h"
 #include "d/actor/d_a_alink.h"
 
+#include "d/d_debug_viewer.h"
+
 gzInfo_c g_gzInfo;
 
 int gzPrint(int x, int y, u32 color, char const* string, ...) {

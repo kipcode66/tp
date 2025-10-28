@@ -267,9 +267,7 @@ void mDoGph_BlankingOFF() {}
 static void dScnPly_BeforeOfPaint() {
     dComIfGd_reset();
 
-    #if DEBUG
     dDbVw_deleteDrawPacketList();
-    #endif
 }
 
 /* 80008450-80008474 002D90 0024+00 0/0 1/0 0/0 .text            mDoGph_BeforeOfDraw__Fv */
