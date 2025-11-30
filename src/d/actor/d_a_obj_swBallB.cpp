@@ -382,7 +382,6 @@ void daObjSwBallB_c::PutCrrPos() {
 }
 
 /* 80CF56A4-80CF582C 001164 0188+00 1/1 0/0 0/0 .text            draw__14daObjSwBallB_cFv */
-// NONMATCHING
 int daObjSwBallB_c::draw() {
     g_env_light.settingTevStruct(0, &current.pos, &tevStr);
     g_env_light.setLightTevColorType_MAJI(mModel, &tevStr);
@@ -458,5 +457,3 @@ extern actor_process_profile_definition g_profile_Obj_SwBallB = {
   fopAc_ACTOR_e,          // mActorType
   fopAc_CULLBOX_CUSTOM_e, // cullType
 };
-
-/* 80CF5A14-80CF5A14 000044 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

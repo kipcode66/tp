@@ -239,7 +239,7 @@ daE_RDY_HIO_c::daE_RDY_HIO_c() {
 }
 
 void daE_RDY_HIO_c::genMessage(JORMContext* context) {
-    // NONMATCHING
+    // DEBUG NONMATCHING
 }
 
 /* 8076BE80-8076BF6C 0001A0 00EC+00 23/23 0/0 0/0 .text            anm_init__FP11e_rdy_classifUcf */
@@ -490,7 +490,6 @@ inline u16 absoluteValue(s16 num) {
 }
 
 /* 8076CB24-8076CE10 000E44 02EC+00 2/2 0/0 0/0 .text            search_bomb__FP11e_rdy_classi */
-// NONMATCHING regalloc
 static dBomb_c* search_bomb(e_rdy_class* i_this, BOOL param_1) {
     if ((i_this->field_0xaf0 & 0x10000000) == 0) {
         return NULL;

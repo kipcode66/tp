@@ -129,7 +129,7 @@ static daNpc_seiD_Param_c l_HIO;
 
 /* 80AC9728-80AC9968 000188 0240+00 1/1 0/0 0/0 .text            create__12daNpc_seiD_cFv */
 int daNpc_seiD_c::create() {
-    fopAcM_SetupActor2(this, daNpc_seiD_c, l_faceMotionAnmData, l_motionAnmData, l_faceMotionSequenceData, 
+    daNpcT_ct(this, daNpc_seiD_c, l_faceMotionAnmData, l_motionAnmData, l_faceMotionSequenceData, 
         4, l_motionSequenceData, 4, l_evtList, l_resNameList);
 
     mType = getType();
@@ -520,8 +520,6 @@ static int daNpc_seiD_Draw(void* param_1) {
 static int daNpc_seiD_IsDelete(void* param_1) {
     return 1;
 }
-
-/* 80ACB408-80ACB408 0000AC 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */
 
 /* 80ACB520-80ACB540 -00001 0020+00 1/0 0/0 0/0 .data            daNpc_seiD_MethodTable */
 static actor_method_class daNpc_seiD_MethodTable = {

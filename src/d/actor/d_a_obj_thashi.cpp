@@ -90,8 +90,8 @@ static void dataStripping2() {
 
     stripFloat(3.0f);
     stripFloat(2000.0f);
-    stripFloat(608.0f);
-    stripFloat(448.0f);
+    stripFloat(FB_WIDTH);
+    stripFloat(FB_HEIGHT);
 }
 
 /* 80D0C298-80D0C2B8 0000D8 0020+00 1/0 0/0 0/0 .text            daObjTHASHI_Create__FP10fopAc_ac_c
@@ -230,12 +230,11 @@ int daObjTHASHI_c::create() {
         int dzb_id = dComIfG_getObjctResName2Index(l_arcName, "S_thashi00.dzb");
 
         unk5A4 = 0;
-#if DEBUG
         if (dzb_id == -1) {
-            OSReport("dzbデータが見つかりませんでした!<%s>\n\n", l_arcName);
+            // "dzb data not found!<%s>"
+            OS_REPORT("dzbデータが見つかりませんでした!<%s>\n\n", l_arcName);
         }
         JUT_ASSERT(1797, dzb_id != -1);
-#endif
         phase_state = MoveBGCreate(l_arcName, dzb_id, dBgS_MoveBGProc_TypicalRotY, 0x4000, 0);
         if (phase_state == cPhs_ERROR_e) {
             return phase_state;

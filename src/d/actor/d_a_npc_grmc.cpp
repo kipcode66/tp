@@ -6,6 +6,7 @@
 #include "d/dolzel_rel.h" // IWYU pragma: keep
 
 #include "d/actor/d_a_npc_grmc.h"
+#include "d/actor/d_a_npc4.h"
 
 enum grC_RES_File_ID {
     /* BCK */
@@ -222,7 +223,7 @@ daNpc_grMC_HIOParam const daNpc_grMC_Param_c::m = {
 
 /* 809D7534-809D77BC 000214 0288+00 1/1 0/0 0/0 .text            create__12daNpc_grMC_cFv */
 cPhs__Step daNpc_grMC_c::create() {
-    fopAcM_SetupActor2(this, daNpc_grMC_c, l_faceMotionAnmData, l_motionAnmData, l_faceMotionSequenceData, 4,
+    daNpcT_ct(this, daNpc_grMC_c, l_faceMotionAnmData, l_motionAnmData, l_faceMotionSequenceData, 4,
                        l_motionSequenceData, 4, l_evtList, l_resNameList);
 
     mType = getType();

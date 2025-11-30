@@ -6,6 +6,7 @@
 #include "d/dolzel_rel.h" // IWYU pragma: keep
 
 #include "d/actor/d_a_npc_tkj.h"
+#include "d/actor/d_a_npc4.h"
 
 /* 805766D4-805766DC 000020 0008+00 1/1 0/0 0/0 .data            l_bmdData */
 static int l_bmdData[1][2] = {
@@ -141,7 +142,7 @@ const daNpc_Tkj_HIOParam daNpc_Tkj_Param_c::m = {
 
 /* 80573850-80573B18 000210 02C8+00 1/1 0/0 0/0 .text            create__10daNpcTkj_cFv */
 int daNpcTkj_c::create() {
-    fopAcM_SetupActor2(this, daNpcTkj_c, l_faceMotionAnmData, l_motionAnmData,
+    daNpcT_ct(this, daNpcTkj_c, l_faceMotionAnmData, l_motionAnmData,
                        l_faceMotionSequenceData, 4, l_motionSequenceData, 4,
                        l_evtList, l_resNameList);
 

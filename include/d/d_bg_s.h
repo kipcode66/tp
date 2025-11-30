@@ -118,7 +118,7 @@ public:
     s32 GetRoomPathPntNo(cBgS_PolyInfo const&);
     int GetGrpSoundId(cBgS_PolyInfo const&);
     u32 ChkGrpInf(cBgS_PolyInfo const&, u32);
-    s32 GetRoomId(cBgS_PolyInfo const&);
+    int GetRoomId(cBgS_PolyInfo const&);
     bool GetPolyAttackThrough(cBgS_PolyInfo const&);
     u32 ChkPolyHSStick(cBgS_PolyInfo const&);
     void WallCorrect(dBgS_Acch*);
@@ -139,6 +139,7 @@ public:
     u32 GetMtrlSndId(const cBgS_PolyInfo& param_0) { return dKy_pol_sound_get(&param_0); }
     void DebugDrawPoly(dBgW_Base *param_1) {}
     fopAc_ac_c* GetActorPointer(cBgS_PolyInfo const& param_0) const { return cBgS::GetActorPointer(param_0); }
+    bool LineCross(cBgS_LinChk* i_linChk) { return ((cBgS*)this)->LineCross(i_linChk); }
     f32 GroundCross(cBgS_GndChk* i_gndChk) { return (f32)((cBgS*)this)->GroundCross(i_gndChk); }
 
     void ChkDeleteActorRegist(fopAc_ac_c*);

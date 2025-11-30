@@ -34,6 +34,10 @@ double cos(double);
 float cosf(float);
 double exp(double);
 
+inline float expf(float x) {
+    return exp(x);
+}
+
 extern double __frsqrte(double);
 extern float __fres(float);
 
@@ -63,13 +67,14 @@ double frexp(double, int*);
 double ldexp(double, int);
 double modf(double, double*);
 double pow(double, double);
+float powf(float, float);
 double sin(double);
 float sinf(float);
 double sqrt(double);
 double tan(double);
 float tanf(float);
 
-#if PLATFORM_SHIELD
+#if PLATFORM_WII || PLATFORM_SHIELD
 inline float sqrtf(float mag) {
     return sqrt(mag);
 }
@@ -100,7 +105,7 @@ inline float sqrtf(float mag) {
         return mag * tmpd;
     } else if (mag < 0.0) {
         return NAN;
-    } else if (fpclassify(mag) == 1) {
+    } else if (isnan(mag)) {
         return NAN;
     } else {
         return mag;

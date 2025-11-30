@@ -219,7 +219,7 @@ bool daObjGOMIKABE_c::checkViewArea(cXyz param_1) {
     Vec local_24;
     mDoLib_project(&param_1, &local_24);
     bool rv = false;
-    if (local_24.x >= 0.0f && local_24.x <= 608.0f && local_24.y >= 0.0f && local_24.y <= 448.0f) {
+    if (local_24.x >= 0.0f && local_24.x <= FB_WIDTH && local_24.y >= 0.0f && local_24.y <= FB_HEIGHT) {
         rv = true;
     }
 
@@ -309,7 +309,7 @@ int daObjGOMIKABE_c::create() {
     if (rv == cPhs_COMPLEATE_e) {
         s32 dzb_id = dComIfG_getObjctResName2Index(l_arcName, "M_Gomikabe.dzb");
         if (dzb_id == -1) {
-            // dzb data not found!
+            // "dzb data not found!<%s>"
             OS_REPORT("dzbデータが見つかりませんでした!<%s>\n\n", l_arcName);
             JUT_ASSERT(969, dzb_id != -1);
         }
@@ -443,5 +443,3 @@ extern actor_process_profile_definition g_profile_Obj_GOMIKABE = {
   fopAc_ACTOR_e,           // mActorType
   fopAc_CULLBOX_CUSTOM_e,  // cullType
 };
-
-/* 80BFFCF4-80BFFCF4 0000D8 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

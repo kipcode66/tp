@@ -799,7 +799,7 @@ enum {
     /* 0x316 */ PROC_METER2,
     /* 0x317 */ PROC_GAMEOVER,
 
-    PROC_MAX,
+    PROC_MAX_NUM,
 };
 
 #endif /* D_PROCNAME_H */

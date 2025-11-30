@@ -620,7 +620,7 @@ int daNpc_Besu_c::create() {
         0x35C0, 0x35C0, 0x35D0, 0x35C0,
         0x35C0, 0x35C0, 0x0,
     };
-    fopAcM_SetupActor2(this, daNpc_Besu_c, l_faceMotionAnmData, l_motionAnmData,
+    daNpcT_ct(this, daNpc_Besu_c, l_faceMotionAnmData, l_motionAnmData,
                        l_faceMotionSequenceData, 4, l_motionSequenceData, 4,
                        l_evtList, l_resNameList
     );
@@ -1356,7 +1356,6 @@ void daNpc_Besu_c::beforeMove() {
 
 /* 80538C18-805391B8 001EB8 05A0+00 1/0 0/0 0/0 .text            setAttnPos__12daNpc_Besu_cFv */
 void daNpc_Besu_c::setAttnPos() {
-    // NONMATCHING
     cXyz eyeOffset(10.0f, 30.0f, 0.0f);
     if (field_0x112f) {
         daPy_getPlayerActorClass()->onWolfEyeKeep();

@@ -76,7 +76,7 @@ int daObjPDoor_c::Create() {
         shape_angle.y = home.angle.y + 0x1555;
     } else if (!isSw2) {
         OS_REPORT("城下町押引扉：SW1,SW2共にＯＮになっています！\n");
-        JUT_PANIC(235, "0");
+        JUT_ASSERT(235, FALSE);
     } else {
         mDoorDirection = -1;
         shape_angle.y = home.angle.y - 0x1555;
@@ -321,6 +321,3 @@ extern actor_process_profile_definition g_profile_Obj_PushDoor = {
   fopAc_ACTOR_e,          // mActorType
   fopAc_CULLBOX_CUSTOM_e, // cullType
 };
-
-
-/* 80CAAB40-80CAAB40 000020 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

@@ -16,7 +16,6 @@ static int daPasserMng_Execute(daPasserMng_c* i_this) {
 }
 
 /* 80D45738-80D4597C 000098 0244+00 1/1 0/0 0/0 .text            execute__13daPasserMng_cFv */
-// NONMATCHING - getTime regalloc
 int daPasserMng_c::execute() {
     int time = getTime();
     if ((field_0x596 != 0 || (time >= startTime && time < endTime)) &&
@@ -502,7 +501,7 @@ int daPasserMng_c::getLuggageParamHigh(u32 param_1) {
         break;
     default:
         OS_REPORT("%s: Line.%d arg=%d\n", "d_a_passer_mng.cpp", 921, param_1);
-        JUT_PANIC(922, 0);
+        JUT_ASSERT(922, FALSE);
     }
     return paramLow << 8;
 }

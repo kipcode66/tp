@@ -13,8 +13,7 @@ public:
     /* 8048C94C */ BOOL chkPointInArea(cXyz, cXyz);
 
     /* 8048CD08 */ BOOL chkPointInArea(cXyz param_0) {
-        cXyz local_28;
-        local_28.set(0.0f, 0.0f, 0.0f);
+        cXyz local_28(0.0f, 0.0f, 0.0f);
         return chkPointInArea(param_0, local_28);
     }
 
@@ -43,6 +42,8 @@ public:
     u8 getBitSW() { return home.angle.x & 0xff; }
 
     u8 getBitSW2() { return (home.angle.x & 0xff00) >> 8; }
+
+    void noEffect() { field_0x56c = 1; }
 
 private:
     /* 0x568 vtable */

@@ -10,8 +10,6 @@
 #include "d/d_com_inf_game.h"
 #include "d/d_meter2_info.h"
 
-// NONMATCHING - vtable order. I think it has something to do with the inline functions.
-
 /* 80C91940-80C91944 000000 0004+00 2/2 0/0 0/0 .rodata          mAttr__18daObjMasterSword_c */
 daObjMasterSword_Attr_c const daObjMasterSword_c::mAttr = {1.0f};
 
@@ -41,7 +39,7 @@ void daObjMasterSword_c::executeWait() {
         for (int i = 0; i < dComIfGp_getAttention()->GetActionCount(); i++) {
             if (dComIfGp_getAttention()->ActionTarget(i) == this) {
                 if (dComIfGp_getAttention()->getActionBtnB() != NULL &&
-                    dComIfGp_getAttention()->getActionBtnB()->mType == 4)
+                    dComIfGp_getAttention()->getActionBtnB()->mType == fopAc_attn_CARRY_e)
                 {
                     dComIfGp_setDoStatusForce(8, 0);
                 }
@@ -93,36 +91,6 @@ actionFunc daObjMasterSword_c::ActionTable[] = {
     &daObjMasterSword_c::initWait, &daObjMasterSword_c::executeWait,
 };
 
-/* 80C90DB8-80C90F6C 000338 01B4+00 1/1 0/0 0/0 .text            create__18daObjMasterSword_cFv */
-int daObjMasterSword_c::create() {
-    fopAcM_ct(this, daObjMasterSword_c);
-
-    if (dComIfGs_isEventBit(dSv_event_flag_c::saveBitLabels[getFlagNo()])) {
-        return cPhs_ERROR_e;
-    }
-
-    int phase = dComIfG_resLoad(&mPhase, l_arcName);
-    if (phase == cPhs_COMPLEATE_e) {
-        if (!fopAcM_entrySolidHeap(this, daObjMasterSword_c::createHeapCallBack, 0x1830)) {
-            return cPhs_ERROR_e;
-        }
-
-        create_init();
-    }
-
-    return phase;
-}
-
-void daObjMasterSword_c::callInit() {
-    (this->**mActionFunc)();
-}
-
-void daObjMasterSword_c::setAction(daObjMasterSword_c::Mode_e i_mode) {
-    mMode = i_mode;
-    mActionFunc = &ActionTable[2 * mMode];
-    callInit();
-}
-
 void daObjMasterSword_c::initCollision() {
     static dCcD_SrcCyl ccCylSrc = {
         {
@@ -141,6 +109,16 @@ void daObjMasterSword_c::initCollision() {
     mCcStts.Init(0xFF, 0xFF, this);
     mCyl.Set(ccCylSrc);
     mCyl.SetStts(&mCcStts);
+}
+
+void daObjMasterSword_c::callInit() {
+    (this->**mActionFunc)();
+}
+
+void daObjMasterSword_c::setAction(daObjMasterSword_c::Mode_e i_mode) {
+    mMode = i_mode;
+    mActionFunc = &ActionTable[2 * mMode];
+    callInit();
 }
 
 /* 80C90F6C-80C9120C 0004EC 02A0+00 1/1 0/0 0/0 .text            create_init__18daObjMasterSword_cFv */
@@ -168,6 +146,26 @@ void daObjMasterSword_c::create_init() {
     field_0x728 = obj_check.m_gnd;
 
     setAction(MODE_0_e);
+}
+
+/* 80C90DB8-80C90F6C 000338 01B4+00 1/1 0/0 0/0 .text            create__18daObjMasterSword_cFv */
+int daObjMasterSword_c::create() {
+    fopAcM_ct(this, daObjMasterSword_c);
+
+    if (dComIfGs_isEventBit(dSv_event_flag_c::saveBitLabels[getFlagNo()])) {
+        return cPhs_ERROR_e;
+    }
+
+    int phase = dComIfG_resLoad(&mPhase, l_arcName);
+    if (phase == cPhs_COMPLEATE_e) {
+        if (!fopAcM_entrySolidHeap(this, daObjMasterSword_c::createHeapCallBack, 0x1830)) {
+            return cPhs_ERROR_e;
+        }
+
+        create_init();
+    }
+
+    return phase;
 }
 
 /* 80C91420-80C91448 0009A0 0028+00 1/0 0/0 0/0 .text            daObjMasterSword_Delete__FP18daObjMasterSword_c */
@@ -280,5 +278,3 @@ extern actor_process_profile_definition g_profile_Obj_MasterSword = {
   fopAc_ACTOR_e,              // mActorType
   fopAc_CULLBOX_CUSTOM_e,     // cullType
 };
-
-/* 80C91970-80C91970 000030 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

@@ -146,7 +146,7 @@ int daSwc00_c::execute() {
         break;
     default:
         OSReport_Error("領域スイッチ：引数０が不正値<%d>です\n", type);
-        JUT_PANIC(289, "0");
+        JUT_ASSERT(289, FALSE);
         break;
     }
     
@@ -366,5 +366,3 @@ extern actor_process_profile_definition g_profile_SWC00 = {
   fopAc_ACTOR_e,         // mActorType
   fopAc_CULLBOX_0_e,     // cullType
 };
-
-/* 805A1DAC-805A1DAC 000018 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

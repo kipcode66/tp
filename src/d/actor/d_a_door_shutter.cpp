@@ -933,7 +933,7 @@ int daDoor20_c::demoProc() {
             if (!field_0x584.init(anm, 1, 0, 1.0f, 0, -1, true) || !field_0x5a0.init(anm,
                                                              1, 0, 1.0f, 0, -1, true))
             {
-                JUT_PANIC(1799, 0);
+                JUT_ASSERT(1799, FALSE);
             }
             field_0x67c = 0;
             openInit2();
@@ -945,7 +945,7 @@ int daDoor20_c::demoProc() {
             if (!field_0x584.init(anm, 1, 0, 1.0f, 0, -1, true) || !field_0x5a0.init(anm,
                                                              1, 0, 1.0f, 0, -1, true))
             {
-                JUT_PANIC(1812, 0);
+                JUT_ASSERT(1812, FALSE);
             }
             field_0x67c = 0;
             openInit2();
@@ -2238,8 +2238,6 @@ static int daDoor20_Create(fopAc_ac_c* i_this) {
     fopAcM_ct(i_this, daDoor20_c);
     return static_cast<daDoor20_c*>(i_this)->create();
 }
-
-/* 804668D8-804668D8 0000B8 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */
 
 /* 804672A0-804672C0 -00001 0020+00 1/0 0/0 0/0 .data            l_daDoor20_Method */
 static actor_method_class l_daDoor20_Method = {

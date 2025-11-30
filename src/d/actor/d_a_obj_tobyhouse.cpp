@@ -521,7 +521,7 @@ void daObjTobyHouse_c::sceneChange() {
         exitId = 3;
         break;
     default:
-        JUT_PANIC(936, "0");
+        JUT_ASSERT(936, FALSE);
     }
 
     dStage_changeScene(exitId, 0.0f, 0, fopAcM_GetRoomNo(this), 0, -1);
@@ -661,5 +661,3 @@ extern actor_process_profile_definition g_profile_Obj_TobyHouse = {
 };
 
 AUDIO_INSTANCES;
-
-/* 80D177C0-80D177C0 000074 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

@@ -128,7 +128,7 @@ static daNpc_seiC_Param_c l_HIO;
 
 /* 80AC75E8-80AC7828 000188 0240+00 1/1 0/0 0/0 .text            create__12daNpc_seiC_cFv */
 int daNpc_seiC_c::create() {
-    fopAcM_SetupActor2(this, daNpc_seiC_c, &l_faceMotionAnmData, &l_motionAnmData, l_faceMotionSequenceData, 
+    daNpcT_ct(this, daNpc_seiC_c, &l_faceMotionAnmData, &l_motionAnmData, l_faceMotionSequenceData, 
                        4, l_motionSequenceData, 4, l_evtList, l_resNameList);
 
     mType = getType();
@@ -269,7 +269,6 @@ void daNpc_seiC_c::reset() {
 
 /* 80AC7C1C-80AC7D34 0007BC 0118+00 1/0 0/0 0/0 .text            setParam__12daNpc_seiC_cFv */
 void daNpc_seiC_c::setParam() {
-    // NONMATCHING
     selectAction();
     srchActors();
 
@@ -549,5 +548,3 @@ extern actor_process_profile_definition g_profile_NPC_SEIC = {
   fopAc_ACTOR_e,           // mActorType
   fopAc_CULLBOX_CUSTOM_e,  // cullType
 };
-
-/* 80AC92C8-80AC92C8 0000AC 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

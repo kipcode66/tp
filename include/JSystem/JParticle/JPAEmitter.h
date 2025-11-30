@@ -139,6 +139,7 @@ public:
     }
     void getGlobalTranslation(JGeometry::TVec3<f32>* out) const { out->set(mGlobalTrs); }
     void setGlobalDynamicsScale(const JGeometry::TVec3<f32>& i_scale) { mGlobalScl.set(i_scale); }
+    void getGlobalDynamicsScale(JGeometry::TVec3<f32>* i_scale) const { i_scale->set(mGlobalScl); }
     void setGlobalAlpha(u8 alpha) { mGlobalPrmClr.a = alpha; }
     u8 getGlobalAlpha() const { return mGlobalPrmClr.a; }
     void getGlobalPrmColor(GXColor& color) { color = mGlobalPrmClr; }
@@ -163,7 +164,16 @@ public:
         mGlobalPScl.set(scaleX, scaleY);
     }
     void getGlobalParticleScale(JGeometry::TVec3<f32>& scale) const {
+        //TODO: Possible fakematch. Debug and Wii indicate TVec3::set, but using it breaks regalloc
+        //      in dPa_gen_b_light8PcallBack::draw on GCN (where the call to set would normally be
+        //      inlined).
+#if PLATFORM_GCN
+        scale.x = mGlobalPScl.x;
+        scale.y = mGlobalPScl.y;
+        scale.z = 1.0f;
+#else
         scale.set(mGlobalPScl.x, mGlobalPScl.y, 1.0f);
+#endif
     }
     void setGlobalScale(const JGeometry::TVec3<f32>& scale) {
         mGlobalScl.set(scale);
@@ -214,6 +224,10 @@ public:
 
     void setVolumeMiniRadius(f32 param_1) {
         mVolumeMinRad = param_1;
+    }
+
+    void setMaxFrame(s32 maxFrame) {
+        mMaxFrame = maxFrame;
     }
 
 public:

@@ -15,6 +15,7 @@
 #include "d/d_debug_viewer.h"
 #include "d/d_meter2_info.h"
 #include "d/d_timer.h"
+#include "d/d_tresure.h"
 #include "f_op/f_op_camera_mng.h"
 #include "m_Do/m_Do_ext.h"
 
@@ -324,7 +325,7 @@ static u32 const heapSize[8] = {
 
 /* 80B5F084-80B5F34C 000264 02C8+00 1/1 0/0 0/0 .text            create__11daNpc_ykW_cFv */
 int daNpc_ykW_c::create() {
-    fopAcM_SetupActor2(this, daNpc_ykW_c, l_faceMotionAnmData, l_motionAnmData,
+    daNpcT_ct(this, daNpc_ykW_c, l_faceMotionAnmData, l_motionAnmData,
                        l_faceMotionSequenceData, 4, l_motionSequenceData, 4, l_evtList,
                        (char**)l_resNameList);
     field_0xf80 = getType();

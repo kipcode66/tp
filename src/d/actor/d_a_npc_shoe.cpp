@@ -6,6 +6,7 @@
 #include "d/dolzel_rel.h"  // IWYU pragma: keep
 
 #include "d/actor/d_a_npc_shoe.h"
+#include "d/actor/d_a_npc.h"
 
 /* 80AEA3B0-80AEA41C 000000 006C+00 11/11 0/0 0/0 .rodata          m__17daNpcShoe_Param_c */
 const daNpcShoe_HIOParam daNpcShoe_Param_c::m = {
@@ -104,7 +105,7 @@ static char* l_arcNames[3] = {
 };
 
 /* 80AEA5AC-80AEA5B0 000074 0004+00 0/1 0/0 0/0 .data            l_evtNames */
-static char* l_evtNames[1] = {l_arcNames[0]};
+static char* l_evtNames[1] = {NULL};
 
 /* 80AEA5B0-80AEA5B4 -00001 0004+00 0/2 0/0 0/0 .data            l_myName */
 static char* l_myName = "Shoe";
@@ -121,7 +122,7 @@ daNpcShoe_c::~daNpcShoe_c() {
         dComIfG_resDelete(&mPhases[i], l_arcNames[i]);
     }
     if (heap != NULL) {
-        mpMorf->stopZelAnime();
+        mAnm_p->stopZelAnime();
     }
 }
 
@@ -146,7 +147,7 @@ cPhs__Step daNpcShoe_c::Create() {
             return cPhs_ERROR_e;
         }
 
-        fopAcM_SetMtx(this, mpMorf->mpModel->getBaseTRMtx());
+        fopAcM_SetMtx(this, mAnm_p->mpModel->getBaseTRMtx());
 
         fopAcM_setCullSizeBox(this, -50.0f, -10.0f, -50.0f, 50.0f, 160.0f, 50.0f);
 
@@ -185,23 +186,23 @@ BOOL daNpcShoe_c::CreateHeap() {
 
     JUT_ASSERT(292, NULL != mdlData_p)
 
-    mpMorf = new mDoExt_McaMorfSO(mdlData_p, NULL, NULL, NULL, -1, 1.0f, 0, -1, &mCreature, 0x80000,
+    mAnm_p = new mDoExt_McaMorfSO(mdlData_p, NULL, NULL, NULL, -1, 1.0f, 0, -1, &mCreature, 0x80000,
                                   0x11020084);
 
-    if (mpMorf != NULL && mpMorf->mpModel == NULL) {
-        mpMorf->stopZelAnime();
-        mpMorf = NULL;
+    if (mAnm_p != NULL && mAnm_p->mpModel == NULL) {
+        mAnm_p->stopZelAnime();
+        mAnm_p = NULL;
     }
 
-    if (mpMorf == NULL) {
+    if (mAnm_p == NULL) {
         return false;
     }
 
     cXyz cstack_30(1.0f, 0.5581154f, 1.0f);
-    mpMorf->offTranslate();
-    mpMorf->setTranslateScale(cstack_30);
+    mAnm_p->offTranslate();
+    mAnm_p->setTranslateScale(cstack_30);
 
-    J3DModel* model = mpMorf->getModel();
+    J3DModel* model = mAnm_p->getModel();
     for (u16 jointNo = 0; jointNo < mdlData_p->getJointNum(); jointNo++) {
         mdlData_p->getJointNodePointer(jointNo)->setCallBack(ctrlJointCallBack);
     }
@@ -268,7 +269,7 @@ int daNpcShoe_c::Draw() {
 
     draw(false, false, mpHIO->m.common.real_shadow_size, NULL, false);
     g_env_light.setLightTevColorType_MAJI(mpModel1->mModelData, &tevStr);
-    mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(11));
+    mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(11));
     mpModel1->setBaseTRMtx(mDoMtx_stack_c::get());
     mDoExt_modelUpdateDL(mpModel1);
     g_env_light.setLightTevColorType_MAJI(mpModel2->mModelData, &tevStr);
@@ -286,11 +287,11 @@ bool daNpcShoe_c::ctrlJoint(J3DJoint* i_joint, J3DModel* i_model) {
     int lookat_joints[3] = {1, 2, 3};
 
     if (joint_no == 0) {
-        mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(1));
+        mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(1));
         mDoMtx_stack_c::multVecZero(&mLookatPos[0]);
-        mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(2));
+        mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(2));
         mDoMtx_stack_c::multVecZero(&mLookatPos[1]);
-        mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(3));
+        mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(3));
         mDoMtx_stack_c::multVecZero(&mLookatPos[2]);
     }
 
@@ -394,7 +395,7 @@ void daNpcShoe_c::reset() {
 
     J3DAnmTexPattern* btpAnm = getTexPtrnAnmP(l_arcNames[0], 12);
     mAnmFlags &= ~(ANM_PAUSE_BTP | ANM_PLAY_BTP | ANM_FLAG_800);
-    if (setBtpAnm(btpAnm, mpMorf->getModel()->getModelData(), 1.0f, 2)) {
+    if (setBtpAnm(btpAnm, mAnm_p->getModel()->getModelData(), 1.0f, 2)) {
         mAnmFlags |= ANM_PAUSE_BTP | ANM_PLAY_BTP | ANM_FLAG_800;
     }
 
@@ -436,7 +437,7 @@ void daNpcShoe_c::playMotion() {
 /* 80AE9820-80AE9A00 001FC0 01E0+00 1/1 0/0 0/0 .text            lookat__11daNpcShoe_cFv */
 void daNpcShoe_c::lookat() {
     fopAc_ac_c* actor = NULL;
-    J3DModel* model = mpMorf->getModel();
+    J3DModel* model = mAnm_p->getModel();
 
     BOOL snap = false;
     f32 body_angleX_min = mpHIO->m.common.body_angleX_min;
@@ -568,7 +569,7 @@ bool daNpcShoe_c::fear(void* param_0) {
     case 1:
         break;
     case 2:
-        if (mpMorf->checkFrame(1.0f)) {
+        if (mAnm_p->checkFrame(1.0f)) {
             mCreature.playVoice(2);
         }
         break;
@@ -729,7 +730,7 @@ void daNpcShoe_c::setAttnPos() {
     lookat();
 
     cXyz vec(10.0f, 15.0f, 0.0f);
-    mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(3));
+    mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(3));
     mDoMtx_stack_c::multVecZero(&mHeadPos);
     mDoMtx_stack_c::multVec(&vec, &eyePos);
     vec.x = 0.0f;
@@ -738,12 +739,12 @@ void daNpcShoe_c::setAttnPos() {
     mHeadAngle.x = cLib_targetAngleX(&mHeadPos, &vec);
     mHeadAngle.y = cLib_targetAngleY(&mHeadPos, &vec);
 
-    mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(3));
+    mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(3));
     mDoMtx_stack_c::multVecZero(&attention_info.position);
     attention_info.position.y += mpHIO->m.common.attention_offset;
 
     cXyz cStack28;
-    mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(1));
+    mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(1));
     mDoMtx_stack_c::multVecZero(&cStack28);
     cStack28.y = current.pos.y;
     mCcCyl.SetC(cStack28);
@@ -773,10 +774,6 @@ void daNpcShoe_c::setMotionAnm(int i_idx, f32 i_morf) {
 BOOL daNpcShoe_c::drawDbgInfo() {
     return FALSE;
 }
-
-/* 80AEA340-80AEA344 002AE0 0004+00 1/0 0/0 0/0 .text            adjustShapeAngle__11daNpcShoe_cFv
- */
-void daNpcShoe_c::adjustShapeAngle() {}
 
 /* 80AEA608-80AEA628 -00001 0020+00 1/0 0/0 0/0 .data            daNpcShoe_MethodTable */
 static actor_method_class daNpcShoe_MethodTable = {

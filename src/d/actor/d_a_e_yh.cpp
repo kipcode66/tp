@@ -2133,7 +2133,7 @@ static int useHeapInit(fopAc_ac_c* a_this) {
     }
 
     J3DModelData* modelData = (J3DModelData*)dComIfG_getObjectRes("E_yd", 0x1a);
-    JUT_ASSERT(3719, modelData != 0);
+    JUT_ASSERT(3719, modelData != NULL);
 
     for (int i = 1; i < 11; i++) {
         if ((i & 1) != 0) {
@@ -2305,5 +2305,3 @@ extern actor_process_profile_definition g_profile_E_YH = {
   fopAc_ENEMY_e,          // mActorType
   fopAc_CULLBOX_CUSTOM_e, // cullType
 };
-
-/* 808043DC-808043DC 000160 0000+00 0/0 0/0 0/0 .rodata          @stringBase0 */

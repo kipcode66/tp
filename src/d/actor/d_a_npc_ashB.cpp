@@ -5,8 +5,9 @@
 
 #include "d/dolzel_rel.h"  // IWYU pragma: keep
 
-#include "JSystem/J3DGraphBase/J3DMaterial.h"
 #include "d/actor/d_a_npc_ashB.h"
+#include "d/actor/d_a_npc.h"
+#include "JSystem/J3DGraphBase/J3DMaterial.h"
 
 /* 809620E4-80962154 000000 0070+00 11/11 0/0 0/0 .rodata          m__17daNpcAshB_Param_c */
 const daNpcAshB_HIOParam daNpcAshB_Param_c::m = {
@@ -45,16 +46,6 @@ const daNpcAshB_HIOParam daNpcAshB_Param_c::m = {
     0,        // debug_info_ON
     400.0f,   // field_0x6c
 };
-
-#if DEBUG
-daNpcAshB_HIO_c::daNpcAshB_HIO_c() {
-    m = daNpcAshB_Param_c::m;
-}
-
-void daNpcAshB_HIO_c::genMessage(JORMContext* ctext) {
-    // TODO
-}
-#endif
 
 NPC_ASHB_HIO_CLASS l_HIO;
 
@@ -96,10 +87,22 @@ static char* l_evtNames[2] = {
 /* 809625A0-809625A4 -00001 0004+00 0/2 0/0 0/0 .data            l_myName */
 static char* l_myName = "AshB";
 
+#if DEBUG
+daNpcAshB_HIO_c::daNpcAshB_HIO_c() {
+    m = daNpcAshB_Param_c::m;
+}
+
+void daNpcAshB_HIO_c::genMessage(JORMContext* ctext) {
+    // Post-conversation follow-up distance
+    ctext->genSlider("会話後追従距離", &m.field_0x6c, 0.0f, 2000.0f, 0, NULL, 0xFFFF, 0xFFFF, 0x200, 24);
+    daNpcF_commonGenMessage(ctext, &m.common);
+}
+#endif
+
 /* 809625B0-809625C8 000198 0018+00 1/2 0/0 0/0 .data            mEvtSeqList__11daNpcAshB_c */
 daNpcAshB_c::EventFn daNpcAshB_c::mEvtSeqList[2] = {
     NULL,
-    &EvCut_Appear,
+    &daNpcAshB_c::EvCut_Appear,
 };
 
 /* 8095DE4C-8095DFD0 0000EC 0184+00 1/1 0/0 0/0 .text            __ct__11daNpcAshB_cFv */
@@ -112,8 +115,14 @@ daNpcAshB_c::~daNpcAshB_c() {
     }
 
     if (heap != NULL) {
-        mpMorf->stopZelAnime();
+        mAnm_p->stopZelAnime();
     }
+
+#if DEBUG
+    if (mpHIO) {
+        mpHIO->removeHIO();
+    }
+#endif
 }
 
 /* 8095E224-8095E4A0 0004C4 027C+00 1/1 0/0 0/0 .text            Create__11daNpcAshB_cFv */
@@ -144,10 +153,15 @@ cPhs__Step daNpcAshB_c::Create() {
             if (!fopAcM_entrySolidHeap(this, createHeapCallBack, 0x58b0)) {
                 return cPhs_ERROR_e;
             } else {
-                J3DModelData* model_data = mpMorf->getModel()->getModelData();
-                fopAcM_SetMtx(this, mpMorf->getModel()->getBaseTRMtx());
+                J3DModelData* model_data = mAnm_p->getModel()->getModelData();
+                fopAcM_SetMtx(this, mAnm_p->getModel()->getBaseTRMtx());
                 fopAcM_setCullSizeBox(this, -100.0f, -50.0f, -100.0f, 100.0f, 220.0f, 100.0f);
                 mCreatureSound.init(&current.pos, &eyePos, 3, 1);
+#if DEBUG
+                mpHIO = &l_HIO;
+                // Ash (cold climate model)
+                mpHIO->entryHIO("アッシュ（寒冷地仕様）");
+#endif
                 mAcchCir.SetWall(mpHIO->m.common.width, mpHIO->m.common.knee_length);
                 mAcch.Set(fopAcM_GetPosition_p(this), fopAcM_GetOldPosition_p(this), this, 1,
                           &mAcchCir, fopAcM_GetSpeed_p(this), fopAcM_GetAngle_p(this),
@@ -164,7 +178,7 @@ cPhs__Step daNpcAshB_c::Create() {
                 mGroundH = mAcch.GetGroundH();
                 setEnvTevColor();
                 setRoomNo();
-                mpMorf->modelCalc();
+                mAnm_p->modelCalc();
                 reset();
                 Execute();
             }
@@ -176,20 +190,24 @@ cPhs__Step daNpcAshB_c::Create() {
 
 /* 8095E4A0-8095E758 000740 02B8+00 1/1 0/0 0/0 .text            CreateHeap__11daNpcAshB_cFv */
 BOOL daNpcAshB_c::CreateHeap() {
-    J3DModelData* modelData = static_cast<J3DModelData*>(dComIfG_getObjectRes(l_arcNames[0], 28));
-    mpMorf = new mDoExt_McaMorfSO(modelData, NULL, NULL, NULL, -1, 1.0f, 0, -1, &mCreatureSound,
-                                  0x80000, 0x11020284);
-    if (mpMorf != NULL && mpMorf->mpModel == NULL) {
-        mpMorf->stopZelAnime();
-        mpMorf = NULL;
+    J3DModelData* mdlData_p = NULL;
+    J3DModel* model = NULL;
+    mdlData_p = static_cast<J3DModelData*>(dComIfG_getObjectRes(l_arcNames[0], 28));
+    JUT_ASSERT(332, NULL != mdlData_p);
+    u32 sp_0x18 = 0x11020284;
+    mAnm_p = new mDoExt_McaMorfSO(mdlData_p, NULL, NULL, NULL, -1, 1.0f, 0, -1, &mCreatureSound,
+                                  0x80000, sp_0x18);
+    if (mAnm_p != NULL && mAnm_p->getModel() == NULL) {
+        mAnm_p->stopZelAnime();
+        mAnm_p = NULL;
     }
-    if (mpMorf == NULL) {
+    if (mAnm_p == NULL) {
         return false;
     }
 
-    J3DModel* model = mpMorf->getModel();
-    for (u16 jointNo = 0; jointNo < modelData->getJointNum(); jointNo++) {
-        modelData->getJointNodePointer(jointNo)->setCallBack(ctrlJointCallBack);
+    model = mAnm_p->getModel();
+    for (u16 jointNo = 0; jointNo < mdlData_p->getJointNum(); jointNo++) {
+        mdlData_p->getJointNodePointer(jointNo)->setCallBack(ctrlJointCallBack);
     }
     model->setUserArea((uintptr_t)this);
 
@@ -197,9 +215,9 @@ BOOL daNpcAshB_c::CreateHeap() {
     if (mpMatAnm == NULL) {
         return false;
     } else {
-        mpModel = mDoExt_J3DModel__create(
-            static_cast<J3DModelData*>(dComIfG_getObjectRes(l_arcNames[0], 29)), 0x80000,
-            0x11000084);
+        mdlData_p = (J3DModelData*) dComIfG_getObjectRes(l_arcNames[0], 29);
+        JUT_ASSERT(366, NULL != mdlData_p);
+        mpModel = mDoExt_J3DModel__create(mdlData_p, 0x80000, 0x11000084);
         if (mpModel == NULL) {
             return false;
         } else {
@@ -215,6 +233,7 @@ BOOL daNpcAshB_c::CreateHeap() {
 
 /* 8095E914-8095E948 000BB4 0034+00 1/1 0/0 0/0 .text            Delete__11daNpcAshB_cFv */
 int daNpcAshB_c::Delete() {
+    fopAcM_RegisterDeleteID(this, "NPC_ASHB");
     this->~daNpcAshB_c();
     return 1;
 }
@@ -227,7 +246,8 @@ int daNpcAshB_c::Execute() {
 
 /* 8095E96C-8095E9C8 000C0C 005C+00 1/1 0/0 0/0 .text            Draw__11daNpcAshB_cFv */
 int daNpcAshB_c::Draw() {
-    mpMorf->getModel()->getModelData()->getMaterialNodePointer(2)->setMaterialAnm(mpMatAnm);
+    J3DModelData* model_data = mAnm_p->getModel()->getModelData();
+    model_data->getMaterialNodePointer(2)->setMaterialAnm(mpMatAnm);
     draw(false, false, mpHIO->m.common.real_shadow_size, NULL, false);
     return 1;
 }
@@ -235,15 +255,16 @@ int daNpcAshB_c::Draw() {
 /* 8095E9C8-8095EB94 000C68 01CC+00 1/1 0/0 0/0 .text
  * ctrlJoint__11daNpcAshB_cFP8J3DJointP8J3DModel                */
 bool daNpcAshB_c::ctrlJoint(J3DJoint* i_joint, J3DModel* i_model) {
-    int jointNo = i_joint->getJntNo();
+    J3DJoint* my_joint = i_joint;
+    int jointNo = my_joint->getJntNo();
     int lookatJoints[3] = {1, 9, 10};
 
     if (jointNo == 0) {
-        mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(1));
+        mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(1));
         mDoMtx_stack_c::multVecZero(&mLookatPos[0]);
-        mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(9));
+        mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(9));
         mDoMtx_stack_c::multVecZero(&mLookatPos[1]);
-        mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(10));
+        mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(10));
         mDoMtx_stack_c::multVecZero(&mLookatPos[2]);
     }
 
@@ -261,8 +282,8 @@ bool daNpcAshB_c::ctrlJoint(J3DJoint* i_joint, J3DModel* i_model) {
 
     if ((jointNo == 10 || jointNo == 19) && (mAnmFlags & ANM_PLAY_BCK)) {
         J3DAnmTransform* bckAnm = mBckAnm.getBckAnm();
-        mBckAnm.changeBckOnly(mpMorf->getAnm());
-        mpMorf->changeAnm(bckAnm);
+        mBckAnm.changeBckOnly(mAnm_p->getAnm());
+        mAnm_p->changeAnm(bckAnm);
     }
 
     return true;
@@ -271,7 +292,8 @@ bool daNpcAshB_c::ctrlJoint(J3DJoint* i_joint, J3DModel* i_model) {
 /* 8095EB94-8095EBB4 000E34 0020+00 1/1 0/0 0/0 .text
  * createHeapCallBack__11daNpcAshB_cFP10fopAc_ac_c              */
 BOOL daNpcAshB_c::createHeapCallBack(fopAc_ac_c* i_this) {
-    return static_cast<daNpcAshB_c*>(i_this)->CreateHeap();
+    daNpcAshB_c* a_this = static_cast<daNpcAshB_c*>(i_this);
+    return a_this->CreateHeap();
 }
 
 /* 8095EBB4-8095EC00 000E54 004C+00 1/1 0/0 0/0 .text ctrlJointCallBack__11daNpcAshB_cFP8J3DJointi
@@ -288,28 +310,67 @@ BOOL daNpcAshB_c::ctrlJointCallBack(J3DJoint* i_joint, int param_1) {
 }
 
 inline void daNpcAshB_c::setLookMode(int i_lookMode) {
-    if (i_lookMode != mLookMode) {
+    if (i_lookMode >= 0 && i_lookMode < 5 && i_lookMode != mLookMode) {
         mLookMode = i_lookMode;
     }
 }
 
+#if DEBUG
+static s16 dummy_lit_120628(int sel) {
+    const s16 arr[2] = {0x00C8, 0x00FF};
+    return arr[sel];
+}
+
+static s16 dummy_lit_120631(int sel) {
+    const s16 arr[2] = {0xC800, 0x00FF};
+    return arr[sel];
+}
+
+static s16 dummy_lit_120638(int sel) {
+    const s16 arr[2] = {0x0000, 0xC8FF};
+    return arr[sel];
+}
+
+static s16 dummy_lit_120641(int sel) {
+    const s16 arr[2] = {0x0000, 0xC8FF};
+    return arr[sel];
+}
+
+static s16 dummy_lit_120644(int sel) {
+    const s16 arr[2] = {0x0000, 0xC8FF};
+    return arr[sel];
+}
+
+static s16 dummy_lit_120647(int sel) {
+    const s16 arr[2] = {0x8080, 0x80A0};
+    return arr[sel];
+}
+
+static s16 dummy_lit_120650(int sel) {
+    const s16 arr[2] = {0x8080, 0x80A0};
+    return arr[sel];
+}
+#endif
+
 inline BOOL daNpcAshB_c::chkFindPlayer() {
-    BOOL ret;
     if (!chkActorInSight(daPy_getPlayerActorClass(), mpHIO->m.common.fov)) {
         mActorMngr[0].remove();
-        ret = false;
-    } else {
-        if (mActorMngr[0].getActorP() == NULL) {
-            ret = chkPlayerInSpeakArea(this);
-        } else {
-            ret = chkPlayerInTalkArea(this);
-        }
-        if (ret) {
-            mActorMngr[0].entry(daPy_getPlayerActorClass());
-        } else {
-            mActorMngr[0].remove();
-        }
+        return FALSE;
     }
+
+    BOOL ret = FALSE;
+    if (mActorMngr[0].getActorP() == NULL) {
+        ret = chkPlayerInSpeakArea(this);
+    } else {
+        ret = chkPlayerInTalkArea(this);
+    }
+
+    if (ret) {
+        mActorMngr[0].entry(daPy_getPlayerActorClass());
+    } else {
+        mActorMngr[0].remove();
+    }
+
     return ret;
 }
 
@@ -393,7 +454,7 @@ void daNpcAshB_c::playMotion() {
 /* 80961574-80961770 003814 01FC+00 1/1 0/0 0/0 .text            lookat__11daNpcAshB_cFv */
 void daNpcAshB_c::lookat() {
     fopAc_ac_c* actor = NULL;
-    J3DModel* model = mpMorf->getModel();
+    J3DModel* model = mAnm_p->getModel();
 
     BOOL snap = false;
     f32 body_angleX_min = mpHIO->m.common.body_angleX_min;
@@ -456,13 +517,10 @@ bool daNpcAshB_c::setExpressionAnm(int i_idx, bool i_modify) {
     }
     mAnmFlags &= ~ANM_EXPRESSION_FLAGS;
 
-    J3DAnmTransform* bckAnm;
-    if (l_bckGetParamList[i_idx].fileIdx >= 0) {
-        bckAnm = getTrnsfrmKeyAnmP(l_arcNames[l_bckGetParamList[i_idx].arcIdx],
-                                   l_bckGetParamList[i_idx].fileIdx);
-    } else {
-        bckAnm = NULL;
-    }
+    J3DAnmTransform* bckAnm = (l_bckGetParamList[i_idx].fileIdx >= 0) ?
+            getTrnsfrmKeyAnmP(l_arcNames[l_bckGetParamList[i_idx].arcIdx],
+                              l_bckGetParamList[i_idx].fileIdx)
+          : NULL;
 
     s32 attr = l_bckGetParamList[i_idx].attr;
     bool res = false;
@@ -507,6 +565,7 @@ bool daNpcAshB_c::setExpressionAnm(int i_idx, bool i_modify) {
         return true;
     }
 
+    OS_REPORT("%s: 表情Bckアニメーションの登録に失敗しました！\n", __FILE__);
     return false;
 }
 
@@ -520,13 +579,15 @@ bool daNpcAshB_c::setExpressionBtp(int i_idx) {
     if (btpAnm == NULL) {
         return true;
     }
-    if (setBtpAnm(btpAnm, mpMorf->getModel()->getModelData(), 1.0f, attr)) {
+    if (setBtpAnm(btpAnm, mAnm_p->getModel()->getModelData(), 1.0f, attr)) {
         mAnmFlags |= ANM_PAUSE_BTP | ANM_PLAY_BTP;
         if (i_idx == 0) {
             mAnmFlags |= ANM_FLAG_800;
         }
         return true;
     }
+
+    OS_REPORT("%s: 表情Btpアニメーションの登録に失敗しました！\n", __FILE__);
     return false;
 }
 
@@ -560,7 +621,6 @@ void daNpcAshB_c::setMotionAnm(int i_idx, f32 i_morf) {
     mAnmFlags &= 0xffffffc0;
     if (i_idx == 12) {
         bool unused_bool = setExpressionBtp(1);
-        (void)unused_bool;
     }
 
     if (morfAnm && setMcaMorfAnm(morfAnm, 1.0f, i_morf, oiVar5, 0, -1)) {
@@ -568,7 +628,7 @@ void daNpcAshB_c::setMotionAnm(int i_idx, f32 i_morf) {
         mMotionLoops = 0;
     }
 
-    if (btkAnm && setBtkAnm(btkAnm, mpMorf->getModel()->getModelData(), 1.0, iVar4)) {
+    if (btkAnm && setBtkAnm(btkAnm, mAnm_p->getModel()->getModelData(), 1.0, iVar4)) {
         mAnmFlags |= 0x12;
     }
 }
@@ -589,8 +649,8 @@ void daNpcAshB_c::reset() {
     mpActionFn = NULL;
     mLookMode = -1;
     mMode = 0;
-    current.pos = home.pos;
-    old.pos = current.pos;
+    current.pos.set(home.pos);
+    old.pos.set(current.pos);
     current.angle.set(0, home.angle.y, 0);
     old.angle = current.angle;
     shape_angle = current.angle;
@@ -605,7 +665,7 @@ void daNpcAshB_c::reset() {
     field_0xded = 0;
     field_0xdee = 0;
 
-    setAction(&wait);
+    setAction(&daNpcAshB_c::wait);
 }
 
 /* 8095F21C-8095F2C4 0014BC 00A8+00 1/1 0/0 0/0 .text
@@ -659,7 +719,6 @@ bool daNpcAshB_c::step(s16 i_targetAngle, int param_2, f32 i_rate) {
 }
 
 /* 8095F2C4-8095FC70 001564 09AC+00 4/0 0/0 0/0 .text            wait__11daNpcAshB_cFPv */
-// NONMATCHING - regalloc
 bool daNpcAshB_c::wait(void* param_0) {
     switch (mMode) {
     case 0:
@@ -681,7 +740,7 @@ bool daNpcAshB_c::wait(void* param_0) {
                 if (fopAcM_seenPlayerAngleY(this) > res) {
                     field_0xdea = fopAcM_searchPlayerAngleY(this);
                 }
-            } else if (step(mCurAngle.y, 1, 15.0f)) {
+            } else if (step(field_0xdea, 1, 15.0f)) {
                 setExpression(EXPR_EXPLAIN_B, -1.0f);
                 setMotion(MOT_WAIT_A, -1.0f, false);
                 mTurnMode = 0;
@@ -716,7 +775,7 @@ bool daNpcAshB_c::wait(void* param_0) {
         /* dSv_event_flag_c::F_0335 - Snowpeak mountain - Obtained scribble from Ashei at mountain
          * pass */
         if (!daNpcF_chkEvtBit(0x14F) && field_0xded == 0 && !daPy_py_c::checkNowWolf()) {
-            f32 res = pow(600.0f, 2.0f);
+            f32 res = std::pow(600.0f, 2.0f);
             if (fopAcM_searchPlayerDistanceXZ2(this) <= res) {
                 daNpcF_offTmpBit(0xb);
                 daNpcF_offTmpBit(0xc);
@@ -734,7 +793,7 @@ bool daNpcAshB_c::wait(void* param_0) {
                         u8 preitemno = dComIfGp_event_getPreItemNo();
                         if (preitemno == fpcNm_ITEM_ASHS_SCRIBBLING) {
                             mFlowID = 504;
-                            setAction(&talk);
+                            setAction(&daNpcAshB_c::talk);
                         } else {
                             s16 evt_idx =
                                 dComIfGp_getEventManager().getEventIdx(this, "NO_RESPONSE", 0xff);
@@ -743,12 +802,12 @@ bool daNpcAshB_c::wait(void* param_0) {
                         }
                     }
                 } else {
-                    setAction(&talk);
+                    setAction(&daNpcAshB_c::talk);
                 }
             } else {
                 int mystaffid = dComIfGp_getEventManager().getMyStaffId(l_myName, NULL, 0);
                 if (mystaffid != -1) {
-                    setAction(&demo);
+                    setAction(&daNpcAshB_c::demo);
                 }
             }
         } else {
@@ -857,10 +916,10 @@ bool daNpcAshB_c::talk(void* param_0) {
                         dComIfGp_getEvent().reset(this);
                         fopAcM_orderChangeEventId(this, evt_idx, 1, -1);
                         field_0x9ec = 1;
-                        setAction(&wait);
+                        setAction(&daNpcAshB_c::wait);
                     }
                 } else {
-                    setAction(&wait);
+                    setAction(&daNpcAshB_c::wait);
                 }
 
                 ret = true;
@@ -903,9 +962,9 @@ bool daNpcAshB_c::talk(void* param_0) {
 }
 
 /* 809602E0-809604C8 002580 01E8+00 1/0 0/0 0/0 .text            demo__11daNpcAshB_cFPv */
-// NONMATCHING - extra instruction at dComIfGp_event_runCheck() causing regalloc issues?
 bool daNpcAshB_c::demo(void* param_0) {
     dEvent_manager_c& evtmgr = dComIfGp_getEventManager();
+    BOOL r26 = FALSE;
 
     switch (mMode) {
     case 0:
@@ -915,21 +974,34 @@ bool daNpcAshB_c::demo(void* param_0) {
         // fallthrough
 
     case 2:
-        if (dComIfGp_event_runCheck() != 0 && !eventInfo.checkCommandTalk()) {
+#if VERSION != VERSION_SHIELD_DEBUG
+        // TODO: gameInfo fake match to force reuse of pointer
+        dComIfG_play_c* play = &g_dComIfG_gameInfo.play;
+        if (play->getEvent().runCheck() && !eventInfo.checkCommandTalk())
+#else
+        if (dComIfGp_event_runCheck() && !eventInfo.checkCommandTalk())
+#endif
+        {
             s32 staff_id = evtmgr.getMyStaffId(l_myName, NULL, 0);
             if (staff_id != -1) {
                 mStaffID = staff_id;
+                JUT_ASSERT(1523, mEvtSeqList[mOrderEvtNo] != 0);
                 if ((this->*(mEvtSeqList[mOrderEvtNo]))(staff_id)) {
                     evtmgr.cutEnd(staff_id);
                 }
+                r26 = TRUE;
             }
 
             if (eventInfo.checkCommandDemoAccrpt() && mEventIdx != -1 && evtmgr.endCheck(mEventIdx))
             {
+#if VERSION != VERSION_SHIELD_DEBUG
+                play->getEvent().reset();
+#else
                 dComIfGp_event_reset();
+#endif
                 mOrderEvtNo = 0;
                 mEventIdx = -1;
-                setAction(&wait);
+                setAction(&daNpcAshB_c::wait);
             }
         }
 
@@ -937,6 +1009,9 @@ bool daNpcAshB_c::demo(void* param_0) {
 
     case 3:
         break;
+
+    default:
+        JUT_ASSERT(1551, FALSE);
     }
 
     return true;
@@ -1004,14 +1079,14 @@ BOOL daNpcAshB_c::EvCut_Appear(int i_staffID) {
         break;
     case '0005':
         if (mMotionPhase > 1) {
-            mpMorf->getModel()->getModelData()->getMaterialNodePointer(4)->getShape()->hide();
+            mAnm_p->getModel()->getModelData()->getMaterialNodePointer(4)->getShape()->hide();
             return TRUE;
         }
 
         if (mMotionPhase == 1) {
             setExpression(6, 0.0f);
-            f32 subtract = mpMorf->getEndFrame() - 1.0f;
-            if (mpMorf->getFrame() > subtract) {
+            f32 subtract = mAnm_p->getEndFrame() - 1.0f;
+            if (mAnm_p->getFrame() > subtract) {
                 field_0xded = 1;
             }
         }
@@ -1123,7 +1198,7 @@ void daNpcAshB_c::setAttnPos() {
     lookat();
 
     cXyz vec(10.0f, 10.0f, 0.0f);
-    mDoMtx_stack_c::copy(mpMorf->getModel()->getAnmMtx(10));
+    mDoMtx_stack_c::copy(mAnm_p->getModel()->getAnmMtx(10));
     mDoMtx_stack_c::multVecZero(&mHeadPos);
     mDoMtx_stack_c::multVec(&vec, &eyePos);
     vec.x = 0.0f;
@@ -1156,7 +1231,7 @@ void daNpcAshB_c::setAttnPos() {
 /* 80961770-809617F8 003A10 0088+00 1/0 0/0 0/0 .text            drawOtherMdls__11daNpcAshB_cFv */
 void daNpcAshB_c::drawOtherMdls() {
     if (field_0xded != 0) {
-        J3DModel* model = mpMorf->getModel();
+        J3DModel* model = mAnm_p->getModel();
         MtxP src = model->getAnmMtx(24);
         mDoMtx_stack_c::copy(src);
         mpModel->setBaseTRMtx(mDoMtx_stack_c::get());

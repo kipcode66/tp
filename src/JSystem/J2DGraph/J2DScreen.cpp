@@ -18,7 +18,7 @@
 
 /* 802F8498-802F8540 2F2DD8 00A8+00 0/0 59/59 4/4 .text            __ct__9J2DScreenFv */
 J2DScreen::J2DScreen()
-    : J2DPane(NULL, true, 'root', JGeometry::TBox2<f32>(JGeometry::TVec2<f32>(0.0f, 0.0f), JGeometry::TVec2<f32>(640.0f, 480.0f))), mColor() {
+    : J2DPane(NULL, true, 'root', JGeometry::TBox2<f32>(JGeometry::TVec2<f32>(0, 0), JGeometry::TVec2<f32>(640, 480))), mColor() {
     field_0x4 = -1;
     mScissor = false;
     mMaterialNum = 0;
@@ -59,10 +59,9 @@ bool J2DScreen::setPriority(char const* resName, u32 param_1, JKRArchive* p_arch
         return false;
     }
 
-    void* res = JKRFileLoader::getGlbResource(resName, p_archive);
+    void* res = JKRGetNameResource(resName, p_archive);
     if (res != NULL) {
-        u32 size = p_archive->getExpandedResSize(res);
-        JSUMemoryInputStream stream(res, size);
+        JSUMemoryInputStream stream(res, p_archive->getExpandedResSize(res));
         return setPriority(&stream, param_1, p_archive);
     }
 
@@ -96,11 +95,7 @@ bool J2DScreen::private_set(JSURandomInputStream* p_stream, u32 param_1, JKRArch
         clean();
     }
 
-    if (make_end) {
-        return p_stream->isGood();
-    }
-
-    return false;
+    return make_end ? p_stream->isGood() : false;
 }
 
 /* 802F8834-802F8894 2F3174 0060+00 1/1 0/0 0/0 .text
@@ -110,6 +105,7 @@ bool J2DScreen::checkSignature(JSURandomInputStream* p_stream) {
     p_stream->read(&header, sizeof(J2DScrnHeader));
 
     if (header.mTag != 'SCRN' || (header.mType != 'blo1' && header.mType != 'blo2')) {
+        JUT_WARN(257, "%s", "SCRN resource is broken.\n")
         return false;
     } else {
         return true;
@@ -123,14 +119,13 @@ bool J2DScreen::getScreenInformation(JSURandomInputStream* p_stream) {
     p_stream->read(&info, sizeof(J2DScrnInfoHeader));
 
     if (info.mTag != 'INF1') {
+        JUT_WARN(282, "%s", "SCRN resource is broken.\n")
         return false;
     }
 
-    JGeometry::TBox2<f32> dimensions(0.0f, 0.0f, info.mWidth, info.mHeight);
-    place(dimensions);
+    place(JGeometry::TBox2<f32>(0.0f, 0.0f, info.mWidth, info.mHeight));
 
-    JUtility::TColor color(info.mColor);
-    mColor = color;
+    mColor = info.mColor;
 
     if (info.mSize > 0x10) {
         p_stream->skip(info.mSize - 0x10);
@@ -153,30 +148,25 @@ s32 J2DScreen::makeHierarchyPanes(J2DPane* p_basePane, JSURandomInputStream* p_s
         case 'EXT1':
             p_stream->seek(header.mSize, JSUStreamSeekFrom_CUR);
             return 1;
-        case 'BGN1':
+        case 'BGN1': {
             p_stream->seek(header.mSize, JSUStreamSeekFrom_CUR);
 
-            int ret = makeHierarchyPanes(next_pane, p_stream, param_2, p_archive);
+            s32 ret = makeHierarchyPanes(next_pane, p_stream, param_2, p_archive);
             if (ret != 0) {
                 return ret;
             }
             break;
+        }
         case 'END1':
             p_stream->seek(header.mSize, JSUStreamSeekFrom_CUR);
             return 0;
         case 'TEX1':
-            J2DResReference* texRes = getResReference(p_stream, param_2);
-            mTexRes = texRes;
-
-            if (texRes == NULL) {
+            if ((mTexRes = getResReference(p_stream, param_2)) == NULL) {
                 return 2;
             }
             break;
         case 'FNT1':
-            J2DResReference* fntRes = getResReference(p_stream, param_2);
-            mFontRes = fntRes;
-
-            if (fntRes == NULL) {
+            if ((mFontRes = getResReference(p_stream, param_2)) == NULL) {
                 return 2;
             }
             break;
@@ -371,7 +361,6 @@ J2DResReference* J2DScreen::getResReference(JSURandomInputStream* p_stream, u32 
 
 /* 802F937C-802F9600 2F3CBC 0284+00 1/1 0/0 0/0 .text
  * createMaterial__9J2DScreenFP20JSURandomInputStreamUlP10JKRArchive */
-// NONMATCHING - nametab section has issues
 bool J2DScreen::createMaterial(JSURandomInputStream* p_stream, u32 param_1, JKRArchive* p_archive) {
     s32 position = p_stream->getPosition();
 
@@ -389,9 +378,10 @@ bool J2DScreen::createMaterial(JSURandomInputStream* p_stream, u32 param_1, JKRA
 
     u8* buffer = new (-4) u8[header.mSize];
     if (mMaterials != NULL && buffer != NULL) {
+        J2DMaterialBlock* pBlock = (J2DMaterialBlock*)buffer;
         p_stream->seek(position, JSUStreamSeekFrom_SET);
         p_stream->read(buffer, header.mSize);
-        J2DMaterialFactory factory(*(J2DMaterialBlock*)buffer);
+        J2DMaterialFactory factory(*pBlock);
 
         for (u16 i = 0; i < mMaterialNum; i++) {
             factory.create(&mMaterials[i], i, param_1, mTexRes, mFontRes, p_archive);
@@ -400,35 +390,37 @@ bool J2DScreen::createMaterial(JSURandomInputStream* p_stream, u32 param_1, JKRA
         if (param_1 & 0x1F0000) {
             u32 offset =
                 buffer[0x14] << 0x18 | buffer[0x15] << 0x10 | buffer[0x16] << 8 | buffer[0x17];
-            char* sec = (char*)buffer + offset;
-            u16* sec_s = ((u16*)sec);
-            u32 size = ((u16*)sec)[0]*2;
-            u16 num = sec_s[size + 1];
-            while (sec[num] != 0) {
-                num++;  
+            ResNTAB* sec_s = (ResNTAB*)(buffer + offset);
+            u16 entryNum = sec_s->mEntryNum;
+            u16 lastOffset = sec_s->mEntries[entryNum - 1].mOffs;
+            char* ptr = (char*)sec_s;
+            u16 size = lastOffset;
+            while (ptr[size] != 0) {
+                size++;  
             }
-            num++; 
+            size++; 
 
-            u8* nametab = new u8[num];
-            if (nametab != NULL) {
-                for (u16 i = 0; i < num; i++) {
-                    nametab[i] = sec[i];
-                }
-
-                mNameTable = new JUTNameTab((ResNTAB*)nametab);
-                if (mNameTable == NULL) {
-                    delete[] nametab;
-                } else {
-                    success:
-                    delete[] buffer;
-                    return true;
-                }
+            u8* nametab = new u8[size];
+            if (nametab == NULL) {
+                goto failure;
             }
-        } else {
-            goto success;
+            for (u16 i = 0; i < size; i++) {
+                nametab[i] = (buffer + offset)[i];
+            }
+
+            mNameTable = new JUTNameTab((ResNTAB*)nametab);
+            if (mNameTable == NULL) {
+                delete[] nametab;
+                goto failure;
+            }
         }
+
+    success:
+        delete[] buffer;
+        return true;
     }
 
+failure:
     delete[] buffer;
     clean();
     return false;
