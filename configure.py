@@ -742,9 +742,9 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "d/d_model.cpp"),
             Object(MatchingFor(ALL_GCN), "d/d_eye_hl.cpp"),
             Object(MatchingFor(ALL_GCN), "d/d_error_msg.cpp"),
-            Object(Equivalent, "d/d_debug_viewer.cpp"), # debug weak func order
+            Object(Custom, "d/d_debug_viewer.cpp"), # debug weak func order
             Object(NonMatching, "d/d_debug_camera.cpp"),
-            Object(NonMatching, "d/actor/d_a_alink.cpp"),
+            Object(Custom, "d/actor/d_a_alink.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_itembase.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_no_chg_room.cpp"),
             Object(NonMatching, "d/actor/d_a_npc.cpp"),
@@ -2433,6 +2433,34 @@ config.libs = [
     ActorRel(MatchingFor(ALL_GCN), "d_a_tboxSw"),
     ActorRel(MatchingFor(ALL_GCN), "d_a_title"),
     ActorRel(MatchingFor(ALL_GCN), "d_a_warp_bug"),
+
+    # gz
+    {
+        "lib": "gz",
+        "mw_version": MWVersion(config.version),
+        "cflags": cflags_framework,
+        "objects": [
+            Object(Custom, "dolphin/card/CARDDelete.c"),
+            Object(Custom, "gz/gz_notification.cpp"),
+            Object(Custom, "gz/gz.cpp"),
+            Object(Custom, "gz/gz_menu.cpp"),
+            Object(Custom, "gz/gz_tab.cpp"),
+            Object(Custom, "gz/gz_settings.cpp"),
+            Object(Custom, "gz/gz_credits.cpp"),
+            Object(Custom, "gz/gz_confirm.cpp"),
+            Object(Custom, "gz/gz_framework.cpp"),
+            Object(Custom, "gz/gz_tools.cpp"),
+            Object(Custom, "gz/gz_keyboard.cpp"),
+            Object(Custom, "gz/gz_practice.cpp"),
+            Object(Custom, "gz/gz_memory.cpp"),
+            Object(Custom, "gz/gz_cheats.cpp"),
+            Object(Custom, "gz/gz_flags.cpp"),
+            Object(Custom, "gz/gz_heaps.cpp"),
+            Object(Custom, "gz/gz_savemgr.cpp"),
+            Object(Custom, "gz/gz_cheatsmgr.cpp"),
+            Object(Custom, "gz/gz_toolsmgr.cpp"),
+        ],
+    },
 ]
 
 

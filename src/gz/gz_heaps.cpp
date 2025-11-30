@@ -258,7 +258,7 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
     for (int i = 0; i < totalCount; i++) {
         JKRExpHeap::CMemBlock* b = tracker->mBlocks[i];
         u8 align = b->getAlignment();
-        if (b->_isTempMemBlock()) {
+        if (b->isTempMemBlock()) {
             tracker->mStarts[i] = (u32)((u8*)b - align);
         } else {
             tracker->mStarts[i] = (u32)b;
