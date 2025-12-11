@@ -101,11 +101,11 @@ JMessage::TResourceContainer::TCResource::~TCResource() {
     JGADGET_ASSERTWARN(173, empty());
 }
 JMessage::TResource* JMessage::TResourceContainer::TCResource::Get_groupID(u16 u16GroupID) {
-    JGadget::TContainerEnumerator<TResourceContainer::TCResource> enumerator(*this);
+    JGadget::TContainerEnumerator<JGadget::TLinkList<TResource, 0> > enumerator(*this);
 	while (enumerator) {
-		const TResource* res = &(*enumerator);
+        JGadget::TLinkList<TResource, 0>::iterator res = *enumerator;
 		if (res->getGroupID() == u16GroupID)
-			return (TResource*)res;
+			return &*res;
 	}
 
 	return NULL;

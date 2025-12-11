@@ -345,7 +345,7 @@ void TControl::reset() {
     mObject_control.reset(NULL);
     JGadget::TContainerEnumerator<JGadget::TLinkList<JStudio::stb::TObject, -12> > aTStack_18(mObjectContainer);
     while (aTStack_18) {
-        (*aTStack_18).reset(NULL);
+        (*aTStack_18)->reset(NULL);
     }
 }
 
@@ -356,7 +356,7 @@ bool TControl::forward(u32 param_0) {
     int uVar6 = 0;
     JGadget::TContainerEnumerator<JGadget::TLinkList<JStudio::stb::TObject, -12> > aTStack_38(mObjectContainer);
     while (aTStack_38) {
-        JStudio::stb::TObject& this_00 = *aTStack_38;
+        JStudio::stb::TObject& this_00 = **aTStack_38;
         rv = this_00.forward(param_0) || rv;
         int uVar3 = this_00.getStatus();
         uVar7 &= uVar3;

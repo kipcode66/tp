@@ -57,14 +57,13 @@ u32 JMessage::TProcessor::toMessageCode_messageID(u32 uMsgID, u32 param_1, bool*
         return 0xFFFFFFFF;
     }
 
-    JGadget::TContainerEnumerator_const<JMessage::TResource, 0> enumerator(pResourceContainer->getResourceContainer());
-    const TResource* pResource;
+    JGadget::TContainerEnumerator_const<JMessage::TResourceContainer::TCResource > enumerator(*pResourceContainer->getResourceContainer());
     while (enumerator) {
-        pResource = (const TResource*)&(*enumerator);
-        if (pResource != pResourceCache) {
+        JGadget::TLinkList<TResource, 0>::const_iterator pResource = *enumerator;
+        if (&*pResource != pResourceCache) {
             u16 u16Index = pResource->toMessageIndex_messageID(uMsgID, param_1, pbValid);
             if (u16Index != 0xFFFF) {
-                ((JMessage::TProcessor*)this)->pResourceCache_ = pResource;
+                ((JMessage::TProcessor*)this)->pResourceCache_ = &*pResource;
                 return u16Index | (pResource->getGroupID() << 16);
             }
         }
