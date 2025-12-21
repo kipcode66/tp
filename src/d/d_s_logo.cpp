@@ -465,7 +465,6 @@ void dScnLogo_c::setRenderMode() {
     mDoMch_render_c::setProgressiveMode();
 }
 
-/* 803C2FD0-803C2FE4 -00001 0014+00 1/0 0/0 0/0 .data            l_dScnLogo_Method */
 static dScnLogo_Method l_dScnLogo_Method[5] = {
     (dScnLogo_Method)dScnLogo_Create,
     dScnLogo_Delete,
