@@ -129,7 +129,7 @@ public:
         Vec player_pos;
         Vec camera_center;
         Vec camera_eye;
-    } ALIGN_DECL(32);  // important that this is aligned to 32
+    } ATTRIBUTE_ALIGN(32);  // important that this is aligned to 32
 
     void execute();
 

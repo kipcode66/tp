@@ -135,7 +135,7 @@ int gzSaveLoaderMng_c::getSaveEntryNum(SaveCategory_e i_category) {
         break;
     }
 
-    u8 ALIGN_DECL(32) read_buffer[MIN_READ_SIZE];
+    u8 ATTRIBUTE_ALIGN(32) read_buffer[MIN_READ_SIZE];
 
     char pathbuf[64];
     sprintf(pathbuf, "/gz/%s.bin", category_str);

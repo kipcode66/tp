@@ -47,3 +47,10 @@ mod_assets/gz/Menu1.dat
 # intermediary images
 *.png
 *.jpg
+
+# LLM Agent folders
+.grok/
+.cursor/
+.aider/
+.windsurf/
+.copilot/

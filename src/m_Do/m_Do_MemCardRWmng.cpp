@@ -28,7 +28,7 @@ struct data_s {
     u32 checksum;
 };
 
-static u8 sTmpBuf[SECTOR_SIZE * 2];
+u8 mDoMemCd_Ctrl_c::sTmpBuf[SECTOR_SIZE * 2];
 
 #if !PLATFORM_SHIELD
 s32 mDoMemCdRWm_Store(CARDFileInfo* file, void* data, u32 length) {

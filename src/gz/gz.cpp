@@ -39,7 +39,7 @@ int gzPrint(int x, int y, u32 color, char const* string, ...) {
 }
 
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
-    DVDFileInfo ALIGN_DECL(32) fileInfo;
+    DVDFileInfo ATTRIBUTE_ALIGN(32) fileInfo;
     if (DVDOpen(filePath, &fileInfo)) {
         int bytesRead = DVDReadPrio(&fileInfo, buffer, length, offset, 2);
         if (bytesRead > 0) {
