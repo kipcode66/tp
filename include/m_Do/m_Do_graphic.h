@@ -23,9 +23,9 @@ public:
     class bloom_c {
     public:
         bloom_c() { m_buffer = NULL; }
-        /* 80009544 */ void create();
-        /* 800095F8 */ void remove();
-        /* 80009650 */ void draw();
+        void create();
+        void remove();
+        void draw();
 
         u8 getEnable() { return mEnable; }
         void setEnable(u8 i_enable) { mEnable = i_enable; }
@@ -55,28 +55,32 @@ public:
     #if PLATFORM_WII || PLATFORM_SHIELD
     class csr_c {
     public:
-        virtual ~csr_c();
+        virtual ~csr_c() {}
         virtual bool isPointer();
 
-        void particleExecute();
+        static void particleExecute();
+        static u32 getBlurID() { return m_blurID; }
 
         static u32 m_blurID;
+        static cXyz m_oldEffPos;
+        static cXyz m_oldOldEffPos;
+        static cXyz m_nowEffPos;
     };
 
     static void entryBaseCsr(csr_c*);
     #endif
 
-    /* 80007E44 */ static void create();
-    /* 80007F90 */ static void beginRender();
-    /* 800080D0 */ static void fadeOut(f32);
-    /* 80007FD8 */ static void fadeOut(f32, _GXColor&);
-    /* 807DFAB4 */ static void fadeIn(f32 fadeSpeed, _GXColor& fadeColor) {
+    static void create();
+    static void beginRender();
+    static void fadeOut(f32);
+    static void fadeOut(f32, _GXColor&);
+    static void fadeIn(f32 fadeSpeed, _GXColor& fadeColor) {
         fadeOut(-fadeSpeed, fadeColor);
     }
-    /* 80008028 */ static void fadeOut_f(f32, _GXColor&);
-    /* 800080A0 */ static void onBlure(const Mtx);
-    /* 80008078 */ static void onBlure();
-    /* 80008330 */ static void calcFade();
+    static void fadeOut_f(f32, _GXColor&);
+    static void onBlure(const Mtx);
+    static void onBlure();
+    static void calcFade();
 
     static void fadeIn(f32 fadeSpeed) {
         fadeOut(-fadeSpeed);
@@ -112,7 +116,7 @@ public:
     }
 
     static f32 getWidthF() {
-        #if PLATFORM_WII || PLATFORM_SHIELD
+        #if WIDESCREEN_SUPPORT
         return m_widthF;
         #else
         return FB_WIDTH;
@@ -120,7 +124,7 @@ public:
     }
 
     static f32 getHeightF() {
-        #if PLATFORM_WII || PLATFORM_SHIELD
+        #if WIDESCREEN_SUPPORT
         return m_heightF;
         #else
         return FB_HEIGHT;
@@ -131,7 +135,7 @@ public:
     static f32 getHeight() { return FB_HEIGHT; }
 
     static f32 getMinYF() {
-        #if PLATFORM_WII || PLATFORM_SHIELD
+        #if WIDESCREEN_SUPPORT
         return m_minYF;
         #else
         return 0.0f;
@@ -139,7 +143,7 @@ public:
     }
 
     static f32 getMinXF() {
-        #if PLATFORM_WII || PLATFORM_SHIELD
+        #if WIDESCREEN_SUPPORT
         return m_minXF;
         #else
         return 0.0f;
@@ -147,7 +151,7 @@ public:
     }
 
     static f32 getMaxYF() {
-        #if PLATFORM_WII || PLATFORM_SHIELD
+        #if WIDESCREEN_SUPPORT
         return m_maxYF;
         #else
         return FB_HEIGHT;
@@ -155,7 +159,7 @@ public:
     }
 
     static f32 getMaxXF() {
-        #if PLATFORM_WII || PLATFORM_SHIELD
+        #if WIDESCREEN_SUPPORT
         return m_maxXF;
         #else
         return FB_WIDTH;
@@ -233,7 +237,13 @@ public:
         #endif
     }
 
-    static f32 getScale() { return 1.0f; }
+    static f32 getScale() {
+        #if WIDESCREEN_SUPPORT
+        return m_scale;
+        #else
+        return 1.0f;
+        #endif
+    }
 
     #if WIDESCREEN_SUPPORT
     static void setTvSize();

@@ -4,16 +4,17 @@
 #include <revolution/si.h>
 #include <revolution/db.h>
 #include <revolution/sc.h>
+#include <revolution/ipc.h>
 
 #include "__os.h"
+#include "__dvd.h"
+
+#include <string.h>
 
 #define NOP 0x60000000
 
 // external functions
 extern void EnableMetroTRKInterrupts(void);
-extern void __OSInitMemoryProtection(void);
-extern void IPCCltInit(void);
-extern BOOL __DVDCheckDevice(void);
 
 #define DB_EXCEPTIONRET_OFFSET 0xC
 #define DB_EXCEPTIONDEST_OFFSET 0x8
@@ -23,14 +24,22 @@ extern BOOL __DVDCheckDevice(void);
 
 #ifdef SDK_AUG2010
 #define BUILD_DATE "Aug 23 2010"
+#if DEBUG
 #define BUILD_TIME "17:27:45"
+#else
+#define BUILD_TIME "17:33:06"
+#endif
 #elif SDK_SEP2006
 #define BUILD_DATE  "Sep 21 2006"
 #define BUILD_TIME "14:32:13"
 #endif
 
 #ifdef SDK_AUG2010
+#if DEBUG
 const char* __OSVersion = "<< RVL_SDK - OS \tdebug build: "BUILD_DATE" "BUILD_TIME" (0x4302_145) >>";
+#else
+const char* __OSVersion = "<< RVL_SDK - OS \trelease build: "BUILD_DATE" "BUILD_TIME" (0x4302_145) >>";
+#endif
 #elif SDK_SEP2006
 const char* __OSVersion = "<< RVL_SDK - OS \trelease build: "BUILD_DATE" "BUILD_TIME" (0x4200_60422) >>";
 #endif
@@ -621,10 +630,14 @@ void OSInit(void) {
             EnableMetroTRKInterrupts();
         }
 
+        #ifdef SDK_AUG2010
         if (!__OSInNandBoot && !__OSInReboot) {
+        #endif
             ClearArena();
             ClearMEM2Arena();
+        #ifdef SDK_AUG2010
         }
+        #endif
 
         OSEnableInterrupts();
         IPCCltInit();
@@ -637,7 +650,9 @@ void OSInit(void) {
             /* do nothing until SC is not busy */
             while (SCCheckStatus() == 1) {}
 
+            #ifdef SDK_AUG2010
             __OSInitNet();
+            #endif
         }
 
         if (!__OSInIPL) {
@@ -654,16 +669,20 @@ void OSInit(void) {
                 DVDInquiryAsync(&DriveBlock, &DriveInfo, InquiryCallback);
             }
 
+            #ifdef SDK_AUG2010
             if (OSGetAppType() == 0x80 && !__OSInReboot) {
                 if (!__DVDCheckDevice()) {
                     OSReturnToMenu();
                 }
             }
+            #endif
         }
 
+        #ifdef SDK_AUG2010
         if (!__OSInIPL && !__OSInNandBoot) {
             __OSInitPlayTime();
         }
+        #endif
 
         if (!__OSInIPL && !__OSInNandBoot && !__OSInReboot) {
             __OSStartPlayRecord();
@@ -723,6 +742,9 @@ static void OSExceptionInit(void) {
     destAddr = (void*)OSPhysicalToCached(OS_DBJUMPPOINT_ADDR);
     if (*(u32*)destAddr == 0) // Lomem should be zero cleared only once by BS2
     {
+        #ifdef SDK_SEP2006
+        DBPrintf("Installing OSDBIntegrator\n");
+        #endif
         memcpy(destAddr, (void*)__OSDBINTSTART, (u32)__OSDBINTEND - (u32)__OSDBINTSTART);
         DCFlushRangeNoSync(destAddr, (u32)__OSDBINTEND - (u32)__OSDBINTSTART);
         __sync();
@@ -732,7 +754,14 @@ static void OSExceptionInit(void) {
     // Copy the right vector into the table
     for (exception = 0; exception < __OS_EXCEPTION_MAX; exception++) {
         if (BI2DebugFlag && (*BI2DebugFlag >= 2)) {
+            #ifdef SDK_SEP2006
+            if (__DBIsExceptionMarked(exception)) {
+                DBPrintf(">>> OSINIT: exception %d commandeered by TRK\n", exception);
+                continue;
+            }
+            #else
             continue;
+            #endif
         }
         
         // Modify the copy of code in text before transferring
@@ -740,8 +769,14 @@ static void OSExceptionInit(void) {
         *opCodeAddr = oldOpCode | exception;
         
         // Modify opcodes at __DBVECTOR if necessary
-        // make sure the opcodes are still nop
+        #ifdef SDK_SEP2006
+        if (__DBIsExceptionMarked(exception)) {
+            DBPrintf(">>> OSINIT: exception %d vectored to debugger\n", exception);
+            memcpy((void*)__DBVECTOR, (void*)__OSDBJUMPSTART, (u32)__OSDBJUMPEND - (u32)__OSDBJUMPSTART);
+        } else
+        #endif
         {
+            // make sure the opcodes are still nop
             u32* ops = (u32*)__DBVECTOR;
             int cb;
             
@@ -768,6 +803,10 @@ static void OSExceptionInit(void) {
     // restore the old opcode, so that we can re-start an application without
     // downloading the text segments
     *opCodeAddr = oldOpCode;
+
+    #ifdef SDK_SEP2006
+    DBPrintf("Exceptions initialized...\n");
+    #endif
 }
 
 #ifdef __GEKKO__
@@ -898,7 +937,7 @@ entry __OSEVEnd
 void __OSUnhandledException(__OSException exception, OSContext* context, u32 dsisr, u32 dar);
 
 #ifdef __GEKKO__
-asm void OSDefaultExceptionHandler(register __OSException exception, register OSContext* context) {
+asm void OSDefaultExceptionHandler(__REGISTER __OSException exception, __REGISTER OSContext* context) {
     nofralloc
     OS_EXCEPTION_SAVE_GPRS(context)
     mfdsisr r5

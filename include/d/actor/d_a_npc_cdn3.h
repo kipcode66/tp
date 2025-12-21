@@ -30,75 +30,75 @@ public:
         MODE_MAX_e,
     };
 
-    /* 80978DD4 */ void setAction(daNpcCdn3_c::Mode_e);
-    /* 80978E18 */ void callInit();
-    /* 80978E40 */ void callExecute();
-    /* 80978E6C */ void initWait();
-    /* 80978ED0 */ void executeWait();
-    /* 80979080 */ void initPath();
-    /* 80979144 */ void executePath();
-    /* 80979A34 */ void initTalk();
-    /* 80979B2C */ void executeTalk();
-    /* 80979F08 */ void initEscape();
-    /* 8097A028 */ void executeEscape();
-    /* 8097A398 */ void initFear();
-    /* 8097A518 */ void executeFear();
-    /* 8097A60C */ void initFear2();
-    /* 8097A6AC */ void executeFear2();
-    /* 8097A724 */ void initFight();
-    /* 8097A7E0 */ void executeFight();
-    /* 8097A960 */ void initRelief();
-    /* 8097A9E4 */ void executeRelief();
-    /* 8097ABDC */ void setAngle();
-    /* 8097ABE8 */ void pathMoveF();
-    /* 8097AF14 */ int ctrlMsgAnm();
-    /* 8097B04C */ bool searchNextScheduleTagSub(fopAc_ac_c*);
-    /* 8097B194 */ bool searchFirstScheduleTagSub(fopAc_ac_c*);
-    /* 8097B288 */ void checkSchedule();
-    /* 8097B38C */ void setSchedule(daTagSchedule_c*);
-    /* 8097B5A8 */ inline bool isInShop();
-    /* 8097B60C */ bool isChairStyle();
-    /* 8097B684 */ bool isNoTurnTalk();
-    /* 8097B6D0 */ int waita(void*);
-    /* 8097B754 */ int talka(void*);
-    /* 8097B7D8 */ int waitwall(void*);
-    /* 8097B85C */ int talkwall(void*);
-    /* 8097B8E0 */ int talkbwall(void*);
-    /* 8097B964 */ int talkb(void*);
-    /* 8097B9E8 */ int talkc(void*);
-    /* 8097BA6C */ int waitb(void*);
-    /* 8097BAF0 */ int sitwaita(void*);
-    /* 8097BB74 */ int sittalka(void*);
-    /* 8097BBF8 */ int sittalkab(void*);
-    /* 8097BC7C */ int sitwaitb(void*);
-    /* 8097BD00 */ int sittalkb(void*);
-    /* 8097BD84 */ int sittalkbb(void*);
-    /* 8097BE08 */ int looka(void*);
-    /* 8097BE8C */ int lookb(void*);
-    /* 8097BF10 */ int playm(void*);
-    /* 8097C070 */ int turnr(void*);
-    /* 8097C12C */ int turnl(void*);
-    /* 8097C1E8 */ int walka(void*);
-    /* 8097C250 */ int walkb(void*);
-    /* 8097C2B8 */ int runa(void*);
-    /* 8097C320 */ int runb(void*);
-    /* 8097C388 */ int browsea(void*);
-    /* 8097C40C */ int browseb(void*);
-    /* 8097C490 */ int dance(void*);
-    /* 8097C5B0 */ int ladytalka(void*);
-    /* 8097C634 */ int ladytalkb(void*);
-    /* 8097C6B8 */ int normtalka(void*);
-    /* 8097C73C */ int normtalkb(void*);
-    /* 8097C7C0 */ int sellme(void*);
-    /* 8097C844 */ int sing(void*);
-    /* 8097C910 */ int create();
-    /* 8097CC58 */ void create_init();
+    void setAction(daNpcCdn3_c::Mode_e);
+    void callInit();
+    void callExecute();
+    void initWait();
+    void executeWait();
+    void initPath();
+    void executePath();
+    void initTalk();
+    void executeTalk();
+    void initEscape();
+    void executeEscape();
+    void initFear();
+    void executeFear();
+    void initFear2();
+    void executeFear2();
+    void initFight();
+    void executeFight();
+    void initRelief();
+    void executeRelief();
+    void setAngle();
+    void pathMoveF();
+    inline int ctrlMsgAnm();
+    bool searchNextScheduleTagSub(fopAc_ac_c*);
+    bool searchFirstScheduleTagSub(fopAc_ac_c*);
+    void checkSchedule();
+    inline void setSchedule(daTagSchedule_c*);
+    inline bool isInShop();
+    bool isChairStyle();
+    bool isNoTurnTalk();
+    int waita(void*);
+    int talka(void*);
+    int waitwall(void*);
+    int talkwall(void*);
+    int talkbwall(void*);
+    int talkb(void*);
+    int talkc(void*);
+    int waitb(void*);
+    int sitwaita(void*);
+    int sittalka(void*);
+    int sittalkab(void*);
+    int sitwaitb(void*);
+    int sittalkb(void*);
+    int sittalkbb(void*);
+    int looka(void*);
+    int lookb(void*);
+    int playm(void*);
+    int turnr(void*);
+    int turnl(void*);
+    int walka(void*);
+    int walkb(void*);
+    int runa(void*);
+    int runb(void*);
+    int browsea(void*);
+    int browseb(void*);
+    int dance(void*);
+    int ladytalka(void*);
+    int ladytalkb(void*);
+    int normtalka(void*);
+    int normtalkb(void*);
+    int sellme(void*);
+    int sing(void*);
+    inline int create();
+    inline void create_init();
     inline int createHeap();
-    /* 8097D078 */ void setMtx();
-    /* 8097D120 */ void lookat();
-    /* 8097D684 */ virtual ~daNpcCdn3_c();
-    /* 8097D748 */ int execute();
-    /* 8097DABC */ void checkTimeSchedule();
+    inline void setMtx();
+    inline void lookat();
+    inline virtual ~daNpcCdn3_c();
+    inline int execute();
+    inline void checkTimeSchedule();
 
     inline int draw();
 
@@ -223,7 +223,7 @@ public:
                 break;
             }
                 /* dSv_event_flag_c::F_0281 - Shop - Malo Mart opens in Castle Town */
-            if (dComIfGs_isEventBit((u16)dSv_event_flag_c::saveBitLabels[281]) && uVar3 == 9) {
+            if (dComIfGs_isEventBit(dSv_event_flag_c::saveBitLabels[281]) && uVar3 == 9) {
                 uVar3 = 0xb;
             }
         } else {
@@ -257,7 +257,7 @@ public:
                 break;
             }
                 /* dSv_event_flag_c::F_0281 - Shop - Malo Mart opens in Castle Town */
-            if (dComIfGs_isEventBit((u16)dSv_event_flag_c::saveBitLabels[281]) && uVar3 == 10) {
+            if (dComIfGs_isEventBit(dSv_event_flag_c::saveBitLabels[281]) && uVar3 == 10) {
                 uVar3 = 12;
             }
         }
@@ -274,7 +274,7 @@ public:
     }
 
     void setCollision() {
-        #ifdef DEBUG
+        #if DEBUG
         mCyl.SetR(Cd2_HIO_cylR(m_type));
         mCyl.SetH(Cd2_HIO_cylH(m_type));
         #endif
@@ -326,13 +326,14 @@ public:
 
     int orderEvent() {
 #if PLATFORM_SHIELD
-        if (mFlowNodeNum > 0) {
+        if (mFlowNodeNum > 0)
 #else
         if ((!mIsDarkWorld || daPy_py_c::checkNowWolfEyeUp()) &&
             mFlowNodeNum > 0 &&
             ((attention_info.flags & fopAc_AttnFlag_SPEAK_e) ||
-                (attention_info.flags & fopAc_AttnFlag_TALK_e))) {
+                (attention_info.flags & fopAc_AttnFlag_TALK_e)))
 #endif
+        {
             eventInfo.onCondition(dEvtCnd_CANTALK_e);
         }
         return 1;

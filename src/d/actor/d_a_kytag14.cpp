@@ -11,13 +11,10 @@
 #include "f_op/f_op_actor_mng.h"
 #include "d/d_debug_viewer.h"
 
-/* 80529998-805299A0 000078 0008+00 1/0 0/0 0/0 .text            daKytag14_Draw__FP13kytag14_class
- */
 static int daKytag14_Draw(kytag14_class*) {
     return 1;
 }
 
-/* 805299A0-80529B34 000080 0194+00 1/0 0/0 0/0 .text daKytag14_Execute__FP13kytag14_class */
 static int daKytag14_Execute(kytag14_class* i_this) {
     fopAc_ac_c* actor = i_this;
     BOOL event1_set = true;
@@ -30,7 +27,7 @@ static int daKytag14_Execute(kytag14_class* i_this) {
     }
 
     if (i_this->mEventID1 != 0xFFFF) {
-        if (dComIfGs_isEventBit((u16)dSv_event_flag_c::saveBitLabels[i_this->mEventID1])) {
+        if (dComIfGs_isEventBit(dSv_event_flag_c::saveBitLabels[i_this->mEventID1])) {
             event1_set = true;
         } else {
             event1_set = false;
@@ -38,7 +35,7 @@ static int daKytag14_Execute(kytag14_class* i_this) {
     }
 
     if (i_this->mEventID2 != 0xFFFF) {
-        if (!dComIfGs_isEventBit((u16)dSv_event_flag_c::saveBitLabels[i_this->mEventID2])) {
+        if (!dComIfGs_isEventBit(dSv_event_flag_c::saveBitLabels[i_this->mEventID2])) {
             event2_unset = true;
         } else {
             event2_unset = false;
@@ -63,7 +60,7 @@ static int daKytag14_Execute(kytag14_class* i_this) {
 
     if (event1_set == true && event2_unset == true && switch1_set == true && switch2_unset == true)
     {
-        #ifdef DEBUG
+        #if DEBUG
         if (!g_kankyoHIO.navy.display_save_location) {
             dDbVw_Report(20, 16, "TAG SavMem STAGE[%s] Room[%d] Lp[%d]", dComIfGp_getStartStageName(), i_this->mSaveRoomNo, i_this->mSavePoint);
             if (i_this->mSaveRoomNo == -1) {
@@ -79,18 +76,14 @@ static int daKytag14_Execute(kytag14_class* i_this) {
     return 1;
 }
 
-/* 80529B34-80529B3C 000214 0008+00 1/0 0/0 0/0 .text daKytag14_IsDelete__FP13kytag14_class */
 static int daKytag14_IsDelete(kytag14_class*) {
     return 1;
 }
 
-/* 80529B3C-80529B44 00021C 0008+00 1/0 0/0 0/0 .text            daKytag14_Delete__FP13kytag14_class
- */
 static int daKytag14_Delete(kytag14_class*) {
     return 1;
 }
 
-/* 80529B44-80529BE0 000224 009C+00 1/0 0/0 0/0 .text            daKytag14_Create__FP10fopAc_ac_c */
 static int daKytag14_Create(fopAc_ac_c* i_this) {
     fopAcM_ct(i_this, kytag14_class);
     kytag14_class* a_this = static_cast<kytag14_class*>(i_this);
@@ -109,14 +102,12 @@ static int daKytag14_Create(fopAc_ac_c* i_this) {
     return cPhs_COMPLEATE_e;
 }
 
-/* 80529BE8-80529C08 -00001 0020+00 1/0 0/0 0/0 .data            l_daKytag14_Method */
 static actor_method_class l_daKytag14_Method = {
     (process_method_func)daKytag14_Create,  (process_method_func)daKytag14_Delete,
     (process_method_func)daKytag14_Execute, (process_method_func)daKytag14_IsDelete,
     (process_method_func)daKytag14_Draw,
 };
 
-/* 80529C08-80529C38 -00001 0030+00 0/0 0/0 1/0 .data            g_profile_KYTAG14 */
 extern actor_process_profile_definition g_profile_KYTAG14 = {
     fpcLy_CURRENT_e,
     7,

@@ -12,13 +12,10 @@
 #include "f_pc/f_pc_debug_sv.h"
 #include "JSystem/JUtility/JUTAssert.h"
 
-/* 80021040-80021060 0020+00 s=0 e=1 z=0  None .text      fpcDt_IsComplete__Fv */
 BOOL fpcDt_IsComplete() {
     return fpcDtTg_IsEmpty();
 }
 
-/* 80021060-800210D4 0074+00 s=1 e=0 z=0  None .text      fpcDt_deleteMethod__FP18base_process_class
- */
 s32 fpcDt_deleteMethod(base_process_class* i_proc) {
     fpc_ProcID id = i_proc->id;
     layer_class* layer = i_proc->delete_tag.layer;
@@ -36,17 +33,15 @@ s32 fpcDt_deleteMethod(base_process_class* i_proc) {
     return 0;
 }
 
-/* 800210D4-8002110C 0038+00 s=0 e=1 z=0  None .text      fpcDt_Handler__Fv */
 void fpcDt_Handler() {
-#ifdef DEBUG
+#if DEBUG
     if (g_fpcDbSv_service[6] != NULL) {
         g_fpcDbSv_service[6](&g_fpcDtTg_Queue.mSize);
     }
 #endif
-    cLsIt_Method(&g_fpcDtTg_Queue, (cNdIt_MethodFunc)fpcDtTg_Do, fpcDt_deleteMethod);
+    cLsIt_Method(&g_fpcDtTg_Queue, (cNdIt_MethodFunc)fpcDtTg_Do, (void*)fpcDt_deleteMethod);
 }
 
-/* 8002110C-80021188 007C+00 s=1 e=0 z=0  None .text      fpcDt_ToQueue__FP18base_process_class */
 s32 fpcDt_ToQueue(base_process_class* i_proc) {
     if (i_proc->unk_0xA != 1 && fpcBs_IsDelete(i_proc) == 1) {
         if (fpcPi_IsInQueue(&i_proc->priority) == 1) {
@@ -62,7 +57,6 @@ s32 fpcDt_ToQueue(base_process_class* i_proc) {
     return 0;
 }
 
-/* 80021188-800212A4 011C+00 s=1 e=0 z=0  None .text      fpcDt_ToDeleteQ__FP18base_process_class */
 s32 fpcDt_ToDeleteQ(base_process_class* i_proc) {
     if (i_proc->unk_0xA == 1) {
         return 0;
@@ -107,12 +101,11 @@ s32 fpcDt_ToDeleteQ(base_process_class* i_proc) {
     return 0;
 }
 
-/* 800212A4-80021308 0064+00 s=0 e=3 z=0  None .text      fpcDt_Delete__FPv */
 s32 fpcDt_Delete(void* i_proc) {
     base_process_class* proc = (base_process_class*)i_proc;
     
     if (proc != NULL) {
-#ifdef DEBUG
+#if DEBUG
         if (!fpcBs_Is_JustOfType(g_fpcBs_type, proc->type)) {
             if (g_fpcDbSv_service[12] != NULL) {
                 g_fpcDbSv_service[12](proc);
@@ -128,7 +121,7 @@ s32 fpcDt_Delete(void* i_proc) {
             return 0;
 
         int ret = fpcDt_ToDeleteQ(proc);
-#ifdef DEBUG
+#if DEBUG
         if (ret == 0) {
             if (g_fpcDbSv_service[5] != NULL) {
                 g_fpcDbSv_service[5](proc);

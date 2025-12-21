@@ -27,7 +27,7 @@ public:
         return ret;
     }
     const void* getContent() const {
-        return (const void*)((int)getBlockEnd_() + align_roundUp(get_IDSize(), 4));
+        return (const void*)((intptr_t)getBlockEnd_() + align_roundUp(get_IDSize(), 4));
     }
 };
 
@@ -41,7 +41,7 @@ public:
     };
     TParse_TParagraph(const void* content) : TParseData_aligned<4>(content) {}
 
-    /* 802850AC */ void getData(JStudio::fvb::data::TParse_TParagraph::TData*) const;
+    void getData(JStudio::fvb::data::TParse_TParagraph::TData*) const;
 };
 
 }  // namespace data

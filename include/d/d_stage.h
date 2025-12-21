@@ -80,6 +80,13 @@ struct stage_stag_info_class {
     /* 0x2C */ u8 mParticleNo[16];
 };  // Size: 0x3C
 
+class dStage_stagInfo_c {
+public:
+    enum {
+        /* 0x1 */ UB_D_MAP = 1,
+    };
+};
+
 // SCLS
 struct stage_scls_info_class {
     /* 0x0 */ char mStage[8];
@@ -1011,7 +1018,7 @@ public:
     /* 0x54 */ stage_tgsc_class* mDrTg;
     /* 0x58 */ stage_tgsc_class* mDoor;
     /* 0x5C */ dStage_FloorInfo_c* mFloorInfo;
-#ifdef DEBUG
+#if DEBUG
     /* 0x60 */ int field_0x60;
 #endif
     /* 0x60 */ u16 mPlayerNum;
@@ -1076,23 +1083,23 @@ public:
     dStage_roomControl_c() {}
     void init(void);
     static int getZoneNo(int i_roomNo) { return mStatus[i_roomNo].getZoneNo(); }
-    /* 80024338 */ void initZone();
-    /* 80024384 */ dStage_roomDt_c* getStatusRoomDt(int);
-    /* 800243B0 */ static JKRExpHeap* getMemoryBlock(int);
-    /* 800243E8 */ static void setStayNo(int);
-    /* 80024424 */ static void setNextStayNo(int);
-    /* 800244E8 */ BOOL checkRoomDisp(int) const;
-    /* 8002451C */ int loadRoom(int, u8*, bool);
-    /* 8002471C */ void zoneCountCheck(int) const;
-    /* 80024844 */ static JKRExpHeap* createMemoryBlock(int, u32);
-    /* 800248A8 */ static void destroyMemoryBlock();
-    /* 8002490C */ static void setArcBank(int, char const*);
-    /* 80024940 */ static char* getArcBank(int);
-    /* 80024954 */ static bool resetArchiveBank(int);
-    /* 80024DB0 */ static void SetTimePass(int i_TimePass) { m_time_pass = i_TimePass; }
-    /* 8025BAAC */ static void setZoneNo(int, int);
+    void initZone();
+    dStage_roomDt_c* getStatusRoomDt(int);
+    static JKRExpHeap* getMemoryBlock(int);
+    static void setStayNo(int);
+    static void setNextStayNo(int);
+    BOOL checkRoomDisp(int) const;
+    int loadRoom(int, u8*, bool);
+    void zoneCountCheck(int) const;
+    static JKRExpHeap* createMemoryBlock(int, u32);
+    static void destroyMemoryBlock();
+    static void setArcBank(int, char const*);
+    static char* getArcBank(int);
+    static bool resetArchiveBank(int);
+    static void SetTimePass(int i_TimePass) { m_time_pass = i_TimePass; }
+    static void setZoneNo(int, int);
     static dBgp_c* getBgp(int i_roomNo) {
-#ifdef DEBUG
+#if DEBUG
         // NONMATCHING
 #else
         return NULL;
@@ -1100,7 +1107,7 @@ public:
     }
     static BOOL GetTimePass() { return m_time_pass; }
 
-    static s8 getStayNo() { return mStayNo; }
+    static int getStayNo() { return mStayNo; }
     static u8 getRegionNo(int i_roomNo) { return mStatus[i_roomNo].mRegionNo; }
     static s8 getMemoryBlockID(int i_roomNo) { return mStatus[i_roomNo].mMemBlockID; }
     dKy_tevstr_c* getTevStr(int i_roomNo) {
@@ -1358,7 +1365,7 @@ inline u32 dStage_stagInfo_GetParticleNo(stage_stag_info_class* p_info) {
     return (p_info->field_0x0a >> 0x3) & 0xFF;
 }
 
-inline s16 dStage_stagInfo_GetUpButton(stage_stag_info_class* p_info) {
+inline s32 dStage_stagInfo_GetUpButton(stage_stag_info_class* p_info) {
     return p_info->field_0x0a & 7;
 }
 
@@ -1475,11 +1482,11 @@ inline f32 dStage_FileList2_dt_GetRightRmX(dStage_FileList2_dt_c* p_fList2) {
     return p_fList2->mRightRmX;
 }
 
-inline f32 dStage_FileList2_dt_GetInnerRmZ(dStage_FileList2_dt_c* p_fList2) {
+inline f32 dStage_FileList2_dt_GetInnerRmZ(const dStage_FileList2_dt_c* p_fList2) {
     return p_fList2->mInnerRmZ;
 }
 
-inline f32 dStage_FileList2_dt_GetFrontRmZ(dStage_FileList2_dt_c* p_fList2) {
+inline f32 dStage_FileList2_dt_GetFrontRmZ(const dStage_FileList2_dt_c* p_fList2) {
     return p_fList2->mFrontRmZ;
 }
 

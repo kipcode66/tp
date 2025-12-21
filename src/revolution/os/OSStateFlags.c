@@ -1,8 +1,8 @@
 #include <revolution/os.h>
 #include <revolution/nand.h>
-#include <stdio.h>
+#include <string.h>
 
-static OSStateFlags StateFlags __attribute__ ((aligned(32)));
+static OSStateFlags StateFlags ATTRIBUTE_ALIGN(32);
 
 static u32 CheckSum(OSStateFlags* flags) {
     u32* ptr, i, sum;

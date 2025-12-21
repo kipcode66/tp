@@ -5,14 +5,14 @@
 
 #include "d/dolzel_rel.h"  // IWYU pragma: keep
 
-#ifdef DEBUG
+#if DEBUG
 #include "d/d_debug_viewer.h"
 #endif
 #include "d/actor/d_a_obj_swchain.h"
 #include "d/d_cc_d.h"
 #include "d/d_s_play.h"
 
-#ifdef DEBUG
+#if DEBUG
 class daObjSwChain_HIO_c : public mDoHIO_entry_c {
 public:
     /* 811C8DE0 */ daObjSwChain_HIO_c();
@@ -111,13 +111,11 @@ void daObjSwChain_HIO_c::genMessage(JORMContext* ctx) {
 static daObjSwChain_HIO_c l_HIO;
 #endif
 
-/* 80CF86B8-80CF86D8 000078 0020+00 1/1 0/0 0/0 .text            CheckCreateHeap__FP10fopAc_ac_c */
 static int CheckCreateHeap(fopAc_ac_c* a_this) {
     daObjSwChain_c* i_this = (daObjSwChain_c*)a_this;
     return i_this->CreateHeap();
 }
 
-/* 80CF86D8-80CF8768 000098 0090+00 2/2 0/0 0/0 .text            GetActorName__FR13cBgS_PolyInfo */
 static s16 GetActorName(cBgS_PolyInfo& param_0) {
     if (dComIfG_Bgsp().ChkPolySafe(param_0)) {
         if (dComIfG_Bgsp().ChkMoveBG_NoDABg(param_0)) {
@@ -130,10 +128,8 @@ static s16 GetActorName(cBgS_PolyInfo& param_0) {
     return PROC_Obj_SwChain;
 }
 
-/* 80CFB798-80CFB79C -00001 0004+00 3/3 0/0 0/0 .data            l_arcName */
 static char* l_arcName = "P_Chain";
 
-/* 80CFB79C-80CFB7DC 000004 0040+00 1/1 0/0 0/0 .data            l_sph_src */
 static dCcD_SrcSph l_sph_src = {
     {
         {0x0, {{0x0, 0x0, 0x0}, {0x4000, 0x11}, 0x58}},  // mObj
@@ -146,7 +142,6 @@ static dCcD_SrcSph l_sph_src = {
     }  // mSphAttr
 };
 
-/* 80CFB7DC-80CFB81C 000044 0040+00 1/1 0/0 0/0 .data            l_sph_srcCo */
 static dCcD_SrcSph l_sph_srcCo = {
     {
         {0x0, {{0x0, 0x0, 0x0}, {0x0, 0x10}, 0x49}},  // mObj
@@ -159,7 +154,6 @@ static dCcD_SrcSph l_sph_srcCo = {
     }  // mSphAttr
 };
 
-/* 80CF8768-80CF89C0 000128 0258+00 1/1 0/0 0/0 .text            Create__14daObjSwChain_cFv */
 int daObjSwChain_c::Create() {
     mStts.Init(0xff, 0xff, this);
     mSph1.Set(l_sph_src);
@@ -208,7 +202,6 @@ int daObjSwChain_c::Create() {
     return 1;
 }
 
-/* 80CF89C0-80CF8B00 000380 0140+00 1/1 0/0 0/0 .text            CreateHeap__14daObjSwChain_cFv */
 int daObjSwChain_c::CreateHeap() {
     mChains = new chain_s[mChainNum + 1];
 
@@ -238,7 +231,6 @@ int daObjSwChain_c::CreateHeap() {
     return 1;
 }
 
-/* 80CF8B48-80CF8DD0 000508 0288+00 1/1 0/0 0/0 .text            create1st__14daObjSwChain_cFv */
 int daObjSwChain_c::create1st() {
     fopAcM_ct(this, daObjSwChain_c);
 
@@ -264,7 +256,7 @@ int daObjSwChain_c::create1st() {
     mOutNum = getOutNum();
     mChainID = getChainID();
 
-#ifdef DEBUG
+#if DEBUG
     if (mChainID != 0 && mChainID != 1 && mChainID != 2 && mChainID != 3) {
         // Chain Switch: Chain ID value is abnormal <%d>
         OS_REPORT_ERROR("チェーンスイッチ：鎖の番号が異常値です<%d>\n", mChainID);
@@ -272,7 +264,7 @@ int daObjSwChain_c::create1st() {
     }
 #endif
 
-#ifdef DEBUG
+#if DEBUG
     if (mOutNum > mChainNum) {
         // Chain Switch: Argument 2 > Argument 1 !
         OS_REPORT_ERROR("チェーンスイッチ：引数２＞引数１になっています！\n");
@@ -280,7 +272,7 @@ int daObjSwChain_c::create1st() {
     }
 #endif
 
-#ifdef DEBUG
+#if DEBUG
     if (mHookShotLength > mChainNum) {
         // Chain Switch: Argument 3 > Argument 1 !
         OS_REPORT_ERROR("チェーンスイッチ：引数３＞引数１になっています！\n");
@@ -300,7 +292,7 @@ int daObjSwChain_c::create1st() {
         if (!Create()) {
             return cPhs_ERROR_e;
         }
-#ifdef DEBUG
+#if DEBUG
         // Chain Switch
         l_HIO.entryHIO("チェーンスイッチ");
 #endif
@@ -309,9 +301,8 @@ int daObjSwChain_c::create1st() {
     return phase;
 }
 
-/* 80CF8ED0-80CF94E4 000890 0614+00 1/1 0/0 0/0 .text            execute__14daObjSwChain_cFv */
 int daObjSwChain_c::execute() {
-#ifdef DEBUG
+#if DEBUG
     if (l_HIO.mProcessStop) {
         return 1;
     }
@@ -359,7 +350,7 @@ int daObjSwChain_c::execute() {
     cXyz cStack_68(mChains[getTopChainNo()].field_0x34);
     cXyz cStack_74(mChains[mChainNum].field_0x34);
     f32 fVar15 = cStack_74.abs(cStack_68);
-#ifdef DEBUG
+#if DEBUG
     if (fVar15 < (l_HIO.field_0xc * (mOutNum - 2)) || mCarry == 0)
 #else
     if (fVar15 < (35.0f * (mOutNum - 2)) || mCarry == 0)
@@ -374,7 +365,7 @@ int daObjSwChain_c::execute() {
             case 4:
             case 6:
                 if (mOutNum > field_0xa69) {
-#ifdef DEBUG
+#if DEBUG
                     chains_p->field_0x34 += cStack_8c * l_HIO.mReturnSpeedHigh;
 #else
                     chains_p->field_0x34 += cStack_8c * 30.0f;
@@ -383,7 +374,7 @@ int daObjSwChain_c::execute() {
                     field_0xa6b = 1;
                     field_0xa6b = 1;
                 } else {
-#ifdef DEBUG
+#if DEBUG
                     chains_p->field_0x34 += cStack_8c * l_HIO.mReturnSpeedLow;
 #else
                     chains_p->field_0x34 += cStack_8c * 15.0f;
@@ -391,7 +382,7 @@ int daObjSwChain_c::execute() {
                 }
                 break;
             default:
-#ifdef DEBUG
+#if DEBUG
                 chains_p->field_0x34 += cStack_8c * l_HIO.mReturnSpeed;
 #else
                 chains_p->field_0x34 += cStack_8c * 2.0f;
@@ -402,7 +393,7 @@ int daObjSwChain_c::execute() {
     if (field_0xa6c == 0) {
         cXyz pos = (daPy_getPlayerActorClass()->current.pos - home.pos);
         s16 abs_tmp = pos.atan2sX_Z() - shape_angle.y;
-#ifdef DEBUG
+#if DEBUG
         if (abs(abs_tmp) < l_HIO.mReactionAngle) {
 #else
         if (abs(abs_tmp) < 0xe74) {
@@ -436,7 +427,7 @@ int daObjSwChain_c::execute() {
     }
 
     field_0xa9d = mCarry;
-#ifdef DEBUG
+#if DEBUG
     if (l_HIO.field_0x42 != 0) {
         if (l_HIO.field_0x44 == getChainID()) {
             dDbVw_Report(0x28, 200, "Num<%d>Len<%.2f>", getCurrentChainNum(),
@@ -455,12 +446,10 @@ int daObjSwChain_c::execute() {
     return 1;
 }
 
-/* 80CF94E4-80CF9500 000EA4 001C+00 1/1 0/0 0/0 .text            getChainBasePos__14daObjSwChain_cFP4cXyz */
 void daObjSwChain_c::getChainBasePos(cXyz* param_0) {
     *param_0 = home.pos;
 }
 
-/* 80CF9500-80CF99C0 000EC0 04C0+00 1/1 0/0 0/0 .text            chain_control__14daObjSwChain_cFv */
 void daObjSwChain_c::chain_control() {
     f32 fVar1;
     chain_s* chains_p2 = mChains;
@@ -469,7 +458,7 @@ void daObjSwChain_c::chain_control() {
     cXyz* pcVar1 = &chains_p1->field_0x34;
     pcVar2 = pcVar1;
     f32 fVar2 = 
-    #ifdef DEBUG
+    #if DEBUG
         l_HIO.mGravity;
     #else
         -6.0f;
@@ -481,7 +470,7 @@ void daObjSwChain_c::chain_control() {
                 fVar2 *= KREG_F(2) + 0.099999994f;
             } else {
                 fVar2 = 
-                #ifdef DEBUG
+                #if DEBUG
                     l_HIO.mGravity;
                 #else
                     -6.0f;
@@ -491,7 +480,7 @@ void daObjSwChain_c::chain_control() {
             fVar2 *= KREG_F(2) + 0.099999994f;
         } else {
             fVar2 = 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.mGravity;
             #else
                 -6.0f;
@@ -545,7 +534,7 @@ void daObjSwChain_c::chain_control() {
         sp94.normalizeZP();
 
         f32 fVar3 = 
-        #ifdef DEBUG
+        #if DEBUG
             l_HIO.field_0xc;
         #else
             35.0f;
@@ -553,7 +542,7 @@ void daObjSwChain_c::chain_control() {
         
         if (topChainNo == mChainNum - 1) {
             fVar3 = 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0x10;
             #else
                 35.0f;
@@ -561,7 +550,7 @@ void daObjSwChain_c::chain_control() {
         }
 
         if (fVar1 <= fVar3 - 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0x14
             #else
                 8.0f
@@ -569,7 +558,7 @@ void daObjSwChain_c::chain_control() {
             ) 
         {
             fVar1 = fVar3 - 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0x14;
             #else
                 8.0f;
@@ -596,7 +585,6 @@ void daObjSwChain_c::chain_control() {
     }
 }
 
-/* 80CF99C0-80CFA05C 001380 069C+00 1/1 0/0 0/0 .text            chain_control2__14daObjSwChain_cFv */
 void daObjSwChain_c::chain_control2() {
     daPy_py_c* player = (daPy_py_c*)daPy_getPlayerActorClass();
     chain_s* chains_p = &mChains[mChainNum];
@@ -616,7 +604,7 @@ void daObjSwChain_c::chain_control2() {
                 mDoMtx_stack_c::get()[2][3] = 0.0f;
                 mDoMtx_stack_c::multVec(&sp90, &sp90);
                 sp78 += sp90;
-                #ifdef DEBUG
+                #if DEBUG
                 field_0xac0 = sp78;
                 #endif
 
@@ -643,7 +631,7 @@ void daObjSwChain_c::chain_control2() {
             mDoMtx_stack_c::XrotM(-field_0xa6e);
             mDoMtx_stack_c::multVec(&sp78, &sp84);
             sp84 += field_0xa78;
-            #ifdef DEBUG
+            #if DEBUG
             field_0xac0 = sp84;
             #endif
             *pcVar1 = sp84;
@@ -660,7 +648,7 @@ void daObjSwChain_c::chain_control2() {
             spb4.z = 0.0f;
             spb4.x = 0.0f;
             spb4.y *=
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0x18;
             #else
                 0.0f;
@@ -696,7 +684,7 @@ void daObjSwChain_c::chain_control2() {
             spcc.normalizeZP();
 
             f32 fVar3 = 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0xc;
             #else
                 35.0f;
@@ -704,7 +692,7 @@ void daObjSwChain_c::chain_control2() {
             
             if (i == mChainNum - 1) {
                 fVar3 = 
-                #ifdef DEBUG
+                #if DEBUG
                     l_HIO.field_0x10;
                 #else
                     35.0f;
@@ -712,7 +700,7 @@ void daObjSwChain_c::chain_control2() {
             }
 
             if (fVar1 <= fVar3 - 
-                #ifdef DEBUG
+                #if DEBUG
                     l_HIO.field_0x14
                 #else
                     8.0f
@@ -720,7 +708,7 @@ void daObjSwChain_c::chain_control2() {
                 ) 
             {
                 fVar1 = fVar3 - 
-                #ifdef DEBUG
+                #if DEBUG
                     l_HIO.field_0x14;
                 #else
                     8.0f;
@@ -737,7 +725,6 @@ void daObjSwChain_c::chain_control2() {
     }
 }
 
-/* 80CFA05C-80CFA124 001A1C 00C8+00 1/1 0/0 0/0 .text            initChainMtx__14daObjSwChain_cFv */
 void daObjSwChain_c::initChainMtx() {
     int iVar1 = 0;
     for (int i = 0; i < mChainNum + 1; i++) {
@@ -753,7 +740,6 @@ void daObjSwChain_c::initChainMtx() {
     setChainMtx();
 }
 
-/* 80CFA124-80CFA4A8 001AE4 0384+00 2/2 0/0 0/0 .text            setChainMtx__14daObjSwChain_cFv */
 void daObjSwChain_c::setChainMtx() {
     daPy_py_c* player = (daPy_py_c*)daPy_getPlayerActorClass();
     chain_s* chains_p1;
@@ -811,7 +797,6 @@ void daObjSwChain_c::setChainMtx() {
     cLib_addCalcAngleS2(&field_0xa6e, field_0xa70, 5, 800);
 }
 
-/* 80CFA4A8-80CFAD50 001E68 08A8+00 1/1 0/0 0/0 .text            chain_count_control__14daObjSwChain_cFv */
 void daObjSwChain_c::chain_count_control() {
     daPy_py_c* player = (daPy_py_c*)daPy_getPlayerActorClass();
     chain_s* chains_p = &mChains[getTopChainNo()];
@@ -820,7 +805,7 @@ void daObjSwChain_c::chain_count_control() {
     int roomNo = fopAcM_GetRoomNo(this);
     f32 fVar1 = sp60.abs(chains_p->field_0x34);
     f32 fVar2 = 
-    #ifdef DEBUG
+    #if DEBUG
         l_HIO.field_0xc
     #else
         35.0f
@@ -834,7 +819,7 @@ void daObjSwChain_c::chain_count_control() {
             if (roomNo != 4 && roomNo != 6) {
                 for (fVar1 -= fVar2; fVar1 > 0.0f;) {
                     fVar1 -= 
-                    #ifdef DEBUG
+                    #if DEBUG
                         l_HIO.field_0xc;
                     #else
                         35.0f;
@@ -865,7 +850,7 @@ void daObjSwChain_c::chain_count_control() {
             chains_p2->field_0x34.z = (chains_p->field_0x34.z + sp60.z) * 0.5f;
         }
     } else if (fVar1 < 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0xc
             #else
                 35.0f
@@ -898,13 +883,13 @@ void daObjSwChain_c::chain_count_control() {
         topChain_p->field_0x34 = mChains->field_0x34;
         if (
             (!bVar1 && pow >
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.mSwitchOnTension
             #else
                 10.0f
             #endif
             ) || (bVar1 && pow >
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0x2c
             #else
                 1.5f
@@ -931,13 +916,13 @@ void daObjSwChain_c::chain_count_control() {
         topChain_p->field_0x34 = mChains->field_0x34;
         if (
             (!daPy_getPlayerActorClass()->checkBootsOrArmorHeavy() && pow > 
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.mSwitchOnTension
             #else
                 10.0f
             #endif
             ) || (daPy_getPlayerActorClass()->checkBootsOrArmorHeavy() && pow >
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0x2c
             #else
                 1.5f
@@ -948,7 +933,7 @@ void daObjSwChain_c::chain_count_control() {
             
             if (getSwbit() != 0xFF) {
                 if (!fopAcM_isSwitch(this, getSwbit()) && field_0xa68 > 
-                    #ifdef DEBUG
+                    #if DEBUG
                         l_HIO.mSwitchOnTime
                     #else
                         0
@@ -990,7 +975,6 @@ void daObjSwChain_c::chain_count_control() {
     }
 }
 
-/* 80CFAD50-80CFB450 002710 0700+00 1/1 0/0 0/0 .text            setTension__14daObjSwChain_cFv */
 void daObjSwChain_c::setTension() {
     f32 fVar1 = pow;
     field_0xa6a = 0;
@@ -1008,7 +992,7 @@ void daObjSwChain_c::setTension() {
         f32 len = spc8.abs(spbc);
         
         f32 max =         
-        #ifdef DEBUG
+        #if DEBUG
             l_HIO.field_0xc
         #else
             35.0f
@@ -1017,7 +1001,7 @@ void daObjSwChain_c::setTension() {
 
         if (roomNo == 4 || roomNo == 6) {
             max = (field_0xa67 + AREG_S(0) + -1) *
-            #ifdef DEBUG
+            #if DEBUG
                 l_HIO.field_0xc;
             #else
                 35.0f;
@@ -1048,7 +1032,7 @@ void daObjSwChain_c::setTension() {
 
                 cXyz spe0(mChains->field_0x34 - mChains[mChainNum].field_0x34);
                 player->setOutPower(pow, cM_atan2s(spe0.x, spe0.z), 0);
-                #ifdef DEBUG
+                #if DEBUG
                 if (l_HIO.field_0x41 != 0) {
                     dDbVw_Report(40, 260, "len<%.2f>max<%.2f>pow<%.2f>pl_spd<%.2f>", len, max, pow, player->getSpeedF());
                 }
@@ -1066,7 +1050,7 @@ void daObjSwChain_c::setTension() {
 
             if (daPy_py_c::checkNowWolf()) {
                     fVar1 =
-                    #ifdef DEBUG
+                    #if DEBUG
                         l_HIO.mTensionWolf;
                     #else
                         13.0f;
@@ -1075,14 +1059,14 @@ void daObjSwChain_c::setTension() {
                 f32 fVar7;
                 if (daPy_getPlayerActorClass()->checkBootsOrArmorHeavy()) {
                     fVar7 = 
-                    #ifdef DEBUG
+                    #if DEBUG
                         l_HIO.mTensionBootsEquipped;
                     #else
                         2.1f;
                     #endif
                 } else {
                     fVar7 = 
-                    #ifdef DEBUG
+                    #if DEBUG
                         l_HIO.mTension;
                     #else
                         15.0f;
@@ -1101,12 +1085,10 @@ void daObjSwChain_c::setTension() {
     }
 }
 
-/* 80CFB450-80CFB464 002E10 0014+00 8/8 0/0 0/0 .text            getTopChainNo__14daObjSwChain_cFv */
 int daObjSwChain_c::getTopChainNo() {
     return mChainNum - mOutNum + 1;
 }
 
-/* 80CFB464-80CFB53C 002E24 00D8+00 1/1 0/0 0/0 .text            checkPlayerPull__14daObjSwChain_cFv */
 BOOL daObjSwChain_c::checkPlayerPull() {
     daPy_py_c* player = (daPy_py_c*)daPy_getPlayerActorClass();
     cXyz sp2c;
@@ -1122,7 +1104,6 @@ BOOL daObjSwChain_c::checkPlayerPull() {
     return FALSE;
 }
 
-/* 80CFB53C-80CFB5E8 002EFC 00AC+00 1/1 0/0 0/0 .text            draw__14daObjSwChain_cFv */
 int daObjSwChain_c::draw() {
     g_env_light.settingTevStruct(0, &home.pos, &tevStr);
     
@@ -1134,7 +1115,7 @@ int daObjSwChain_c::draw() {
     g_env_light.setLightTevColorType_MAJI(mpModel, &tevStr);
     mDoExt_modelUpdateDL(mpModel);
 
-    #ifdef DEBUG
+    #if DEBUG
     if (l_HIO.field_0x41 != 0) {
         cXyz sp2c;
         mDoMtx_stack_c::YrotS(shape_angle.y);
@@ -1182,46 +1163,39 @@ int daObjSwChain_c::draw() {
     return 1;
 }
 
-/* 80CFB5E8-80CFB61C 002FA8 0034+00 1/1 0/0 0/0 .text            _delete__14daObjSwChain_cFv */
 int daObjSwChain_c::_delete() {
     dComIfG_resDelete(&mPhase, l_arcName);
-#ifdef DEBUG
+#if DEBUG
     l_HIO.removeHIO();
 #endif
     return 1;
 }
 
-/* 80CFB61C-80CFB63C 002FDC 0020+00 1/0 0/0 0/0 .text            daObjSwChain_Draw__FP14daObjSwChain_c */
 static int daObjSwChain_Draw(daObjSwChain_c* i_this) {
     return i_this->draw();
 }
 
-/* 80CFB63C-80CFB65C 002FFC 0020+00 1/0 0/0 0/0 .text            daObjSwChain_Execute__FP14daObjSwChain_c */
 static int daObjSwChain_Execute(daObjSwChain_c* i_this) {
     return i_this->execute();
 }
 
-/* 80CFB65C-80CFB67C 00301C 0020+00 1/0 0/0 0/0 .text            daObjSwChain_Delete__FP14daObjSwChain_c */
 static int daObjSwChain_Delete(daObjSwChain_c* i_this) {
     fpc_ProcID unused = fopAcM_GetID(i_this);
     return i_this->_delete();
 }
 
-/* 80CFB67C-80CFB69C 00303C 0020+00 1/0 0/0 0/0 .text            daObjSwChain_Create__FP10fopAc_ac_c */
 static int daObjSwChain_Create(fopAc_ac_c* a_this) {
     daObjSwChain_c* i_this = (daObjSwChain_c*)a_this;
     fpc_ProcID unused = fopAcM_GetID(a_this);
     return i_this->create1st();
 }
 
-/* 80CFB81C-80CFB83C -00001 0020+00 1/0 0/0 0/0 .data            l_daObjSwChain_Method */
 static actor_method_class l_daObjSwChain_Method = {
     (process_method_func)daObjSwChain_Create,  (process_method_func)daObjSwChain_Delete,
     (process_method_func)daObjSwChain_Execute, 0,
     (process_method_func)daObjSwChain_Draw,
 };
 
-/* 80CFB83C-80CFB86C -00001 0030+00 0/0 0/0 1/0 .data            g_profile_Obj_SwChain */
 extern actor_process_profile_definition g_profile_Obj_SwChain = {
     fpcLy_CURRENT_e,         // mLayerID
     7,                       // mListID

@@ -16,7 +16,6 @@
 #include "m_Do/m_Do_graphic.h"
 #include <stdio.h>
 
-/* 8003A260-8003A280 034BA0 0020+00 0/0 1/1 0/0 .text            __ct__11dRes_info_cFv */
 dRes_info_c::dRes_info_c() {
     mCount = 0;
     mDMCommand = NULL;
@@ -26,7 +25,6 @@ dRes_info_c::dRes_info_c() {
     mRes = NULL;
 }
 
-/* 8003A280-8003A348 034BC0 00C8+00 3/3 1/1 0/0 .text            __dt__11dRes_info_cFv */
 dRes_info_c::~dRes_info_c() {
     if (mDMCommand != NULL) {
         delete mDMCommand;
@@ -43,7 +41,6 @@ dRes_info_c::~dRes_info_c() {
     }
 }
 
-/* 8003A348-8003A3F0 034C88 00A8+00 1/1 0/0 0/0 .text set__11dRes_info_cFPCcPCcUcP7JKRHeap */
 int dRes_info_c::set(char const* i_arcName, char const* i_path, u8 i_mountDirection, JKRHeap* i_heap) {
     char path[40];
 
@@ -62,7 +59,6 @@ int dRes_info_c::set(char const* i_arcName, char const* i_path, u8 i_mountDirect
     return true;
 }
 
-/* 8003A3F0-8003A490 034D30 00A0+00 1/1 0/0 0/0 .text            setAlpha__FP16J3DMaterialTable */
 static void setAlpha(J3DMaterialTable* i_matTable) {
     for (u16 i = 0; i < i_matTable->getMaterialNum(); i++) {
         J3DMaterial* mat = i_matTable->getMaterialNodePointer(i);
@@ -78,7 +74,6 @@ static void setAlpha(J3DMaterialTable* i_matTable) {
     }
 }
 
-/* 8003A490-8003A81C 034DD0 038C+00 1/1 0/0 0/0 .text            setIndirectTex__FP12J3DModelData */
 static void setIndirectTex(J3DModelData* i_modelData) {
     const char* textureName;
     J3DMaterialTable& materialTable = i_modelData->getMaterialTable();
@@ -104,12 +99,10 @@ static void setIndirectTex(J3DModelData* i_modelData) {
     }
 }
 
-/* 8003A81C-8003A840 03515C 0024+00 1/1 0/0 0/0 .text            setAlpha__FP12J3DModelData */
 static void setAlpha(J3DModelData* i_modelData) {
     setAlpha(&i_modelData->getMaterialTable());
 }
 
-/* 80379840-803798A4 005EA0 0064+00 2/2 0/0 0/0 .rodata          l_texMtxInfo */
 static const J3DTexMtxInfo l_texMtxInfo = {
     0x00,
     0x08, 0x00, 0x00,
@@ -123,10 +116,6 @@ static const J3DTexMtxInfo l_texMtxInfo = {
     },
 };
 
-/* 8003A840-8003AACC 035180 028C+00 1/1 0/0 0/0 .text            addWarpMaterial__FP12J3DModelData
- */
-// NONMATCHING l_alphaCompInfo needs to be placed in .sdata2, but the function breaks if it is declared const
-// Also see J3DAlphaComp::setAlphaCompInfo in J3DMatBlock.h
 static void addWarpMaterial(J3DModelData* i_modelData) {
     static J3DTevStageInfo const l_tevStageInfo = {
         0x05, 0x0F, 0x08, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x01, 0x00,
@@ -134,6 +123,7 @@ static void addWarpMaterial(J3DModelData* i_modelData) {
     };
     static J3DTexCoordInfo l_texCoordInfo = {0x00, 0x00, 0x27};
     static J3DTevOrderInfo l_tevOrderInfo = {0x00, 0x03, 0xFF, 0x00};
+    static J3DAlphaCompInfo const l_alphaCompInfo = {0x04, 0x80, 0x00, 0x03, 0xFF};
 
     ResTIMG* resTimg = (ResTIMG*)dComIfG_getObjectRes("Always", 0x5d);
     JUT_ASSERT(279, resTimg != NULL);
@@ -175,14 +165,11 @@ static void addWarpMaterial(J3DModelData* i_modelData) {
 
         J3DPEBlock* peBlock = material->getPEBlock();
         J3DAlphaComp* alphaComp = peBlock->getAlphaComp();
-        static J3DAlphaCompInfo l_alphaCompInfo = {0x04, 0x80, 0x00, 0x03, 0xFF, 0, 0, 0};
         alphaComp->setAlphaCompInfo(l_alphaCompInfo);
         peBlock->setZCompLoc((u8)0);
     }
 }
 
-/* 8003AB30-8003AC1C 035470 00EC+00 0/0 2/1 0/0 .text
- * onWarpMaterial__11dRes_info_cFP12J3DModelData                */
 void dRes_info_c::onWarpMaterial(J3DModelData* i_modelData) {
     for (u16 i = 0; i < i_modelData->getMaterialNum(); i++) {
         J3DMaterial* material = i_modelData->getMaterialNodePointer(i);
@@ -199,8 +186,6 @@ void dRes_info_c::onWarpMaterial(J3DModelData* i_modelData) {
     }
 }
 
-/* 8003AC1C-8003AD08 03555C 00EC+00 0/0 2/1 0/0 .text
- * offWarpMaterial__11dRes_info_cFP12J3DModelData               */
 void dRes_info_c::offWarpMaterial(J3DModelData* i_modelData) {
     for (u16 i = 0; i < i_modelData->getMaterialNum(); i++) {
         J3DMaterial* material = i_modelData->getMaterialNodePointer(i);
@@ -216,8 +201,6 @@ void dRes_info_c::offWarpMaterial(J3DModelData* i_modelData) {
     }
 }
 
-/* 8003AD08-8003AE14 035648 010C+00 0/0 1/1 0/0 .text
- * setWarpSRT__11dRes_info_cFP12J3DModelDataRC4cXyzff           */
 void dRes_info_c::setWarpSRT(J3DModelData* i_modelData, const cXyz& i_pos, f32 i_transX,
                              f32 i_transY) {
     J3DMaterial* material = i_modelData->getMaterialNodePointer(0);
@@ -234,8 +217,6 @@ void dRes_info_c::setWarpSRT(J3DModelData* i_modelData, const cXyz& i_pos, f32 i
     cMtx_concat(l_texMtxInfo.mEffectMtx, mDoMtx_stack_c::get(), texMtxInfo.mEffectMtx);
 }
 
-/* 8003AE14-8003B150 035754 033C+00 2/1 1/1 0/0 .text            loaderBasicBmd__11dRes_info_cFUlPv
- */
 J3DModelData* dRes_info_c::loaderBasicBmd(u32 i_tag, void* i_data) {
     u32 flags = 0x59020010;
     u16 i;
@@ -318,7 +299,6 @@ J3DModelData* dRes_info_c::loaderBasicBmd(u32 i_tag, void* i_data) {
     return (J3DModelData*)i_data;
 }
 
-/* 8003B30C-8003B8D0 035C4C 05C4+00 2/2 0/0 0/0 .text            loadResource__11dRes_info_cFv */
 int dRes_info_c::loadResource() {
     JUT_ASSERT(0x2C5, mRes == NULL);
 
@@ -362,7 +342,7 @@ int dRes_info_c::loadResource() {
 
                     JKRExpHeap* parentHeap = (JKRExpHeap*)JKRHeap::findFromRoot(JKRHeap::getCurrentHeap());
                     JUT_ASSERT(0x308, parentHeap != NULL && (parentHeap == mDoExt_getGameHeap() || parentHeap == mDoExt_getArchiveHeap()));
-#ifdef DEBUG
+#if DEBUG
                     char* heapName;
                     if (parentHeap == mDoExt_getGameHeap()) {
                         heapName = "GameHeap";
@@ -419,7 +399,7 @@ int dRes_info_c::loadResource() {
                     }
 
                     modelData = (J3DModelData*)result;
-#ifdef DEBUG
+#if DEBUG
                     J3DMaterial* materialp = modelData->getMaterialNodePointer(0);
                     if (materialp->isDrawModeOpaTexEdge()) {
                         // "BMDG:Translucent model can't be drawn!!\n"
@@ -497,8 +477,6 @@ int dRes_info_c::loadResource() {
     return 0;
 }
 
-/* 8003B998-8003BA9C 0362D8 0104+00 1/1 0/0 0/0 .text            deleteArchiveRes__11dRes_info_cFv
- */
 void dRes_info_c::deleteArchiveRes() {
     JUT_ASSERT(0x45E, mArchive != NULL);
 
@@ -527,7 +505,6 @@ void dRes_info_c::deleteArchiveRes() {
     }
 }
 
-/* 8003BA9C-8003BAC4 0363DC 0028+00 2/2 0/0 0/0 .text            getArcHeader__FP10JKRArchive */
 static SArcHeader* getArcHeader(JKRArchive* i_archive) {
     if (i_archive != NULL) {
         switch (i_archive->getMountMode()) {
@@ -539,8 +516,6 @@ static SArcHeader* getArcHeader(JKRArchive* i_archive) {
     return NULL;
 }
 
-/* 8003BAC4-8003BAF8 036404 0034+00 1/1 0/0 0/0 .text setRes__11dRes_info_cFP10JKRArchiveP7JKRHeap
- */
 int dRes_info_c::setRes(JKRArchive* i_archive, JKRHeap* i_heap) {
     JUT_ASSERT(0x4AD, mArchive == NULL);
     mArchive = i_archive;
@@ -552,7 +527,6 @@ int dRes_info_c::setRes(JKRArchive* i_archive, JKRHeap* i_heap) {
     return rt >> 0x1F;
 }
 
-/* 8003BAF8-8003BC98 036438 01A0+00 2/2 0/0 0/0 .text            setRes__11dRes_info_cFv */
 int dRes_info_c::setRes() {
     if (mArchive == NULL) {
         if (mDMCommand == NULL) {
@@ -611,7 +585,6 @@ int dRes_info_c::setRes() {
     return 0;
 }
 
-/* 8003BC98-8003BD00 0365D8 0068+00 1/1 0/0 0/0 .text            myGetMemBlockSize__FPv */
 static s32 myGetMemBlockSize(void* i_data) {
     JKRHeap* heap = JKRHeap::findFromRoot(i_data);
     if (heap->getHeapType() == 'EXPH') {
@@ -621,7 +594,6 @@ static s32 myGetMemBlockSize(void* i_data) {
     return -1;
 }
 
-/* 8003BD00-8003BD2C 036640 002C+00 1/1 0/0 0/0 .text            myGetMemBlockSize0__FPv */
 static s32 myGetMemBlockSize0(void* i_data) {
     s32 size = myGetMemBlockSize(i_data);
     if (size < 0) {
@@ -636,7 +608,6 @@ f32 dummy(int x) {
     return x;
 }
 
-/* 8003BD2C-8003BE38 03666C 010C+00 1/1 0/0 0/0 .text dump_long__11dRes_info_cFP11dRes_info_ci */
 void dRes_info_c::dump_long(dRes_info_c* i_resInfo, int i_infoNum) {
     int i;
     void* header;
@@ -681,8 +652,6 @@ void dRes_info_c::dump_long(dRes_info_c* i_resInfo, int i_infoNum) {
     }
 }
 
-/* 8003BE38-8003BFB0 036778 0178+00 1/1 0/0 0/0 .text            dump__11dRes_info_cFP11dRes_info_ci
- */
 void dRes_info_c::dump(dRes_info_c* i_resInfo, int i_infoNum) {
     int totalArcHeaderSize;
     int totalHeapSize;
@@ -722,7 +691,6 @@ void dRes_info_c::dump(dRes_info_c* i_resInfo, int i_infoNum) {
                        totalHeapSize);
 }
 
-/* 8003BFB0-8003C078 0368F0 00C8+00 0/0 1/1 0/0 .text            __dt__14dRes_control_cFv */
 dRes_control_c::~dRes_control_c() {
     for (int i = 0; i < ARRAY_SIZE(mObjectInfo); i++) {
         mObjectInfo[i].~dRes_info_c();
@@ -733,8 +701,6 @@ dRes_control_c::~dRes_control_c() {
     }
 }
 
-/* 8003C078-8003C160 0369B8 00E8+00 2/2 8/8 0/0 .text
- * setRes__14dRes_control_cFPCcP11dRes_info_ciPCcUcP7JKRHeap    */
 int dRes_control_c::setRes(char const* i_arcName, dRes_info_c* i_resInfo, int i_infoNum,
                            char const* i_path, u8 i_mountDirection, JKRHeap* i_heap) {
     dRes_info_c* resInfo = getResInfo(i_arcName, i_resInfo, i_infoNum);
@@ -761,13 +727,11 @@ int dRes_control_c::setRes(char const* i_arcName, dRes_info_c* i_resInfo, int i_
     return 1;
 }
 
-/* 8003C160-8003C194 036AA0 0034+00 0/0 10/10 1/1 .text
- * syncRes__14dRes_control_cFPCcP11dRes_info_ci                 */
 int dRes_control_c::syncRes(char const* i_arcName, dRes_info_c* i_resInfo, int i_infoNum) {
     dRes_info_c* resInfo = getResInfo(i_arcName, i_resInfo, i_infoNum);
 
     if (resInfo == NULL) {
-#ifdef DEBUG
+#if DEBUG
         if (i_arcName[0] == 'R' ||
             (i_arcName[0] == 'S' && i_arcName[1] == 't' && i_arcName[2] == 'g' && i_arcName[3] == '_' && i_arcName[4] == '0' && i_arcName[5] == '0') ||
             strncmp(i_arcName, "Pack", 4) == 0)
@@ -785,13 +749,11 @@ int dRes_control_c::syncRes(char const* i_arcName, dRes_info_c* i_resInfo, int i
     }
 }
 
-/* 8003C194-8003C1E4 036AD4 0050+00 1/1 7/7 0/0 .text
- * deleteRes__14dRes_control_cFPCcP11dRes_info_ci               */
 int dRes_control_c::deleteRes(char const* i_arcName, dRes_info_c* i_resInfo, int i_infoNum) {
     dRes_info_c* resInfo = getResInfo(i_arcName, i_resInfo, i_infoNum);
 
     if (resInfo == NULL) {
-#ifdef DEBUG
+#if DEBUG
     if (strcmp(i_arcName, "Xtg_00") == 0) {
         // "<%s.arc> deleteRes: res nothing !!\n(Detected deleting an unregistered resource! Please fix.)\n"
         OS_REPORT_ERROR("<%s.arc> deleteRes: res nothing !!\n(未登録のリソースを削除してるのを発見しました！修正してください。)\n", i_arcName);   
@@ -806,8 +768,6 @@ int dRes_control_c::deleteRes(char const* i_arcName, dRes_info_c* i_resInfo, int
     return 1;
 }
 
-/* 8003C1E4-8003C260 036B24 007C+00 5/5 5/5 3/3 .text
- * getResInfo__14dRes_control_cFPCcP11dRes_info_ci              */
 dRes_info_c* dRes_control_c::getResInfo(char const* i_arcName, dRes_info_c* i_resInfo, int i_infoNum) {
     for (int i = 0; i < i_infoNum; i++) {
         if (i_resInfo->getCount() != 0) {
@@ -821,8 +781,6 @@ dRes_info_c* dRes_control_c::getResInfo(char const* i_arcName, dRes_info_c* i_re
     return NULL;
 }
 
-/* 8003C260-8003C288 036BA0 0028+00 1/1 0/0 0/0 .text newResInfo__14dRes_control_cFP11dRes_info_ci
- */
 dRes_info_c* dRes_control_c::newResInfo(dRes_info_c* i_resInfo, int i_infoNum) {
     for (int i = 0; i < i_infoNum; i++) {
         if (i_resInfo->getCount() == 0) {
@@ -834,14 +792,12 @@ dRes_info_c* dRes_control_c::newResInfo(dRes_info_c* i_resInfo, int i_infoNum) {
     return NULL;
 }
 
-/* 8003C288-8003C2EC 036BC8 0064+00 4/4 0/0 0/0 .text
- * getResInfoLoaded__14dRes_control_cFPCcP11dRes_info_ci        */
 dRes_info_c* dRes_control_c::getResInfoLoaded(char const* i_arcName, dRes_info_c* i_resInfo,
                                               int i_infoNum) {
     dRes_info_c* resInfo = getResInfo(i_arcName, i_resInfo, i_infoNum);
 
     if (resInfo == NULL) {
-#ifdef DEBUG
+#if DEBUG
     if (stricmp(i_arcName, "Xtg_00") == 0) {
         OS_REPORT("\x1b[35m<%s.arc> getRes: res nothing !!\n\x1b[m", i_arcName);   
     }
@@ -855,8 +811,6 @@ dRes_info_c* dRes_control_c::getResInfoLoaded(char const* i_arcName, dRes_info_c
     return resInfo;
 }
 
-/* 8003C2EC-8003C37C 036C2C 0090+00 1/1 54/54 894/894 .text
- * getRes__14dRes_control_cFPCclP11dRes_info_ci                 */
 void* dRes_control_c::getRes(char const* i_arcName, s32 i_index, dRes_info_c* i_resInfo, int i_infoNum) {
     dRes_info_c* resInfo = getResInfoLoaded(i_arcName, i_resInfo, i_infoNum);
     if (resInfo == NULL) {
@@ -875,8 +829,6 @@ void* dRes_control_c::getRes(char const* i_arcName, s32 i_index, dRes_info_c* i_
     return resInfo->getRes(i_index);
 }
 
-/* 8003C37C-8003C400 036CBC 0084+00 0/0 18/18 109/109 .text
- * getRes__14dRes_control_cFPCcPCcP11dRes_info_ci               */
 void* dRes_control_c::getRes(char const* i_arcName, char const* i_resName, dRes_info_c* i_resInfo,
                              int i_infoNum) {
     dRes_info_c* resInfo = getResInfoLoaded(i_arcName, i_resInfo, i_infoNum);
@@ -895,8 +847,6 @@ void* dRes_control_c::getRes(char const* i_arcName, char const* i_resName, dRes_
     }
 }
 
-/* 8003C400-8003C470 036D40 0070+00 0/0 7/7 4/4 .text
- * getIDRes__14dRes_control_cFPCcUsP11dRes_info_ci              */
 void* dRes_control_c::getIDRes(char const* i_arcName, u16 i_resID, dRes_info_c* i_resInfo, int i_infoNum) {
     dRes_info_c* resInfo = getResInfoLoaded(i_arcName, i_resInfo, i_infoNum);
     if (resInfo == NULL) {
@@ -912,8 +862,6 @@ void* dRes_control_c::getIDRes(char const* i_arcName, u16 i_resID, dRes_info_c* 
     return resInfo->getRes(index);
 }
 
-/* 8003C470-8003C4E4 036DB0 0074+00 0/0 3/3 0/0 .text syncAllRes__14dRes_control_cFP11dRes_info_ci
- */
 int dRes_control_c::syncAllRes(dRes_info_c* i_resInfo, int i_infoNum) {
     for (int i = 0; i < i_infoNum; i++) {
         if (i_resInfo->getDMCommand() != NULL && i_resInfo->setRes() > 0) {
@@ -925,13 +873,11 @@ int dRes_control_c::syncAllRes(dRes_info_c* i_resInfo, int i_infoNum) {
     return 0;
 }
 
-/* 8003C4E4-8003C5BC 036E24 00D8+00 1/1 0/0 0/0 .text
- * setObjectRes__14dRes_control_cFPCcPvUlP7JKRHeap              */
 int dRes_control_c::setObjectRes(char const* i_arcName, void* i_archiveRes, u32 i_bufferSize,
                                  JKRHeap* i_heap) {
     JUT_ASSERT(0x7A3, i_archiveRes != NULL);
 
-#ifdef DEBUG
+#if DEBUG
     dRes_info_c* nowInfo = getResInfo(i_arcName, mObjectInfo, ARRAY_SIZEU(mObjectInfo));
     JUT_ASSERT(0x7A6, nowInfo == NULL);
 #endif
@@ -956,8 +902,6 @@ int dRes_control_c::setObjectRes(char const* i_arcName, void* i_archiveRes, u32 
     return 0;
 }
 
-/* 8003C5BC-8003C638 036EFC 007C+00 0/0 2/2 0/0 .text setStageRes__14dRes_control_cFPCcP7JKRHeap
- */
 int dRes_control_c::setStageRes(char const* i_arcName, JKRHeap* i_heap) {
     char path[20];
 
@@ -965,7 +909,6 @@ int dRes_control_c::setStageRes(char const* i_arcName, JKRHeap* i_heap) {
     return setRes(i_arcName, mStageInfo, ARRAY_SIZEU(mStageInfo), path, mDoDvd_MOUNT_DIRECTION_TAIL, i_heap);
 }
 
-/* 8003C638-8003C6B8 036F78 0080+00 0/0 2/2 0/0 .text            dump__14dRes_control_cFv */
 void dRes_control_c::dump() {
     JUTReportConsole_f("\ndRes_control_c::dump mObjectInfo\n");
     dRes_info_c::dump(mObjectInfo, ARRAY_SIZEU(mObjectInfo));
@@ -976,8 +919,6 @@ void dRes_control_c::dump() {
     dRes_info_c::dump_long(mStageInfo, ARRAY_SIZEU(mStageInfo));
 }
 
-/* 8003C6B8-8003C734 036FF8 007C+00 0/0 0/0 32/32 .text
- * getObjectResName2Index__14dRes_control_cFPCcPCc              */
 int dRes_control_c::getObjectResName2Index(char const* i_arcName, char const* i_resName) {
     dRes_info_c* info = getResInfoLoaded(i_arcName, mObjectInfo, ARRAY_SIZEU(mObjectInfo));
 

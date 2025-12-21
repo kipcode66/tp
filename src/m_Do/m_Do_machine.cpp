@@ -16,7 +16,9 @@
 #include "SSystem/SComponent/c_malloc.h"
 #include "SSystem/SComponent/c_math.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
+#ifdef __MWERKS__
 #include "base/PPCArch.h"
+#endif
 #include "m_Do/m_Do_DVDError.h"
 #include "m_Do/m_Do_MemCard.h"
 #include "m_Do/m_Do_Reset.h"
@@ -26,7 +28,6 @@
 #include "m_Do/m_Do_main.h"
 #include "DynamicLink.h"
 
-/* 80450BF0-80450BF4 0000F0 0004+00 1/1 0/0 0/0 .sbss            None */
 #if DEBUG
 u8 mDoMch::mDebugFill = true;
 u8 mDoMch::mDebugFillNotUse = 0xDD;
@@ -42,29 +43,21 @@ u8 mDoMch::GXWarningExecuteFrame;
 u8 mDoMch::mDebugFill;
 #endif
 
-/* 80450BF4-80450BF8 0000F4 0004+00 1/1 0/0 0/0 .sbss            solidHeapErrors */
 static int solidHeapErrors;
 
-/* 80450BF8-80450BFC 0000F8 0004+00 1/1 0/0 0/0 .sbss            gameHeapErrors */
 static int gameHeapErrors;
 
-/* 80450BFC-80450C00 0000FC 0004+00 1/1 0/0 0/0 .sbss            zeldaHeapErrors */
 static int zeldaHeapErrors;
 
-/* 80450C00-80450C04 000100 0004+00 1/1 0/0 0/0 .sbss            commandHeapErrors */
 static int commandHeapErrors;
 
-/* 80450C04-80450C08 000104 0004+00 1/1 0/0 0/0 .sbss            archiveHeapErrors */
 static int archiveHeapErrors;
 
-/* 80450C08-80450C0C 000108 0004+00 1/1 0/0 0/0 .sbss            unknownHeapErrors */
 static int unknownHeapErrors;
 
-/* 80450C0C-80450C10 00010C 0004+00 1/1 0/0 0/0 .sbss            heapErrors */
 static u32 heapErrors;
 
 #if VERSION == VERSION_GCN_USA || VERSION == VERSION_GCN_JPN
-/* 803A2F60-803A2F9C 000080 003C+00 1/0 0/0 0/0 .data            g_ntscZeldaIntDf */
 GXRenderModeObj g_ntscZeldaIntDf = {
     VI_TVMODE_NTSC_INT,
     608,
@@ -92,7 +85,6 @@ GXRenderModeObj g_ntscZeldaIntDf = {
     {8, 8, 10, 12, 10, 8, 8},
 };
 
-/* 803A2F9C-803A2FD8 0000BC 003C+00 1/1 1/1 0/0 .data            g_ntscZeldaProg */
 GXRenderModeObj g_ntscZeldaProg = {
     VI_TVMODE_NTSC_PROG,
     608,
@@ -120,7 +112,6 @@ GXRenderModeObj g_ntscZeldaProg = {
     {0, 0, 21, 22, 21, 0, 0},
 };
 #elif VERSION == VERSION_GCN_PAL
-/* 803A2F60-803A2F9C 000080 003C+00 1/0 0/0 0/0 .data            g_ntscZeldaIntDf */
 GXRenderModeObj g_ntscZeldaIntDf = {
     VI_TVMODE_PAL_INT,
     608,
@@ -148,7 +139,6 @@ GXRenderModeObj g_ntscZeldaIntDf = {
     {8, 8, 10, 12, 10, 8, 8},
 };
 
-/* 803A2F9C-803A2FD8 0000BC 003C+00 1/1 1/1 0/0 .data            g_ntscZeldaProg */
 GXRenderModeObj g_ntscZeldaProg = {
     VI_TVMODE_EURGB60_INT,
     608,
@@ -231,7 +221,7 @@ GXRenderModeObj g_ntscZeldaProg = {
 };
 #endif
 
-#ifdef DEBUG
+#if DEBUG
 static void myGXVerifyCallback(GXWarningLevel, u32, const char*);
 
 GXRenderModeObj g_palZeldaProg60 = {
@@ -254,12 +244,8 @@ GXRenderModeObj g_palZeldaProg60 = {
 };
 #endif
 
-/* 804505A0-804505A8 -00001 0004+04 1/1 3/3 0/0 .sdata           mRenderModeObj__15mDoMch_render_c
- */
 GXRenderModeObj* mDoMch_render_c::mRenderModeObj = &g_ntscZeldaIntDf;
 
-/* 8000B1EC-8000B3EC 005B2C 0200+00 2/2 0/0 0/0 .text            myGetHeapTypeByString__FP7JKRHeap
- */
 static const char* myGetHeapTypeByString(JKRHeap* p_heap) {
     static char tmpString[5];
 
@@ -318,7 +304,6 @@ static const char* myGetHeapTypeByString(JKRHeap* p_heap) {
     }
 }
 
-/* 8000B3EC-8000B5C8 005D2C 01DC+00 1/1 0/0 0/0 .text            myMemoryErrorRoutine__FPvUli */
 static void myMemoryErrorRoutine(void* p_heap, u32 size, int alignment) {
     JKRHeap* heap = (JKRHeap*)p_heap;
 
@@ -362,7 +347,6 @@ static void myMemoryErrorRoutine(void* p_heap, u32 size, int alignment) {
     }
 }
 
-/* 8000B5C8-8000B668 005F08 00A0+00 1/1 0/0 0/0 .text            myHeapCheckRecursive__FP7JKRHeap */
 void myHeapCheckRecursive(JKRHeap* p_heap) {
     if (!p_heap->check()) {
         const char* type = myGetHeapTypeByString(p_heap);
@@ -375,12 +359,10 @@ void myHeapCheckRecursive(JKRHeap* p_heap) {
     }
 }
 
-/* 8000B668-8000B68C 005FA8 0024+00 0/0 2/2 0/0 .text            mDoMch_HeapCheckAll__Fv */
 void mDoMch_HeapCheckAll() {
     myHeapCheckRecursive(JKRHeap::sRootHeap);
 }
 
-/* 8000B68C-8000B73C 005FCC 00B0+00 1/1 0/0 0/0 .text            developKeyCheck__FUlUl */
 static int developKeyCheck(u32 btnTrig, u32 btnHold) {
     static u8 key_link;
     static u8 key_ganon;
@@ -412,17 +394,14 @@ static int developKeyCheck(u32 btnTrig, u32 btnHold) {
     return mDoMain::developmentMode;
 }
 
-/* 8000B73C-8000B768 00607C 002C+00 1/1 0/0 0/0 .text            mDoMch_IsProgressiveMode__Fv */
 BOOL mDoMch_IsProgressiveMode() {
     return OSGetProgressiveMode() == true;
 }
 
-/* 8000B768-8000B798 0060A8 0030+00 2/2 0/0 0/0 .text            exceptionReadPad__FPUlPUl */
 bool exceptionReadPad(u32* p_btnTrig, u32* p_btnHold) {
     return JUTException::getManager()->readPad(p_btnTrig, p_btnHold);
 }
 
-/* 8000B798-8000B7C8 0060D8 0030+00 1/1 0/0 0/0 .text            exceptionRestart__Fv */
 void exceptionRestart() {
     mDoRst_reset(0, 0, 0);
     OSResetSystem(0, 0, 0);
@@ -430,7 +409,6 @@ void exceptionRestart() {
     } while (true);
 }
 
-/* 8000B7C8-8000B95C 006108 0194+00 1/1 0/0 0/0 .text myExceptionCallback__FUsP9OSContextUlUl */
 void myExceptionCallback(u16, OSContext*, u32, u32) {
     u32 btnHold;
     u32 btnTrig;
@@ -478,13 +456,12 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
         }
     }
     DVDChangeDir("/map/Final/Release");
-    JUTVideo::destroyManager();
+    JUTDestroyVideoManager();
     GXSetDrawDoneCallback(NULL);
     VISetBlack(0);
     VIFlush();
 }
 
-/* 8000B95C-8000BCF4 00629C 0398+00 1/1 0/0 0/0 .text fault_callback_scroll__FUsP9OSContextUlUl */
 static void fault_callback_scroll(u16, OSContext* p_context, u32, u32) {
     JUTException* manager = JUTException::getManager();
     JUTConsole* exConsole = manager->getConsole();
@@ -606,33 +583,30 @@ static void dummy_string() {
     DEAD_STRING("\x1B[32m%-24s = size=%d KB\n\x1B[m");
 }
 
-/* 8000BCF4-8000BCF8 006634 0004+00 1/1 0/0 0/0 .text            my_PrintHeap__FPCcUl */
 static void my_PrintHeap(char const* heapName, u32 heapSize) {
     OS_REPORT("\x1b[32m%-24s = size=%d KB\n\x1b[m", heapName, heapSize / 1024);
 }
 
-/* 8000BCF8-8000BD44 006638 004C+00 1/1 0/0 0/0 .text            my_SysPrintHeap__FPCcPvUl */
 void my_SysPrintHeap(char const* message, void* start, u32 size) {
     uintptr_t end = (uintptr_t)start + size;
     OSReport_System("\x1b[32m%-24s = %08x-%08x size=%d KB\n\x1b[m", message, start,
                     end, size / 1024);
 }
 
-/* 8000BD44-8000C0CC 006684 0388+00 0/0 2/1 0/0 .text            mDoMch_Create__Fv */
 int mDoMch_Create() {
     if (mDoMain::developmentMode == 0 || !(OSGetConsoleType() & 0x10000000)) {
         OSReportDisable();
     }
 
     JKRHeap::setDefaultDebugFill(mDoMch::mDebugFill);
-    #ifdef DEBUG
+    #if DEBUG
     JKRSetDebugFillNotuse(mDoMch::mDebugFillNotUse);
     JKRSetDebugFillNew(mDoMch::mDebugFillNew);
     JKRSetDebugFillDelete(mDoMch::mDebugFillDelete);
     #endif
     JFWSystem::setMaxStdHeap(1);
 
-    #ifndef DEBUG
+    #if !DEBUG
     uintptr_t arenaHi = (uintptr_t)OSGetArenaHi();
     uintptr_t arenaLo = (uintptr_t)OSGetArenaLo();
 
@@ -678,7 +652,7 @@ int mDoMch_Create() {
     gameHeapSize += 0x100000;
     dynamicLinkHeapSize = 0x180000;
 
-    #ifndef DEBUG
+    #if !DEBUG
     // Fakematch because the heap sizes differ between debug and retail.
     // Maybe the actual calculations above use sizeof or constants and that's why it's different?
     archiveHeapSize -= 0x641800;
@@ -690,7 +664,7 @@ int mDoMch_Create() {
     gameHeapSize += 0xC800;
     #endif
 
-    #ifdef DEBUG
+    #if DEBUG
     if (mDoMain::archiveHeapSize != -1) {
         OSReport_Error("アーカイブヒープサイズ指定！\n");
         archiveHeapSize = mDoMain::archiveHeapSize;
@@ -709,7 +683,7 @@ int mDoMch_Create() {
 
     arenaSize -= (dbPrintHeapSize + 0x10);
     arenaSize -= 0x120;
-    #ifndef DEBUG
+    #if !DEBUG
     arenaSize -= 0xDAB400;
     #endif
     #if VERSION == VERSION_GCN_JPN
@@ -724,14 +698,14 @@ int mDoMch_Create() {
     }
 
     JFWSystem::setFifoBufSize(0xA0000);
-    #ifdef DEBUG
+    #if DEBUG
     JFWSystem::setAramAudioBufSize(0xB00000);
     #else
     JFWSystem::setAramAudioBufSize(0xA00000);
     #endif
     JFWSystem::setAramGraphBufSize(-1);
 
-    #ifdef DEBUG
+    #if DEBUG
     VIInit();
     if (VIGetDTVStatus() != 0 && mDoMch_IsProgressiveMode()) {
         mDoMch_render_c::setProgressiveMode();
@@ -776,7 +750,7 @@ int mDoMch_Create() {
     JKRSetErrorFlag(JFWSystem::getSystemHeap(), true);
 
     JKRHeap* rootHeap = (JKRHeap*)JKRGetRootHeap();
-    #ifdef DEBUG
+    #if DEBUG
     JKRHeap* rootHeap2 = JKRGetRootHeap2();
     #else
     JKRHeap* rootHeap2 = rootHeap;
@@ -786,7 +760,7 @@ int mDoMch_Create() {
     heap = mDoExt_createCommandHeap(commandHeapSize, rootHeap);
     my_SysPrintHeap("コマンドヒープ", heap, commandHeapSize);
 
-    #ifdef DEBUG
+    #if DEBUG
     heap = DynamicModuleControlBase::createHeap(dynamicLinkHeapSize, rootHeap);
     my_SysPrintHeap("ダイナミックリンクヒープ", heap, dynamicLinkHeapSize);
     #endif
@@ -803,7 +777,7 @@ int mDoMch_Create() {
     heap = mDoExt_createGameHeap(gameHeapSize, rootHeap);
     my_SysPrintHeap("ゲームヒープ", heap, gameHeapSize);
 
-    #ifdef DEBUG
+    #if DEBUG
     JKRHeap* sp28 = rootHeap2;
     u32 hostIOHeapSize = 0x71450;
     hostIOHeapSize += 0x32000;
@@ -819,7 +793,7 @@ int mDoMch_Create() {
     my_SysPrintHeap("ゼルダヒープ", zeldaHeap, size);
     JKRSetCurrentHeap(zeldaHeap);
 
-    #ifdef DEBUG
+    #if DEBUG
     my_PrintHeap("システムヒープ", JKRGetSystemHeap()->getTotalFreeSize());
     my_PrintHeap("ルートヒープ", JKRGetRootHeap()->getTotalFreeSize());
     my_PrintHeap("ルートヒープ2", JKRGetRootHeap2()->getTotalFreeSize());
@@ -835,7 +809,7 @@ int mDoMch_Create() {
     sysConsole->setOutput(JUTConsole::OUTPUT_CONSOLE | JUTConsole::OUTPUT_OSREPORT);
     sysConsole->setPosition(16, 42);
 
-#ifdef DEBUG
+#if DEBUG
     JUTException::setMapFile("/map/RVL/Debug/RframeworkD.map");
 #else
     JUTException::appendMapFile("/map/Final/Release/frameworkF.map");
@@ -845,7 +819,7 @@ int mDoMch_Create() {
 
     cMl::init(mDoExt_getZeldaHeap());
     cM_initRnd(100, 100, 100);
-    #ifdef DEBUG
+    #if DEBUG
     GXSetVerifyLevel((GXWarningLevel)mDoMch::GXWarningLevel);
     GXSetVerifyCallback((GXVerifyCallback)&myGXVerifyCallback);
     #endif

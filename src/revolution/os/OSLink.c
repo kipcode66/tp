@@ -1,5 +1,6 @@
 #include <revolution.h>
 #include <revolution/os.h>
+#include <string.h>
 
 #include "__os.h"
 
@@ -118,9 +119,11 @@ void OSNotifyLink(OSModuleInfo* module) {}
 
 void OSNotifyUnlink(OSModuleInfo* module) {}
 
+#if SDK_AUG2010
 void OSNotifyPreLink(OSModuleHeader* newModule, OSModuleHeader* module) {}
 
 void OSNotifyPostLink(OSModuleHeader* newModule, OSModuleHeader* module) {}
+#endif
 #pragma dont_inline reset
 
 void OSSetStringTable(void* stringTable) {
@@ -148,7 +151,9 @@ static BOOL Relocate(OSModuleHeader* newModule, OSModuleHeader* module) {
     return FALSE;
 
 Found:
+    #if SDK_AUG2010
     OSNotifyPreLink(newModule, module);
+    #endif
 
     siFlush = 0;
     for (rel = (OSRel*)imp->offset; rel->type != R_DOLPHIN_END; rel++) {
@@ -227,7 +232,9 @@ Found:
         ICInvalidateRange((void*)offset, siFlush->size);
     }
 
+    #if SDK_AUG2010
     OSNotifyPostLink(newModule, module);
+    #endif
     return TRUE;
 }
 
@@ -362,7 +369,10 @@ static BOOL Undo(OSModuleHeader* newModule, OSModuleHeader* module) {
     return FALSE;
 
 Found:
+    #if SDK_AUG2010
     OSNotifyPreLink(newModule, module);
+    #endif
+
     siFlush = 0;
     for (rel = (OSRel*)imp->offset; rel->type != R_DOLPHIN_END; rel++) {
         (u8*)p += rel->offset;
@@ -430,7 +440,9 @@ Found:
         ICInvalidateRange((void*)offset, siFlush->size);
     }
 
+    #if SDK_AUG2010
     OSNotifyPostLink(newModule, module);
+    #endif
     return TRUE;
 }
 

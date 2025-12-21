@@ -381,12 +381,10 @@ void dScnLogo_c::dvdDataLoad() {
     preLoad_dyl();
 }
 
-/* 80258420-80258444 252D60 0024+00 1/0 0/0 0/0 .text            dScnLogo_Create__FP11scene_class */
 static int dScnLogo_Create(scene_class* i_this) {
     return (new (i_this) dScnLogo_c())->create();
 }
 
-/* 80258444-80258484 252D84 0040+00 1/0 0/0 0/0 .text            dScnLogo_Execute__FP10dScnLogo_c */
 static int dScnLogo_Execute(dScnLogo_c* i_this) {
     if (mDoRst::isReset()) {
         fopScnM_ChangeReq(i_this, PROC_LOGO_SCENE, 0, 5);
@@ -394,13 +392,11 @@ static int dScnLogo_Execute(dScnLogo_c* i_this) {
     return 1;
 }
 
-/* 80258484-802584A8 252DC4 0024+00 1/0 0/0 0/0 .text            dScnLogo_Draw__FP10dScnLogo_c */
 static int dScnLogo_Draw(dScnLogo_c* i_this) {
     i_this->draw();
     return 1;
 }
 
-/* 802584A8-802584D0 252DE8 0028+00 1/0 0/0 0/0 .text            dScnLogo_Delete__FP10dScnLogo_c */
 static int dScnLogo_Delete(dScnLogo_c* i_this) {
     i_this->setupGameResources();
     // initialize GZ after most game resources are setup
@@ -409,8 +405,6 @@ static int dScnLogo_Delete(dScnLogo_c* i_this) {
     return 1;
 }
 
-/* 802584D0-802584D8 252E10 0008+00 1/0 0/0 0/0 .text            dScnLogo_IsDelete__FP10dScnLogo_c
- */
 static int dScnLogo_IsDelete(dScnLogo_c* i_this) {
     return 1;
 }
@@ -443,8 +437,6 @@ u8 dScnLogo_c::getPalLanguage() {
 }
 #endif
 
-/* 802584D8-802584FC 252E18 0024+00 1/1 0/0 0/0 .text            setProgressiveMode__10dScnLogo_cFUc
- */
 void dScnLogo_c::setProgressiveMode(u8 mode) {
     #if VERSION == VERSION_GCN_PAL
     OSSetEuRgb60Mode(mode);
@@ -453,8 +445,6 @@ void dScnLogo_c::setProgressiveMode(u8 mode) {
     #endif
 }
 
-/* 802584FC-80258520 252E3C 0024+00 3/3 0/0 0/0 .text            getProgressiveMode__10dScnLogo_cFv
- */
 u8 dScnLogo_c::getProgressiveMode() {
     #if VERSION == VERSION_GCN_PAL
     return OSGetEuRgb60Mode();
@@ -463,8 +453,6 @@ u8 dScnLogo_c::getProgressiveMode() {
     #endif
 }
 
-/* 80258520-8025854C 252E60 002C+00 1/1 0/0 0/0 .text            isProgressiveMode__10dScnLogo_cFv
- */
 bool dScnLogo_c::isProgressiveMode() {
     #if VERSION == VERSION_GCN_PAL
     return OSGetEuRgb60Mode() == OS_EURGB60_ON;
@@ -473,7 +461,6 @@ bool dScnLogo_c::isProgressiveMode() {
     #endif
 }
 
-/* 8025854C-8025855C 252E8C 0010+00 1/1 0/0 0/0 .text            setRenderMode__10dScnLogo_cFv */
 void dScnLogo_c::setRenderMode() {
     mDoMch_render_c::setProgressiveMode();
 }
@@ -487,7 +474,6 @@ static dScnLogo_Method l_dScnLogo_Method[5] = {
     dScnLogo_Draw,
 };
 
-/* 803C2FE4-803C300C -00001 0028+00 0/0 0/0 1/0 .data            g_profile_LOGO_SCENE */
 extern scene_process_profile_definition g_profile_LOGO_SCENE = {
     fpcLy_ROOT_e,
     1,

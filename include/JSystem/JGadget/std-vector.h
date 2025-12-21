@@ -8,7 +8,7 @@
 
 namespace JGadget {
 namespace vector {
-/* 802DCCC8 */ u32 extend_default(u32, u32, u32);
+u32 extend_default(u32, u32, u32);
 };
 
 typedef u32 (*extendFunc)(u32, u32, u32);
@@ -28,6 +28,9 @@ struct TVector {
         Allocator* mAllocator;
         T* mPtr;
     };
+
+    typedef T* iterator;
+    typedef const T* const_iterator;
 
     TVector(Allocator const& allocator) {
         mAllocator = allocator;
@@ -111,9 +114,10 @@ struct TVector {
         return pBegin_ + diff;
     }
 
-    T* begin() const { return pBegin_; }
-
-    T* end() const { return pEnd_; }
+    iterator begin() { return pBegin_; }
+    const_iterator begin() const { return pBegin_; }
+    iterator end() { return pEnd_; }
+    const_iterator end() const { return pEnd_; }
 
     u32 size() const {
         if (pBegin_ == 0) {
@@ -177,6 +181,9 @@ template <typename T>
 struct TVector_pointer : TVector_pointer_void {
     TVector_pointer(const TAllocator<void*>& allocator) : TVector_pointer_void(allocator) {}
     ~TVector_pointer() {}
+
+    typedef T* iterator;
+    typedef const T* const_iterator;
 
     const T* begin() const { return (const T*)TVector_pointer_void::begin(); }
     T* begin() { return (T*)TVector_pointer_void::begin(); }

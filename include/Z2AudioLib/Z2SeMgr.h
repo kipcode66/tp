@@ -55,29 +55,30 @@ struct Z2MultiSeObj : Z2MultiSeMgr {
 
 class Z2SeMgr : public JASGlobalInstance<Z2SeMgr> {
 public:
-    /* 802AB64C */ Z2SeMgr();
-    /* 802AB750 */ void initSe();
-    /* 802AB80C */ void resetModY();
-    /* 802AB830 */ void modHeightAtCamera(const Vec**);
-    /* 802AB93C */ void incrCrowdSize();
-    /* 802AB960 */ void decrCrowdSize();
-    /* 802AB984 */ bool seStart(JAISoundID soundID, const Vec* posPtr, u32, s8 reverb,
+    Z2SeMgr();
+    void initSe();
+    void resetModY();
+    void modHeightAtCamera(const Vec**);
+    void incrCrowdSize();
+    void decrCrowdSize();
+    bool seStart(JAISoundID soundID, const Vec* posPtr, u32, s8 reverb,
                                 f32 pitch, f32 volume, f32 pan, f32 dolby, u8);
-    /* 802AC50C */ bool seStartLevel(JAISoundID soundID, const Vec* posPtr, u32, s8 reverb,
+    bool seStartLevel(JAISoundID soundID, const Vec* posPtr, u32, s8 reverb,
                                      f32 pitch, f32 volume, f32 pan, f32 dolby, u8);
-    /* 802AD8B0 */ void seStop(JAISoundID soundID, u32 fadeTime);
-    /* 802AD94C */ void seStopAll(u32 fadeTime);
-    /* 802AD9F4 */ void seMoveVolumeAll(f32 volume, u32 moveTime);
-    /* 802ADB14 */ void messageSePlay(u16, Vec*, s8);
-    /* 802ADB50 */ void talkInSe();
-    /* 802ADC54 */ void talkOutSe();
-    /* 802ADD58 */ void menuInSe();
-    /* 802ADE5C */ void setLevObjSE(u32 soundID, Vec* posPtr, s8 reverb);
-    /* 802ADFF4 */ void setMultiTriggerSE(u32 soundID, Vec* posPtr, s8 reverb);
-    /* 802AE184 */ void processSeFramework();
-    /* 802AE524 */ bool isLevelSe(JAISoundID soundID);
-    /* 802AE5B0 */ bool isSoundCulling(JAISoundID soundID);
-    /* 802B9AC4 */ void resetCrowdSize() { mCrowdSize = 0; }
+    void seStop(JAISoundID soundID, u32 fadeTime);
+    void seStopAll(u32 fadeTime);
+    void seMoveVolumeAll(f32 volume, u32 moveTime);
+    void messageSePlay(u16, Vec*, s8);
+    void talkInSe();
+    void talkOutSe();
+    void menuInSe();
+    void setLevObjSE(u32 soundID, Vec* posPtr, s8 reverb);
+    void setMultiTriggerSE(u32 soundID, Vec* posPtr, s8 reverb);
+    void processSeFramework();
+    void playNaviFlySound(f32, f32);
+    bool isLevelSe(JAISoundID soundID);
+    bool isSoundCulling(JAISoundID soundID);
+    void resetCrowdSize() { mCrowdSize = 0; }
 
 #if PLATFORM_WII || PLATFORM_SHIELD
     void homeMenuSeCallback(s32);    
@@ -86,12 +87,12 @@ public:
 private:
     /* 0x000 */ JAISoundHandle mSoundHandle[24];
     /* 0x060 */ JAISoundHandles mSoundHandles;
-    #if VERSION == VERSION_SHIELD_DEBUG
-    /* 0x068 */ JAISoundHandle dbg_field_0x68;
-    /* 0x06C */ f32 dbg_field_0x6c;
-    /* 0x070 */ f32 dbg_field_0x70;
-    /* 0x074 */ f32 dbg_field_0x74;
-    /* 0x078 */ f32 dbg_field_0x78;
+    #if VERSION >= VERSION_WII_USA_R0
+    /* 0x068 */ JAISoundHandle wii_field_0x68;
+    /* 0x06C */ f32 wii_field_0x6c;
+    /* 0x070 */ f32 wii_field_0x70;
+    /* 0x074 */ f32 wii_field_0x74;
+    /* 0x078 */ f32 wii_field_0x78;
     #endif
     /* 0x068 */ Z2MultiSeObj mLevelObjSe[10];
     /* 0x1D0 */ u8 mLevelObjectSeCount;

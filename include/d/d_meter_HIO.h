@@ -11,7 +11,7 @@
 struct subJOREventCallbackListNode : public JOREventCallbackListNode {
     subJOREventCallbackListNode() : JOREventCallbackListNode(0x81000000, 0x81000000, true) {}
 
-    virtual int JORAct(u32, const char*);
+    virtual BOOL JORAct(u32, const char*);
     virtual ~subJOREventCallbackListNode() {}
 };
 
@@ -19,8 +19,8 @@ class JKRAramArchive;
 
 class dMeter_menuHIO_c : public JORReflexible {
 public:
-    /* 801FE330 */ dMeter_menuHIO_c();
-    /* 8020123C */ virtual ~dMeter_menuHIO_c() {}
+    dMeter_menuHIO_c();
+    virtual ~dMeter_menuHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -84,8 +84,8 @@ public:
 
 class dMeter_drawOptionHIO_c : public JORReflexible {
 public:
-    /* 801FE4EC */ dMeter_drawOptionHIO_c();
-    /* 80200F98 */ virtual ~dMeter_drawOptionHIO_c() {}
+    dMeter_drawOptionHIO_c();
+    virtual ~dMeter_drawOptionHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -122,8 +122,8 @@ public:
 
 class dMeter_drawLetterHIO_c : public JORReflexible {
 public:
-    /* 801FE5CC */ dMeter_drawLetterHIO_c();
-    /* 80200F50 */ virtual ~dMeter_drawLetterHIO_c() {}
+    dMeter_drawLetterHIO_c();
+    virtual ~dMeter_drawLetterHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -164,8 +164,8 @@ public:
 
 class dMeter_drawFishingHIO_c : public JORReflexible {
 public:
-    /* 801FE730 */ dMeter_drawFishingHIO_c();
-    /* 80200F08 */ virtual ~dMeter_drawFishingHIO_c() {}
+    dMeter_drawFishingHIO_c();
+    virtual ~dMeter_drawFishingHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -216,8 +216,8 @@ public:
 
 class dMeter_drawInsectHIO_c : public JORReflexible {
 public:
-    /* 801FE8DC */ dMeter_drawInsectHIO_c();
-    /* 80200EC0 */ virtual ~dMeter_drawInsectHIO_c() {}
+    dMeter_drawInsectHIO_c();
+    virtual ~dMeter_drawInsectHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -249,8 +249,8 @@ public:
 
 class dMeter_drawCalibrationHIO_c : public JORReflexible {
 public:
-    /* 801FE954 */ dMeter_drawCalibrationHIO_c();
-    /* 80200E78 */ virtual ~dMeter_drawCalibrationHIO_c() {}
+    dMeter_drawCalibrationHIO_c();
+    virtual ~dMeter_drawCalibrationHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -266,8 +266,8 @@ public:
 
 class dMeter_drawSkillHIO_c : public JORReflexible {
 public:
-    /* 801FE990 */ dMeter_drawSkillHIO_c();
-    /* 80200E30 */ virtual ~dMeter_drawSkillHIO_c() {}
+    dMeter_drawSkillHIO_c();
+    virtual ~dMeter_drawSkillHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -306,8 +306,8 @@ public:
 
 class dMeter_drawEmpButtonHIO_c : public JORReflexible {
 public:
-    /* 801FEAF0 */ dMeter_drawEmpButtonHIO_c();
-    /* 80200DA0 */ virtual ~dMeter_drawEmpButtonHIO_c() {}
+    dMeter_drawEmpButtonHIO_c();
+    virtual ~dMeter_drawEmpButtonHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -456,8 +456,8 @@ public:
 
 class dMeter_drawMiniGameHIO_c : public JORReflexible {
 public:
-    /* 801FEFF0 */ dMeter_drawMiniGameHIO_c();
-    /* 80200DE8 */ virtual ~dMeter_drawMiniGameHIO_c() {}
+    dMeter_drawMiniGameHIO_c();
+    virtual ~dMeter_drawMiniGameHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -532,8 +532,8 @@ public:
 
 class dMeter_drawLightDropHIO_c : public JORReflexible {
 public:
-    /* 801FF31C */ dMeter_drawLightDropHIO_c();
-    /* 80200D58 */ virtual ~dMeter_drawLightDropHIO_c() {}
+    dMeter_drawLightDropHIO_c();
+    virtual ~dMeter_drawLightDropHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -578,16 +578,18 @@ public:
     /* 0xA8 */ u8 mAnimDebug;
 };  // Size: 0xAC
 
+class dMeter_map_HIO_c;
+
 class dMeter_drawHIO_c : public JORReflexible {
 public:
-    /* 801FF5B8 */ dMeter_drawHIO_c();
-    /* 80201128 */ virtual ~dMeter_drawHIO_c() {
+    dMeter_drawHIO_c();
+    virtual ~dMeter_drawHIO_c() {
         #if DEBUG
-        field_0x8_debug = 0;
+        field_0x8_debug = NULL;
         #endif
     }
 
-    #ifdef DEBUG
+    #if DEBUG
     virtual void listenPropertyEvent(const JORPropertyEvent*);
     virtual void genMessage(JORMContext*);
 
@@ -601,8 +603,8 @@ public:
 
     /* 0x000 */  // vtable
     /* 0x004 */ s8 field_0x4;
-    #ifdef DEBUG
-    int field_0x8_debug;
+    #if DEBUG
+    dMeter_map_HIO_c* field_0x8_debug;
     #endif
     /* 0x008 */ f32 mLifeTopPosX;
     /* 0x00C */ f32 mLifeTopPosY;
@@ -751,7 +753,7 @@ public:
     /* 0x2C4 */ f32 mButtonATextSpacing;
     /* 0x2C8 */ s32 mButtonATextActionID;
     /* 0x2CC */ u32 field_0x2cc;
-    /* 0x2D0 */ bool mButtonATextDebug;
+    /* 0x2D0 */ u8 mButtonATextDebug;
     /* 0x2D4 */ f32 mButtonBFontScale;
     /* 0x2D8 */ f32 mButtonBFontPosX;
     /* 0x2DC */ f32 mButtonBFontPosY;
@@ -838,13 +840,13 @@ public:
     /* 0x420 */ s16 mButtonCrossMoveFrame;
     /* 0x422 */ s16 field_0x422;
     /* 0x424 */ s16 field_0x424;
-    /* 0x426 */ bool mButtonDebug[4];
+    /* 0x426 */ u8 mButtonDebug[4];
     /* 0x42A */ u8 mButtonXYItemDimAlpha;
     /* 0x42B */ u8 mButtonXYBaseDimAlpha;
     /* 0x42C */ u8 field_0x42c;
     /* 0x42D */ u8 mMaxSpurAmount;
-    /* 0x42E */ bool mSpurDebug;
-    /* 0x42F */ bool field_0x42f;
+    /* 0x42E */ u8 mSpurDebug;
+    /* 0x42F */ u8 field_0x42f;
     /* 0x430 */ JUtility::TColor mSpurIconPikariFrontInner;
     /* 0x434 */ JUtility::TColor mSpurIconPikariFrontOuter;
     /* 0x438 */ JUtility::TColor mSpurIconPikariBackInner;
@@ -919,9 +921,9 @@ public:
     /* 0x55C */ u32 mMessageID;
     /* 0x560 */ u32 mFlowID;
     /* 0x564 */ s16 mMessageDuration;
-    /* 0x566 */ bool mMessageDebug;
-    /* 0x567 */ bool mFlowDebug;
-    /* 0x568 */ bool mItemScaleAdjustON;
+    /* 0x566 */ u8 mMessageDebug;
+    /* 0x567 */ u8 mFlowDebug;
+    /* 0x568 */ u8 mItemScaleAdjustON;
     /* 0x569 */ u8 mItemScalePercent;
     /* 0x56C */ f32 mTouchAreaUnselectScale[5];
     /* 0x580 */ f32 mTouchAreaSelectScale[5];
@@ -935,7 +937,7 @@ public:
     /* 0x5F0 */ JUtility::TColor mTouchAreaSelectWhite[3];
     /* 0x5FC */ JUtility::TColor mTouchAreaSelectBlack[3];
     /* 0x608 */ s16 mTouchAreaSelectFrameNum;
-    /* 0x60A */ bool field_0x60a;
+    /* 0x60A */ u8 field_0x60a;
     /* 0x60C */ f32 mLanternIconMeterPosX;
     /* 0x610 */ f32 mLanternIconMeterPosY;
     /* 0x614 */ f32 mLanternIconMeterSize;
@@ -955,8 +957,8 @@ STATIC_ASSERT(sizeof(dMeter_drawHIO_c) == 3880);
 
 class dMeter_ringHIO_c : public JORReflexible {
 public:
-    /* 802001AC */ dMeter_ringHIO_c();
-    /* 802010E0 */ virtual ~dMeter_ringHIO_c() {}
+    dMeter_ringHIO_c();
+    virtual ~dMeter_ringHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -1053,8 +1055,8 @@ STATIC_ASSERT(sizeof(dMeter_ringHIO_c) == 344);
 
 class dMeter_mapIconHIO_c : public JORReflexible {
 public:
-    /* 802004B4 */ dMeter_mapIconHIO_c();
-    /* 80201028 */ virtual ~dMeter_mapIconHIO_c() {}
+    dMeter_mapIconHIO_c();
+    virtual ~dMeter_mapIconHIO_c() {}
 
     void genMessage(JORMContext*);
 
@@ -1140,6 +1142,10 @@ public:
     /* 0x179 */ bool mIconDisplay[22];
 };  // Size: 0x190
 
+class dMf_HIO_c;
+class dMdm_HIO_c;
+class dMfm_HIO_c;
+
 class dMeter_fmapHIO_c : public JORReflexible {
 public:
     enum {
@@ -1184,8 +1190,8 @@ public:
         /* 0x24 */ JUtility::TColor field_0x24;
     };  // Size: 0x28
 
-    /* 802006C8 */ dMeter_fmapHIO_c();
-#ifdef DEBUG
+    dMeter_fmapHIO_c();
+#if DEBUG
     void update();
     void createEvtCallBackObject();
     void deleteEvtCallBackObject();
@@ -1193,19 +1199,19 @@ public:
     virtual void listenPropertyEvent(const JORPropertyEvent*);
     virtual void genMessage(JORMContext*);
 #endif
-    /* 80200BCC */ virtual ~dMeter_fmapHIO_c();
+    virtual ~dMeter_fmapHIO_c();
 
     /* 0x004 */ s8 field_0x4;
     #if DEBUG
     /* 0x008 */ subJOREventCallbackListNode* mpEvtCallBack;
     #endif
-    /* 0x008 */ JKRAramArchive* mpArcData;
+    /* 0x008 */ JKRArchive* mpArcData;
     /* 0x00C */ void* mpArcFile;
     /* 0x010 */ void* mpDecompBuf;
-    /* 0x014 */ void* field_0x14;
-    /* 0x018 */ void* field_0x18;
+    /* 0x014 */ dMfm_HIO_c* field_0x14;
+    /* 0x018 */ dMdm_HIO_c* field_0x18;
     #if DEBUG
-    /* 0x020 */ u8 unk_0x20[4];
+    /* 0x020 */ dMf_HIO_c* field_0x20;
     #endif
     /* 0x01C */ MapBlinkAnime mMapBlink[3];
     /* 0x094 */ s16 mDisplayFrameNum;
@@ -1311,8 +1317,8 @@ STATIC_ASSERT(sizeof(dMeter_fmapHIO_c) == 1188);
 
 class dMeter_cursorHIO_c : public JORReflexible {
 public:
-    /* 80200CD4 */ dMeter_cursorHIO_c();
-    /* 80201098 */ virtual ~dMeter_cursorHIO_c() {}
+    dMeter_cursorHIO_c();
+    virtual ~dMeter_cursorHIO_c() {}
 
     void genMessage(JORMContext*);
 

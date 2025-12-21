@@ -4,14 +4,14 @@
 #include "JSystem/J3DGraphBase/J3DSys.h"
 
 // matches debug
-inline f32 J3DCalcZValue(register MtxP m, register Vec v) {
-    register f32 temp_f4;
-    register f32 out;
-    register f32 temp_f0;
-    register f32 temp_f2;
-    register f32 temp_f1 = 1.0f;
-
+inline f32 J3DCalcZValue(__REGISTER MtxP m, __REGISTER Vec v) {
 #ifdef __MWERKS__
+    __REGISTER f32 temp_f4;
+    __REGISTER f32 out;
+    __REGISTER f32 temp_f0;
+    __REGISTER f32 temp_f2;
+    __REGISTER f32 temp_f1 = 1.0f;
+
     // clang-format off
     asm {
         psq_l temp_f0, 0(v), 0, 0 /* qr0 */
@@ -24,9 +24,9 @@ inline f32 J3DCalcZValue(register MtxP m, register Vec v) {
         ps_sum0 out, out, out, out
     }
     // clang-format on
-#endif
 
     return out;
+#endif
 }
 
 class J3DDrawBuffer;

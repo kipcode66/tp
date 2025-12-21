@@ -14,13 +14,13 @@ void fapGm_Execute();
 
 class fapGm_HIO_c : public JORReflexible {
 public:
-    /* 80018944 */ fapGm_HIO_c();
+    fapGm_HIO_c();
 
     #if DEBUG
     virtual void listenPropertyEvent(const JORPropertyEvent*);
     virtual void genMessage(JORMContext*);
     #endif
-    /* 80018AE0 */ virtual ~fapGm_HIO_c();
+    virtual ~fapGm_HIO_c();
 
     #if DEBUG
     static void startCpuTimer();
@@ -139,7 +139,11 @@ inline void fapGmHIO_set2Ddraw(u8 param_0) {
 }
 
 inline u8 fapGmHIO_get2Ddraw() {
+    #if DEBUG
     return g_HIO.mDisplay2D;
+    #else
+    return TRUE;
+    #endif
 }
 
 inline void fapGmHIO_offPrint() {
@@ -151,7 +155,11 @@ inline void fapGmHIO_onPrint() {
 }
 
 inline u8 fapGmHIO_getParticle() {
+    #if DEBUG
     return g_HIO.mDisplayParticle;
+    #else
+    return TRUE;
+    #endif
 }
 
 #if PLATFORM_WII || PLATFORM_SHIELD
