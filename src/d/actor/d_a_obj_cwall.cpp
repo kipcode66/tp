@@ -12,7 +12,7 @@
 #include "Z2AudioLib/Z2Instances.h"
 #include "d/d_cc_d.h"
 #include "d/d_com_inf_game.h"
-#include "cmath.h"
+#include <math.h>
 
 void daObjCwall_c::initBaseMtx() {
     mWallModel->setBaseScale(scale);
@@ -830,7 +830,7 @@ static actor_method_class daObjCwall_METHODS = {
     (process_method_func)daObjCwall_MoveBGDraw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_ChainWall = {
+actor_process_profile_definition g_profile_Obj_ChainWall = {
   fpcLy_CURRENT_e,        // mLayerID
   3,                      // mListID
   fpcPi_CURRENT_e,        // mListPrio

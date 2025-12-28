@@ -3,7 +3,7 @@
 #include "JSystem/JKernel/JKRThread.h"
 #include "JSystem/JUtility/JUTAssert.h"
 #include "JSystem/JUtility/JUTConsole.h"
-#include "stdio.h"
+#include <stdio.h>
 #include "global.h"
 #include <stdint.h>
 
@@ -82,7 +82,7 @@ void JKRThread::setCommon_heapSpecified(JKRHeap* heap, u32 stack_size, int param
     mStackMemory = JKRAllocFromHeap(mHeap, mStackSize, 0x20);
     mThreadRecord = (OSThread*)JKRAllocFromHeap(mHeap, sizeof(OSThread), 0x20);
 
-    void* stackBase = (void*)((int)mStackMemory + mStackSize);
+    void* stackBase = (void*)((intptr_t)mStackMemory + mStackSize);
     OSCreateThread(mThreadRecord, start, this, stackBase, mStackSize, param_3, 1);
 }
 

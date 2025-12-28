@@ -324,7 +324,6 @@ void daObjLv7Brg_c::action() {
     }
 }
 
-// NONMATCHING - small regalloc
 void daObjLv7Brg_c::mode_action() {
     f32 var_f31;
     f32 temp_f30 = field_0xa78;
@@ -472,7 +471,7 @@ static actor_method_class daObjLv7Brg_METHODS = {
     (process_method_func)daObjLv7Brg_MoveBGDraw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_Lv7Bridge = {
+actor_process_profile_definition g_profile_Obj_Lv7Bridge = {
   fpcLy_CURRENT_e,        // mLayerID
   3,                      // mListID
   fpcPi_CURRENT_e,        // mListPrio

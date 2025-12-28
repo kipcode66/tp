@@ -1,8 +1,8 @@
 #ifndef _MSL_COMMON_PRINTF_H
 #define _MSL_COMMON_PRINTF_H
 
-#include "ansi_files.h"
-#include "__va_arg.h"
+#include <ansi_files.h>
+#include <cstdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,16 +13,10 @@ int printf(const char* format, ...);
 int sprintf(char* s, const char* format, ...);
 int snprintf(char* s, size_t n, const char* format, ...);
 int vsnprintf(char* s, size_t n, const char* format, va_list arg);
+int vsprintf(char* s, const char* format, va_list arg);
 int vprintf(const char* format, va_list arg);
 
 int vswprintf(wchar_t* s, size_t n, const wchar_t* format, va_list arg);
-
-#if defined(__cplusplus)
-namespace std {
-    extern "C" { using ::vsnprintf; }
-    extern "C" { using ::vswprintf; }
-}
-#endif
 
 #ifdef __cplusplus
 }

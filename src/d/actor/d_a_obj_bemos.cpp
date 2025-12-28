@@ -54,8 +54,8 @@ static Vec const l_craw_offset[4] = {
 s16 const daObjBm_c::M_dir_base[4] = {
     0x0000,
     0x4000,
-    0x8000,
-    0xC000,
+    -0x8000,
+    -0x4000,
 };
 
 static const char* l_arcName = "Obj_bm";
@@ -1907,7 +1907,7 @@ static actor_method_class daObjBm_METHODS = {
     (process_method_func)daObjBm_MoveBGDraw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_Bemos = {
+actor_process_profile_definition g_profile_Obj_Bemos = {
     fpcLy_CURRENT_e,         // mLayerID
     3,                       // mListID
     fpcPi_CURRENT_e,         // mListPrio

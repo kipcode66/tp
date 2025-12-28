@@ -11,6 +11,14 @@ class mDoDvdThd_mountXArchive_c;
 class mDoDvdThd_mountArchive_c;
 class mDoDvdThd_toMainRam_c;
 
+class dLog_HIO_c {
+public:
+    dLog_HIO_c();
+    virtual ~dLog_HIO_c();
+
+    u8 field_0x4[0x8 - 0x4];
+};  // Size: 0x8
+
 class dScnLogo_c : public scene_class {
 public:
     enum {

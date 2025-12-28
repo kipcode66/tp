@@ -12,8 +12,6 @@
 
 static daBarDesk_HIO_c l_HIO;
 
-static u8 data_80BA9D2C[4];
-
 dCcD_SrcGObjInf const daBarDesk_c::mCcDObjInfo = {
     {0, {{0, 0, 0}, {0xD8FAFDBF, 0x11}, {0}}},
     {1, 0, 0, 0, 0},
@@ -160,7 +158,7 @@ static actor_method_class l_daBarDesk_Method = {
     (process_method_func)daBarDesk_Draw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_BarDesk = {
+actor_process_profile_definition g_profile_Obj_BarDesk = {
     fpcLy_CURRENT_e,
     3,
     fpcPi_CURRENT_e,

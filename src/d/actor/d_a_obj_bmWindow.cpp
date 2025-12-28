@@ -150,7 +150,7 @@ void daBmWindow_c::init_modeWait() {
 }
 
 void daBmWindow_c::modeWait() {
-    daPy_py_c* player = (daPy_py_c*)g_dComIfG_gameInfo.play.getPlayerPtr(LINK_PTR);
+    daPy_py_c* player = (daPy_py_c*)dComIfGp_getLinkPlayer();
     cXyz cStack_2c;
     cXyz cStack_38;
     cStack_2c = l_check_area[0];
@@ -330,7 +330,7 @@ static actor_method_class l_daBmWindow_Method = {
     (process_method_func)daBmWindow_Draw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_BmWindow = {
+actor_process_profile_definition g_profile_Obj_BmWindow = {
     fpcLy_CURRENT_e,          // mLayerID
     3,                        // mListID
     fpcPi_CURRENT_e,          // mListPrio

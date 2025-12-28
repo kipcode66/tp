@@ -11,7 +11,7 @@
 #include "d/d_com_inf_game.h"
 #include "d/d_cc_d.h"
 #include "d/d_item_data.h"
-#include "cmath.h"
+#include <math.h>
 
 const static dCcD_SrcCyl l_cyl_src = {
     {
@@ -349,11 +349,13 @@ static int daItemShield_Execute(daItemShield_c* i_this) {
 }
 
 static int daItemShield_Delete(daItemShield_c* i_this) {
+    fopAcM_RegisterDeleteID(i_this, "ObjSShield");
     return i_this->_delete();
 }
 
 static int daItemShield_Create(fopAc_ac_c* i_this) {
-    return static_cast<daItemShield_c*>(i_this)->create();
+    fopAcM_RegisterCreateID(daItemShield_c, i_this, "ObjSShield");
+    return a_this->create();
 }
 
 static actor_method_class l_daItemShield_Method = {
@@ -364,7 +366,7 @@ static actor_method_class l_daItemShield_Method = {
     (process_method_func)daItemShield_Draw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_Shield = {
+actor_process_profile_definition g_profile_Obj_Shield = {
   fpcLy_CURRENT_e,        // mLayerID
   7,                      // mListID
   fpcPi_CURRENT_e,        // mListPrio

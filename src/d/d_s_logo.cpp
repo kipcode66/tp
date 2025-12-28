@@ -465,15 +465,17 @@ void dScnLogo_c::setRenderMode() {
     mDoMch_render_c::setProgressiveMode();
 }
 
-static dScnLogo_Method l_dScnLogo_Method[5] = {
-    (dScnLogo_Method)dScnLogo_Create,
-    dScnLogo_Delete,
-    dScnLogo_Execute,
-    dScnLogo_IsDelete,
-    dScnLogo_Draw,
+dLog_HIO_c::~dLog_HIO_c() {}
+
+static scene_method_class l_dScnLogo_Method = {
+    (process_method_func)dScnLogo_Create,
+    (process_method_func)dScnLogo_Delete,
+    (process_method_func)dScnLogo_Execute,
+    (process_method_func)dScnLogo_IsDelete,
+    (process_method_func)dScnLogo_Draw,
 };
 
-extern scene_process_profile_definition g_profile_LOGO_SCENE = {
+scene_process_profile_definition g_profile_LOGO_SCENE = {
     fpcLy_ROOT_e,
     1,
     fpcPi_CURRENT_e,
@@ -483,6 +485,6 @@ extern scene_process_profile_definition g_profile_LOGO_SCENE = {
     0,
     0,
     &g_fopScn_Method.base,
-    (process_method_class*)&l_dScnLogo_Method,
+    &l_dScnLogo_Method,
     NULL,
 };

@@ -193,7 +193,7 @@ enum Joint {
 
 static e_rdy_class* boss;
 
-static bool hioInit;
+static bool hio_set;
 
 static daE_RDY_HIO_c l_HIO;
 
@@ -3838,7 +3838,7 @@ static void demo_camera(e_rdy_class* i_this) {
         daPy_getPlayerActorClass()->changeOriginalDemo();
         daPy_getPlayerActorClass()->changeDemoMode(0x17, 0, 0, 0);
         i_this->mCamDist = 300.0f;
-        dComIfGp_getEvent().startCheckSkipEdge(a_this);
+        dComIfGp_getEvent()->startCheckSkipEdge(a_this);
         i_this->mTargetAngleY = i_this->mPlayerAngle;
         a_this->current.angle.y = -0x3384;
         a_this->shape_angle.y = a_this->current.angle.y;
@@ -3996,7 +3996,7 @@ static void demo_camera(e_rdy_class* i_this) {
         daPy_getPlayerActorClass()->changeOriginalDemo();
         daPy_getPlayerActorClass()->changeDemoMode(4, 0, 0, 0);
         Z2GetAudioMgr()->bgmStop(70, 0);
-        dComIfGp_getEvent().offFlag2(8);
+        dComIfGp_getEvent()->offFlag2(8);
         dComIfGs_offTmpBit(dSv_event_tmp_flag_c::tempBitLabels[11] & 0xffff);
         // fallthrough
 
@@ -4008,7 +4008,7 @@ static void demo_camera(e_rdy_class* i_this) {
                 i_this->mMsgFlow.init(a_this, 0x7d1, 0, NULL);
             }
             if (i_this->mDemoTimer == 50) {
-                dComIfGp_getEvent().startCheckSkipEdge(a_this);
+                dComIfGp_getEvent()->startCheckSkipEdge(a_this);
             }
             if (i_this->mDemoTimer == 55) {
                 daPy_getPlayerActorClass()->changeDemoMode(1, 4, 0, 0);
@@ -4197,7 +4197,7 @@ static void demo_camera(e_rdy_class* i_this) {
     }
 
     if (i_this->mDemoMode >= 11 && i_this->mDemoMode < 20) {
-        if (dComIfGp_getEvent().checkSkipEdge()) {
+        if (dComIfGp_getEvent()->checkSkipEdge()) {
             a_this->current.pos.set(-103242.0f, -22894.0f, 38097.0f);
             a_this->current.angle.y = 0x44a3;
             a_karg->current.pos.set(-103242.0f, -22894.0f, 38097.0f);
@@ -4213,7 +4213,7 @@ static void demo_camera(e_rdy_class* i_this) {
             Z2GetAudioMgr()->setBattleBgmOff(false);
         }
     } else if (i_this->mDemoMode >= 20 && i_this->mDemoMode < 29) {
-        if (dComIfGp_getEvent().checkSkipEdge()) {
+        if (dComIfGp_getEvent()->checkSkipEdge()) {
             cVar13 = 2;
             vec2.set(-93666.0f, -5951.0f, 39000.0f);
             player->setPlayerPosAndAngle(&vec2, 0, 0);
@@ -4695,7 +4695,7 @@ static int daE_RDY_Delete(e_rdy_class* i_this) {
     dComIfG_resDelete(&i_this->mPhase, i_this->mpArcName);
 
     if (i_this->mHIOInit) {
-        hioInit = false;
+        hio_set = false;
     }
 
     if (a_this->heap != NULL) {
@@ -4909,9 +4909,9 @@ static cPhs__Step daE_RDY_Create(fopAc_ac_c* i_this) {
             return cPhs_ERROR_e;
         }
 
-        if (!hioInit) {
+        if (!hio_set) {
             _this->mHIOInit = true;
-            hioInit = true;
+            hio_set = true;
             l_HIO.field_0x4 = -1;
         }
 
@@ -4995,7 +4995,7 @@ static actor_method_class l_daE_RDY_Method = {
     (process_method_func)daE_RDY_Draw,
 };
 
-extern actor_process_profile_definition g_profile_E_RDY = {
+actor_process_profile_definition g_profile_E_RDY = {
   fpcLy_CURRENT_e,        // mLayerID
   7,                      // mListID
   fpcPi_CURRENT_e,        // mListPrio

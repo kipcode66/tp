@@ -262,7 +262,7 @@ struct TLinkList_factory : public TLinkList<T, I> {
     }
 
     typename TLinkList<T, I>::iterator Erase_destroy(T* param_0) {
-        typename TLinkList<T, I>::iterator spC(Erase(param_0));
+        typename TLinkList<T, I>::iterator spC(this->Erase(param_0));
         Do_destroy(param_0);
         return spC;
     }
@@ -270,7 +270,11 @@ struct TLinkList_factory : public TLinkList<T, I> {
 
 template <typename T, int I>
 TLinkList_factory<T, I>::~TLinkList_factory() {
+#ifdef __MWERKS__
     JGADGET_ASSERTWARN(934, empty());
+#else
+    JGADGET_ASSERTWARN(934, this->empty());
+#endif
 }
 
 template <typename T>

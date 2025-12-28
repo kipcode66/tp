@@ -269,8 +269,7 @@ void daB_GG_c::initCc() {
     }
 }
 
-/* 805ED6FD 0003+00 l_HIOInit None */
-static u8 l_HIOInit;
+static u8 hio_set;
 
 static daB_GG_HIO_c l_HIO;
 
@@ -544,10 +543,8 @@ static s16 s_TargetAngle;
 
 static cXyz s_centerpos(217.0f, 1275.0f, -57.0f);
 
-/* 805ED74C 0002+00 data_805ED74C s_M_Action__22@unnamed@d_a_b_gg_cpp@ */
 static s16 s_M_Action;
 
-/* 805ED74E 0002+00 data_805ED74E s_W_Action__22@unnamed@d_a_b_gg_cpp@ */
 static s16 s_W_Action;
 }
 
@@ -938,8 +935,8 @@ void daB_GG_c::St_CamAction() {
     }
 
     if (mCamMode != 0) {
-        dComIfGp_getEvent().onSkipFade();
-        dComIfGp_getEvent().setSkipProc(this, DemoSkipCallBack, 0);
+        dComIfGp_getEvent()->onSkipFade();
+        dComIfGp_getEvent()->setSkipProc(this, DemoSkipCallBack, 0);
     }
 }
 
@@ -1376,8 +1373,8 @@ void daB_GG_c::Gn_CamAction() {
     }
 
     if (mCamMode > 1) {
-        dComIfGp_getEvent().onSkipFade();
-        dComIfGp_getEvent().setSkipProc(this, DemoSkipCallBack, 1);
+        dComIfGp_getEvent()->onSkipFade();
+        dComIfGp_getEvent()->setSkipProc(this, DemoSkipCallBack, 1);
     }
 }
 
@@ -4194,7 +4191,7 @@ int daB_GG_c::Delete() {
     dComIfG_resDelete(&mPhase, "B_gg");
 
     if (mHIOInit) {
-        l_HIOInit = 0;
+        hio_set = 0;
         mDoHIO_DELETE_CHILD(l_HIO.id);
     }
 
@@ -4288,8 +4285,8 @@ int daB_GG_c::Create() {
             return cPhs_ERROR_e;
         }
 
-        if (!l_HIOInit) {
-            l_HIOInit = TRUE;
+        if (!hio_set) {
+            hio_set = TRUE;
             mHIOInit = TRUE;
             l_HIO.id = mDoHIO_CREATE_CHILD("ガーゴイル", &l_HIO);
         }
@@ -4459,7 +4456,7 @@ static actor_method_class l_daB_GG_Method = {
     (process_method_func)daB_GG_Draw,
 };
 
-extern actor_process_profile_definition g_profile_B_GG = {
+actor_process_profile_definition g_profile_B_GG = {
     fpcLy_CURRENT_e,        // mLayerID
     7,                      // mListID
     fpcPi_CURRENT_e,        // mListPrio

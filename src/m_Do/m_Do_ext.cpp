@@ -21,7 +21,7 @@
 #include "global.h"
 #include "m_Do/m_Do_ext.h"
 #include "m_Do/m_Do_mtx.h"
-#include "stdio.h"
+#include <stdio.h>
 
 static void mDoExt_setJ3DData(Mtx mtx, const J3DTransformInfo* transformInfo, u16 param_2) {
     bool local_28;
@@ -831,17 +831,42 @@ u32 mDoExt_adjustSolidHeap(JKRSolidHeap* i_heap) {
         return -1;
     }
 
+    u32 estimatedSize = i_heap->getHeapSize();
     s32 result = i_heap->adjustSize();
     if (result < 0) {
         // "adjustSize failure %08x\n"
         OSReport_Error("adjustSize失敗 %08x\n", i_heap);
         return -1;
     }
+    u32 actualSize = i_heap->getHeapSize();
+
+    #if DEBUG
+    if (lbl_8074C3B9[0]) {
+        // "\x1B[33mSolid heap estimate: %08x actual: %08x\n\x1B[m"
+        OS_REPORT("\x1B[33mソリッドヒープの見積もり %08x 実際 %08x\n\x1B[m", estimatedSize, actualSize);
+
+        if (estimatedSize > 0x400 && estimatedSize > (actualSize + 0x400)) {
+            // "\x1B[33mThe estimate is %x bytes too large (%5.2f times). This could lead to degraded memory efficiency.\n\x1B[m"
+            OS_REPORT("\x1B[33m見積もりが %x バイト大きい(%5.2f倍)です。メモリ効率悪化が懸念されます。\n\x1B[m", estimatedSize - actualSize, (f32)estimatedSize / (f32)actualSize);
+        } else if (estimatedSize >= (actualSize + 0x20)) {
+            // "\x1B[36mThe estimate is %x bytes too large. That's pretty good.\n\x1B[m"
+            OS_REPORT("\x1B[36m見積もりが %x バイト大きいです。だいぶいい感じです。\n\x1B[m", estimatedSize - actualSize);
+        } else {
+            // "\x1B[32mThe estimate is spot on! Perfect.\n\x1B[m"
+            OS_REPORT("\x1B[32m見積もりが、ジャストミート！完璧です。\n\x1B[m");
+        }
+    }
+
+    if (lbl_8074C3B9[0]) {
+        OS_REPORT("JKRSolidHeap::adjustSize %08x (%08x bytes)\n", (u32)i_heap, result);
+    }
+    #endif
 
     // this probably indicates that 0x80 is some constant, maybe from a sizeof(JKRSolidHeap)
     // with alignment?
-    if (result >= (u32)0x80) {
-        result -= 0x80;
+    u32 r25 = 0x80;
+    if (result >= r25) {
+        return result - r25;
     }
 
     return result;
@@ -1060,9 +1085,6 @@ void mDoExt_morf_c::frameUpdate() {
     mFrameCtrl.update();
 }
 
-/* 8000FC4C-8000FD10 00A58C 00C4+00 0/0 0/0 34/34 .text
- * __ct__14mDoExt_McaMorfFP12J3DModelDataP25mDoExt_McaMorfCallBack1_cP25mDoExt_McaMorfCallBack2_cP15J3DAnmTransformifiiiPvUlUl
- */
 mDoExt_McaMorf::mDoExt_McaMorf(J3DModelData* modelData, mDoExt_McaMorfCallBack1_c* callback1,
                                    mDoExt_McaMorfCallBack2_c* callback2, J3DAnmTransform* anmTransform,
                                    int param_4, f32 param_5, int param_6, int param_7, int param_8,
@@ -1079,9 +1101,6 @@ mDoExt_McaMorf::~mDoExt_McaMorf() {
     }
 }
 
-/* 8000FD94-80010074 00A6D4 02E0+00 1/1 0/0 0/0 .text
- * create__14mDoExt_McaMorfFP12J3DModelDataP25mDoExt_McaMorfCallBack1_cP25mDoExt_McaMorfCallBack2_cP15J3DAnmTransformifiiiPvUlUl
- */
 int mDoExt_McaMorf::create(J3DModelData* modelData, mDoExt_McaMorfCallBack1_c* callback1,
                            mDoExt_McaMorfCallBack2_c* callback2, J3DAnmTransform* anmTransform,
                            int param_4, f32 param_5, int param_6, int param_7, int param_8,
@@ -1320,9 +1339,6 @@ void mDoExt_McaMorf::getTransform(u16 param_0, J3DTransformInfo* param_1) {
     }
 }
 
-/* 800107D0-80010888 00B110 00B8+00 0/0 2/2 222/222 .text
- * __ct__16mDoExt_McaMorfSOFP12J3DModelDataP25mDoExt_McaMorfCallBack1_cP25mDoExt_McaMorfCallBack2_cP15J3DAnmTransformifiiP10Z2CreatureUlUl
- */
 mDoExt_McaMorfSO::mDoExt_McaMorfSO(J3DModelData* param_0, mDoExt_McaMorfCallBack1_c* param_1,
                                    mDoExt_McaMorfCallBack2_c* param_2, J3DAnmTransform* param_3,
                                    int param_4, f32 param_5, int param_6, int param_7,
@@ -1337,9 +1353,6 @@ mDoExt_McaMorfSO::~mDoExt_McaMorfSO() {
     stopZelAnime();
 }
 
-/* 800108F0-80010B68 00B230 0278+00 1/1 0/0 0/0 .text
- * create__16mDoExt_McaMorfSOFP12J3DModelDataP25mDoExt_McaMorfCallBack1_cP25mDoExt_McaMorfCallBack2_cP15J3DAnmTransformifiiP10Z2CreatureUlUl
- */
 int mDoExt_McaMorfSO::create(J3DModelData* i_modelData, mDoExt_McaMorfCallBack1_c* param_1,
                              mDoExt_McaMorfCallBack2_c* param_2, J3DAnmTransform* param_3,
                              int param_4, f32 param_5, int param_6, int param_7,
@@ -1618,9 +1631,6 @@ void mDoExt_McaMorfSO::stopZelAnime() {
     }
 }
 
-/* 80011348-800113FC 00BC88 00B4+00 0/0 0/0 1/1 .text
- * __ct__15mDoExt_McaMorf2FP12J3DModelDataP25mDoExt_McaMorfCallBack1_cP25mDoExt_McaMorfCallBack2_cP15J3DAnmTransformP15J3DAnmTransformifiiP10Z2CreatureUlUl
- */
 mDoExt_McaMorf2::mDoExt_McaMorf2(J3DModelData* param_0, mDoExt_McaMorfCallBack1_c* param_1,
                                  mDoExt_McaMorfCallBack2_c* param_2, J3DAnmTransform* param_3,
                                  J3DAnmTransform* param_4, int param_5, f32 param_6, int param_7,
@@ -1633,9 +1643,6 @@ mDoExt_McaMorf2::~mDoExt_McaMorf2() {
     stopZelAnime();
 }
 
-/* 80011464-800116B4 00BDA4 0250+00 1/1 0/0 0/0 .text
- * create__15mDoExt_McaMorf2FP12J3DModelDataP25mDoExt_McaMorfCallBack1_cP25mDoExt_McaMorfCallBack2_cP15J3DAnmTransformP15J3DAnmTransformifiiP10Z2CreatureUlUl
- */
  int mDoExt_McaMorf2::create(J3DModelData* param_0, mDoExt_McaMorfCallBack1_c* param_1,
                                  mDoExt_McaMorfCallBack2_c* param_2, J3DAnmTransform* param_3,
                                  J3DAnmTransform* param_4, int param_5, f32 param_6, int param_7,

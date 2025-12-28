@@ -64,8 +64,8 @@ static const s16 l_open_limit_max[3] = {
 
 static const s16 l_open_limit_min[3] = {
     0x1388,
-    0xAAAB,
-    0xAE39,
+    -0x5555,
+    -0x51C7,
 };
 
 static const s16 l_open_speed[3] = {
@@ -273,10 +273,11 @@ int daZdoor_c::create1st() {
     mDoorType = getType();
     int phase_state = dComIfG_resLoad(&mPhaseReq, l_arcName[mDoorType]);
     if (phase_state == cPhs_COMPLEATE_e) {
-        int res_name_index = g_dComIfG_gameInfo.mResControl.getObjectResName2Index(l_arcName[mDoorType], l_dzbName[mDoorType]);
+        int dzb_id = dComIfG_getObjctResName2Index(l_arcName[mDoorType], l_dzbName[mDoorType]);
+        JUT_ASSERT(604, dzb_id != -1);
         
         u16 estimate_size = estimateSizeTbl[mDoorType];
-        phase_state = MoveBGCreate(l_arcName[mDoorType], res_name_index, 0x0, estimate_size, 0x0);
+        phase_state = MoveBGCreate(l_arcName[mDoorType], dzb_id, 0x0, estimate_size, 0x0);
 
         if (phase_state == cPhs_ERROR_e) {
             return phase_state;
@@ -380,7 +381,7 @@ static actor_method_class daZdoor_METHODS = {
     (process_method_func)daZdoor_MoveBGDraw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_ZDoor = {
+actor_process_profile_definition g_profile_Obj_ZDoor = {
   fpcLy_CURRENT_e,        // mLayerID
   3,                      // mListID
   fpcPi_CURRENT_e,        // mListPrio

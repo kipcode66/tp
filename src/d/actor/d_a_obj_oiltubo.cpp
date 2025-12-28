@@ -235,7 +235,7 @@ void daObj_Oiltubo_c::setAttnPos() {
 BOOL daObj_Oiltubo_c::chkEvent() {
     BOOL var_r5 = 1;
 
-    if (!dComIfGp_getEvent().isOrderOK()) {
+    if (!dComIfGp_getEvent()->isOrderOK()) {
         var_r5 = 0;
 
         if (eventInfo.checkCommandCatch()) {
@@ -288,7 +288,7 @@ static actor_method_class daObj_Oiltubo_MethodTable = {
     (process_method_func)daObj_Oiltubo_Draw,
 };
 
-extern actor_process_profile_definition g_profile_OBJ_OILTUBO = {
+actor_process_profile_definition g_profile_OBJ_OILTUBO = {
     fpcLy_CURRENT_e,
     7,
     fpcPi_CURRENT_e,

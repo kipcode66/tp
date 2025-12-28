@@ -37,6 +37,8 @@ class J3DModelData;  // placeholder
 class JKRHeap;
 class cM3dGPla;
 
+s8 dComIfGp_getReverb(int roomNo);
+
 struct fopAcM_prmBase_class {
     /* 0x00 */ u32 parameters;
     /* 0x04 */ cXyz position;
@@ -74,6 +76,8 @@ struct fopAcM_search4ev_prm {
 };
 
 struct fopAcM_search_prm {
+    fopAcM_search_prm() {};
+
     /* 0x00 */ u32 prm0;
     /* 0x04 */ u32 prm1;
     /* 0x08 */ s16 procname;
@@ -478,15 +482,14 @@ inline f32 fopAcM_searchActorDistanceY(const fopAc_ac_c* actorA, const fopAc_ac_
     return actorB->current.pos.y - actorA->current.pos.y;
 }
 
-inline u16 fopAcM_GetSetId(const fopAc_ac_c* i_actor) {
+inline int fopAcM_GetSetId(const fopAc_ac_c* i_actor) {
     return i_actor->setID;
 }
 
 inline void dComIfGs_onActor(int bitNo, int roomNo);
 
 inline void fopAcM_onActor(const fopAc_ac_c* i_actor) {
-    int setId = fopAcM_GetSetId(i_actor);
-    dComIfGs_onActor(setId, fopAcM_GetHomeRoomNo(i_actor));
+    dComIfGs_onActor(fopAcM_GetSetId(i_actor), fopAcM_GetHomeRoomNo(i_actor));
 }
 
 inline void fopAcM_onDraw(fopAc_ac_c* i_actor) {
@@ -760,8 +763,6 @@ inline s16 fopAcM_toPlayerShapeAngleY(const fopAc_ac_c* i_actor) {
     return fopAcM_toActorShapeAngleY(i_actor, dComIfGp_getPlayer(0));
 }
 
-s8 dComIfGp_getReverb(int roomNo);
-
 inline void fopAcM_seStartCurrent(const fopAc_ac_c* actor, u32 sfxID, u32 param_2) {
     mDoAud_seStart(sfxID, &actor->current.pos, param_2,
                    dComIfGp_getReverb(fopAcM_GetRoomNo(actor)));
@@ -781,7 +782,7 @@ inline void fopAcM_seStartCurrentLevel(const fopAc_ac_c* actor, u32 sfxID, u32 p
                         dComIfGp_getReverb(fopAcM_GetRoomNo(actor)));
 }
 
-inline void fopAcM_offActor(fopAc_ac_c* i_actor, u32 flag) {
+inline void fopAcM_offActor(const fopAc_ac_c* i_actor, int flag) {
     dComIfGs_offActor(flag, fopAcM_GetHomeRoomNo(i_actor));
 }
 
@@ -842,7 +843,9 @@ void fopAcM_showAssert_f(const fopAc_ac_c*, const char*, int, const char*, ...);
 #define fopAcM_setWarningMessage(...)
 #endif
 
-void fopAcM_getNameString(const fopAc_ac_c*, char*);
+BOOL fopAcM_getNameString(const fopAc_ac_c*, char*);
+
+inline void fopAcM_SetStatusMap(fopAc_ac_c*, u32) {}
 
 class fopAcM_lc_c {
 public:
@@ -853,7 +856,10 @@ public:
     static cXyz* getCrossP() { return mLineCheck.GetCrossP(); }
     static cXyz& getCross() { return mLineCheck.GetCross(); }
     static bool lineCheck(const cXyz*, const cXyz*, const fopAc_ac_c*);
-    static bool getTriPla(cM3dGPla* o_tri) { return dComIfG_Bgsp().GetTriPla(mLineCheck, o_tri); }
+    static bool dummyCheck(cM3dGPla* i_plane);
+    static bool getTriPla(cM3dGPla* i_plane) {
+        return dComIfG_Bgsp().GetTriPla(mLineCheck, i_plane);
+    };
     static s32 getWallCode() { return dComIfG_Bgsp().GetWallCode(mLineCheck); }
     static bool checkWallHit() {
         cM3dGPla poly;

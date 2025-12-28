@@ -6,6 +6,7 @@
 #include "JSystem/JUtility/JUTConsole.h"
 #include "JSystem/JKernel/JKRAram.h"
 #include "dolphin/gx.h"
+#include "stdint.h"
 
 JUTCacheFont::JUTCacheFont(ResFONT const* p_fontRes, u32 cacheSize, JKRHeap* p_heap) {
     initialize_state();
@@ -338,9 +339,6 @@ JUTCacheFont::TGlyphCacheInfo* JUTCacheFont::determineBlankPage() {
     return NULL;
 }
 
-/* 802DDBBC-802DDCE4 2D84FC 0128+00 1/1 0/0 0/0 .text
- * getGlyphFromAram__12JUTCacheFontFPQ212JUTCacheFont15TGlyphCacheInfoPQ212JUTCacheFont10TCachePagePiPi
- */
 void JUTCacheFont::getGlyphFromAram(JUTCacheFont::TGlyphCacheInfo* param_0,
                                     JUTCacheFont::TCachePage* pCachePage, int* param_2, int* param_3) {
     TGlyphCacheInfo* pGylphCacheInfo = pCachePage;
@@ -424,18 +422,18 @@ void JUTCacheFont::invalidiateAllCache() {
         if (uVar2 == 0) {
             iVar1 = 0;
         } else {
-            iVar1 = (int)piVar3 - field_0x94;
+            iVar1 = (intptr_t)piVar3 - field_0x94;
         }
         *piVar3 = iVar1;
         if (uVar2 == mCachePage - 1) {
             iVar1 = 0;
         } else {
-            iVar1 = (int)piVar3 + field_0x94;
+            iVar1 = (intptr_t)piVar3 + field_0x94;
         }
         piVar3[1] = iVar1;
-        piVar3 = (int*)((int)piVar3 + field_0x94);
+        piVar3 = (int*)((intptr_t)piVar3 + field_0x94);
     }
-    field_0xa8 = (int)piVar3 - field_0x94;
+    field_0xa8 = (intptr_t)piVar3 - field_0x94;
     field_0xa4 = (TGlyphCacheInfo*)mCacheBuffer;
     field_0x9c = NULL;
     field_0xa0 = NULL;

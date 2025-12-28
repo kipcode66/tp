@@ -239,7 +239,7 @@ int daObjWStatue_c::initActionOrderGetDemo() {
     mCcCyl.OffCoSPrmBit(1);
     hide();
     s16 eventIdx = dComIfGp_getEventManager().getEventIdx(this, "DEFAULT_GETITEM", 0xff);
-    dComIfGp_getEvent().reset(this);
+    dComIfGp_getEvent()->reset(this);
     fopAcM_orderChangeEventId(this, eventIdx, 1, 0xffff);
     mItemId = fopAcM_createItemForTrBoxDemo(&current.pos, m_itemNo, 0xffffffff,
                                             fopAcM_GetRoomNo(this), 0, 0);
@@ -469,7 +469,7 @@ static actor_method_class l_daObjWStatue_Method = {
     (process_method_func)daObjWStatue_Draw,
 };
 
-extern actor_process_profile_definition g_profile_Obj_WoodStatue = {
+actor_process_profile_definition g_profile_Obj_WoodStatue = {
     fpcLy_CURRENT_e,         // mLayerID
     7,                       // mListID
     fpcPi_CURRENT_e,         // mListPrio

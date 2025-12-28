@@ -7,7 +7,7 @@
 
 #include "d/actor/d_a_obj_carry.h"
 #include "d/actor/d_a_player.h"
-#include <cmath.h>
+#include <math.h>
 #include "d/d_com_inf_game.h"
 #include "SSystem/SComponent/c_math.h"
 #include "d/actor/d_a_obj_swBallA.h"
@@ -4299,7 +4299,7 @@ static actor_method_class l_daObjCarry_Method = {
     (process_method_func)daObjCarry_Execute, (process_method_func)NULL,
     (process_method_func)daObjCarry_Draw};
 
-extern actor_process_profile_definition g_profile_Obj_Carry = {
+actor_process_profile_definition g_profile_Obj_Carry = {
     fpcLy_CURRENT_e,         // mLayerID
     8,                       // mListID
     fpcPi_CURRENT_e,         // mListPrio

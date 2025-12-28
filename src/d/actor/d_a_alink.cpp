@@ -4608,7 +4608,7 @@ int daAlink_c::create() {
     }
 
     if (var_r24 != NULL) {
-        dComIfGp_getEvent().setPtD(var_r24);
+        dComIfGp_getEvent()->setPtD(var_r24);
     }
 
     bgWaitFlg = 0;
@@ -16597,7 +16597,7 @@ int daAlink_c::procCrouch() {
 int daAlink_c::procCoMetamorphoseInit() {
     int var_r29 = 0;
 
-    if (dComIfGp_getEvent().isOrderOK()) {
+    if (dComIfGp_getEvent()->isOrderOK()) {
         if (!dComIfGp_event_compulsory(this, NULL, 0xFFFF)) {
             return 0;
         }
@@ -17275,7 +17275,7 @@ int daAlink_c::execute() {
             mWolfEyeUp = mpHIO->mWolf.m.mSensesLingerTime;
         } else if (mTargetedActor != NULL || dComIfGp_checkPlayerStatus0(0, 0x2000)) {
             mWolfEyeUp = mpHIO->mWolf.m.mSensesLingerTime - 1;
-        } else if (!dComIfGp_getEvent().isOrderOK() && mProcID != PROC_GET_ITEM &&
+        } else if (!dComIfGp_getEvent()->isOrderOK() && mProcID != PROC_GET_ITEM &&
                    mWolfEyeUp <= mpHIO->mWolf.m.mSensesLingerTime)
         {
             offWolfEyeUp();
@@ -18882,7 +18882,7 @@ static actor_method_class l_daAlink_Method = {
     (process_method_func)daAlink_Draw,
 };
 
-extern actor_process_profile_definition g_profile_ALINK = {
+actor_process_profile_definition g_profile_ALINK = {
     fpcLy_CURRENT_e,
     5,
     fpcPi_CURRENT_e,

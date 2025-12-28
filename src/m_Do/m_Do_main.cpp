@@ -33,7 +33,7 @@
 #include "m_Do/m_Do_printf.h"
 #include "m_Do/m_Do_ext2.h"
 #include "SSystem/SComponent/c_counter.h"
-#include <cstring.h>
+#include <string.h>
 #include "gz/gz.h"
 
 #if PLATFORM_WII || PLATFORM_SHIELD
@@ -197,14 +197,12 @@ OSTime mDoMain::sPowerOnTime;
 
 OSTime mDoMain::sHungUpTime;
 
-/* 80450B18 0001+00 data_80450B18 None */
 static u8 mDisplayHeapSize;
 
 #if DEBUG
 static u8 mReportDisable;
 #endif
 
-/* 80450B19 0001+00 data_80450B19 None */
 static u8 mSelectHeapBar;
 
 #if DEBUG
@@ -212,7 +210,6 @@ static u8 mVisibleHeapBar;
 static u8 mPrintFrameLine;
 #endif
 
-/* 80450B1A 0002+00 data_80450B1A None */
 static u8 mCheckHeap;
 
 #if DEBUG
