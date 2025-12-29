@@ -175,16 +175,14 @@ config.dtk_path = args.dtk
 config.objdiff_path = args.objdiff
 config.binutils_path = args.binutils
 config.compilers_path = args.compilers
-config.generate_map = args.map
-config.non_matching = args.non_matching
+# Always enable non-matching and map generation for tpgz
+config.non_matching = True
+config.generate_map = True
 config.sjiswrap_path = args.sjiswrap
 config.ninja_path = args.ninja
 config.progress = args.progress
 if not is_windows():
     config.wrapper = args.wrapper
-# Don't build asm unless we're --non-matching
-if not config.non_matching:
-    config.asm_dir = None
 
 # Tool versions
 config.binutils_tag = "2.42-1"
