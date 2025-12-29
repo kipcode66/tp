@@ -99,5 +99,5 @@ To add new features to the practice ROM:
 
 ## Adding Custom Assets
 
-- Place your custom asset into the `mod_asset` directory. The directory structure will be copied 1:1 to the final disc image.
+- Place your custom asset into the `mod_assets` directory. The directory structure will be copied 1:1 to the final disc image.
 - Re-run the build process above to include your changes
