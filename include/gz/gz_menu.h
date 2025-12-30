@@ -581,8 +581,10 @@ public:
 
 private:
     void updateDynamicLines();
-    u8 getHaihaiFlags(int idx);
+    u8 getHaihaiFlags(int);
     int getCurrentLineNum();
+    void setRegionFlag(int);
+    bool getRegionFlag(int);
 
 private:
     gzTextBox* mpTabHeaders[TAB_MAX];

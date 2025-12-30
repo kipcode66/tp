@@ -264,6 +264,8 @@ public:
     u8 getRegionNo() const { return mRegionNo; }
     char* getName() { return mName; }
     s16 getAngleY() { return mAngleY; }
+    u8 getRegion() { return mRegion; }
+    void setRegion(u8 i_region) { mRegion = i_region; }
 
 private:
     /* 0x00 */ cXyz mPos;
