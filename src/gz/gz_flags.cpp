@@ -1,18 +1,99 @@
-#include "d/dolzel.h" // IWYU pragma: keep
+#include "d/dolzel.h"  // IWYU pragma: keep
 
 #include "c/c_damagereaction.h"
 
 #include "gz/gz.h"
 #include "gz/gz_menu.h"
 
+// General flags
+static const BoolFlagInfo generalFlags[15] = {
+    {"boss flag", "sets the boss flag value", gzInfo_isBossFlag, gzInfo_onBossFlag,
+     gzInfo_offBossFlag},
+    {"coro td", "toggle temporary flag for coro text displacement", gzInfo_isCoroTD,
+     gzInfo_onCoroTD, gzInfo_offCoroTD},
+    {"epona stolen", "toggle flag for epona being stolen", gzInfo_isEponaStolen,
+     gzInfo_onEponaStolen, gzInfo_offEponaStolen},
+    {"epona tamed", "toggle flag for epona being tamed", gzInfo_isEponaTamed, gzInfo_onEponaTamed,
+     gzInfo_offEponaTamed},
+    {"malo mart in castle town", "toggle flag for malo mart being open in castle town",
+     gzInfo_isMaloMartCT, gzInfo_onMaloMartCT, gzInfo_offMaloMartCT},
+    {"map warping", "toggle flag for map warping", gzInfo_isMapWarping, gzInfo_onMapWarping,
+     gzInfo_offMapWarping},
+    {"midna charge", "toggle flag for midna charge", gzInfo_isMidnaCharge, gzInfo_onMidnaCharge,
+     gzInfo_offMidnaCharge},
+    {"midna healed", "toggle flag for midna being healed", gzInfo_isMidnaHealthy,
+     gzInfo_onMidnaHealthy, gzInfo_offMidnaHealthy},
+    {"midna on back", "toggle flag for midna appearing on wolf link's back", gzInfo_isMidnaOnBack,
+     gzInfo_onMidnaOnBack, gzInfo_offMidnaOnBack},
+    {"midna available", "toggle flag for being able to call midna", gzInfo_isMidnaOnZ,
+     gzInfo_onMidnaOnZ, gzInfo_offMidnaOnZ},
+    {"rusl td", "toggle temporary flag for rusl text displacement", gzInfo_isRuslTD,
+     gzInfo_onRuslTD, gzInfo_offRuslTD},
+    {"transform/warp", "toggle flag for transforming/warping", gzInfo_isTransformWarp,
+     gzInfo_onTransformWarp, gzInfo_offTransformWarp},
+    {"wolf sense", "toggle flag for wolf sense", gzInfo_isWolfSense, gzInfo_onWolfSense,
+     gzInfo_offWolfSense}};
+
+static const DungeonBoolFlagInfo dungeonFlags[7] = {
+    {"have boss key", "Give selected dungeon boss key", gzInfo_isDungeonBossKey,
+     gzInfo_onDungeonBossKey, gzInfo_offDungeonBossKey},
+    {"have compass", "Give selected dungeon compass", gzInfo_isDungeonCompass,
+     gzInfo_onDungeonCompass, gzInfo_offDungeonCompass},
+    {"have heart container", "Give selected dungeon heart container",
+     gzInfo_isDungeonHeartContainer, gzInfo_onDungeonHeartContainer,
+     gzInfo_offDungeonHeartContainer},
+    {"have map", "Give selected dungeon map", gzInfo_isDungeonMap, gzInfo_onDungeonMap,
+     gzInfo_offDungeonMap},
+    {"have ooccoo", "Give selected dungeon ooccoo", gzInfo_isDungeonOoccoo, gzInfo_onDungeonOoccoo,
+     gzInfo_offDungeonOoccoo},
+    {"boss defeated", "Selected dungeon boss is defeated", gzInfo_isBossDefeated,
+     gzInfo_onBossDefeated, gzInfo_offBossDefeated},
+    {"miniboss defeated", "Selected dungeon miniboss is defeated", gzInfo_isMiniBossDefeated,
+     gzInfo_onMiniBossDefeated, gzInfo_offMiniBossDefeated},
+};
+
+// Portal warp flags
+
+static const WarpBoolFlagInfo warpFlags[15] = {
+    {"ordon spring", "Ordon Spring warp portal", isSpringWarp, onSpringWarp, offSpringWarp},
+    {"south faron", "South Faron warp portal", isSFaronWarp, onSFaronWarp, offSFaronWarp},
+    {"north faron", "North Faron warp portal", isNFaronWarp, onNFaronWarp, offNFaronWarp},
+    {"sacred grove", "Sacred Grove warp portal", isGroveWarp, onGroveWarp, offGroveWarp},
+    {"eldin gorge", "Eldin Gorge warp portal", isGorgeWarp, onGorgeWarp, offGorgeWarp},
+    {"kak village", "Kakariko Village warp portal", isKakarikoWarp, onKakarikoWarp,
+     offKakarikoWarp},
+    {"death mountain", "Death Mountain warp portal", isMountainWarp, onMountainWarp,
+     offMountainWarp},
+    {"eldin bridge", "Bridge of Eldin warp portal", isBridgeWarp, onBridgeWarp, offBridgeWarp},
+    {"castle town", "Castle Town warp portal", isTownWarp, onTownWarp, offTownWarp},
+    {"lake hylia", "Lake Hylia warp portal", isLakeWarp, onLakeWarp, offLakeWarp},
+    {"domain warp", "Zora's Domain warp portal", isDomainWarp, onDomainWarp, offDomainWarp},
+    {"upper river", "Upper Zora's River warp portal", isUzrWarp, onUzrWarp, offUzrWarp},
+    {"snowpeak", "Snowpeak warp portal", isSnowpeakWarp, onSnowpeakWarp, offSnowpeakWarp},
+    {"gerudo mesa", "Gerudo Mesa warp portal", isMesaWarp, onMesaWarp, offMesaWarp},
+    {"mirror chamber", "Mirror Chamber warp portal", isMirrorWarp, onMirrorWarp, offMirrorWarp}};
+
+// Rupee bool flags
+static const RupeeBoolFlagInfo rupeeFlags[3] = {
+    {"fundraising 1", "Toggle flag for first fundraising being complete", NULL, NULL, NULL},
+    {"fundraising 2", "Toggle flag for second fundraising being complete", NULL, NULL, NULL},
+    {"rupee cutscenes", "Toggle rupee cutscenes being enabled", NULL, NULL, NULL}};
+
+// Dungeon and region names
+static const char* dungeonNames[] = {"Forest Temple",     "Goron Mines",        "Lakebed Temple",
+                                     "Arbiter's Grounds", "Snowpeak Ruins",     "Temple of Time",
+                                     "City in the Sky",   "Palace of Twilight", "Hyrule Castle"};
+#define NUM_DUNGEONS (sizeof(dungeonNames) / sizeof(dungeonNames[0]))
+
+static const char* regionNames[] = {"ordon", "faron", "eldin", "lanayru", "desert", "snowpeak"};
+#define NUM_REGIONS (sizeof(regionNames) / sizeof(regionNames[0]))
+
 gzFlagsMenu_c::gzFlagsMenu_c() {
     OSReport("creating gzFlagsMenu_c\n");
-
     for (int i = 0; i < TAB_MAX; i++) {
         mpTabHeaders[i] = new gzTextBox;
-        mpTabHeaders[i]->setFontSize(15.0f,15.0f);
+        mpTabHeaders[i]->setFontSize(15.0f, 15.0f);
     }
-
     mpTabHeaders[TAB_GENERAL]->setString("general");
     mpTabHeaders[TAB_DUNGEON]->setString("dungeon");
     mpTabHeaders[TAB_PORTAL]->setString("portal");
@@ -22,31 +103,15 @@ gzFlagsMenu_c::gzFlagsMenu_c() {
         mpLinesGeneral[i] = new gzTextBox();
         mpLinesGeneral[i]->mBounds.f.x = 430.0f;
         mpLinesGeneral[i]->mBounds.f.y = 10.0f;
-
+        mpLinesGeneral[i]->setStringDesc(generalFlags[i].mName, generalFlags[i].mDesc);
         mpLineOptionsGeneral[i] = new gzTextBox();
         mpLineOptionsGeneral[i]->mBounds.f.y = 10.0f;
     }
-
-    // Set strings for general tab
-    mpLinesGeneral[G_FLAG_BOSS_FLAG]->setStringDesc("boss flag", "sets the boss flag value");
-    mpLinesGeneral[G_FLAG_CORO_TD]->setStringDesc("coro td", "toggle temporary flag for coro text displacement");
-    mpLinesGeneral[G_FLAG_EPONA_STOLEN]->setStringDesc("epona stolen", "toggle flag for epona being stolen");
-    mpLinesGeneral[G_FLAG_EPONA_TAMED]->setStringDesc("epona tamed", "toggle flag for epona being tamed");
-    mpLinesGeneral[G_FLAG_MALO_MART_CT]->setStringDesc("malo mart in castle town", "toggle flag for malo mart being open in castle town");
-    mpLinesGeneral[G_FLAG_MAP_WARPING]->setStringDesc("map warping", "toggle flag for map warping");
-    mpLinesGeneral[G_FLAG_MIDNA_CHARGE]->setStringDesc("midna charge", "toggle flag for midna charge");
-    mpLinesGeneral[G_FLAG_MIDNA_HEALTHY]->setStringDesc("midna healed", "toggle flag for midna being healed");
-    mpLinesGeneral[G_FLAG_MIDNA_ON_BACK]->setStringDesc("midna on back", "toggle flag for midna appearing on wolf link's back");
-    mpLinesGeneral[G_FLAG_MIDNA_Z]->setStringDesc("midna available", "toggle flag for being able to call midna");
-    mpLinesGeneral[G_FLAG_RUSL_TD]->setStringDesc("rusl td", "toggle temporary flag for rusl text displacement");
-    mpLinesGeneral[G_FLAG_TRANSFORM_WARP]->setStringDesc("transform/warp", "toggle flag for transforming/warping");
-    mpLinesGeneral[G_FLAG_WOLF_SENSE]->setStringDesc("wolf sense", "toggle flag for wolf sense");
 
     for (int i = 0; i < D_FLAG_MAX; i++) {
         mpLinesDungeon[i] = new gzTextBox();
         mpLinesDungeon[i]->mBounds.f.x = 430.0f;
         mpLinesDungeon[i]->mBounds.f.y = 10.0f;
-
         mpLineOptionsDungeon[i] = new gzTextBox();
         mpLineOptionsDungeon[i]->mBounds.f.y = 10.0f;
     }
@@ -54,18 +119,19 @@ gzFlagsMenu_c::gzFlagsMenu_c() {
     // Set strings for dungeon tab
     mpLinesDungeon[D_FLAG_SELECT_DUNGEON]->setStringDesc("dungeon:", "Selected dungeon flags");
     mpLinesDungeon[D_FLAG_SMALL_KEY]->setStringDesc("small keys", "Selected dungeon small keys");
-    mpLinesDungeon[D_FLAG_MAP]->setStringDesc("have map", "Give selected dungeon map");
-    mpLinesDungeon[D_FLAG_COMPASS]->setStringDesc("have compass", "Give selected dungeon compass");
-    mpLinesDungeon[D_FLAG_BOSS_KEY]->setStringDesc("have boss key", "Give selected dungeon boss key");
-    mpLinesDungeon[D_FLAG_DEFEAT_MINIBOSS]->setStringDesc("miniboss dead", "Selected dungeon miniboss is defeated");
-    mpLinesDungeon[D_FLAG_DEFEAT_BOSS]->setStringDesc("boss dead", "Selected dungeon boss is defeated");
-    mpLinesDungeon[D_FLAG_CLEAR_DUNGEON]->setStringDesc("clear flags", "Clear all selected dungeon flags");
+
+    for (int i = 0; i < 7; i++) {
+        mpLinesDungeon[D_FLAG_BOSS_KEY + i]->setStringDesc(dungeonFlags[i].mName,
+                                                           dungeonFlags[i].mDesc);
+    }
+
+    mpLinesDungeon[D_FLAG_CLEAR_DUNGEON]->setStringDesc("clear flags",
+                                                        "Clear all selected dungeon flags");
 
     for (int i = 0; i < P_FLAG_MAX; i++) {
         mpLinesPortal[i] = new gzTextBox();
         mpLinesPortal[i]->mBounds.f.x = 430.0f;
         mpLinesPortal[i]->mBounds.f.y = 10.0f;
-
         mpLineOptionsPortal[i] = new gzTextBox();
         mpLineOptionsPortal[i]->mBounds.f.y = 10.0f;
     }
@@ -73,46 +139,40 @@ gzFlagsMenu_c::gzFlagsMenu_c() {
     // Set strings for portal tab
     mpLinesPortal[P_FLAG_SELECT_REGION]->setStringDesc("region:", "Select region flag");
     mpLinesPortal[P_FLAG_REGION]->setStringDesc("region unlocked", "Unlock selected map region");
-    mpLinesPortal[P_FLAG_SPRING_WARP]->setStringDesc("ordon spring", "Ordon Spring warp portal");
-    mpLinesPortal[P_FLAG_S_FARON_WARP]->setStringDesc("south faron", "South Faron warp portal");
-    mpLinesPortal[P_FLAG_N_FARON_WARP]->setStringDesc("north faron", "North Faron warp portal");
-    mpLinesPortal[P_FLAG_GROVE_WARP]->setStringDesc("sacred grove", "Sacred Grove warp portal");
-    mpLinesPortal[P_FLAG_GORGE_WARP]->setStringDesc("eldin gorge", "Eldin Gorge warp portal");
-    mpLinesPortal[P_FLAG_KAKARIKO_WARP]->setStringDesc("kak village", "Kakariko Village warp portal");
-    mpLinesPortal[P_FLAG_MOUNTAIN_WARP]->setStringDesc("death mountain", "Death Mountain warp portal");
-    mpLinesPortal[P_FLAG_BRIDGE_WARP]->setStringDesc("eldin bridge", "Bridge of Eldin warp portal");
-    mpLinesPortal[P_FLAG_TOWN_WARP]->setStringDesc("castle town", "Castle Town warp portal");
-    mpLinesPortal[P_FLAG_LAKE_WARP]->setStringDesc("lake hylia", "Lake Hylia warp portal");
-    mpLinesPortal[P_FLAG_DOMAIN_WARP]->setStringDesc("zora's domain", "Zora's Domain warp portal");
-    mpLinesPortal[P_FLAG_UZR_WARP]->setStringDesc("upper river", "Upper Zora's River warp portal");
-    mpLinesPortal[P_FLAG_SNOWPEAK_WARP]->setStringDesc("snowpeak", "Snowpeak warp portal");
-    mpLinesPortal[P_FLAG_MESA_WARP]->setStringDesc("gerudo mesa", "Gerudo Mesa warp portal");
-    mpLinesPortal[P_FLAG_MIRROR_WARP]->setStringDesc("mirror chamber", "Mirror Chamber warp portal");
+
+    for (int i = 0; i < 15; i++) {
+        mpLinesPortal[P_FLAG_SPRING_WARP + i]->setStringDesc(warpFlags[i].mName,
+                                                             warpFlags[i].mDesc);
+    }
 
     for (int i = 0; i < R_FLAG_MAX; i++) {
         mpLinesRupee[i] = new gzTextBox();
         mpLinesRupee[i]->mBounds.f.x = 430.0f;
         mpLinesRupee[i]->mBounds.f.y = 10.0f;
-
         mpLineOptionsRupee[i] = new gzTextBox();
         mpLineOptionsRupee[i]->mBounds.f.y = 10.0f;
     }
-
     // Set strings for rupee tab
-    mpLinesRupee[R_FLAG_DONATION_AMT]->setStringDesc("donation amount:", "Sets the amount of rupees donated to Charlo");
-    mpLinesRupee[R_FLAG_FUNDRAISING_AMT]->setStringDesc("fundraising amount:", "Sets the current fundraising amount");
-    mpLinesRupee[R_FLAG_FUNDRAISING_1]->setStringDesc("fundraising 1", "Toggle flag for first fundraising being complete");
-    mpLinesRupee[R_FLAG_FUNDRAISING_2]->setStringDesc("fundraising 2", "Toggle flag for second fundraising being complete");
-    mpLinesRupee[R_FLAG_RUPEE_CS_FLAG]->setStringDesc("rupee cutscenes", "Toggle rupee cutscenes being enabled");
+    mpLinesRupee[R_FLAG_DONATION_AMT]->setStringDesc("donation amount:",
+                                                     "Sets the amount of rupees donated to Charlo");
+    mpLinesRupee[R_FLAG_FUNDRAISING_AMT]->setStringDesc("fundraising amount:",
+                                                        "Sets the current fundraising amount");
+
+    for (int i = 0; i < 3; i++) {
+        mpLinesRupee[R_FLAG_FUNDRAISING_1 + i]->setStringDesc(rupeeFlags[i].mName,
+                                                              rupeeFlags[i].mDesc);
+    }
 
     mpDescription = new gzTextBox();
-
     mpDrawCursor = new dSelect_cursor_c(2, 1.0f, NULL);
     mpDrawCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
     mpDrawCursor->setAlphaRate(1.0f);
-
     mpMeterHaihai = new dMeterHaihai_c(3);
-
+    mCurrentTab = TAB_GENERAL;
+    mTopLine = 0;
+    mSelectedDungeon = 0;
+    mSelectedRegion = 0;
+    mOption = false;
     mXPos = 200.0f;
 }
 
@@ -122,99 +182,94 @@ gzFlagsMenu_c::~gzFlagsMenu_c() {
 
 void gzFlagsMenu_c::_delete() {
     OSReport("deleting gzFlagsMenu_c\n");
-
     for (int i = 0; i < TAB_MAX; i++) {
         delete mpTabHeaders[i];
         mpTabHeaders[i] = NULL;
     }
-
     for (int i = 0; i < G_FLAG_MAX; i++) {
         delete mpLinesGeneral[i];
         mpLinesGeneral[i] = NULL;
         delete mpLineOptionsGeneral[i];
         mpLineOptionsGeneral[i] = NULL;
     }
-
     for (int i = 0; i < D_FLAG_MAX; i++) {
         delete mpLinesDungeon[i];
         mpLinesDungeon[i] = NULL;
         delete mpLineOptionsDungeon[i];
         mpLineOptionsDungeon[i] = NULL;
     }
-
     for (int i = 0; i < P_FLAG_MAX; i++) {
         delete mpLinesPortal[i];
         mpLinesPortal[i] = NULL;
         delete mpLineOptionsPortal[i];
         mpLineOptionsPortal[i] = NULL;
     }
-
     for (int i = 0; i < R_FLAG_MAX; i++) {
         delete mpLinesRupee[i];
         mpLinesRupee[i] = NULL;
         delete mpLineOptionsRupee[i];
         mpLineOptionsRupee[i] = NULL;
     }
-
+    delete mpDescription;
+    mpDescription = NULL;
     delete mpDrawCursor;
     mpDrawCursor = NULL;
-
     delete mpMeterHaihai;
     mpMeterHaihai = NULL;
 }
 
 u8 gzFlagsMenu_c::getHaihaiFlags(int idx) {
     u8 haihai_flags = gzMainMenu_c::ARROW_LEFT | gzMainMenu_c::ARROW_RIGHT;
-
     switch (mCurrentTab) {
     case TAB_GENERAL:
-        switch (idx) {
-        case G_FLAG_BOSS_FLAG:
-            gzInfo_getBossFlag() == 0 ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_CORO_TD:
-            !gzInfo_isCoroTD() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_EPONA_STOLEN:
-            !gzInfo_isEponaStolen() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_EPONA_TAMED:
-            !gzInfo_isEponaTamed() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_MALO_MART_CT:
-            !gzInfo_isMaloMartCT() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_MAP_WARPING:
-            !gzInfo_isMapWarping() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_MIDNA_CHARGE:
-            !gzInfo_isMidnaCharge() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_MIDNA_HEALTHY:
-            !gzInfo_isMidnaHealthy() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_MIDNA_ON_BACK:
-            !gzInfo_isMidnaOnBack() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_MIDNA_Z:
-            !gzInfo_isMidnaOnZ() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_RUSL_TD:
-            !gzInfo_isRuslTD() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_TRANSFORM_WARP:
-            !gzInfo_isTransformWarp() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
-        case G_FLAG_WOLF_SENSE:
-            !gzInfo_isWolfSense() ? haihai_flags &= ~gzMainMenu_c::ARROW_LEFT : haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
-            break;
+        if (generalFlags[idx].mIsOn()) {
+            haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
+        } else {
+            haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
         }
-
         break;
     case TAB_DUNGEON:
+        if (idx == D_FLAG_SELECT_DUNGEON || idx == D_FLAG_SMALL_KEY) {
+        } else if (idx == D_FLAG_CLEAR_DUNGEON) {
+            haihai_flags = 0;
+        } else if (idx >= D_FLAG_BOSS_KEY && idx <= D_FLAG_DEFEAT_MINIBOSS) {
+            int bIdx = idx - D_FLAG_BOSS_KEY;
+            if (dungeonFlags[bIdx].mIsOn(mSelectedDungeon)) {
+                haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
+            } else {
+                haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
+            }
+        }
+        break;
+    case TAB_PORTAL:
+        if (idx == P_FLAG_SELECT_REGION) {
+        } else if (idx == P_FLAG_REGION) {
+            if (getRegionFlag(mSelectedRegion)) {
+                haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
+            } else {
+                haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
+            }
+        } else if (idx >= P_FLAG_SPRING_WARP && idx < P_FLAG_MAX) {
+            int wIdx = idx - P_FLAG_SPRING_WARP;
+            if (warpFlags[wIdx].mIsOn()) {
+                haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
+            } else {
+                haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
+            }
+        }
+        break;
+    case TAB_RUPEE:
+        if (idx == R_FLAG_DONATION_AMT || idx == R_FLAG_FUNDRAISING_AMT) {
+        } else if (idx >= R_FLAG_FUNDRAISING_1 && idx < R_FLAG_MAX) {
+            int rIdx = idx - R_FLAG_FUNDRAISING_1;
+            if (rupeeFlags[rIdx].mIsOn()) {
+                haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
+            } else {
+                haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
+            }
+        }
         break;
     }
-
     return haihai_flags;
 }
 
@@ -229,137 +284,80 @@ int gzFlagsMenu_c::getCurrentLineNum() {
     case TAB_RUPEE:
         return R_FLAG_MAX;
     }
+    return 0;
 }
-
-// move to disc?
-static char* dungeonNames[] = {
-    "Forest Temple",     "Goron Mines",        "Lakebed Temple",
-    "Arbiter's Grounds", "Snowpeak Ruins",     "Temple of Time",
-    "City in the Sky",   "Palace of Twilight", "Hyrule Castle",
-};
-
-// move to disc?
-static char* regionNames[] = {
-    "ordon", "faron", "eldin", "lanayru", "desert", "snowpeak",
-};
 
 void gzFlagsMenu_c::updateDynamicLines() {
     gzTextBox** currentLines;
     gzTextBox** currentLineOptions;
     int currentLineNum;
-
     switch (mCurrentTab) {
     case TAB_GENERAL:
         currentLines = mpLinesGeneral;
         currentLineOptions = mpLineOptionsGeneral;
         currentLineNum = G_FLAG_MAX;
+        for (int i = 0; i < G_FLAG_MAX; i++) {
+            currentLineOptions[i]->setStringf("%s", generalFlags[i].mIsOn() ? "on" : "off");
+        }
         break;
     case TAB_DUNGEON:
         currentLines = mpLinesDungeon;
         currentLineOptions = mpLineOptionsDungeon;
         currentLineNum = D_FLAG_MAX;
+        currentLineOptions[D_FLAG_SELECT_DUNGEON]->setStringf("%s", dungeonNames[mSelectedDungeon]);
+        // currentLineOptions[D_FLAG_SMALL_KEY]->setStringf("%d",
+        // gzInfo_getDungeonSmallKeys(mSelectedDungeon));
+        for (int i = 0; i < 7; i++) {
+            currentLineOptions[D_FLAG_BOSS_KEY + i]->setStringf(
+                "%s", dungeonFlags[i].mIsOn(mSelectedDungeon) ? "yes" : "no");
+        }
+        currentLineOptions[D_FLAG_CLEAR_DUNGEON]->setString("");
         break;
     case TAB_PORTAL:
         currentLines = mpLinesPortal;
         currentLineOptions = mpLineOptionsPortal;
         currentLineNum = P_FLAG_MAX;
+        currentLineOptions[P_FLAG_SELECT_REGION]->setStringf("%s", regionNames[mSelectedRegion]);
+        currentLineOptions[P_FLAG_REGION]->setStringf("%s", getRegionFlag(mSelectedRegion) ? "on" :
+                                                                                             "off");
+        for (int i = 0; i < 15; i++) {
+            currentLineOptions[P_FLAG_SPRING_WARP + i]->setStringf(
+                "%s", warpFlags[i].mIsOn() ? "on" : "off");
+        }
         break;
     case TAB_RUPEE:
         currentLines = mpLinesRupee;
         currentLineOptions = mpLineOptionsRupee;
         currentLineNum = R_FLAG_MAX;
+        // currentLineOptions[R_FLAG_DONATION_AMT]->setStringf("%d", gzInfo_getDonationAmt());
+        // currentLineOptions[R_FLAG_FUNDRAISING_AMT]->setStringf("%d", gzInfo_getFundraisingAmt());
+        for (int i = 0; i < 3; i++) {
+            currentLineOptions[R_FLAG_FUNDRAISING_1 + i]->setStringf(
+                "%s", rupeeFlags[i].mIsOn() ? "on" : "off");
+        }
         break;
     default:
         return;
     }
-
-    for (int i = 0; i < currentLineNum; i++) {
-        switch (mCurrentTab) {
-        case TAB_DUNGEON:
-            if (i == D_FLAG_SELECT_DUNGEON) {
-                currentLineOptions[i]->setStringf("%s", dungeonNames[mSelectedDungeon]);
-            } 
-            break;
-        case TAB_PORTAL:
-            switch (i) {
-            case P_FLAG_SELECT_REGION:
-                currentLineOptions[i]->setStringf("%s", regionNames[mSelectedRegion]);
-                break;
-            case P_FLAG_REGION:
-                currentLineOptions[i]->setStringf("%s", getRegionFlag(mSelectedRegion) ? "on": "off");
-                break;   
-            }
-            break;
-        case TAB_GENERAL:
-            switch (i) {
-            case G_FLAG_BOSS_FLAG:
-                currentLineOptions[i]->setStringf("%s", cDmr_SkipInfo > 0 ? "on" : "off");
-                break;
-            case G_FLAG_CORO_TD:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isCoroTD() ? "on" : "off");
-                break;
-            case G_FLAG_EPONA_STOLEN:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isEponaStolen() ? "on" : "off");
-                break;
-            case G_FLAG_EPONA_TAMED:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isEponaTamed() ? "on" : "off");
-                break;
-            case G_FLAG_MALO_MART_CT:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isMaloMartCT() ? "on" : "off");
-                break;
-            case G_FLAG_MAP_WARPING:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isMapWarping() ? "on" : "off");
-                break;
-            case G_FLAG_MIDNA_CHARGE:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isMidnaCharge() ? "on" : "off");
-                break;
-            case G_FLAG_MIDNA_HEALTHY:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isMidnaHealthy() ? "on" : "off");
-                break;
-            case G_FLAG_MIDNA_ON_BACK:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isMidnaOnBack() ? "on" : "off");
-                break;
-            case G_FLAG_MIDNA_Z:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isMidnaOnZ() ? "on" : "off");
-                break;
-            case G_FLAG_RUSL_TD:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isRuslTD() ? "on" : "off");
-                break;
-            case G_FLAG_TRANSFORM_WARP:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isTransformWarp() ? "on" : "off");
-                break;
-            case G_FLAG_WOLF_SENSE:
-                currentLineOptions[i]->setStringf("%s", gzInfo_isWolfSense() ? "on" : "off");
-                break;
-            }
-
-            break;
-        case TAB_RUPEE:
-            if (i == R_FLAG_DONATION_AMT) {
-                currentLineOptions[i]->setStringf("%d", 0);
-            }
-            
-            break;
-        }
-    }
-
     J2DTextBox::TFontSize font_size;
-
     for (int i = 0; i < currentLineNum; i++) {
         currentLineOptions[i]->getFontSize(font_size);
         font_size.mSizeX *= 0.5f;
         currentLines[i]->mBounds.f.x = currentLines[i]->mStringLength * font_size.mSizeX;
-        currentLineOptions[i]->mBounds.f.x = currentLineOptions[i]->mStringLength * font_size.mSizeX;
+        currentLineOptions[i]->mBounds.f.x =
+            currentLineOptions[i]->mStringLength * font_size.mSizeX;
     }
 }
 
 void gzFlagsMenu_c::setRegionFlag(int regionBit) {
     u8 region = g_dComIfG_gameInfo.info.getPlayer().getPlayerFieldLastStayInfo().getRegion();
-    g_dComIfG_gameInfo.info.getPlayer().getPlayerFieldLastStayInfo().setRegion(region ^= (1 << regionBit));
+    g_dComIfG_gameInfo.info.getPlayer().getPlayerFieldLastStayInfo().setRegion(region ^=
+                                                                               (1 << regionBit));
 }
 
 bool gzFlagsMenu_c::getRegionFlag(int regionBit) {
-    return g_dComIfG_gameInfo.info.getPlayer().getPlayerFieldLastStayInfo().getRegion() & (1 << regionBit);
+    return g_dComIfG_gameInfo.info.getPlayer().getPlayerFieldLastStayInfo().getRegion() &
+           (1 << regionBit);
 }
 
 void gzFlagsMenu_c::execute() {
@@ -367,25 +365,20 @@ void gzFlagsMenu_c::execute() {
         g_gzInfo.mInputWaitTimer--;
         return;
     }
-
     gzCursor* l_cursor = gzInfo_getCursor();
-
     if (!mOption) {
         if (gzPad::getTrigDown()) {
             l_cursor->y = (l_cursor->y + 1) % getCurrentLineNum();
             gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
         }
-
         if (gzPad::getTrigUp()) {
             l_cursor->y = (l_cursor->y - 1 + getCurrentLineNum()) % getCurrentLineNum();
             gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
         }
-
         if (gzPad::getTrigRight()) {
             mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
         }
-
         if (gzPad::getTrigLeft()) {
             mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
@@ -394,339 +387,132 @@ void gzFlagsMenu_c::execute() {
         if (gzPad::getTrigRight()) {
             switch (mCurrentTab) {
             case TAB_GENERAL:
-                switch (l_cursor->y) {
-                case G_FLAG_BOSS_FLAG:
-                    if (!gzInfo_isBossFlag()) {
-                        gzInfo_setBossFlag(50);
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_CORO_TD:
-                    if (!gzInfo_isCoroTD()) {
-                        gzInfo_onCoroTD();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_EPONA_STOLEN:
-                    if (!gzInfo_isEponaStolen()) {
-                        gzInfo_onEponaStolen();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-                    
-                    break;
-                case G_FLAG_EPONA_TAMED:
-                    if (!gzInfo_isEponaTamed()) {
-                        gzInfo_onEponaTamed();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MALO_MART_CT:
-                    if (!gzInfo_isMaloMartCT()) {
-                        gzInfo_onMaloMartCT();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MAP_WARPING:
-                    if (!gzInfo_isMapWarping()) {
-                        gzInfo_onMapWarping();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_CHARGE:
-                    if (!gzInfo_isMidnaCharge()) {
-                        gzInfo_onMidnaCharge();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_HEALTHY:
-                    if (!gzInfo_isMidnaHealthy()) {
-                        gzInfo_onMidnaHealthy();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_ON_BACK:
-                    if (!gzInfo_isMidnaOnBack()) {
-                        gzInfo_onMidnaOnBack();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_Z:
-                    if (!gzInfo_isMidnaOnZ()) {
-                        gzInfo_onMidnaOnZ();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_RUSL_TD:
-                    if (!gzInfo_isRuslTD()) {
-                        gzInfo_onRuslTD();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_TRANSFORM_WARP:
-                    if (!gzInfo_isTransformWarp()) {
-                        gzInfo_onTransformWarp();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_WOLF_SENSE:
-                    if (!gzInfo_isWolfSense()) {
-                        gzInfo_onWolfSense();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
+                if (l_cursor->y < G_FLAG_MAX && !generalFlags[l_cursor->y].mIsOn()) {
+                    generalFlags[l_cursor->y].mOn();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 }
+                break;
             case TAB_DUNGEON:
-                switch (l_cursor->y) {
-                case D_FLAG_SELECT_DUNGEON:
-                    mSelectedDungeon = (mSelectedDungeon + 1) % ARRAY_SIZE(dungeonNames);
-                    break;
-                case D_FLAG_SMALL_KEY:
-                    break;
-                case D_FLAG_MAP:
-                    break;
-                case D_FLAG_COMPASS:
-                    break;
-                case D_FLAG_BOSS_KEY:
-                    break;
-                case D_FLAG_DEFEAT_MINIBOSS:
-                    break;
-                case D_FLAG_DEFEAT_BOSS:
-                    break;
-                case D_FLAG_CLEAR_DUNGEON:
-                    break;
-                    
+                if (l_cursor->y == D_FLAG_SELECT_DUNGEON) {
+                    mSelectedDungeon = (mSelectedDungeon + 1) % NUM_DUNGEONS;
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y == D_FLAG_SMALL_KEY) {
+                    // int val = gzInfo_getDungeonSmallKeys(mSelectedDungeon) + 1;
+                    // gzInfo_setDungeonSmallKeys(mSelectedDungeon, val);
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y >= D_FLAG_BOSS_KEY && l_cursor->y <= D_FLAG_DEFEAT_MINIBOSS)
+                {
+                    int bIdx = l_cursor->y - D_FLAG_BOSS_KEY;
+                    if (!dungeonFlags[bIdx].mIsOn(mSelectedDungeon)) {
+                        dungeonFlags[bIdx].mOn(mSelectedDungeon);
+                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                    }
                 }
-
                 break;
             case TAB_PORTAL:
-                switch (l_cursor->y) {
-                case P_FLAG_SELECT_REGION:
-                    mSelectedRegion = (mSelectedRegion + 1) % ARRAY_SIZE(regionNames);
-                    break;
-                case P_FLAG_REGION:
+                if (l_cursor->y == P_FLAG_SELECT_REGION) {
+                    mSelectedRegion = (mSelectedRegion + 1) % NUM_REGIONS;
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y == P_FLAG_REGION) {
                     if (!getRegionFlag(mSelectedRegion)) {
                         setRegionFlag(mSelectedRegion);
                         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                     }
-                    break;
-                case P_FLAG_SPRING_WARP:
-                    break;
-                case P_FLAG_S_FARON_WARP:
-                    break;
-                case P_FLAG_N_FARON_WARP:
-                    break;
-                case P_FLAG_GROVE_WARP:
-                    break;
-                case P_FLAG_GORGE_WARP:
-                    break;
-                case P_FLAG_KAKARIKO_WARP:
-                    break;
-                case P_FLAG_MOUNTAIN_WARP:
-                    break;
-                case P_FLAG_BRIDGE_WARP:
-                    break;
-                case P_FLAG_TOWN_WARP:
-                    break;
-                case P_FLAG_LAKE_WARP:
-                    break;
-                case P_FLAG_DOMAIN_WARP:
-                    break;
-                case P_FLAG_UZR_WARP:
-                    break;
-                case P_FLAG_SNOWPEAK_WARP:
-                    break;
-                case P_FLAG_MESA_WARP:
-                    break;
-                case P_FLAG_MIRROR_WARP:
-                    break;
-                    
+                } else if (l_cursor->y >= P_FLAG_SPRING_WARP && l_cursor->y < P_FLAG_MAX) {
+                    int wIdx = l_cursor->y - P_FLAG_SPRING_WARP;
+                    if (!warpFlags[wIdx].mIsOn()) {
+                        warpFlags[wIdx].mOn();
+                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                    }
                 }
-
+                break;
+            case TAB_RUPEE:
+                if (l_cursor->y == R_FLAG_DONATION_AMT) {
+                    // int val = gzInfo_getDonationAmt() + 1;
+                    // gzInfo_setDonationAmt(val);
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y == R_FLAG_FUNDRAISING_AMT) {
+                    // int val = gzInfo_getFundraisingAmt() + 1;
+                    // gzInfo_setFundraisingAmt(val);
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y >= R_FLAG_FUNDRAISING_1 && l_cursor->y < R_FLAG_MAX) {
+                    int rIdx = l_cursor->y - R_FLAG_FUNDRAISING_1;
+                    if (!rupeeFlags[rIdx].mIsOn()) {
+                        rupeeFlags[rIdx].mOn();
+                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                    }
+                }
                 break;
             }
-            
         }
-
         if (gzPad::getTrigLeft()) {
             switch (mCurrentTab) {
             case TAB_GENERAL:
-                switch (l_cursor->y) {
-                case G_FLAG_BOSS_FLAG:
-                    if (gzInfo_isBossFlag()) {
-                        gzInfo_setBossFlag(0);
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_CORO_TD:
-                    if (gzInfo_isCoroTD()) {
-                        gzInfo_offCoroTD();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_EPONA_STOLEN:
-                    if (gzInfo_isEponaStolen()) {
-                        gzInfo_offEponaStolen();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-                    
-                    break;
-                case G_FLAG_EPONA_TAMED:
-                    if (gzInfo_isEponaTamed()) {
-                        gzInfo_offEponaTamed();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-                    
-                    break;
-                case G_FLAG_MALO_MART_CT:
-                    if (gzInfo_isMaloMartCT()) {
-                        gzInfo_offMaloMartCT();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MAP_WARPING:
-                    if (gzInfo_isMapWarping()) {
-                        gzInfo_offMapWarping();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_CHARGE:
-                    if (gzInfo_isMidnaCharge()) {
-                        gzInfo_offMidnaCharge();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_HEALTHY:
-                    if (gzInfo_isMidnaHealthy()) {
-                        gzInfo_offMidnaHealthy();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_ON_BACK:
-                    if (gzInfo_isMidnaOnBack()) {
-                        gzInfo_offMidnaOnBack();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_MIDNA_Z:
-                    if (gzInfo_isMidnaOnZ()) {
-                        gzInfo_offMidnaOnZ();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_RUSL_TD:
-                    if (gzInfo_isRuslTD()) {
-                        gzInfo_offRuslTD();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_TRANSFORM_WARP:
-                    if (gzInfo_isTransformWarp()) {
-                        gzInfo_offTransformWarp();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
-                case G_FLAG_WOLF_SENSE:
-                    if (gzInfo_isWolfSense()) {
-                        gzInfo_offWolfSense();
-                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-                    }
-
-                    break;
+                if (l_cursor->y < G_FLAG_MAX && generalFlags[l_cursor->y].mIsOn()) {
+                    generalFlags[l_cursor->y].mOff();
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 }
+                break;
             case TAB_DUNGEON:
-                switch (l_cursor->y) {
-                case D_FLAG_SELECT_DUNGEON:
-                    mSelectedDungeon = (mSelectedDungeon - 1 + ARRAY_SIZE(dungeonNames)) % ARRAY_SIZE(dungeonNames);
-                    break;
-                case D_FLAG_SMALL_KEY:
-                    break;
-                case D_FLAG_MAP:
-                    break;
-                case D_FLAG_COMPASS:
-                    break;
-                case D_FLAG_BOSS_KEY:
-                    break;
-                case D_FLAG_DEFEAT_MINIBOSS:
-                    break;
-                case D_FLAG_DEFEAT_BOSS:
-                    break;
-                case D_FLAG_CLEAR_DUNGEON:
-                    break;
-                    
+                if (l_cursor->y == D_FLAG_SELECT_DUNGEON) {
+                    mSelectedDungeon = (mSelectedDungeon - 1 + NUM_DUNGEONS) % NUM_DUNGEONS;
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y == D_FLAG_SMALL_KEY) {
+                    // int val = gzInfo_getDungeonSmallKeys(mSelectedDungeon) - 1;
+                    // if (val >= 0) {
+                    //     gzInfo_setDungeonSmallKeys(mSelectedDungeon, val);
+                    // }
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y >= D_FLAG_BOSS_KEY && l_cursor->y <= D_FLAG_DEFEAT_MINIBOSS)
+                {
+                    int bIdx = l_cursor->y - D_FLAG_BOSS_KEY;
+                    if (dungeonFlags[bIdx].mIsOn(mSelectedDungeon)) {
+                        dungeonFlags[bIdx].mOff(mSelectedDungeon);
+                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                    }
                 }
-
                 break;
             case TAB_PORTAL:
-                switch (l_cursor->y) {
-                case P_FLAG_SELECT_REGION:
-                    mSelectedRegion = (mSelectedRegion - 1 + ARRAY_SIZE(regionNames)) % ARRAY_SIZE(regionNames);
-                    break;
-                case P_FLAG_REGION:
+                if (l_cursor->y == P_FLAG_SELECT_REGION) {
+                    mSelectedRegion = (mSelectedRegion - 1 + NUM_REGIONS) % NUM_REGIONS;
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y == P_FLAG_REGION) {
                     if (getRegionFlag(mSelectedRegion)) {
                         setRegionFlag(mSelectedRegion);
                         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                     }
-                    break;
-                case P_FLAG_SPRING_WARP:
-                    break;
-                case P_FLAG_S_FARON_WARP:
-                    break;
-                case P_FLAG_N_FARON_WARP:
-                    break;
-                case P_FLAG_GROVE_WARP:
-                    break;
-                case P_FLAG_GORGE_WARP:
-                    break;
-                case P_FLAG_KAKARIKO_WARP:
-                    break;
-                case P_FLAG_MOUNTAIN_WARP:
-                    break;
-                case P_FLAG_BRIDGE_WARP:
-                    break;
-                case P_FLAG_TOWN_WARP:
-                    break;
-                case P_FLAG_LAKE_WARP:
-                    break;
-                case P_FLAG_DOMAIN_WARP:
-                    break;
-                case P_FLAG_UZR_WARP:
-                    break;
-                case P_FLAG_SNOWPEAK_WARP:
-                    break;
-                case P_FLAG_MESA_WARP:
-                    break;
-                case P_FLAG_MIRROR_WARP:
-                    break;
-                    
+                } else if (l_cursor->y >= P_FLAG_SPRING_WARP && l_cursor->y < P_FLAG_MAX) {
+                    int wIdx = l_cursor->y - P_FLAG_SPRING_WARP;
+                    if (warpFlags[wIdx].mIsOn()) {
+                        warpFlags[wIdx].mOff();
+                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                    }
                 }
-
+                break;
+            case TAB_RUPEE:
+                if (l_cursor->y == R_FLAG_DONATION_AMT) {
+                    // int val = gzInfo_getDonationAmt() - 1;
+                    // if (val >= 0) {
+                    //     gzInfo_setDonationAmt(val);
+                    // }
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y == R_FLAG_FUNDRAISING_AMT) {
+                    // int val = gzInfo_getFundraisingAmt() - 1;
+                    // if (val >= 0) {
+                    //     gzInfo_setFundraisingAmt(val);
+                    // }
+                    gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                } else if (l_cursor->y >= R_FLAG_FUNDRAISING_1 && l_cursor->y < R_FLAG_MAX) {
+                    int rIdx = l_cursor->y - R_FLAG_FUNDRAISING_1;
+                    if (rupeeFlags[rIdx].mIsOn()) {
+                        rupeeFlags[rIdx].mOff();
+                        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+                    }
+                }
                 break;
             }
         }
     }
-
     if (gzPad::getTrigB()) {
         if (mOption) {
             mOption = false;
@@ -739,18 +525,28 @@ void gzFlagsMenu_c::execute() {
             return;
         }
     }
-
     if (gzPad::getTrigA()) {
-        mOption = !mOption;
-        mOption ? gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK) : gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+        bool handled = false;
+        if (mOption && mCurrentTab == TAB_DUNGEON && l_cursor->y == D_FLAG_CLEAR_DUNGEON) {
+            // gzInfo_clearDungeonFlags(mSelectedDungeon);
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+            mOption = false;
+            handled = true;
+        }
+        if (!handled) {
+            mOption = !mOption;
+            if (mOption) {
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+            } else {
+                gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            }
+        }
     }
-
     mpMeterHaihai->_execute(0);
 }
 
 void gzFlagsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
-
     static const f32 Y_ALIGNMENT = 100.0f;
     static const f32 OPTIONS_X_OFFSET = -20.0f;
     static const f32 HAIHAI_X_OFFSET = 305.0f;
@@ -781,7 +577,6 @@ void gzFlagsMenu_c::draw() {
     mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
 
     u32 cursor_color = gzInfo_getCursorColor();
-
     f32 y_header_alignment = g_gzInfo.mBackgroundYPos + 48.0f;
     f32 x_alignment_opts = mXPos + OPTIONS_X_OFFSET;
     f32 x_alignment_haihai = x_alignment_opts + HAIHAI_X_OFFSET;
@@ -791,7 +586,6 @@ void gzFlagsMenu_c::draw() {
     gzTextBox** currentLines;
     gzTextBox** currentLineOptions;
     int currentLineNum;
-
     switch (mCurrentTab) {
     case TAB_GENERAL:
         currentLines = mpLinesGeneral;
@@ -816,7 +610,8 @@ void gzFlagsMenu_c::draw() {
     }
 
     for (int i = 0; i < TAB_MAX; i++) {
-        mpTabHeaders[i]->draw(X_POS[i], y_header_alignment, i == mCurrentTab ? cursor_color : COLOR_WHITE);
+        mpTabHeaders[i]->draw(X_POS[i], y_header_alignment,
+                              i == mCurrentTab ? cursor_color : COLOR_WHITE);
     }
 
     if (l_cursor->y < mTopLine) {
@@ -824,24 +619,28 @@ void gzFlagsMenu_c::draw() {
     } else if (l_cursor->y >= mTopLine + VISIBLE_LINES) {
         mTopLine = l_cursor->y - VISIBLE_LINES + 1;
     }
-
     int maxTop = currentLineNum - VISIBLE_LINES;
-    if (maxTop < 0) maxTop = 0;
-    if (mTopLine > maxTop) mTopLine = maxTop;
-    if (mTopLine < 0) mTopLine = 0;
+    if (maxTop < 0)
+        maxTop = 0;
+    if (mTopLine > maxTop)
+        mTopLine = maxTop;
+    if (mTopLine < 0)
+        mTopLine = 0;
 
     for (int screenIdx = 0; screenIdx < VISIBLE_LINES; screenIdx++) {
         int lineIdx = mTopLine + screenIdx;
-        if (lineIdx >= currentLineNum) break;
-
+        if (lineIdx >= currentLineNum)
+            break;
         f32 y_pos = Y_ALIGNMENT + (screenIdx * LINE_SPACING);
         if (l_cursor->y == lineIdx && gzInfo_isSubMenuVisible()) {
             currentLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
             f32 x_size_haihai = currentLineOptions[lineIdx]->mBounds.f.x + HAIHAI_EXTRA_SPACING;
             if (mOption) {
-                mpMeterHaihai->drawHaihai(getHaihaiFlags(lineIdx), x_alignment_haihai, y_pos + HAIHAI_Y_OFFSET, x_size_haihai, 0.0f);
+                mpMeterHaihai->drawHaihai(getHaihaiFlags(lineIdx), x_alignment_haihai,
+                                          y_pos + HAIHAI_Y_OFFSET, x_size_haihai, 0.0f);
             }
-            mpDrawCursor->setPos(x_alignment_tp_cursor, y_pos - 10.0f, (J2DPane*)currentLines[lineIdx], false);
+            mpDrawCursor->setPos(x_alignment_tp_cursor, y_pos - 10.0f,
+                                 (J2DPane*)currentLines[lineIdx], false);
             currentLineOptions[lineIdx]->draw(x_alignment_opts, y_pos, cursor_color, HBIND_CENTER);
         } else {
             currentLines[lineIdx]->draw(mXPos, y_pos, COLOR_WHITE);
@@ -851,9 +650,7 @@ void gzFlagsMenu_c::draw() {
 
     if (gzInfo_isSubMenuVisible()) {
         if (currentLines[l_cursor->y] && *currentLines[l_cursor->y]->m_description != 0) {
-            f32 description_x = DESCRIPTION_X;
             f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
-
             mpDescription->setString(currentLines[l_cursor->y]->m_description);
             mpDescription->draw(DESCRIPTION_X, description_y, cursor_color, HBIND_CENTER);
         }

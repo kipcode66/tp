@@ -495,119 +495,6 @@ private:
     bool mOption;
 };
 
-class gzFlagsMenu_c : public gzMenu_c {
-public:
-
-    enum gzFlagsMenu_Tabs_e {
-        TAB_GENERAL,
-        TAB_DUNGEON,
-        TAB_PORTAL,
-        TAB_RUPEE,
-
-        TAB_MAX
-    };
-
-    enum gzFlagsMenu_General_e {
-        G_FLAG_BOSS_FLAG,
-        G_FLAG_CORO_TD,
-        G_FLAG_EPONA_STOLEN,
-        G_FLAG_EPONA_TAMED,
-        G_FLAG_MALO_MART_CT,
-        G_FLAG_MAP_WARPING,
-        G_FLAG_MIDNA_CHARGE,
-        G_FLAG_MIDNA_HEALTHY,
-        G_FLAG_MIDNA_ON_BACK,
-        G_FLAG_MIDNA_Z,
-        G_FLAG_RUSL_TD,
-        G_FLAG_TRANSFORM_WARP,
-        G_FLAG_WOLF_SENSE,
-
-        G_FLAG_MAX
-    };
-
-    enum gzFlagsMenu_Dungeon_e {
-        D_FLAG_SELECT_DUNGEON,
-        D_FLAG_SMALL_KEY,
-        D_FLAG_MAP,
-        D_FLAG_COMPASS,
-        D_FLAG_BOSS_KEY,
-        D_FLAG_DEFEAT_MINIBOSS,
-        D_FLAG_DEFEAT_BOSS,
-        D_FLAG_CLEAR_DUNGEON,
-
-        D_FLAG_MAX
-    };
-
-    enum gzFlagsMenu_Portal_e {
-        P_FLAG_SELECT_REGION,
-        P_FLAG_REGION,
-        P_FLAG_SPRING_WARP,
-        P_FLAG_S_FARON_WARP,
-        P_FLAG_N_FARON_WARP,
-        P_FLAG_GROVE_WARP,
-        P_FLAG_GORGE_WARP,
-        P_FLAG_KAKARIKO_WARP,
-        P_FLAG_MOUNTAIN_WARP,
-        P_FLAG_BRIDGE_WARP,
-        P_FLAG_TOWN_WARP,
-        P_FLAG_LAKE_WARP,
-        P_FLAG_DOMAIN_WARP,
-        P_FLAG_UZR_WARP,
-        P_FLAG_SNOWPEAK_WARP,
-        P_FLAG_MESA_WARP,
-        P_FLAG_MIRROR_WARP,
-
-        P_FLAG_MAX
-    };
-
-    enum gzFlagsMenu_Rupee_e {
-        R_FLAG_DONATION_AMT,
-        R_FLAG_FUNDRAISING_AMT,
-        R_FLAG_FUNDRAISING_1,
-        R_FLAG_FUNDRAISING_2,
-        R_FLAG_RUPEE_CS_FLAG,
-
-        R_FLAG_MAX
-    };
-
-    gzFlagsMenu_c();
-    ~gzFlagsMenu_c();
-
-    virtual void _delete();
-    virtual void execute();
-    virtual void draw();
-    virtual f32 getXPos() { return mXPos; }
-    virtual void setXPos(f32 x) { mXPos = x; }
-
-private:
-    void updateDynamicLines();
-    u8 getHaihaiFlags(int);
-    int getCurrentLineNum();
-    void setRegionFlag(int);
-    bool getRegionFlag(int);
-
-private:
-    gzTextBox* mpTabHeaders[TAB_MAX];
-    gzTextBox* mpLinesGeneral[G_FLAG_MAX];
-    gzTextBox* mpLineOptionsGeneral[G_FLAG_MAX];
-    gzTextBox* mpLinesDungeon[D_FLAG_MAX];
-    gzTextBox* mpLineOptionsDungeon[D_FLAG_MAX];
-    gzTextBox* mpLinesPortal[P_FLAG_MAX];
-    gzTextBox* mpLineOptionsPortal[P_FLAG_MAX];
-    gzTextBox* mpLinesRupee[R_FLAG_MAX];
-    gzTextBox* mpLineOptionsRupee[R_FLAG_MAX];
-    gzTextBox* mpDescription;
-
-    dSelect_cursor_c* mpDrawCursor;
-    dMeterHaihai_c* mpMeterHaihai;
-    int mCurrentTab;
-    int mTopLine;
-    int mSelectedDungeon;
-    int mSelectedRegion;
-    bool mOption;
-    f32 mXPos;
-};
-
 class gzHeapsMenu_c : public gzMenu_c {
 public:
 
@@ -748,5 +635,197 @@ inline f32 calcSlidePosition(u32 currentFrame, u32 startFrame, f32 startPos, f32
 
     return J2DHermiteInterpolation<f32>(age, &time0, &value0, &tan_out0, &time1, &value1, &tan_in1);
 }
+
+struct BoolFlagInfo {
+    const char* mName;
+    const char* mDesc;
+    bool (*mIsOn)();
+    void (*mOn)();
+    void (*mOff)();
+};
+
+struct DungeonBoolFlagInfo {
+    const char* mName;
+    const char* mDesc;
+    bool (*mIsOn)(int);
+    void (*mOn)(int);
+    void (*mOff)(int);
+};
+
+struct WarpBoolFlagInfo {
+    const char* mName;
+    const char* mDesc;
+    bool (*mIsOn)();
+    void (*mOn)();
+    void (*mOff)();
+};
+
+struct RupeeBoolFlagInfo {
+    const char* mName;
+    const char* mDesc;
+    bool (*mIsOn)();
+    void (*mOn)();
+    void (*mOff)();
+};
+
+class gzFlagsMenu_c : public gzMenu_c {
+public:
+    enum gzFlagsMenu_Tabs_e {
+        TAB_GENERAL,
+        TAB_DUNGEON,
+        TAB_PORTAL,
+        TAB_RUPEE,
+
+        TAB_MAX
+    };
+
+    enum gzFlagsMenu_General_e {
+        G_FLAG_BOSS_FLAG,
+        G_FLAG_CORO_TD,
+        G_FLAG_EPONA_STOLEN,
+        G_FLAG_EPONA_TAMED,
+        G_FLAG_MALO_MART_CT,
+        G_FLAG_MAP_WARPING,
+        G_FLAG_MIDNA_CHARGE,
+        G_FLAG_MIDNA_HEALTHY,
+        G_FLAG_MIDNA_ON_BACK,
+        G_FLAG_MIDNA_Z,
+        G_FLAG_RUSL_TD,
+        G_FLAG_TRANSFORM_WARP,
+        G_FLAG_WOLF_SENSE,
+
+        G_FLAG_MAX
+    };
+
+    enum gzFlagsMenu_Dungeon_e {
+        D_FLAG_SELECT_DUNGEON,
+        D_FLAG_SMALL_KEY,
+        D_FLAG_BOSS_KEY,
+        D_FLAG_COMPASS,
+        D_FLAG_HC,
+        D_FLAG_MAP,
+        D_FLAG_OOCCOO,
+        D_FLAG_DEFEAT_BOSS,
+        D_FLAG_DEFEAT_MINIBOSS,
+        D_FLAG_CLEAR_DUNGEON,
+
+        D_FLAG_MAX
+    };
+
+    enum gzFlagsMenu_Portal_e {
+        P_FLAG_SELECT_REGION,
+        P_FLAG_REGION,
+        P_FLAG_SPRING_WARP,
+        P_FLAG_S_FARON_WARP,
+        P_FLAG_N_FARON_WARP,
+        P_FLAG_GROVE_WARP,
+        P_FLAG_GORGE_WARP,
+        P_FLAG_KAKARIKO_WARP,
+        P_FLAG_MOUNTAIN_WARP,
+        P_FLAG_BRIDGE_WARP,
+        P_FLAG_TOWN_WARP,
+        P_FLAG_LAKE_WARP,
+        P_FLAG_DOMAIN_WARP,
+        P_FLAG_UZR_WARP,
+        P_FLAG_SNOWPEAK_WARP,
+        P_FLAG_MESA_WARP,
+        P_FLAG_MIRROR_WARP,
+
+        P_FLAG_MAX
+    };
+
+    enum gzFlagsMenu_Rupee_e {
+        R_FLAG_DONATION_AMT,
+        R_FLAG_FUNDRAISING_AMT,
+        R_FLAG_FUNDRAISING_1,
+        R_FLAG_FUNDRAISING_2,
+        R_FLAG_RUPEE_CS_FLAG,
+
+        R_FLAG_MAX
+    };
+
+    gzFlagsMenu_c();
+    ~gzFlagsMenu_c();
+
+    virtual void _delete();
+    virtual void execute();
+    virtual void draw();
+    virtual f32 getXPos() { return mXPos; }
+    virtual void setXPos(f32 x) { mXPos = x; }
+
+private:
+    void updateDynamicLines();
+    u8 getHaihaiFlags(int);
+    int getCurrentLineNum();
+    void setRegionFlag(int);
+    bool getRegionFlag(int);
+
+private:
+    gzTextBox* mpTabHeaders[TAB_MAX];
+    gzTextBox* mpLinesGeneral[G_FLAG_MAX];
+    gzTextBox* mpLineOptionsGeneral[G_FLAG_MAX];
+    gzTextBox* mpLinesDungeon[D_FLAG_MAX];
+    gzTextBox* mpLineOptionsDungeon[D_FLAG_MAX];
+    gzTextBox* mpLinesPortal[P_FLAG_MAX];
+    gzTextBox* mpLineOptionsPortal[P_FLAG_MAX];
+    gzTextBox* mpLinesRupee[R_FLAG_MAX];
+    gzTextBox* mpLineOptionsRupee[R_FLAG_MAX];
+    gzTextBox* mpDescription;
+
+    dSelect_cursor_c* mpDrawCursor;
+    dMeterHaihai_c* mpMeterHaihai;
+    int mCurrentTab;
+    int mTopLine;
+    int mSelectedDungeon;
+    int mSelectedRegion;
+    bool mOption;
+    f32 mXPos;
+};
+
+inline bool isSpringWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::ORDON, 52); }
+inline void onSpringWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::ORDON, 52); }
+inline void offSpringWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::ORDON, 52); }
+inline bool isSFaronWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::FARON, 71); }
+inline void onSFaronWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::FARON, 71); }
+inline void offSFaronWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::FARON, 71); }
+inline bool isNFaronWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::FARON, 2); }
+inline void onNFaronWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::FARON, 2); }
+inline void offNFaronWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::FARON, 2); }
+inline bool isGroveWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::GROVE, 100); }
+inline void onGroveWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::GROVE, 100); }
+inline void offGroveWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::GROVE, 100); }
+inline bool isGorgeWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::FIELD, 21); }
+inline void onGorgeWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::FIELD, 21); }
+inline void offGorgeWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::FIELD, 21); }
+inline bool isKakarikoWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::ELDIN, 31); }
+inline void onKakarikoWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::ELDIN, 31); }
+inline void offKakarikoWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::ELDIN, 31); }
+inline bool isMountainWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::ELDIN, 21); }
+inline void onMountainWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::ELDIN, 21); }
+inline void offMountainWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::ELDIN, 21); }
+inline bool isBridgeWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::FIELD, 99); }
+inline void onBridgeWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::FIELD, 99); }
+inline void offBridgeWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::FIELD, 99); }
+inline bool isTownWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::FIELD, 3); }
+inline void onTownWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::FIELD, 3); }
+inline void offTownWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::FIELD, 3); }
+inline bool isLakeWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::LANAYRU, 10); }
+inline void onLakeWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::LANAYRU, 10); }
+inline void offLakeWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::LANAYRU, 10); }
+inline bool isDomainWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::LANAYRU, 2); }
+inline void onDomainWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::LANAYRU, 2); }
+inline void offDomainWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::LANAYRU, 2); }
+inline bool isUzrWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::LANAYRU, 21); }
+inline void onUzrWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::LANAYRU, 21); }
+inline void offUzrWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::LANAYRU, 21); }
+inline bool isSnowpeakWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::SNOWPEAK, 21); }
+inline void onSnowpeakWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::SNOWPEAK, 21); }
+inline void offSnowpeakWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::SNOWPEAK, 21); }
+inline bool isMesaWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::DESERT, 21); }
+inline void onMesaWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::DESERT, 21); }
+inline void offMesaWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::DESERT, 21); }
+inline bool isMirrorWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::DESERT, 40); }
+inline void onMirrorWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::DESERT, 40); }
+inline void offMirrorWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::DESERT, 40); }
 
 #endif // GZ_MENU_H

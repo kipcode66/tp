@@ -4492,4 +4492,18 @@ inline void dComIfGd_setListCursor() {
 }
 #endif
 
+// inlines for gz
+
+inline void dComIfGs_offStageLife() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offStageLife();
+}
+
+inline void dComIfGs_onSaveDungeonItemMap(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onDungeonItemMap();
+}
+
+inline void dComIfGs_onSaveStageLife(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onStageLife();
+}
+
 #endif /* D_COM_D_COM_INF_GAME_H */

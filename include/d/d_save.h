@@ -649,6 +649,15 @@ public:
     s32 isDungeonItemWarp() const { return isDungeonItem(OOCCOO_NOTE); }
     void onStageLife() { onDungeonItem(STAGE_LIFE); }
 
+    // for gz inlines
+    void offDungeonItemBossKey() { offDungeonItem(BOSS_KEY); }
+    void offDungeonItemCompass() { offDungeonItem(COMPASS); }
+    void offDungeonItemMap() { offDungeonItem(MAP); }
+    void offDungeonItemWarp() { offDungeonItem(OOCCOO_NOTE); }
+    void offStageBossEnemy() { offDungeonItem(STAGE_BOSS_ENEMY); }
+    void offStageBossEnemy2() { offDungeonItem(STAGE_BOSS_ENEMY_2); }
+    void offStageLife() { offDungeonItem(STAGE_LIFE); }
+
 private:
     /* 0x00 */ u32 mTbox[2];
     /* 0x08 */ u32 mSwitch[4];
@@ -699,6 +708,32 @@ public:
     void init();
     dSv_memBit_c& getBit() { return mBit; }
     const dSv_memBit_c& getBit() const { return mBit; }
+
+    enum {
+    /* 0x00 */ ORDON,
+    /* 0x01 */ SEWERS,
+    /* 0x02 */ FARON,
+    /* 0x03 */ ELDIN,
+    /* 0x04 */ LANAYRU,
+    /* 0x06 */ FIELD = 6,
+    /* 0x07 */ GROVE,
+    /* 0x08 */ SNOWPEAK,
+    /* 0x09 */ TOWN,
+    /* 0x0A */ DESERT,
+    /* 0x0B */ POND,
+    /* 0x10 */ FOREST_TEMPLE = 16,
+    /* 0x11 */ GORON_MINES,
+    /* 0x12 */ LAKEBED,
+    /* 0x13 */ ARBITERS,
+    /* 0x14 */ SNOWPEAK_RUINS,
+    /* 0x15 */ TEMPLE_OF_TIME,
+    /* 0x16 */ CITY,
+    /* 0x17 */ PALACE,
+    /* 0x18 */ HYRULE_CASTLE,
+    /* 0x19 */ CAVE_1,
+    /* 0x1A */ CAVE_2,
+    /* 0x1B */ GROTTO
+    };
 
 private:
     /* 0x0 */ dSv_memBit_c mBit;
