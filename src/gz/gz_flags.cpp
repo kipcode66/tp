@@ -32,8 +32,10 @@ static const BoolFlagInfo generalFlags[15] = {
     {"transform/warp", "toggle flag for transforming/warping", gzInfo_isTransformWarp,
      gzInfo_onTransformWarp, gzInfo_offTransformWarp},
     {"wolf sense", "toggle flag for wolf sense", gzInfo_isWolfSense, gzInfo_onWolfSense,
-     gzInfo_offWolfSense}};
+     gzInfo_offWolfSense}
+};
 
+// Dungeon bool flags
 static const DungeonBoolFlagInfo dungeonFlags[7] = {
     {"have boss key", "Give selected dungeon boss key", gzInfo_isDungeonBossKey,
      gzInfo_onDungeonBossKey, gzInfo_offDungeonBossKey},
@@ -53,7 +55,6 @@ static const DungeonBoolFlagInfo dungeonFlags[7] = {
 };
 
 // Portal warp flags
-
 static const WarpBoolFlagInfo warpFlags[15] = {
     {"ordon spring", "Ordon Spring warp portal", isSpringWarp, onSpringWarp, offSpringWarp},
     {"south faron", "South Faron warp portal", isSFaronWarp, onSFaronWarp, offSFaronWarp},
@@ -75,18 +76,18 @@ static const WarpBoolFlagInfo warpFlags[15] = {
 
 // Rupee bool flags
 static const RupeeBoolFlagInfo rupeeFlags[3] = {
-    {"fundraising 1", "Toggle flag for first fundraising being complete", NULL, NULL, NULL},
-    {"fundraising 2", "Toggle flag for second fundraising being complete", NULL, NULL, NULL},
-    {"rupee cutscenes", "Toggle rupee cutscenes being enabled", NULL, NULL, NULL}};
+    {"fundraising 1", "Toggle flag for first fundraising being complete", isFundraising1, onFundraising1, offFundraising1},
+    {"fundraising 2", "Toggle flag for second fundraising being complete", isFundraising2, onFundraising2, offFundraising2},
+    {"rupee cutscenes", "Toggle rupee cutscenes being enabled", isRupeeCS, onRupeeCS, offRupeeCS}};
 
 // Dungeon and region names
 static const char* dungeonNames[] = {"Forest Temple",     "Goron Mines",        "Lakebed Temple",
                                      "Arbiter's Grounds", "Snowpeak Ruins",     "Temple of Time",
                                      "City in the Sky",   "Palace of Twilight", "Hyrule Castle"};
-#define NUM_DUNGEONS (sizeof(dungeonNames) / sizeof(dungeonNames[0]))
+#define NUM_DUNGEONS ARRAY_SIZE(dungeonNames)
 
 static const char* regionNames[] = {"ordon", "faron", "eldin", "lanayru", "desert", "snowpeak"};
-#define NUM_REGIONS (sizeof(regionNames) / sizeof(regionNames[0]))
+#define NUM_REGIONS ARRAY_SIZE(regionNames)
 
 gzFlagsMenu_c::gzFlagsMenu_c() {
     OSReport("creating gzFlagsMenu_c\n");
@@ -234,7 +235,7 @@ u8 gzFlagsMenu_c::getHaihaiFlags(int idx) {
             haihai_flags = 0;
         } else if (idx >= D_FLAG_BOSS_KEY && idx <= D_FLAG_DEFEAT_MINIBOSS) {
             int bIdx = idx - D_FLAG_BOSS_KEY;
-            if (dungeonFlags[bIdx].mIsOn(mSelectedDungeon)) {
+            if (dungeonFlags[bIdx].mIsOn(mSelectedDungeon + 16)) {
                 haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
             } else {
                 haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
@@ -244,7 +245,7 @@ u8 gzFlagsMenu_c::getHaihaiFlags(int idx) {
     case TAB_PORTAL:
         if (idx == P_FLAG_SELECT_REGION) {
         } else if (idx == P_FLAG_REGION) {
-            if (getRegionFlag(mSelectedRegion)) {
+            if (getRegionFlag(mSelectedRegion + 1)) {
                 haihai_flags &= ~gzMainMenu_c::ARROW_RIGHT;
             } else {
                 haihai_flags &= ~gzMainMenu_c::ARROW_LEFT;
@@ -305,11 +306,10 @@ void gzFlagsMenu_c::updateDynamicLines() {
         currentLineOptions = mpLineOptionsDungeon;
         currentLineNum = D_FLAG_MAX;
         currentLineOptions[D_FLAG_SELECT_DUNGEON]->setStringf("%s", dungeonNames[mSelectedDungeon]);
-        // currentLineOptions[D_FLAG_SMALL_KEY]->setStringf("%d",
-        // gzInfo_getDungeonSmallKeys(mSelectedDungeon));
+        currentLineOptions[D_FLAG_SMALL_KEY]->setStringf("%d", getDungeonSmallKeys(mSelectedDungeon + 16));
         for (int i = 0; i < 7; i++) {
             currentLineOptions[D_FLAG_BOSS_KEY + i]->setStringf(
-                "%s", dungeonFlags[i].mIsOn(mSelectedDungeon) ? "yes" : "no");
+                "%s", dungeonFlags[i].mIsOn(mSelectedDungeon + 16) ? "yes" : "no");
         }
         currentLineOptions[D_FLAG_CLEAR_DUNGEON]->setString("");
         break;
@@ -318,8 +318,8 @@ void gzFlagsMenu_c::updateDynamicLines() {
         currentLineOptions = mpLineOptionsPortal;
         currentLineNum = P_FLAG_MAX;
         currentLineOptions[P_FLAG_SELECT_REGION]->setStringf("%s", regionNames[mSelectedRegion]);
-        currentLineOptions[P_FLAG_REGION]->setStringf("%s", getRegionFlag(mSelectedRegion) ? "on" :
-                                                                                             "off");
+        currentLineOptions[P_FLAG_REGION]->setStringf("%s", getRegionFlag(mSelectedRegion + 1) ? "on" : "off");
+        OSReport("mSelectedRegion: %d\n", mSelectedRegion);
         for (int i = 0; i < 15; i++) {
             currentLineOptions[P_FLAG_SPRING_WARP + i]->setStringf(
                 "%s", warpFlags[i].mIsOn() ? "on" : "off");
@@ -329,8 +329,8 @@ void gzFlagsMenu_c::updateDynamicLines() {
         currentLines = mpLinesRupee;
         currentLineOptions = mpLineOptionsRupee;
         currentLineNum = R_FLAG_MAX;
-        // currentLineOptions[R_FLAG_DONATION_AMT]->setStringf("%d", gzInfo_getDonationAmt());
-        // currentLineOptions[R_FLAG_FUNDRAISING_AMT]->setStringf("%d", gzInfo_getFundraisingAmt());
+        currentLineOptions[R_FLAG_DONATION_AMT]->setStringf("%d", getDonationAmt());
+        currentLineOptions[R_FLAG_FUNDRAISING_AMT]->setStringf("%d", getFundraisingAmt());
         for (int i = 0; i < 3; i++) {
             currentLineOptions[R_FLAG_FUNDRAISING_1 + i]->setStringf(
                 "%s", rupeeFlags[i].mIsOn() ? "on" : "off");
@@ -397,14 +397,14 @@ void gzFlagsMenu_c::execute() {
                     mSelectedDungeon = (mSelectedDungeon + 1) % NUM_DUNGEONS;
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y == D_FLAG_SMALL_KEY) {
-                    // int val = gzInfo_getDungeonSmallKeys(mSelectedDungeon) + 1;
-                    // gzInfo_setDungeonSmallKeys(mSelectedDungeon, val);
+                    int val = getDungeonSmallKeys(mSelectedDungeon + 16) + 1;
+                    setDungeonSmallKeys(mSelectedDungeon + 16, val);
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y >= D_FLAG_BOSS_KEY && l_cursor->y <= D_FLAG_DEFEAT_MINIBOSS)
                 {
                     int bIdx = l_cursor->y - D_FLAG_BOSS_KEY;
-                    if (!dungeonFlags[bIdx].mIsOn(mSelectedDungeon)) {
-                        dungeonFlags[bIdx].mOn(mSelectedDungeon);
+                    if (!dungeonFlags[bIdx].mIsOn(mSelectedDungeon + 16)) {
+                        dungeonFlags[bIdx].mOn(mSelectedDungeon + 16);
                         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                     }
                 }
@@ -414,8 +414,8 @@ void gzFlagsMenu_c::execute() {
                     mSelectedRegion = (mSelectedRegion + 1) % NUM_REGIONS;
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y == P_FLAG_REGION) {
-                    if (!getRegionFlag(mSelectedRegion)) {
-                        setRegionFlag(mSelectedRegion);
+                    if (!getRegionFlag(mSelectedRegion + 1)) {
+                        setRegionFlag(mSelectedRegion + 1);
                         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                     }
                 } else if (l_cursor->y >= P_FLAG_SPRING_WARP && l_cursor->y < P_FLAG_MAX) {
@@ -428,12 +428,12 @@ void gzFlagsMenu_c::execute() {
                 break;
             case TAB_RUPEE:
                 if (l_cursor->y == R_FLAG_DONATION_AMT) {
-                    // int val = gzInfo_getDonationAmt() + 1;
-                    // gzInfo_setDonationAmt(val);
+                    u16 val = getDonationAmt() + 1;
+                    setDonationAmt(val);
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y == R_FLAG_FUNDRAISING_AMT) {
-                    // int val = gzInfo_getFundraisingAmt() + 1;
-                    // gzInfo_setFundraisingAmt(val);
+                    u16 val = getFundraisingAmt() + 1;
+                    setFundraisingAmt(val);
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y >= R_FLAG_FUNDRAISING_1 && l_cursor->y < R_FLAG_MAX) {
                     int rIdx = l_cursor->y - R_FLAG_FUNDRAISING_1;
@@ -458,16 +458,16 @@ void gzFlagsMenu_c::execute() {
                     mSelectedDungeon = (mSelectedDungeon - 1 + NUM_DUNGEONS) % NUM_DUNGEONS;
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y == D_FLAG_SMALL_KEY) {
-                    // int val = gzInfo_getDungeonSmallKeys(mSelectedDungeon) - 1;
-                    // if (val >= 0) {
-                    //     gzInfo_setDungeonSmallKeys(mSelectedDungeon, val);
-                    // }
+                    int val = getDungeonSmallKeys(mSelectedDungeon + 16) - 1;
+                    if (val >= 0) {
+                        setDungeonSmallKeys(mSelectedDungeon + 16, val);
+                    }
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y >= D_FLAG_BOSS_KEY && l_cursor->y <= D_FLAG_DEFEAT_MINIBOSS)
                 {
                     int bIdx = l_cursor->y - D_FLAG_BOSS_KEY;
-                    if (dungeonFlags[bIdx].mIsOn(mSelectedDungeon)) {
-                        dungeonFlags[bIdx].mOff(mSelectedDungeon);
+                    if (dungeonFlags[bIdx].mIsOn(mSelectedDungeon + 16)) {
+                        dungeonFlags[bIdx].mOff(mSelectedDungeon + 16);
                         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                     }
                 }
@@ -477,8 +477,8 @@ void gzFlagsMenu_c::execute() {
                     mSelectedRegion = (mSelectedRegion - 1 + NUM_REGIONS) % NUM_REGIONS;
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y == P_FLAG_REGION) {
-                    if (getRegionFlag(mSelectedRegion)) {
-                        setRegionFlag(mSelectedRegion);
+                    if (getRegionFlag(mSelectedRegion + 1)) {
+                        setRegionFlag(mSelectedRegion + 1);
                         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                     }
                 } else if (l_cursor->y >= P_FLAG_SPRING_WARP && l_cursor->y < P_FLAG_MAX) {
@@ -491,16 +491,16 @@ void gzFlagsMenu_c::execute() {
                 break;
             case TAB_RUPEE:
                 if (l_cursor->y == R_FLAG_DONATION_AMT) {
-                    // int val = gzInfo_getDonationAmt() - 1;
-                    // if (val >= 0) {
-                    //     gzInfo_setDonationAmt(val);
-                    // }
+                    u16 val = getDonationAmt() - 1;
+                    if (val >= 0) {
+                        setDonationAmt(val);
+                    }
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y == R_FLAG_FUNDRAISING_AMT) {
-                    // int val = gzInfo_getFundraisingAmt() - 1;
-                    // if (val >= 0) {
-                    //     gzInfo_setFundraisingAmt(val);
-                    // }
+                    u16 val = getFundraisingAmt() - 1;
+                    if (val >= 0) {
+                        setFundraisingAmt(val);
+                    }
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 } else if (l_cursor->y >= R_FLAG_FUNDRAISING_1 && l_cursor->y < R_FLAG_MAX) {
                     int rIdx = l_cursor->y - R_FLAG_FUNDRAISING_1;
@@ -528,7 +528,7 @@ void gzFlagsMenu_c::execute() {
     if (gzPad::getTrigA()) {
         bool handled = false;
         if (mOption && mCurrentTab == TAB_DUNGEON && l_cursor->y == D_FLAG_CLEAR_DUNGEON) {
-            // gzInfo_clearDungeonFlags(mSelectedDungeon);
+            clearDungeonFlags(mSelectedDungeon + 16);
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
             mOption = false;
             handled = true;

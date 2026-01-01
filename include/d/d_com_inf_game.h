@@ -4494,16 +4494,115 @@ inline void dComIfGd_setListCursor() {
 
 // inlines for gz
 
+inline bool dComIfGs_isSaveDungeonItemBossKey(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().isDungeonItemBossKey();
+}
+
+inline bool dComIfGs_isSaveDungeonItemCompass(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().isDungeonItemCompass();
+}
+
+inline bool dComIfGs_isSaveDungeonItemMap(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().isDungeonItemMap();
+}
+
+inline bool dComIfGs_isSaveStageLife(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().isStageLife();
+}
+
+inline bool dComIfGs_isSaveDungeonItemWarp(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isDungeonItemWarp();
+}
+
+inline bool dComIfGs_isSaveStageBossEnemy(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().isStageBossEnemy();
+}
+
+inline bool dComIfGs_isSaveStageMiddleBoss(int i_stageNo) {
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().isStageBossEnemy2();
+}
+
 inline void dComIfGs_offStageLife() {
     g_dComIfG_gameInfo.info.getMemory().getBit().offStageLife();
 }
 
+inline void dComIfGs_offDungeonItemMap() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offDungeonItemMap();
+}
+
+inline void dComIfGs_offDungeonItemCompass() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offDungeonItemCompass();
+}
+
+inline void dComIfGs_offDungeonItemBossKey() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offDungeonItemBossKey();
+}
+
+inline void dComIfGs_offDungeonItemWarp() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offDungeonItemWarp();
+}
+
+inline void dComIfGs_offStageBossEnemy() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offStageBossEnemy();
+}
+
+inline void dComIfGs_offStageMiddleBoss() {
+    g_dComIfG_gameInfo.info.getMemory().getBit().offStageBossEnemy2();
+}
+
+inline void dComIfGs_offSaveStageBossEnemy(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offStageBossEnemy();
+}
+
+inline void dComIfGs_offSaveStageMiddleBoss(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offStageBossEnemy2();
+}
+
+inline void dComIfGs_offSaveDungeonItemBossKey(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offDungeonItemBossKey();
+}
+
+inline void dComIfGs_offSaveDungeonItemCompass(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offDungeonItemCompass();
+}
+
+inline void dComIfGs_offSaveDungeonItemMap(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offDungeonItemMap();
+}
+
+inline void dComIfGs_offSaveDungeonItemWarp(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offDungeonItemWarp();
+}
+
+inline void dComIfGs_offSaveStageLife(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().offStageLife();
+}
+
 inline void dComIfGs_onSaveDungeonItemMap(int i_stageNo) {
-    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onDungeonItemMap();
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onDungeonItemMap();
 }
 
 inline void dComIfGs_onSaveStageLife(int i_stageNo) {
-    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onStageLife();
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onStageLife();
+}
+
+inline void dComIfGs_onSaveStageBossEnemy(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onStageBossEnemy();
+}
+
+inline void dComIfGs_onSaveStageMiddleBoss(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onStageBossEnemy2();
+}
+
+inline void dComIfGs_onSaveDungeonItemBossKey(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onDungeonItemBossKey();
+}
+inline void dComIfGs_onSaveDungeonItemCompass(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onDungeonItemCompass();
+}
+
+inline void dComIfGs_onSaveDungeonItemWarp(int i_stageNo) {
+    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onDungeonItemWarp();
 }
 
 #endif /* D_COM_D_COM_INF_GAME_H */

@@ -782,6 +782,12 @@ private:
     f32 mXPos;
 };
 
+inline u8 getDungeonSmallKeys(int i_stageNo) { return dComIfGs_getSaveData()->getSave(i_stageNo).getBit().getKeyNum(); }
+inline void setDungeonSmallKeys(int i_stageNo, u8 i_numKeys) { 
+    dComIfGs_setKeyNum(i_numKeys);
+    dComIfGs_getSaveData()->getSave(i_stageNo).getBit().setKeyNum(i_numKeys); 
+}
+
 inline bool isSpringWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::ORDON, 52); }
 inline void onSpringWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::ORDON, 52); }
 inline void offSpringWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::ORDON, 52); }
@@ -827,5 +833,61 @@ inline void offMesaWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::DESERT, 21); }
 inline bool isMirrorWarp() { return dComIfGs_isSaveSwitch(dSv_memory_c::DESERT, 40); }
 inline void onMirrorWarp() { dComIfGs_onSaveSwitch(dSv_memory_c::DESERT, 40); }
 inline void offMirrorWarp() { dComIfGs_offSaveSwitch(dSv_memory_c::DESERT, 40); }
+
+inline u16 getDonationAmt() { 
+    u8 donation_high_bits = dComIfGs_getEventReg(0xf7ff);
+    u8 donation_low_bits = dComIfGs_getEventReg(0xf8ff);
+
+    return donation_high_bits << 8 | donation_low_bits; 
+}
+inline void setDonationAmt(u16& i_amt) {
+    if (i_amt > 1000)
+        i_amt = 1000;
+
+    dComIfGs_setEventReg(0xf7ff, (i_amt >> 8) & 0xFF);
+    dComIfGs_setEventReg(0xf8ff, i_amt & 0xFF);
+}
+
+inline u16 getFundraisingAmt() {
+    u8 fund_high_bits = dComIfGs_getEventReg(0xf9ff);
+    u8 fund_low_bits = dComIfGs_getEventReg(0xfaff);
+
+    return fund_high_bits << 8 | fund_low_bits;
+}
+
+inline void setFundraisingAmt(u16& i_amt) {
+    if (i_amt > 2000)
+        i_amt = 2000;
+
+    dComIfGs_setEventReg(0xf9ff, (i_amt >> 8) & 0xFF);
+    dComIfGs_setEventReg(0xfaff, i_amt & 0xFF);
+}
+
+inline bool isFundraising1() { return dComIfGs_isEventBit(0x2e20); }
+inline void onFundraising1() { dComIfGs_onEventBit(0x2e20); }
+inline void offFundraising1() { dComIfGs_offEventBit(0x2e20); }
+inline bool isFundraising2() { return dComIfGs_isEventBit(0x0f10); }
+inline void onFundraising2() {  dComIfGs_onEventBit(0x0f10); }
+inline void offFundraising2() { dComIfGs_offEventBit(0x0f10); }
+inline bool isRupeeCS() { 
+    for (int itemNo = fpcNm_ITEM_BLUE_RUPEE; itemNo <= fpcNm_ITEM_SILVER_RUPEE; itemNo++) {
+        if (dComIfGs_isItemFirstBit(itemNo)) return false;
+    }
+    return true;
+}
+inline void onRupeeCS() { 
+    for (int itemNo = fpcNm_ITEM_BLUE_RUPEE; itemNo <= fpcNm_ITEM_SILVER_RUPEE; itemNo++) {
+        dComIfGs_offItemFirstBit(itemNo);
+    }
+}
+inline void offRupeeCS() { 
+    for (int itemNo = fpcNm_ITEM_BLUE_RUPEE; itemNo <= fpcNm_ITEM_SILVER_RUPEE; itemNo++) {
+        dComIfGs_onItemFirstBit(itemNo);
+    }
+}
+
+inline void clearDungeonFlags(int i_stageNo) {
+    memset((void*)&dComIfGs_getSaveData()->getSave(i_stageNo).getBit(), 0, sizeof(dSv_memBit_c));
+}
 
 #endif // GZ_MENU_H

@@ -455,8 +455,67 @@ inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
 inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
 
-inline bool gzInfo_isBossDefeated(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isStageBossEnemy(); }
-inline bool gzInfo_isMiniBossDefeated(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isStageBossEnemy2(); }
+inline bool gzInfo_isInDungeon(int i_stageNo) {
+    // Check if we're in the dungeon, and return true
+    switch (i_stageNo) {
+    case 16:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN05") == 0) {
+            return true;
+        }
+        break;
+    case 17:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN04") == 0) {
+            return true;
+        }
+        break;
+    case 18:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN01") == 0) {
+            return true;
+        }
+        break;
+    case 19:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN10") == 0) {
+            return true;
+        }
+        break;
+    case 20:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN11") == 0) {
+            return true;
+        }
+        break;
+    case 21:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN06") == 0) {
+            return true;
+        }
+        break;
+    case 22:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN07") == 0) {
+            return true;
+        }
+        break;
+    case 23:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN08") == 0) {
+            return true;
+        }
+        break;
+    case 24:
+        if (strcmp(dComIfGp_getStartStageName(), "D_MN09") == 0) {
+            return true;
+        }
+        break;
+    }
+
+    return false;
+}
+
+inline bool gzInfo_isBossDefeated(int i_stageNo) { 
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isStageBossEnemy() : dComIfGs_isSaveStageBossEnemy(i_stageNo);
+}
+
+inline bool gzInfo_isMiniBossDefeated(int i_stageNo) { 
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isStageMiddleBoss() : dComIfGs_isSaveStageMiddleBoss(i_stageNo);
+}
+
 inline bool gzInfo_isBossFlag() { return gzInfo_getBossFlag() > 0; }
 inline bool gzInfo_isCoroTD() { return g_gzInfo.isCoroTD(); }
 inline bool gzInfo_isCursorTypeClassic() { return g_gzInfo.isCursorTypeClassic(); }
@@ -466,11 +525,27 @@ inline bool gzInfo_isDisableWalls() { return g_gzInfo.isDisableWalls(); }
 inline bool gzInfo_isDisplayModeInterlaced() { return g_gzInfo.getDisplayMode() == false; }
 inline bool gzInfo_isDisplayModeProgressive() { return g_gzInfo.getDisplayMode() == true; }
 inline bool gzInfo_isDropShadows() { return g_gzInfo.isDropShadows(); }
-inline bool gzInfo_isDungeonBossKey(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isDungeonItemBossKey(); }
-inline bool gzInfo_isDungeonCompass(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isDungeonItemCompass(); }
-inline bool gzInfo_isDungeonHeartContainer(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isStageLife(); }
-inline bool gzInfo_isDungeonMap(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isDungeonItemMap(); }
-inline bool gzInfo_isDungeonOoccoo(int i_stageNo) { return g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().isDungeonItemWarp(); }
+
+inline bool gzInfo_isDungeonBossKey(int i_stageNo) { 
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isDungeonItemBossKey() : dComIfGs_isSaveDungeonItemBossKey(i_stageNo);
+}
+
+inline bool gzInfo_isDungeonCompass(int i_stageNo) { 
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isDungeonItemCompass() : dComIfGs_isSaveDungeonItemCompass(i_stageNo);
+}
+
+inline bool gzInfo_isDungeonHeartContainer(int i_stageNo) { 
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isStageLife() : dComIfGs_isSaveStageLife(i_stageNo);
+}
+
+inline bool gzInfo_isDungeonMap(int i_stageNo) {
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isDungeonItemMap() : dComIfGs_isSaveDungeonItemMap(i_stageNo);
+}
+
+inline bool gzInfo_isDungeonOoccoo(int i_stageNo) { 
+    return gzInfo_isInDungeon(i_stageNo) ? dComIfGs_isDungeonItemWarp() : dComIfGs_isSaveDungeonItemWarp(i_stageNo); 
+}
+
 inline bool gzInfo_isElevatorEscape() { return g_gzInfo.isElevatorEscape(); }
 inline bool gzInfo_isEndingBlowMoonBoots() { return g_gzInfo.isEndingBlowMoonBoots(); }
 inline bool gzInfo_isEponaStolen() { return g_gzInfo.isEponaStolen(); }
@@ -538,22 +613,42 @@ inline void gzInfo_setSwapEquips(bool swapEquips) { g_gzInfo.setSwapEquips(swapE
 inline void gzInfo_setTextColor(u32 textColor) { g_gzInfo.setTextColor(textColor); }
 
 inline void gzInfo_offAbMashRate() { g_gzInfo.setAbMashRate(false); }
-inline void gzInfo_offBossDefeated(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offStageBossEnemy(); }
-inline void gzInfo_offMiniBossDefeated(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offStageBossEnemy2(); }
+
+inline void gzInfo_offBossDefeated(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offStageBossEnemy() : dComIfGs_offSaveStageBossEnemy(i_stageNo); 
+}
+
+inline void gzInfo_offMiniBossDefeated(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offStageMiddleBoss() : dComIfGs_offStageMiddleBoss(); 
+}
+
 inline void gzInfo_offBossFlag() { g_gzInfo.setBossFlag(0); }
 inline void gzInfo_offCoroTD() { g_gzInfo.setCoroTD(false); }
 inline void gzInfo_offDisableItemTimer() { g_gzInfo.setDisableItemTimer(false); }
 inline void gzInfo_offDisableWalls() { g_gzInfo.setDisableWalls(false); }
 inline void gzInfo_offDisplacement() { g_gzInfo.setDisplacement(false); }
 inline void gzInfo_offDropShadows() { g_gzInfo.setDropShadows(false); }
+
 inline void gzInfo_offDungeonBossKey(int i_stageNo) { 
-    OSReport("off: %d\n", i_stageNo+16);
-    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offDungeonItemBossKey(); 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offDungeonItemBossKey() : dComIfGs_offSaveDungeonItemBossKey(i_stageNo); 
 }
-inline void gzInfo_offDungeonCompass(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offDungeonItemCompass(); }
-inline void gzInfo_offDungeonHeartContainer(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offStageLife(); }
-inline void gzInfo_offDungeonMap(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offDungeonItemMap(); }
-inline void gzInfo_offDungeonOoccoo(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().offDungeonItemWarp(); }
+
+inline void gzInfo_offDungeonCompass(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offDungeonItemCompass() : dComIfGs_offSaveDungeonItemCompass(i_stageNo); 
+}
+
+inline void gzInfo_offDungeonHeartContainer(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offStageLife() : dComIfGs_offSaveStageLife(i_stageNo); 
+}
+
+inline void gzInfo_offDungeonMap(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offDungeonItemMap() : dComIfGs_offSaveDungeonItemMap(i_stageNo); 
+}
+
+inline void gzInfo_offDungeonOoccoo(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offDungeonItemWarp() : dComIfGs_offSaveDungeonItemWarp(i_stageNo);
+}
+
 inline void gzInfo_offElevatorEscape() { g_gzInfo.setElevatorEscape(false); }
 inline void gzInfo_offEndingBlowMoonBoots() { g_gzInfo.setEndingBlowMoonBoots(false); }
 inline void gzInfo_offEponaStolen() { g_gzInfo.setEponaStolen(false); }
@@ -599,32 +694,46 @@ inline void gzInfo_offUnrestrictedItems() { g_gzInfo.setUnrestrictedItems(false)
 inline void gzInfo_offWolfSense() { g_gzInfo.setWolfSense(false); }
 
 inline void gzInfo_onAbMashRate() { g_gzInfo.setAbMashRate(true); }
-inline void gzInfo_onBossDefeated(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onStageBossEnemy(); }
-inline void gzInfo_onMiniBossDefeated(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onStageBossEnemy2(); }
+
+inline void gzInfo_onBossDefeated(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_onStageBossEnemy() : dComIfGs_onSaveStageBossEnemy(i_stageNo);
+}
+
+inline void gzInfo_onMiniBossDefeated(int i_stageNo) { 
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_onStageMiddleBoss() : dComIfGs_onSaveStageMiddleBoss(i_stageNo);
+}
+
 inline void gzInfo_onBossFlag() { g_gzInfo.setBossFlag(50); }
 inline void gzInfo_onCoroTD() { g_gzInfo.setCoroTD(true); }
 inline void gzInfo_onDisableItemTimer() { g_gzInfo.setDisableItemTimer(true); }
 inline void gzInfo_onDisableWalls() { g_gzInfo.setDisableWalls(true); }
 inline void gzInfo_onDisplacement() { g_gzInfo.setDisplacement(true); }
 inline void gzInfo_onDropShadows() { g_gzInfo.setDropShadows(true); }
+
 inline void gzInfo_onDungeonBossKey(int i_stageNo) { 
-    execItemGet(fpcNm_ITEM_BOSS_KEY);
-    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onDungeonItemBossKey(); 
+    gzInfo_isInDungeon(i_stageNo) ? execItemGet(fpcNm_ITEM_BOSS_KEY) : dComIfGs_onSaveDungeonItemBossKey(i_stageNo); 
 }
+
 inline void gzInfo_onDungeonCompass(int i_stageNo) { 
-    execItemGet(fpcNm_ITEM_COMPUS);
-    g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onDungeonItemCompass(); 
+    gzInfo_isInDungeon(i_stageNo) ? execItemGet(fpcNm_ITEM_COMPUS) : dComIfGs_onSaveDungeonItemCompass(i_stageNo); 
 }
+
 inline void gzInfo_onDungeonHeartContainer(int i_stageNo) { 
-    // execItemGet func for this does more than we want in this context
-    dComIfGs_onStageLife();
-    dComIfGs_onSaveStageLife(i_stageNo);
+    // Not using execItemGet func for this as it does more than we want in this context
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_onStageLife() : dComIfGs_onSaveStageLife(i_stageNo);
 }
+
 inline void gzInfo_onDungeonMap(int i_stageNo) { 
-    execItemGet(fpcNm_ITEM_MAP);
-    dComIfGs_onSaveDungeonItemMap(i_stageNo);
+    gzInfo_isInDungeon(i_stageNo) ? execItemGet(fpcNm_ITEM_MAP) : dComIfGs_onSaveDungeonItemMap(i_stageNo);
 }
-inline void gzInfo_onDungeonOoccoo(int i_stageNo) { g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo + 16).getBit().onDungeonItemWarp(); }
+
+inline void gzInfo_onDungeonOoccoo(int i_stageNo) { 
+    // NOTE(Pheenoh): This won't actually give you the ooccoo, just set the flag. 
+    // Maybe we should call execItemGet(fpcNm_ITEM_DUNGEON_EXIT) which will do both?
+    // Or should we leave them separate and let the user set ooccoo in the inventory menu?
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_onDungeonItemWarp() : dComIfGs_onSaveDungeonItemWarp(i_stageNo);
+}
+
 inline void gzInfo_onElevatorEscape() { g_gzInfo.setElevatorEscape(true); }
 inline void gzInfo_onEndingBlowMoonBoots() { g_gzInfo.setEndingBlowMoonBoots(true); }
 inline void gzInfo_onEponaStolen() { g_gzInfo.setEponaStolen(true); }
