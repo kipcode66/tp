@@ -20,6 +20,8 @@ public:
     void executeNoSinkSand();
     void executeTeleport();
 
+    bool isMoveLinkActive() const { return mMoveLink; }
+
 private:
     // for "run once" reenable checks
     SavedCameraState mCamera;
@@ -28,6 +30,9 @@ private:
     cXyz mLinkPos;
     csXyz mLinkAngle;
     bool mMoveLink;
+    bool mPrevMoveLink;
+    bool mMoveLinkComboHeld;
+    f32 mMoveLinkCamAngle;
 };
 
 #endif // GZ_MANAGER_TOOLS_H

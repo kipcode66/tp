@@ -209,6 +209,7 @@ public:
     bool isMidnaOnZ() { return dComIfGs_isEventBit(0x0C10);}
     bool isMoonJump() { return mSettings.mMoonJump; }
     bool isMoveLink() { return mSettings.mMoveLink; }
+    bool isMoveLinkActive() { return mToolsMng.isMoveLinkActive(); }
     bool isNoSinkingInSand() { return mSettings.mNoSinkingInSand; }
     bool isRolling() { return mSettings.mRolling; }
     bool isRuslTD() { return dComIfGs_isTmpBit(0x0006);}
@@ -554,6 +555,7 @@ inline bool gzInfo_isMidnaOnBack() { return g_gzInfo.isMidnaOnBack(); }
 inline bool gzInfo_isMidnaOnZ() { return g_gzInfo.isMidnaOnZ(); }
 inline bool gzInfo_isMoonJump() { return g_gzInfo.isMoonJump(); }
 inline bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
+inline bool gzInfo_isMoveLinkActive() { return g_gzInfo.isMoveLinkActive(); }
 inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
 inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
 inline bool gzInfo_isRolling() { return g_gzInfo.isRolling(); }

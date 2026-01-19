@@ -14,7 +14,6 @@
 #include "m_Do/m_Do_MemCard.h"
 #include "dolphin/card.h"
 #include "dolphin/gx/GXTexture.h"
-#include "f_op/f_op_view.h"
 
 class gzCapture_c : public dDlst_base_c {
 public:
@@ -314,7 +313,7 @@ int gzInfo_c::execute() {
 
     updateStickTriggers();
 
-    if (gzPad::getHoldL() && gzPad::getHoldR() && gzPad::getTrigDown()) {
+    if (gzPad::getHoldL() && gzPad::getHoldR() && (gzPad::getTrig() & PAD_BUTTON_DOWN)) {
         mDisplay = !mDisplay;
         gzClearControllerInput();
 
@@ -491,6 +490,6 @@ void gzInfo_c::sendNotification(const char* msg) {
     if (mpNotification != NULL) mpNotification->send(msg);
 }
 
-void gzInfo_c::sendNotification(const char* msg, int i_notificationType) { 
+void gzInfo_c::sendNotification(const char* msg, int i_notificationType) {
     if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
 }

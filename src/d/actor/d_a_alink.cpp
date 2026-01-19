@@ -50,6 +50,7 @@
 #include "d/actor/d_a_canoe.h"
 #include "d/actor/d_a_ni.h"
 #include "d/d_s_play.h"
+#include "gz/gz.h"
 
 #include "res/Object/Alink.h"
 
@@ -12859,6 +12860,10 @@ void daAlink_c::setFootSpeed() {
 }
 
 void daAlink_c::posMove() {
+    if (gzInfo_isMoveLinkActive()) {
+        return;
+    }
+
     f32 temp_f30 = cM_ssin(shape_angle.y);
     f32 temp_f29 = cM_scos(shape_angle.y);
     cXyz sp108;
@@ -18000,7 +18005,9 @@ int daAlink_c::execute() {
             mItemTrigger = 0;
         }
 
-        allAnimePlay();
+        if (!gzInfo_isMoveLinkActive()) {
+            allAnimePlay();
+        }
 
         if (mDamageTimer != 0) {
             damageTimerCount();
@@ -18072,7 +18079,9 @@ int daAlink_c::execute() {
         }
 
         checkLightSwordMtrl();
-        (this->*mpProcFunc)();
+        if (!gzInfo_isMoveLinkActive()) {
+            (this->*mpProcFunc)();
+        }
 
         if (!checkEndResetFlg0(ERFLG0_UNK_2000) && checkWindDashAnime()) {
             resetUpperAnime(UPPER_2, 3.0f);
@@ -18084,17 +18093,21 @@ int daAlink_c::execute() {
             cXyz old_pos = current.pos;
             posMove();
 
-            if (checkWolf()) {
-                wolfBgCheck();
-            } else if (checkModeFlg(MODE_SWIMMING)) {
-                swimBgCheck(120.0f);
+            if (!gzInfo_isMoveLinkActive()) {
+                if (checkWolf()) {
+                    wolfBgCheck();
+                } else if (checkModeFlg(MODE_SWIMMING)) {
+                    swimBgCheck(120.0f);
+                }
             }
 
             cXyz pos = current.pos;
             field_0x3528 = speed;
 
-            mLinkAcch.ClrGroundHit();
-            mLinkAcch.CrrPos(dComIfG_Bgsp());
+            if (!gzInfo_isMoveLinkActive()) {
+                mLinkAcch.ClrGroundHit();
+                mLinkAcch.CrrPos(dComIfG_Bgsp());
+            }
 
             if (checkMagneBootsOn()) {
                 current.pos = pos;
