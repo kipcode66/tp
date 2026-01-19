@@ -3014,6 +3014,7 @@ if args.mode == "configure":
         output_iso = f"tpgz-{version}.iso"
         orig_iso = f"orig/{version}/{version}.iso"
         dol_output = f"build/{version}/framework.dol"
+        rel_output = f"build/{version}/f_pc_profile_lst/f_pc_profile_lst.rel"
 
         # Add the rebuild_iso rule after the custom build rules section
         iso_rule = f"""
@@ -3030,7 +3031,7 @@ rule rebuild_iso
 
         # Add the build step before the default rule
         iso_build = f"""# Rebuild ISO
-build {output_iso}: rebuild_iso | {dol_output} tools/rebuild-decomp-tp.py
+build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py
 
 """
         content = content.replace(
