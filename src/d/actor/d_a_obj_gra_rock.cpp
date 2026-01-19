@@ -24,10 +24,12 @@ dCcD_SrcCyl const daObjGraRock_c::mCcDCyl = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        0.0f, // mRadius
-        0.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            0.0f, // mRadius
+            0.0f // mHeight
+        } // mCyl
+    },
 };
 
 void daObjGraRock_c::setAttnPos() {
@@ -35,7 +37,7 @@ void daObjGraRock_c::setAttnPos() {
     mDoMtx_stack_c::ZXYrotS(current.angle.x, current.angle.y, current.angle.z);
     mDoMtx_stack_c::multVec(&cStack_50, &attention_info.position);
     attention_info.position += current.pos;
-    attention_info.distances[0] = daNpcF_getDistTableIdx(8, 5);
+    attention_info.distances[fopAc_attn_LOCK_e] = daNpcF_getDistTableIdx(8, 5);
     attention_info.flags = fopAc_AttnFlag_LOCK_e;
     dAttention_c* attention = dComIfGp_getAttention();
     if (attention->LockonTruth()) {

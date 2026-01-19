@@ -1544,10 +1544,8 @@ static int daE_GB_IsDelete(e_gb_class* i_this) {
 }
 
 static int daE_GB_Delete(e_gb_class* i_this) {
-    "Delete -> E_GB(id=%d)\n";
-
     fopEn_enemy_c* actor = &i_this->actor;
-    fpc_ProcID id = fopAcM_GetID(i_this);
+    fopAcM_RegisterDeleteID(i_this, "E_GB");
 
     dComIfG_resDelete(&i_this->phase, "E_gb");
     if (i_this->hioInit != 0) {
@@ -1637,10 +1635,12 @@ static cPhs__Step daE_GB_Create(fopAc_ac_c* actor) {
             {0x0}, // mGObjCo
         }, // mObjInf
         {
-            {0.0f, 0.0f, 0.0f}, // mCenter
-            30.0f, // mRadius
-            20.0f // mHeight
-        } // mCyl
+            {
+                {0.0f, 0.0f, 0.0f}, // mCenter
+                30.0f, // mRadius
+                20.0f // mHeight
+            } // mCyl
+        }
     };
 
     e_gb_class* i_this = (e_gb_class*)actor;

@@ -103,7 +103,7 @@ struct dCcD_SrcTri {
 
 struct dCcD_SrcCyl {
     /* 0x00 */ dCcD_SrcGObjInf mObjInf;
-    /* 0x30 */ cM3dGCylS mCyl;
+    /* 0x30 */ cCcD_SrcCylAttr mCylAttr;
 };  // Size: 0x44
 
 struct dCcD_SrcCps {
@@ -146,7 +146,7 @@ public:
     u32 GetRPrm() const { return mRPrm; }
     u32 MskSPrm(u32 mask) const { return mGFlag & mask; }
     u32 MskRPrm(u32 mask) const { return mRPrm & mask; }
-    bool ChkSPrm(u32 mask) const { return MskSPrm(mask); }
+    bool ChkSPrm(u32 mask) { return MskSPrm(mask); }
     void OnSPrm(u32 flag) { mGFlag |= flag; }
     void OnRPrm(u32 flag) { mRPrm |= flag; }
     void OffSPrm(u32 flag) { mGFlag &= ~flag; }
@@ -169,14 +169,15 @@ public:
     void SetHitMark(u8 mark) { mHitMark = mark; }
     void SetSe(u8 se) { mSe = se; }
     void SetMtrl(u8 mtrl) { mMtrl = mtrl; }
-    void SetAtSpl(dCcG_At_Spl spl) { mSpl = spl; }
+    void SetSpl(dCcG_At_Spl spl) { mSpl = spl; }
     u8 GetSe() { return mSe; }
-    u8 GetSpl() { return mSpl; }
+    dCcG_At_Spl GetSpl() { return (dCcG_At_Spl)mSpl; }
     u8 GetMtrl() { return mMtrl; }
     u8 GetHitMark() { return mHitMark; }
     void SetRVec(cXyz& vec) { mRVec = vec; }
     void SetHitPos(cXyz& pos) { mHitPos = pos; }
     cXyz* GetHitPosP() { return &mHitPos; }
+    void ClrHit() { dCcD_GAtTgCoCommonBase::ClrActorInfo(); }
 
     // private:
     /* 0x1C */ u8 mSe;
@@ -212,6 +213,7 @@ public:
     void SetHitPos(cXyz& pos) { mHitPos = pos; }
     cXyz* GetHitPosP() { return &mHitPos; }
     u8 GetSe() { return mSe; }
+    void ClrHit() { dCcD_GAtTgCoCommonBase::ClrActorInfo(); }
 
 private:
     /* 0x1C */ u8 mSe;
@@ -231,6 +233,7 @@ class dCcD_GObjCo : public dCcD_GAtTgCoCommonBase {
 public:
     virtual ~dCcD_GObjCo() {}
     void Set(dCcD_SrcGObjCo const& pSrc) { dCcD_GAtTgCoCommonBase::Set(pSrc.mBase); }
+    void ClrHit() { dCcD_GAtTgCoCommonBase::ClrActorInfo(); }
 };  // Size = 0x1C ?
 
 class dCcD_GStts : public cCcD_GStts {
@@ -308,7 +311,7 @@ public:
 
     void SetAtVec(cXyz& vec) { mGObjAt.SetVec(vec); }
     void SetTgVec(cXyz& vec) { mGObjTg.SetVec(vec); }
-    bool ChkAtNoMass() const { return mGObjAt.ChkSPrm(8); }
+    bool ChkAtNoMass() { return mGObjAt.ChkSPrm(8); }
     void OnAtNoHitMark() { mGObjAt.OnSPrm(2); }
     void OffAtNoHitMark() { mGObjAt.OffSPrm(2); }
     void OnTgNoHitMark() { mGObjTg.OnSPrm(4); }
@@ -328,7 +331,7 @@ public:
     bool ChkAtShieldHit() { return mGObjAt.ChkRPrm(1); }
     cXyz* GetAtVecP() { return mGObjAt.GetVecP(); }
     cXyz* GetTgVecP() { return mGObjTg.GetVecP(); }
-    void SetAtSpl(dCcG_At_Spl spl) { mGObjAt.SetAtSpl(spl); }
+    void SetAtSpl(dCcG_At_Spl spl) { mGObjAt.SetSpl(spl); }
     void SetAtHitCallback(dCcD_HitCallback callback) { mGObjAt.SetHitCallback(callback); }
     void SetTgHitCallback(dCcD_HitCallback callback) { mGObjTg.SetHitCallback(callback); }
     void SetCoHitCallback(dCcD_HitCallback callback) { mGObjCo.SetHitCallback(callback); }
@@ -412,7 +415,7 @@ public:
     void SetTgHitPos(cXyz& pos) { mGObjTg.SetHitPos(pos); }
     void SetAtHitPos(cXyz& pos) { mGObjAt.SetHitPos(pos); }
     u8 GetTgSe() { return mGObjTg.GetSe(); }
-    u32 GetTgHitObjHitSeID(int i_soundID) { return getHitSeID(GetTgHitObjSe(),i_soundID); }
+    u32 GetTgHitObjHitSeID(BOOL i_isRebound) { return getHitSeID(GetTgHitObjSe(), i_isRebound); }
     cXyz* GetAtHitPosP() { return mGObjAt.GetHitPosP(); }
     cXyz* GetTgHitPosP() { return mGObjTg.GetHitPosP(); }
     cXyz* GetTgRVecP() { return mGObjTg.GetRVecP(); }
@@ -448,6 +451,9 @@ public:
     void CalcTgVec();
     virtual ~dCcD_Cps() {}
     dCcD_Cps() {}
+    #if DEBUG
+    virtual void Draw(const GXColor& color);
+    #endif
 };  // Size = 0x144
 
 // Triangle
@@ -457,6 +463,9 @@ public:
     cCcD_ShapeAttr* GetShapeAttr();
     virtual ~dCcD_Tri() {}
     dCcD_Tri() {}
+    #if DEBUG
+    virtual void Draw(const GXColor& color);
+    #endif
 };
 
 // Cylinder
@@ -469,6 +478,9 @@ public:
     void MoveCTg(cXyz&);
     virtual ~dCcD_Cyl() {}
     dCcD_Cyl() {}
+    #if DEBUG
+    virtual void Draw(const GXColor& color);
+    #endif
 };  // Size = 0x13C
 
 // Sphere
@@ -480,6 +492,9 @@ public:
     void MoveCAt(cXyz&);
     virtual cCcD_ShapeAttr* GetShapeAttr();
     virtual ~dCcD_Sph() {}
+    #if DEBUG
+    virtual void Draw(const GXColor& color);
+    #endif
 };  // Size = 0x138
 
 dCcD_GObjInf* dCcD_GetGObjInf(cCcD_Obj* param_0);

@@ -20,10 +20,12 @@ const static dCcD_SrcCyl l_cyl_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        20.0f, // mRadius
-        40.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            20.0f, // mRadius
+            40.0f // mHeight
+        } // mCyl
+    }
 };
 
 static void* searchParentSub(void* i_actor, void* i_data) {
@@ -537,13 +539,14 @@ static int daKey_Execute(daKey_c* i_this) {
 }
 
 static int daKey_Delete(daKey_c* i_this) {
-    fpc_ProcID id = fopAcM_GetID(i_this);
+    fopAcM_RegisterDeleteID(i_this, "ObjSKey");
     return i_this->_delete();
 }
 
 static int daKey_Create(fopAc_ac_c* i_this) {
-    fpc_ProcID id = fopAcM_GetID(i_this);
-    return ((daKey_c*)i_this)->create();
+    daKey_c* a_this = (daKey_c*)i_this;
+    fopAcM_RegisterCreateID(i_this, "ObjSKey");
+    return a_this->create();
 }
 
 static actor_method_class l_daKey_Method = {

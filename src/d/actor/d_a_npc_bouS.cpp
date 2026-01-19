@@ -416,7 +416,7 @@ int daNpcBouS_c::CreateHeap() {
 }
 
 int daNpcBouS_c::Delete() {
-    fpc_ProcID id = fopAcM_GetID(this);
+    fopAcM_RegisterDeleteID(this, "NPC_BOU_S");
     this->~daNpcBouS_c();
     return 1;
 }
@@ -951,6 +951,23 @@ void daNpcBouS_c::lookat() {
     mLookat.setParam(body_angleX_min, body_angleX_max, body_angleY_min, body_angleY_max, 0.0f, 0.0f, 0.0f, 0.0f, 
                      head_angleX_min, head_angleX_max, head_angleY_min, head_angleY_max, mCurAngle.y, lookatPos);
     mLookat.calc(this, mdl_p->getBaseTRMtx(), lookatAngle, i_snap, angle_delta, FALSE);
+}
+
+BOOL daNpcBouS_c::chkFindPlayer() {
+    BOOL inArea = FALSE;
+    if (mActorMngrs[0].getActorP() == NULL) {
+        inArea = chkPlayerInSpeakArea(this);
+    } else {
+        inArea = chkPlayerInTalkArea(this);
+    }
+
+    if (inArea) {
+        mActorMngrs[0].entry(daPy_getPlayerActorClass());
+    } else {
+        mActorMngrs[0].remove();
+    }
+
+    return inArea;
 }
 
 BOOL daNpcBouS_c::step(s16 i_turnTargetAngle, int param_2) {
@@ -1594,7 +1611,7 @@ int daNpcBouS_c::drawDbgInfo() {
     return 0;
 }
 
-void daNpcBouS_c::drawOtherMdls() {}
+inline void daNpcBouS_c::drawOtherMdls() {}
 
 AUDIO_INSTANCES;
 

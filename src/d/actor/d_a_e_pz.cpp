@@ -40,10 +40,12 @@ static dCcD_SrcCyl cc_pz_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        50.0f, // mRadius
-        300.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            50.0f, // mRadius
+            300.0f // mHeight
+        } // mCyl
+    } // mCylAttr
 };
 
 static dCcD_SrcSph cc_pz_at_src = {
@@ -66,10 +68,12 @@ static dCcD_SrcCyl cc_pz_wp_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        50.0f, // mRadius
-        300.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            50.0f, // mRadius
+            300.0f // mHeight
+        } // mCyl
+    } // mCylAttr
 };
 }
 
@@ -261,14 +265,14 @@ u8 daE_PZ_c::getCutType() {
     case daPy_py_c::CUT_TYPE_NM_STAB:
     case daPy_py_c::CUT_TYPE_NM_RIGHT:
     case daPy_py_c::CUT_TYPE_FINISH_VERTICAL:
-    case daPy_py_c::CUT_TYPE_DASH_UNK_26:
+    case daPy_py_c::CUT_TYPE_DASH_RIGHT:
         return 1;
     case daPy_py_c::CUT_TYPE_NM_LEFT:
     case daPy_py_c::CUT_TYPE_FINISH_LEFT:
     case daPy_py_c::CUT_TYPE_COMBO_STAB:
-    case daPy_py_c::CUT_TYPE_HORSE_UNK_22:
-    case daPy_py_c::CUT_TYPE_HORSE_UNK_23:
-    case daPy_py_c::CUT_TYPE_DASH_UNK_25:
+    case daPy_py_c::CUT_TYPE_HORSE_LEFT_A:
+    case daPy_py_c::CUT_TYPE_HORSE_LEFT_B:
+    case daPy_py_c::CUT_TYPE_DASH_LEFT:
         return 2;
     default:
         return 3;

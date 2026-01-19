@@ -145,10 +145,12 @@ static dCcD_SrcCyl cc_dr_week_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        40.0f, // mRadius
-        0.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            40.0f, // mRadius
+            0.0f // mHeight
+        } // mCyl
+    } // mCylAttr
 };
 
 static dCcD_SrcSph cc_dr_tail_src = {
@@ -207,10 +209,12 @@ static dCcD_SrcCyl cc_pillar_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        40.0f, // mRadius
-        0.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            40.0f, // mRadius
+            0.0f // mHeight
+        } // mCyl
+    } // mCylAttr
 };
 
 static dCcD_SrcCyl cc_down_src = {
@@ -221,10 +225,12 @@ static dCcD_SrcCyl cc_down_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        50.0f, // mRadius
-        300.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            50.0f, // mRadius
+            300.0f // mHeight
+        } // mCyl
+    } // mCylAttr
 };
 
 static dCcD_SrcSph cc_downSph_src = {
@@ -1807,7 +1813,7 @@ void daB_DR_c::executeWeekHit() {
             dComIfGp_particle_set(0x8999, &sp50, NULL, NULL);
             dComIfGp_particle_set(0x899A, &sp50, NULL, NULL);
 
-            if (health <= 0 || player->getCutType() == 0x20) {
+            if (health <= 0 || player->getCutType() == daPy_py_c::CUT_TYPE_FINISH_STAB) {
                 health = 0;
                 mSound.startCollisionSE(Z2SE_HIT_SWORD, 0x20);
 

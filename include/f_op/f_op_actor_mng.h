@@ -12,32 +12,40 @@
 #include "f_pc/f_pc_manager.h"
 #include "m_Do/m_Do_hostIO.h"
 
-#define fopAcM_ct(ptr, ClassName)                                                          \
-    if (!fopAcM_CheckCondition(ptr, fopAcCnd_INIT_e)) {                                            \
-        new (ptr) ClassName();                                                                     \
-        fopAcM_OnCondition(ptr, fopAcCnd_INIT_e);                                                  \
+#define fopAcM_ct(ptr, ClassName)                                           \
+    if (!fopAcM_CheckCondition(ptr, fopAcCnd_INIT_e)) {                     \
+        new (ptr) ClassName();                                              \
+        fopAcM_OnCondition(ptr, fopAcCnd_INIT_e);                           \
     }
 
-#define fopAcM_RegisterDeleteID(i_this, actor_name_str)                                            \
-    const fpc_ProcID procID = fopAcM_GetID(i_this);                                                \
-    "Delete -> " actor_name_str "(id=%d)\n"
+#define fopAcM_RegisterDeleteID(i_this, actor_name_str)                     \
+    ("Delete -> " actor_name_str "(id=%d)\n", fopAcM_GetID(i_this))
 
-#define fopAcM_RegisterCreateID(actor_class, i_this, actor_name_str)                               \
-    actor_class* a_this = static_cast<actor_class*>(i_this);                                       \
-    const fpc_ProcID procID = fopAcM_GetID(i_this);                                                \
-    "Create -> " actor_name_str "(id=%d)\n"
+#define fopAcM_RegisterCreateID(i_this, actor_name_str)                     \
+    ("Create -> " actor_name_str "(id=%d)\n", fopAcM_GetID(i_this))
 
-#define fopAcM_RegisterDelete(i_this, actor_name_str) "Delete -> " actor_name_str "\n"
+#define fopAcM_RegisterDelete(i_this, actor_name_str)                       \
+    ("Delete -> " actor_name_str "\n")
 
-#define fopAcM_RegisterCreate(actor_class, i_this, actor_name_str)                                 \
-    static_cast<actor_class*>(i_this);                                                             \
-    "Create -> " actor_name_str "\n"
+#define fopAcM_RegisterCreate(i_this, actor_name_str)                       \
+    ("Create -> " actor_name_str "\n")
 
 class J3DModelData;  // placeholder
 class JKRHeap;
 class cM3dGPla;
 
 s8 dComIfGp_getReverb(int roomNo);
+
+namespace fopAcM {
+extern u8 HeapAdjustEntry;
+extern u8 HeapAdjustUnk;
+extern u8 HeapAdjustVerbose;
+extern u8 HeapAdjustQuiet;
+extern u8 HeapDummyCreate;
+extern u8 HeapDummyCheck;
+extern u8 HeapSkipMargin;
+extern int HeapAdjustMargin;
+}  // namespace fopAcM
 
 struct fopAcM_prmBase_class {
     /* 0x00 */ u32 parameters;
@@ -791,7 +799,7 @@ inline void fopAcM_OnCarryType(fopAc_ac_c* i_actor, fopAcM_CARRY param_2) {
 }
 
 inline void fopAcM_OffCarryType(fopAc_ac_c* i_actor, fopAcM_CARRY param_2) {
-    i_actor->carryType &= ~param_2;
+    UNSET_FLAG(i_actor->carryType, param_2, u8);
 }
 
 enum fopAcM_FOOD {
@@ -816,22 +824,8 @@ inline void fopAcM_effSmokeSet2(u32* param_0, u32* param_1, cXyz const* param_2,
     fopAcM_effSmokeSet1(param_0, param_1, param_2, param_3, param_4, param_5, 0);
 }
 
-inline void fopAcM_setWarningMessage_f(const fopAc_ac_c* i_actor, const char* i_filename,
-                                       int i_line, const char* i_msg, ...) {
-#if DEBUG
-    /* va_list args;
-    va_start(args, i_msg);
-
-    char buf[64];
-    snprintf(buf, sizeof(buf), "<%s> %s", dStage_getName(fopAcM_GetProfName(i_actor),
-    i_actor->argument), i_msg); setWarningMessage_f_va(JUTAssertion::getSDevice(), i_filename,
-    i_line, buf, args);
-
-    va_end(args); */
-#endif
-}
-
-void fopAcM_showAssert_f(const fopAc_ac_c*, const char*, int, const char*, ...);
+void fopAcM_showAssert_f(const fopAc_ac_c* i_actor, const char* i_filename, int i_line,
+                                const char* i_msg, ...) ;
 
 #define fopAcM_assert(line, actor, COND, msg) \
     (COND) ? (void)0 : (fopAcM_showAssert_f(actor, __FILE__, line, msg));
@@ -839,6 +833,8 @@ void fopAcM_showAssert_f(const fopAc_ac_c*, const char*, int, const char*, ...);
 #if DEBUG
 #define fopAcM_setWarningMessage(i_actor, i_filename, i_line, i_msg)                               \
     fopAcM_setWarningMessage_f(i_actor, i_filename, i_line, i_msg)
+void fopAcM_setWarningMessage_f(const fopAc_ac_c* i_actor, const char* i_filename, int i_line,
+                                const char* i_msg, ...);
 #else
 #define fopAcM_setWarningMessage(...)
 #endif

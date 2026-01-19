@@ -92,10 +92,12 @@ void daE_SB_c::initCcCylinder() {
             {0x0}, // mGObjCo
         }, // mObjInf
         {
-            {0.0f, 0.0f, 0.0f}, // mCenter
-            80.0f, // mRadius
-            130.0f // mHeight
-        } // mCyl
+            {
+                {0.0f, 0.0f, 0.0f}, // mCenter
+                80.0f, // mRadius
+                130.0f // mHeight
+            } // mCyl
+        }
     };
 
     mStts.Init(0xFE, 0xFF, this);
@@ -605,7 +607,7 @@ void daE_SB_c::ActionCheck() {
         if ( (s16) (shape_angle.y - tgt_ang) > -0x3000 && (s16) (shape_angle.y - tgt_ang) < 0x3000) {
             if (temp_r27 > 1U) {
                 Hit();
-            } else if (temp_r29 == 1 || temp_r29 == 10 || temp_r29 == 0x29 || dComIfGp_checkPlayerStatus0(0, 0x4000U)) {
+            } else if (temp_r29 == daPy_py_c::CUT_TYPE_NM_VERTICAL || temp_r29 == daPy_py_c::CUT_TYPE_JUMP || temp_r29 == daPy_py_c::CUT_TYPE_GUARD_ATTACK || dComIfGp_checkPlayerStatus0(0, 0x4000U)) {
                 Hanekaeri();
             } else {
                 Hit();
@@ -1113,7 +1115,7 @@ cPhs__Step daE_SB_c::Create() {
         }
 
         attention_info.flags = fopAc_AttnFlag_BATTLE_e;
-        attention_info.distances[2] = 0x24;
+        attention_info.distances[fopAc_attn_BATTLE_e] = 0x24;
         fopAcM_SetMtx(this, mpMorf->getModel()->getBaseTRMtx());
         fopAcM_SetMin(this, -200.0f, 0.0f, -200.0f);
         fopAcM_SetMax(this, 200.0f, 200.0f, 200.0f);

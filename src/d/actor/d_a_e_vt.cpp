@@ -9,7 +9,7 @@
 #include "JSystem/J3DGraphBase/J3DMaterial.h"
 #include "SSystem/SComponent/c_math.h"
 #include "c/c_damagereaction.h"
-#include <math.h>
+#include <cmath>
 #include "d/actor/d_a_player.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_s_play.h"
@@ -123,10 +123,12 @@ static dCcD_SrcCyl cc_vt_body_src = {
         {0x0},                                               // mGObjCo
     },                                                       // mObjInf
     {
-        {0.0f, 0.0f, 0.0f},  // mCenter
-        150.0f,              // mRadius
-        158.0f               // mHeight
-    }  // mCyl
+        {
+            {0.0f, 0.0f, 0.0f},  // mCenter
+            150.0f,              // mRadius
+            158.0f               // mHeight
+        }  // mCyl
+    }
 };
 
 static dCcD_SrcSph cc_vt_attack_src = {
@@ -2757,7 +2759,7 @@ void daE_VA_c::executeOpaciDown() {
         break;
     }
 
-    if (player->getCutCount() > 1 || player->getCutType() == 10) {
+    if (player->getCutCount() > 1 || player->getCutType() == daPy_py_c::CUT_TYPE_JUMP) {
         if (mFadeAwayTimer < 30) {
             mFadeAwayTimer = 30;
         }
@@ -2771,7 +2773,7 @@ void daE_VA_c::executeOpaciDown() {
 void daE_VA_c::executeOpaciDownDamage() {
     daPy_py_c* player = daPy_getPlayerActorClass();
 
-    if (player->getCutCount() > 1 || player->getCutType() == 10) {
+    if (player->getCutCount() > 1 || player->getCutType() == daPy_py_c::CUT_TYPE_JUMP) {
         if (mFadeAwayTimer < 30) {
             mFadeAwayTimer = 30;
         }

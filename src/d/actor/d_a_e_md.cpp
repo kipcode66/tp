@@ -33,10 +33,12 @@ void daE_MD_c::initCcCylinder() {
             {0x0}, // mGObjCo
         }, // mObjInf
         {
-            {0.0f, 0.0f, 0.0f}, // mCenter
-            60.0f, // mRadius
-            350.0f // mHeight
-        } // mCyl
+            {
+                {0.0f, 0.0f, 0.0f}, // mCenter
+                60.0f, // mRadius
+                350.0f // mHeight
+            } // mCyl
+        }
     };
 
     mCcStts.Init(200, 0xFF, this);
@@ -100,7 +102,7 @@ static int useHeapInit(fopAc_ac_c* i_this) {
 
 static int daE_MD_Create(fopAc_ac_c* i_this) {
     daE_MD_c* a_this = (daE_MD_c*)i_this;
-    fpc_ProcID id = fopAcM_GetID(a_this);
+    fpc_ProcID id = fopAcM_GetID(i_this);
     return a_this->create();
 }
 

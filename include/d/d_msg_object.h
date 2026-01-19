@@ -356,7 +356,7 @@ inline void dMsgObject_demoMessageGroup() {
 }
 
 inline bool dMsgObject_isTalkNowCheck() {
-    return dMsgObject_getMsgObjectClass()->getStatus() != 1 ? true : false;
+    return dMsgObject_getMsgObjectClass()->getStatus() == 1 ? false : true;
 }
 
 inline bool dMsgObject_isKillMessageFlag() {
@@ -417,7 +417,7 @@ inline void dMsgObject_changeFlowGroup(s32 flow) {
 
 inline void dMsgObject_setTalkActor(fopAc_ac_c* actor) {
     if (dMsgObject_getMsgObjectClass() != NULL) {
-        dMsgObject_c::setTalkActor(actor);
+        dMsgObject_getMsgObjectClass()->setTalkActor(actor);
     }
 }
 
@@ -445,11 +445,11 @@ inline void dMsgObject_setKillMessageFlag() {
 }
 
 inline void dMsgObject_endFlowGroup() {
-    dMsgObject_c::endFlowGroup();
+    dMsgObject_getMsgObjectClass()->endFlowGroup();
 }
 
 inline void dMsgObject_setSmellType(u8 type) {
-    dMsgObject_c::setSmellType(type);
+    dMsgObject_getMsgObjectClass()->setSmellType(type);
 }
 
 inline u8 dMsgObject_getSelectCursorPos() {
@@ -485,7 +485,7 @@ inline void dMsgObject_setEquipBombInfo() {
 }
 
 inline bool dMsgObject_isHowlHearingMode() {
-    return dMsgObject_c::isHowlHearingMode();
+    return dMsgObject_getMsgObjectClass()->isHowlHearingMode();
 }
 
 inline void dMsgObject_onMsgSend() {

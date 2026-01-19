@@ -72,6 +72,7 @@ public:
     static interface_of_controller_pad m_cpadInfo[4];
 
     static interface_of_controller_pad m_gzPadInfo;
+    static interface_of_controller_pad m_debugCpadInfo[4];
 };
 
 inline void mDoCPd_ANALOG_CONV(u8 analog, f32& param_1) {
@@ -82,7 +83,7 @@ inline void mDoCPd_ANALOG_CONV(u8 analog, f32& param_1) {
 }
 
 inline void mDoCPd_TRIGGER_CONV(u8 analog, f32& param_1) {
-    param_1 = analog * 0.0071428571827709675f;
+    param_1 = analog * (1.0f / 140.0f);
     if (param_1 > 1.0f) {
         param_1 = 1.0f;
     }

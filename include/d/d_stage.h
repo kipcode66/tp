@@ -186,8 +186,12 @@ struct stage_camera_class {
 
 // AROB / RARO
 struct stage_arrow_data_class {
-    /* 0x00 */ cXyz position;
-    /* 0x0C */ csXyz angle;
+    /* 0x00 */ f32 posX;
+    /* 0x04 */ f32 posY;
+    /* 0x08 */ f32 posZ;
+    /* 0x0C */ s16 angleX;
+    /* 0x0E */ s16 angleY;
+    /* 0x10 */ s16 angleZ;
     /* 0x12 */ s16 field_0x12;
 };  // Size: 0x14
 
@@ -684,8 +688,8 @@ public:
     /* vt[91] */ virtual void setElst(dStage_Elst_c* i_Elst) { mElst = i_Elst; }
     /* vt[92] */ virtual dStage_Elst_c* getElst(void);
 
-    s16 getWorldRollAngleX() { return (s16)mWorldRollAngleX; }
-    s16 getWorldRollDirAngleY() { return mWorldRollDirAngleY; }
+    s16 getWorldRollAngleX() const { return (s16)mWorldRollAngleX; }
+    s16 getWorldRollDirAngleY() const { return mWorldRollDirAngleY; }
 
 public:
     /* 0x08 */ stage_camera_class* mCamera;
@@ -1140,7 +1144,8 @@ public:
     static void setRegionNo(int i_roomNo, u8 i_regionNo) { mStatus[i_roomNo].mRegionNo = i_regionNo; }
 
     u8 checkStatusFlag(int i_roomNo, u8 flag) const {
-        return cLib_checkBit(mStatus[i_roomNo].mFlag, flag);
+        JUT_ASSERT(2699, 0 <= i_roomNo && i_roomNo < 64);
+        return cLib_checkBit((u8) mStatus[i_roomNo].mFlag, flag);
     }
 
     void onStatusFlag(int i_roomNo, u8 flag) {
@@ -1259,6 +1264,33 @@ typedef int (*dStage_Func)(dStage_dt_c*, void*, int, void*);
 struct FuncTable {
     char identifier[5];
     dStage_Func function;
+};
+
+enum dStage_SaveTbl {
+    dStage_SaveTbl_ORDON,
+    dStage_SaveTbl_PRISON,
+    dStage_SaveTbl_FARON,
+    dStage_SaveTbl_ELDIN,
+    dStage_SaveTbl_LANAYRU,
+    dStage_SaveTbl_FIELD = 6,
+    dStage_SaveTbl_GROVE,
+    dStage_SaveTbl_SNOWPEAK,
+    dStage_SaveTbl_CASTLE_TOWN,
+    dStage_SaveTbl_DESERT,
+    dStage_SaveTbl_FISHING_POND,
+
+    dStage_SaveTbl_LV1 = 16,
+    dStage_SaveTbl_LV2,
+    dStage_SaveTbl_LV3,
+    dStage_SaveTbl_LV4,
+    dStage_SaveTbl_LV5,
+    dStage_SaveTbl_LV6,
+    dStage_SaveTbl_LV7,
+    dStage_SaveTbl_LV8,
+    dStage_SaveTbl_LV9,
+    dStage_SaveTbl_CAVE1,
+    dStage_SaveTbl_CAVE2,
+    dStage_SaveTbl_GROTTO,
 };
 
 const char* dStage_getName2(s16, s8);
@@ -1412,7 +1444,7 @@ inline u32 dStage_stagInfo_ChkKeyDisp(stage_stag_info_class* pstag) {
     return pstag->field_0x09 & 1;
 }
 
-inline u8 dStage_stagInfo_GetWolfDashType(stage_stag_info_class* pstag) {
+inline int dStage_stagInfo_GetWolfDashType(stage_stag_info_class* pstag) {
     return (pstag->field_0x09 >> 6) & 3;
 }
 

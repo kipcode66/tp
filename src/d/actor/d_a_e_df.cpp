@@ -61,12 +61,14 @@ void daE_DF_c::initCcCylinder() {
             {dCcD_SE_NONE, 0x0, 0x0, 0x0, 0x0},                 // mGObjAt
             {dCcD_SE_NONE, 0x0, 0x0, 0x0, 0x1},                 // mGObjTg
             {0x0},                                              // mGObjCo
-        },                                                      // mObjInf
-        {
-            {0.0f, 0.0f, 0.0f},  // mCenter
-            150.0f,              // mRadius
-            158.0f               // mHeight
-        }  // mCyl
+        },      
+        {                                                // mObjInf
+            {
+                {0.0f, 0.0f, 0.0f},  // mCenter
+                150.0f,              // mRadius
+                158.0f               // mHeight
+            }  // mCyl
+        }
     };
 
     mStts.Init(0xff, 0xff, this);
@@ -640,7 +642,7 @@ static int daE_DF_IsDelete(daE_DF_c* i_this) {
 }
 
 static int daE_DF_Delete(daE_DF_c* i_this) {
-    fpc_ProcID proc_id = fopAcM_GetID(i_this);
+    fopAcM_RegisterDeleteID(i_this, "E_DF");
     return i_this->Delete();
 }
 
@@ -653,7 +655,7 @@ int daE_DF_c::Create() {
         mArg0 = (u8)fopAcM_GetParam(this);
 
         if (mArg0 != 0xff && dComIfGs_isSwitch(mArg0, fopAcM_GetRoomNo(this))) {
-            OS_REPORT("E_WS やられ後なので再セットしません");
+            OS_REPORT("E_WS やられ後なので再セットしません\n");
             return cPhs_ERROR_e;
         }
 
@@ -704,7 +706,7 @@ int daE_DF_c::Create() {
 
 static int daE_DF_Create(fopAc_ac_c* i_this) {
     daE_DF_c* a_this = (daE_DF_c*)i_this;
-    fpc_ProcID proc_id = fopAcM_GetID(i_this);
+    fopAcM_RegisterCreateID(i_this, "E_DF");
     return a_this->Create();
 }
 

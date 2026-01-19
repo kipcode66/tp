@@ -1,25 +1,57 @@
 #ifndef GZ_H
 #define GZ_H
 
+#include "c/c_damagereaction.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_item.h"
-#include "m_Do/m_Do_controller_pad.h"
-#include "m_Do/m_Do_machine.h"
+#include "gz/gz_manager_cheats.h"
+#include "gz/gz_manager_practice.h"
+#include "gz/gz_manager_tools.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
+#include "m_Do/m_Do_controller_pad.h"
+#include "m_Do/m_Do_machine.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
-#include "c/c_damagereaction.h"
-#include <cstring.h>
 
 class gzMenu_c;
 class gzTextBox;
 class gzMainMenu_c;
 class gzNotification_c;
+class gzToolsMng_c;
+class dSelect_cursor_c;
+class gzCapture_c;
 
 #define COLOR_WHITE 0xFFFFFFFFu
 #define COLOR_RED 0xFF0000FFu
 #define COLOR_BLUE 0x0000FFFFu
 #define COLOR_GREEN 0x00FF00FFu
+
+#define COLOR_AMETHYST 0x9966FFFF
+#define COLOR_AQUAMARINE 0x71D9E2FF
+#define COLOR_BANANA_MANIA 0xFAE7B5FF
+#define COLOR_BOLD_CRIMSON 0xDC143CFF
+#define COLOR_BUBBLEGUM_PINK 0xFF69B4FF
+#define COLOR_CERULEAN 0x007BA7FF
+#define COLOR_COSMIC_COBALT 0x2E2D88FF
+#define COLOR_ELECTRIC_BLUE 0x7DF9FFFF
+#define COLOR_FIERY_ORANGE 0xFF4500FF
+#define COLOR_FLAMINGO_FEATHER 0xFC8EACFF
+#define COLOR_GOLD_DROP 0xEE8000FF
+#define COLOR_LEMON_YELLOW 0xFFF44FFF
+#define COLOR_LIME_GREEN 0x32CD32FF
+#define COLOR_MAGENTA_MAGIC 0xFF00FFFF
+#define COLOR_MIDNIGHT_BLUE 0x191970FF
+#define COLOR_MYSTICAL_PURPLE 0x9370DBFF
+#define COLOR_NEON_CARROT 0xFFA343FF
+#define COLOR_PERIWINKLE 0xCCCCFFFF
+#define COLOR_SAPPHIRE_SPARKLE 0x0F52BAFF
+#define COLOR_SHAMROCK_GREEN 0x009E60FF
+#define COLOR_SUNNY_YELLOW 0xFFFF00FF
+#define COLOR_TANGERINE_TWIST 0xFFA500FF
+#define COLOR_TROPICAL_TURQUOISE 0x40E0D0FF
+#define COLOR_VIVID_VIOLET 0x9F00FFFF
+#define COLOR_WILD_STRAWBERRY 0xFF43A4FF
+#define COLOR_ZESTY_CHARTREUSE 0x7FFF00FF
 
 struct gzCommandCombos_s {
     u32 mMoveLink;
@@ -36,6 +68,7 @@ struct gzSettings_s {
     u8 mCursorType;
     bool mDisplayMode;
     bool mMenuPausesGame;
+    bool mBootToMenu;
     bool mMoveLink;
     gzCommandCombos_s mCommandCombos;
     bool mMenuSfx;
@@ -62,7 +95,6 @@ struct gzSettings_s {
     bool mUniversalMapDelay;
     bool mUnrestrictedItems;
     bool mAbMashRate;
-    bool mDisplacement;
     bool mFastBonkRecovery;
     bool mFastMovement;
     bool mInGameTimer;
@@ -81,136 +113,6 @@ struct gzConfigHeader_s {
     u32 settingsOffset;
 
     u8 reserved[0x20 - 0x8];
-};
-
-class gzSaveLoaderMng_c {
-public:
-    gzSaveLoaderMng_c() {
-        mLoadPhase = PHASE_WAIT_e;
-        mTimer = 0;
-        mSaveInjectReady = false;
-    }
-
-    enum Mode_e {
-        MODE_SAVE_e,
-        MODE_MEMFILE_e,
-    };
-
-    enum LoadPhase_e {
-        PHASE_WAIT_e,         // "do nothing" state
-        PHASE_INIT_e,         // file load process initialization
-        PHASE_STAGE_INIT_e,   // processes to be run during stage initialization
-        PHASE_PLAYER_INIT_e,  // processes to be run after player is initialized
-    };
-
-    enum SaveCategory_e {
-        CATEGORY_ANYP_e,
-        CATEGORY_NOSQ_e,
-        CATEGORY_HUNDO_e,
-        CATEGORY_ALLDUNGEONS_e,
-        CATEGORY_GLITCHLESS_e,
-    };
-
-    enum SaveSetFlags_e {
-        SETFLAG_POS_e = 1,
-        SETFLAG_CAM_e = 2,
-    };
-
-    // container for any extra data to store in the memfile after the main save data
-    struct memfileExData_s {
-        char name[20];
-        cXyz player_pos;
-    };
-
-    struct saveMetadata_s {
-        char name[32];
-        char desc[64];
-        char filename[32];
-        u8 flags;
-        s16 angle;
-        Vec player_pos;
-        Vec camera_center;
-        Vec camera_eye;
-    } ATTRIBUTE_ALIGN(32);  // important that this is aligned to 32
-
-    void execute();
-
-    void loadSave(SaveCategory_e i_category, int i_entryNo);
-    void getSaveMetadata(SaveCategory_e i_category, int i_entryNo, saveMetadata_s* o_data);
-    int getSaveEntryNum(SaveCategory_e i_category);
-
-    void setMode(Mode_e i_mode) { mMode = i_mode; }
-
-    void start() { mLoadPhase = PHASE_INIT_e; }
-    void onStageInit() { mLoadPhase = PHASE_STAGE_INIT_e; }
-    void onPlayerInit() { mLoadPhase = PHASE_PLAYER_INIT_e; }
-    void wait() { mLoadPhase = PHASE_WAIT_e; }
-
-    bool isSaveInject() { return mSaveInjectReady; }
-    
-    void end() {
-        mLoadPhase = PHASE_WAIT_e;
-        mSaveInjectReady = false;
-    }
-
-    memfileExData_s mMemfileExData;
-    saveMetadata_s mSaveMetadata;
-    Mode_e mMode;
-    int mLoadPhase;
-    bool mSaveInjectReady;
-    u8 mTimer;
-};
-
-struct SavedCameraState {
-    cXyz center;
-    cXyz eye;
-    f32 fovy;
-    cSAngle bank;
-};
-
-class gzToolsMng_c {
-public:
-    void execute();
-    void executeFastBonkRecovery();
-    void executeFastMovement();
-    void executeMoveLink();
-    void executeNoSinkSand();
-    void executeTeleport();
-
-private:
-    // for "run once" reenable checks
-    SavedCameraState mCamera;
-    bool mFastBonkRecovery;
-    bool mFastMovement;
-    cXyz mLinkPos;
-    csXyz mLinkAngle;
-    bool mMoveLink;
-};
-
-class gzCheatsMng_c {
-public:
-    void execute();
-    void executeDisableItemTimer();
-    void executeDisableWalls();
-    void executeEnableItemTimer();
-    void executeEnableWalls();
-    void executeInfiniteAir();
-    void executeInfiniteArrows();
-    void executeInfiniteBombs();
-    void executeInfiniteHearts();
-    void executeInfiniteOil();
-    void executeInfiniteRupees();
-    void executeInfiniteSlingshot();
-    void executeInvincibleLink();
-    void executeInvincibleEnemies();
-    void executeMoonJump();
-    void executeSuperClawshot();
-    void executeUnrestrictedItems();
-
-private:
-    // for "run once" reenable checks
-    bool mDisableWalls;
-    bool mDisableItemTimer;
 };
 
 struct gzCursor {
@@ -234,6 +136,7 @@ public:
     int _delete();
     int execute();
     int draw();
+    void updateStickTriggers();
 
     void loadDefaultSettings();
     int storeSettingsMemcard();
@@ -247,6 +150,14 @@ public:
     void executeMoveLink();
 
     gzCursor* getCursor() { return &mCursor; }
+    dSelect_cursor_c* getTPCursor() { return mpTPCursor; }
+    gzTextBox* getMenuDescription() { return mpMenuDescription; }
+    bool isMenuOption() { return mMenuOption; }
+    void setMenuOption(bool i_opt) { mMenuOption = i_opt; }
+    s32 getTopLine() { return mTopLine; }
+    void setTopLine(s32 i_topLine) { mTopLine = i_topLine; }
+    s32 getVisibleLines() { return mVisibleLines; }
+    void setVisibleLines(s32 i_visibleLines) { mVisibleLines = i_visibleLines; }
     u32 getCursorColor() { return getCursorType() & CURSOR_CLASSIC ? getTextColor() : COLOR_WHITE; }
     u8 getCursorType() const { return mSettings.mCursorType; }
     bool getDisplayMode() const { return mSettings.mDisplayMode; }
@@ -264,7 +175,6 @@ public:
     bool isCursorTypeTP() { return getCursorType() & CURSOR_TP; }
     bool isDisableItemTimer() { return mSettings.mDisableItemTimer; }
     bool isDisableWalls() { return mSettings.mDisableWalls; }
-    bool isDisplacement() { return mSettings.mDisplacement; }
     bool isDisplay() { return mDisplay; }
     bool isDropShadows() { return mSettings.mDropShadows; }
     bool isElevatorEscape() { return mSettings.mElevatorEscape; }
@@ -291,6 +201,7 @@ public:
     bool isMaloMartCT() { return dComIfGs_isEventBit(0x2210);}
     bool isMapWarping() { return dComIfGs_isEventBit(0x0604);}
     bool isMenuPausesGame() const { return mSettings.mMenuPausesGame; }
+    bool isBootToMenu() const { return mSettings.mBootToMenu; }
     bool isMenuSfx() const { return mSettings.mMenuSfx; }
     bool isMidnaCharge() { return dComIfGs_isEventBit(0x0501);}
     bool isMidnaHealthy() { return dComIfGs_isEventBit(0x1E08);}
@@ -321,7 +232,6 @@ public:
     void setCursorType(u8 i_type) { mSettings.mCursorType = i_type; }
     void setDisableItemTimer(bool i_opt) { mSettings.mDisableItemTimer = i_opt; }
     void setDisableWalls(bool i_opt) { mSettings.mDisableWalls = i_opt; }
-    void setDisplacement(bool i_opt) { mSettings.mDisplacement = i_opt; }
     void setDisplayMode(bool i_mode) { mSettings.mDisplayMode = i_mode; }
     void setDropShadows(bool i_dropShadows) { mSettings.mDropShadows = i_dropShadows; }
     void setElevatorEscape(bool i_opt) { mSettings.mElevatorEscape = i_opt; }
@@ -349,6 +259,7 @@ public:
     void setMaloMartCT(bool i_opt) { i_opt ? dComIfGs_onEventBit(0x2210) : dComIfGs_offEventBit(0x2210); }
     void setMapWarping(bool i_opt) { i_opt ? dComIfGs_onEventBit(0x0604) : dComIfGs_offEventBit(0x0604); }
     void setMenuPausesGame(bool i_opt) { mSettings.mMenuPausesGame = i_opt; }
+    void setBootToMenu(bool i_opt) { mSettings.mBootToMenu = i_opt; }
     void setMenuSfx(bool sfx) { mSettings.mMenuSfx = sfx; }
     void setMidnaCharge(bool i_opt) { i_opt ? dComIfGs_onEventBit(0x0501) : dComIfGs_offEventBit(0x0501); }
     void setMidnaHealthy(bool i_opt) { i_opt ? dComIfGs_onEventBit(0x1E08) : dComIfGs_offEventBit(0x1E08); }
@@ -389,7 +300,7 @@ public:
         }
     }
 
-    u8 previousCursorType() {
+    u8 prevCursorType() {
         switch (getCursorType()) {
         case CURSOR_CLASSIC:
             return CURSOR_BOTH;
@@ -402,6 +313,48 @@ public:
         }
     }
 
+    u32 nextTextColor() {
+        static const u32 sTextColors[] = {
+            COLOR_AMETHYST, COLOR_AQUAMARINE, COLOR_BANANA_MANIA, COLOR_BOLD_CRIMSON,
+            COLOR_BUBBLEGUM_PINK, COLOR_CERULEAN, COLOR_COSMIC_COBALT, COLOR_ELECTRIC_BLUE,
+            COLOR_FIERY_ORANGE, COLOR_FLAMINGO_FEATHER, COLOR_GOLD_DROP, COLOR_LEMON_YELLOW,
+            COLOR_LIME_GREEN, COLOR_MAGENTA_MAGIC, COLOR_MIDNIGHT_BLUE, COLOR_MYSTICAL_PURPLE,
+            COLOR_NEON_CARROT, COLOR_PERIWINKLE, COLOR_SAPPHIRE_SPARKLE, COLOR_SHAMROCK_GREEN,
+            COLOR_SUNNY_YELLOW, COLOR_TANGERINE_TWIST, COLOR_TROPICAL_TURQUOISE, COLOR_VIVID_VIOLET,
+            COLOR_WILD_STRAWBERRY, COLOR_ZESTY_CHARTREUSE
+        };
+        static const int sNumColors = sizeof(sTextColors) / sizeof(sTextColors[0]);
+
+        u32 current = getTextColor();
+        for (int i = 0; i < sNumColors; i++) {
+            if (sTextColors[i] == current) {
+                return sTextColors[(i + 1) % sNumColors];
+            }
+        }
+        return COLOR_WHITE;
+    }
+
+    u32 prevTextColor() {
+        static const u32 sTextColors[] = {
+            COLOR_AMETHYST, COLOR_AQUAMARINE, COLOR_BANANA_MANIA, COLOR_BOLD_CRIMSON,
+            COLOR_BUBBLEGUM_PINK, COLOR_CERULEAN, COLOR_COSMIC_COBALT, COLOR_ELECTRIC_BLUE,
+            COLOR_FIERY_ORANGE, COLOR_FLAMINGO_FEATHER, COLOR_GOLD_DROP, COLOR_LEMON_YELLOW,
+            COLOR_LIME_GREEN, COLOR_MAGENTA_MAGIC, COLOR_MIDNIGHT_BLUE, COLOR_MYSTICAL_PURPLE,
+            COLOR_NEON_CARROT, COLOR_PERIWINKLE, COLOR_SAPPHIRE_SPARKLE, COLOR_SHAMROCK_GREEN,
+            COLOR_SUNNY_YELLOW, COLOR_TANGERINE_TWIST, COLOR_TROPICAL_TURQUOISE, COLOR_VIVID_VIOLET,
+            COLOR_WILD_STRAWBERRY, COLOR_ZESTY_CHARTREUSE
+        };
+        static const int sNumColors = sizeof(sTextColors) / sizeof(sTextColors[0]);
+
+        u32 current = getTextColor();
+        for (int i = 0; i < sNumColors; i++) {
+            if (sTextColors[i] == current) {
+                return sTextColors[(i - 1 + sNumColors) % sNumColors];
+            }
+        }
+        return COLOR_WHITE;
+    }
+
     J2DPicture* mpIcon;
     J2DPicture* mpBackground;
     gzTextBox* mpHeader;
@@ -409,11 +362,22 @@ public:
     gzMenu_c* mpCurrentMenu;
     gzMainMenu_c* mpMainMenu;
     gzNotification_c* mpNotification;
+    dSelect_cursor_c* mpTPCursor;
+    gzCapture_c* mpCapture;
+    gzTextBox* mpMenuDescription;
+    bool mMenuOption;
+    s32 mTopLine;
+    s32 mVisibleLines;
 
     JUTFont* mpFont;
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
+
+    // Input state for menu navigation (stick + d-pad with repeat)
+    u32 mStickTriggers;
+    u32 mRepeatDirection;
+    s16 mRepeatCounter;
     gzSettings_s mSettings;
     gzCursor mCursor;
     gzSaveLoaderMng_c mSaveLoaderMng;
@@ -439,17 +403,34 @@ public:
 extern gzInfo_c g_gzInfo;
 
 inline gzCursor* gzInfo_getCursor() { return g_gzInfo.getCursor(); }
+inline dSelect_cursor_c* gzInfo_getTPCursor() { return g_gzInfo.getTPCursor(); }
+inline gzTextBox* gzInfo_getMenuDescription() { return g_gzInfo.getMenuDescription(); }
+inline bool gzInfo_isMenuOption() { return g_gzInfo.isMenuOption(); }
+inline void gzInfo_setMenuOption(bool i_opt) { g_gzInfo.setMenuOption(i_opt); }
+inline void gzInfo_onMenuOption() { g_gzInfo.setMenuOption(true); }
+inline void gzInfo_offMenuOption() { g_gzInfo.setMenuOption(false); }
+inline s32 gzInfo_getTopLine() { return g_gzInfo.getTopLine(); }
+inline void gzInfo_setTopLine(s32 i_topLine) { g_gzInfo.setTopLine(i_topLine); }
+inline void gzInfo_resetTopLine() { g_gzInfo.setTopLine(0); }
+inline s32 gzInfo_getVisibleLines() { return g_gzInfo.getVisibleLines(); }
+inline void gzInfo_setVisibleLines(s32 i_visibleLines) { g_gzInfo.setVisibleLines(i_visibleLines); }
 inline u32 gzInfo_getCursorColor() { return g_gzInfo.getCursorColor(); }
-inline const u32 gzInfo_getTextColor() { return g_gzInfo.getTextColor(); }
-inline const u8 gzInfo_getCursorType() { return g_gzInfo.getCursorType(); }
-inline const bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
-inline const bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
+inline u32 gzInfo_getTextColor() { return g_gzInfo.getTextColor(); }
+inline u8 gzInfo_getCursorType() { return g_gzInfo.getCursorType(); }
+inline bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
+inline bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
 inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 
 inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcard(); }
 inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
-inline u8 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
-inline u8 gzInfo_previousCursorType() { return g_gzInfo.previousCursorType(); }
+inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
+inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
+inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }
+inline u32 gzInfo_prevTextColor() { return g_gzInfo.prevTextColor(); }
+//implementation tbd
+inline u32 gzInfo_nextFont() { return 0; }
+inline u32 gzInfo_prevFont() { return 0; }
+
 inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
@@ -564,6 +545,8 @@ inline bool gzInfo_isLadderFreezardCancel() { return g_gzInfo.isLadderFreezardCa
 inline bool gzInfo_isMaloMartCT() { return g_gzInfo.isMaloMartCT(); }
 inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}
 inline bool gzInfo_isMapWarping() { return g_gzInfo.isMapWarping(); }
+inline bool gzInfo_isMenuPausesGame() { return g_gzInfo.isMenuPausesGame(); }
+inline bool gzInfo_isBootToMenu() { return g_gzInfo.isBootToMenu(); }
 inline bool gzInfo_isMenuSfx() { return g_gzInfo.isMenuSfx(); }
 inline bool gzInfo_isMidnaCharge() { return g_gzInfo.isMidnaCharge(); }
 inline bool gzInfo_isMidnaHealthy() { return g_gzInfo.isMidnaHealthy(); }
@@ -594,7 +577,6 @@ inline bool gzInfo_isFastBonkRecovery() { return g_gzInfo.isFastBonkRecovery(); 
 inline bool gzInfo_isFastMovement() { return g_gzInfo.isFastMovement(); }
 inline bool gzInfo_isNoSinkingInSand() { return g_gzInfo.isNoSinkingInSand(); }
 inline bool gzInfo_isTeleport() { return g_gzInfo.isTeleport(); }
-inline bool gzInfo_isDisplacement() { return g_gzInfo.isDisplacement(); }
 
 
 inline void gzInfo_setBossFlag(u8 value) { g_gzInfo.setBossFlag(value); }
@@ -604,6 +586,7 @@ inline void gzInfo_setDisplayModeInterlaced() { mDoMch_render_c::setInterlacedMo
 inline void gzInfo_setDisplayModeProgressive() { mDoMch_render_c::setProgressiveMode(); gzInfo_setDisplayMode(true); }
 inline void gzInfo_setDropShadows(bool dropShadows) { g_gzInfo.setDropShadows(dropShadows); }
 inline void gzInfo_setMenuPausesGame(bool opt) { g_gzInfo.setMenuPausesGame(opt); }
+inline void gzInfo_setBootToMenu(bool opt) { g_gzInfo.setBootToMenu(opt); }
 inline void gzInfo_setMenuSfx(bool sfx) { g_gzInfo.setMenuSfx(sfx); }
 inline void gzInfo_setMoveLink(bool i_opt) { g_gzInfo.setMoveLink(i_opt); }
 inline void gzInfo_setReloadType(bool i_type) { g_gzInfo.setReloadType(i_type); }
@@ -618,15 +601,14 @@ inline void gzInfo_offBossDefeated(int i_stageNo) {
     gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offStageBossEnemy() : dComIfGs_offSaveStageBossEnemy(i_stageNo); 
 }
 
-inline void gzInfo_offMiniBossDefeated(int i_stageNo) { 
-    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offStageMiddleBoss() : dComIfGs_offStageMiddleBoss(); 
+inline void gzInfo_offMiniBossDefeated(int i_stageNo) {
+    gzInfo_isInDungeon(i_stageNo) ? dComIfGs_offStageMiddleBoss() : dComIfGs_offSaveStageMiddleBoss(i_stageNo);
 }
 
 inline void gzInfo_offBossFlag() { g_gzInfo.setBossFlag(0); }
 inline void gzInfo_offCoroTD() { g_gzInfo.setCoroTD(false); }
 inline void gzInfo_offDisableItemTimer() { g_gzInfo.setDisableItemTimer(false); }
 inline void gzInfo_offDisableWalls() { g_gzInfo.setDisableWalls(false); }
-inline void gzInfo_offDisplacement() { g_gzInfo.setDisplacement(false); }
 inline void gzInfo_offDropShadows() { g_gzInfo.setDropShadows(false); }
 
 inline void gzInfo_offDungeonBossKey(int i_stageNo) { 
@@ -672,6 +654,8 @@ inline void gzInfo_offLinkDebugInfo() { g_gzInfo.setLinkDebugInfo(false); }
 inline void gzInfo_offLoadTimer() { g_gzInfo.setLoadTimer(false); }
 inline void gzInfo_offMaloMartCT() { g_gzInfo.setMaloMartCT(false); }
 inline void gzInfo_offMapWarping() { g_gzInfo.setMapWarping(false); }
+inline void gzInfo_offMenuPausesGame() { g_gzInfo.setMenuPausesGame(false); }
+inline void gzInfo_offBootToMenu() { g_gzInfo.setBootToMenu(false); }
 inline void gzInfo_offMenuSfx() { g_gzInfo.setMenuSfx(false); }
 inline void gzInfo_offMidnaCharge() { g_gzInfo.setMidnaCharge(false); }
 inline void gzInfo_offMidnaHealthy() { g_gzInfo.setMidnaHealthy(false); }
@@ -707,7 +691,6 @@ inline void gzInfo_onBossFlag() { g_gzInfo.setBossFlag(50); }
 inline void gzInfo_onCoroTD() { g_gzInfo.setCoroTD(true); }
 inline void gzInfo_onDisableItemTimer() { g_gzInfo.setDisableItemTimer(true); }
 inline void gzInfo_onDisableWalls() { g_gzInfo.setDisableWalls(true); }
-inline void gzInfo_onDisplacement() { g_gzInfo.setDisplacement(true); }
 inline void gzInfo_onDropShadows() { g_gzInfo.setDropShadows(true); }
 
 inline void gzInfo_onDungeonBossKey(int i_stageNo) { 
@@ -757,6 +740,8 @@ inline void gzInfo_onLinkDebugInfo() { g_gzInfo.setLinkDebugInfo(true); }
 inline void gzInfo_onLoadTimer() { g_gzInfo.setLoadTimer(true); }
 inline void gzInfo_onMaloMartCT() { g_gzInfo.setMaloMartCT(true); }
 inline void gzInfo_onMapWarping() { g_gzInfo.setMapWarping(true); }
+inline void gzInfo_onMenuPausesGame() { g_gzInfo.setMenuPausesGame(true); }
+inline void gzInfo_onBootToMenu() { g_gzInfo.setBootToMenu(true); }
 inline void gzInfo_onMenuSfx() { g_gzInfo.setMenuSfx(true); }
 inline void gzInfo_onMidnaCharge() { g_gzInfo.setMidnaCharge(true); }
 inline void gzInfo_onMidnaHealthy() { g_gzInfo.setMidnaHealthy(true); }
@@ -780,12 +765,13 @@ inline void gzInfo_onWolfSense() { g_gzInfo.setWolfSense(true); }
 
 namespace gzPad {
     inline u32 getTrig() { return mDoCPd_c::m_gzPadInfo.mPressedButtonFlags; }
+    inline u32 getInputTrig() { return g_gzInfo.mStickTriggers; }  // Combined stick + d-pad with repeat
     inline u32 getTrigLockL() { return mDoCPd_c::m_gzPadInfo.mTrigLockL; }
     inline u32 getTrigLockR() { return mDoCPd_c::m_gzPadInfo.mTrigLockR; }
-    inline u32 getTrigUp() { return getTrig() & PAD_BUTTON_UP; }
-    inline u32 getTrigDown() { return getTrig() & PAD_BUTTON_DOWN; }
-    inline u32 getTrigLeft() { return getTrig() & PAD_BUTTON_LEFT; }
-    inline u32 getTrigRight() { return getTrig() & PAD_BUTTON_RIGHT; }
+    inline u32 getTrigUp() { return getInputTrig() & PAD_BUTTON_UP; }
+    inline u32 getTrigDown() { return getInputTrig() & PAD_BUTTON_DOWN; }
+    inline u32 getTrigLeft() { return getInputTrig() & PAD_BUTTON_LEFT; }
+    inline u32 getTrigRight() { return getInputTrig() & PAD_BUTTON_RIGHT; }
     inline u32 getTrigL() { return getTrig() & PAD_TRIGGER_L; }
     inline u32 getTrigR() { return getTrig() & PAD_TRIGGER_R; }
     inline u32 getTrigA() { return getTrig() & PAD_BUTTON_A; }
@@ -826,101 +812,39 @@ namespace gzPad {
 int gzPrint(int x, int y, u32 color, char const* string, ...);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
 
-class gzTextBox : public J2DTextBox {
-public:
-    gzTextBox() : J2DTextBox() {
-        setFont(g_gzInfo.mpFont);
-        setFontSize(18.0f, 18.0f);
-        m_description[0] = 0;
-    }
+// Sets up 2D orthographic context for GZ overlay drawing.
+// Call this before drawing J2DScreen-based elements (like haihai arrows).
+void gzSetup2DContext();
 
-    gzTextBox(f32 sizeX, f32 sizeY) : J2DTextBox() {
-        setFont(g_gzInfo.mpFont);
-        setFontSize(sizeX, sizeY);
-        m_description[0] = 0;
-    }
+// Clears all controller input (buttons, sticks, triggers)
+inline void gzClearControllerInput() {
+    interface_of_controller_pad& cpad = mDoCPd_c::getCpadInfo(PAD_1);
+    cpad.mPressedButtonFlags = 0;
+    cpad.mButtonFlags = 0;
+    cpad.mMainStickPosX = 0.0f;
+    cpad.mMainStickPosY = 0.0f;
+    cpad.mMainStickValue = 0.0f;
+    cpad.mMainStickAngle = 0;
+    cpad.mCStickPosX = 0.0f;
+    cpad.mCStickPosY = 0.0f;
+    cpad.mCStickValue = 0.0f;
+    cpad.mCStickAngle = 0;
+    cpad.mAnalogA = 0.0f;
+    cpad.mAnalogB = 0.0f;
+    cpad.mTriggerLeft = 0.0f;
+    cpad.mTriggerRight = 0.0f;
+}
 
-    gzTextBox(const char* string, u32 color) : J2DTextBox() {
-        setFont(g_gzInfo.mpFont);
-        setFontSize(18.0f, 18.0f);
-        setString(string);
-        setCharColor(color);
-        setGradColor(color);
-        m_description[0] = 0;
-    }
+// Clears just button input (pressed and held)
+inline void gzClearButtonInput() {
+    mDoCPd_c::getCpadInfo(PAD_1).mPressedButtonFlags = 0;
+    mDoCPd_c::getCpadInfo(PAD_1).mButtonFlags = 0;
+}
 
-    void setStringDesc(const char* string, const char* description) {
-        setString(string);
-        strcpy(m_description, description);
-    }
+// Toggles menu option state and plays appropriate sound effect
+inline void gzInfo_toggleMenuOption() {
+    gzInfo_setMenuOption(!gzInfo_isMenuOption());
+    gzInfo_seStart(gzInfo_isMenuOption() ? Z2SE_SY_TALK_CURSOR_OK : Z2SE_SY_CURSOR_CANCEL);
+}
 
-    void setFullColor(u32 color) {
-        setCharColor(color);
-        setGradColor(color);
-    }
-
-    void setStringf(const char* fmt, ...) {
-        char buffer[256];
-
-        va_list list;
-        va_start(list, string);
-        vsnprintf(buffer, sizeof(buffer), fmt, list);
-        va_end(list);
-
-        setString(buffer);
-    }
-
-    void draw(f32 x, f32 y, u32 color) {
-        if (gzInfo_isDropShadows()) {
-            setCharColor(0x00000080);
-            setGradColor(0x00000080);
-            J2DTextBox::draw(x + 2, y + 2, 608.0f, HBIND_LEFT);
-        }
-        
-        setCharColor(color);
-        setGradColor(color);
-        J2DTextBox::draw(x, y, 608.0f, HBIND_LEFT);
-    }
-
-    void draw(f32 x, f32 y, u32 color, J2DTextBoxHBinding binding) {
-        if (gzInfo_isDropShadows()) {
-            setCharColor(0x00000080);
-            setGradColor(0x00000080);
-            J2DTextBox::draw(x + 2, y + 2, 608.0f, binding);
-        }
-        
-        setCharColor(color);
-        setGradColor(color);
-        J2DTextBox::draw(x, y, 608.0f, binding);
-    }
-
-    char m_description[80]; // todo: is this the best way to handle this?
-};
-
-class gzNotification_c {
-public:
-    enum NotificationType {
-        NOTIFY_INFO,
-        NOTIFY_WARNING,
-        NOTIFY_ERROR
-    };
-
-    gzNotification_c();
-    gzNotification_c(NotificationType mType);
-    ~gzNotification_c();
-
-    void send(const char* message);
-    void send(const char* message, NotificationType notification);
-    void draw();
-    static const int NOTIFICATION_MAX = 3;
-
-private:
-    gzTextBox* mpNotifications[NOTIFICATION_MAX];
-    int mNumNotifications;
-    u32 mStartFrames[NOTIFICATION_MAX];
-    NotificationType mType;
-
-    void removeExpired();
-};
-
-#endif
+#endif // GZ_H

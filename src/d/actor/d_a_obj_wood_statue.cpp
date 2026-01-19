@@ -45,10 +45,12 @@ const static dCcD_SrcCyl l_cyl_src = {
         {0x0}, // mGObjCo
     }, // mObjInf
     {
-        {0.0f, 0.0f, 0.0f}, // mCenter
-        20.0f, // mRadius
-        40.0f // mHeight
-    } // mCyl
+        {
+            {0.0f, 0.0f, 0.0f}, // mCenter
+            20.0f, // mRadius
+            40.0f // mHeight
+        } // mCyl
+    }
 };
 
 static char* l_arcName = "O_wood";
@@ -445,21 +447,22 @@ int daObjWStatue_c::_delete() {
     return 1;
 }
 
-static int daObjWStatue_Draw(daObjWStatue_c * i_this) {
+static int daObjWStatue_Draw(daObjWStatue_c* i_this) {
     return i_this->draw();
 }
 
-static int daObjWStatue_Execute(daObjWStatue_c * i_this) {
+static int daObjWStatue_Execute(daObjWStatue_c* i_this) {
     return i_this->execute();
 }
 
-static int daObjWStatue_Delete(daObjWStatue_c * i_this) {
+static int daObjWStatue_Delete(daObjWStatue_c* i_this) {
     fopAcM_RegisterDeleteID(i_this, "ObjLife");
     return i_this->_delete();
 }
 
-static int daObjWStatue_Create(fopAc_ac_c * i_this) {
-    fopAcM_RegisterCreateID(daObjWStatue_c, i_this, "ObjLife");
+static int daObjWStatue_Create(fopAc_ac_c* i_this) {
+    daObjWStatue_c* a_this = (daObjWStatue_c*)i_this;
+    fopAcM_RegisterCreateID(i_this, "ObjLife");
     return a_this->create();
 }
 

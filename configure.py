@@ -570,7 +570,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_graphic.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_machine.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_mtx.cpp"),
-            Object(Equivalent, "m_Do/m_Do_ext.cpp"), # weak func order
+            Object(MatchingFor(ALL_GCN), "m_Do/m_Do_ext.cpp"),
             Object(NonMatching, "m_Do/m_Do_ext2.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_lib.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_Reset.cpp"),
@@ -604,61 +604,61 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "f_ap/f_ap_game.cpp"),
 
             # f_op
-            Object(MatchingFor(ALL_GCN), "f_op/f_op_actor.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_op/f_op_actor_iter.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_op/f_op_actor_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_op/f_op_camera.cpp"),
-            Object(NonMatching, "f_op/f_op_actor_map.cpp"),
+            Object(MatchingFor(ALL_GCN, "Shield"), "f_op/f_op_actor.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_actor_iter.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_actor_tag.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_camera.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_actor_map.cpp"),
             Object(MatchingFor(ALL_GCN), "f_op/f_op_actor_mng.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_op/f_op_camera_mng.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_op/f_op_overlap.cpp"),
-            Object(MatchingFor(ALL_GCN, "Shield"), "f_op/f_op_overlap_mng.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_op/f_op_overlap_req.cpp"),
-            Object(MatchingFor(ALL_GCN, "Shield"), "f_op/f_op_scene.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_WII, "Shield"), "f_op/f_op_camera_mng.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_overlap.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_WII, "Shield"), "f_op/f_op_overlap_mng.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_WII, "ShieldD"), "f_op/f_op_overlap_req.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_WII, "Shield"), "f_op/f_op_scene.cpp"),
             Object(MatchingFor(ALL_GCN, "ShieldD"), "f_op/f_op_scene_iter.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_op/f_op_scene_mng.cpp"),
-            Object(MatchingFor(ALL_GCN, "Shield"), "f_op/f_op_scene_req.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_op/f_op_scene_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_op/f_op_view.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_op/f_op_kankyo.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_scene_mng.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_scene_req.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_scene_tag.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_view.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_kankyo.cpp"),
             Object(MatchingFor(ALL), "f_op/f_op_msg.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_op/f_op_kankyo_mng.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_WII, "Shield"), "f_op/f_op_kankyo_mng.cpp"),
             Object(MatchingFor(ALL_GCN), "f_op/f_op_msg_mng.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_op/f_op_draw_iter.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_op/f_op_draw_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_op/f_op_scene_pause.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_draw_iter.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_draw_tag.cpp"),
+            Object(MatchingFor(ALL), "f_op/f_op_scene_pause.cpp"),
 
             # f_pc
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_base.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_create_iter.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_create_req.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_create_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_creator.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_delete_tag.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_deletor.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_draw_priority.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_executor.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_layer.cpp"),
-            Object(MatchingFor(ALL_GCN, "Shield"), "f_pc/f_pc_leaf.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_layer_iter.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_layer_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_line.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_load.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_WII), "f_pc/f_pc_base.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_create_iter.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_create_req.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_create_tag.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_creator.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_delete_tag.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_deletor.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_draw_priority.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_executor.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_layer.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_leaf.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_layer_iter.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_layer_tag.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_line.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_load.cpp"),
             Object(MatchingFor(ALL_GCN), "f_pc/f_pc_manager.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_method.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_node.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_node_req.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_priority.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_profile.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_searcher.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_line_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_line_iter.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_method_iter.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_method_tag.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_pause.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_draw.cpp"),
-            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_fstcreate_req.cpp"),
-            Object(MatchingFor(ALL_GCN), "f_pc/f_pc_stdcreate_req.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_method.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_node.cpp"),
+            Object(MatchingFor(ALL_GCN, "ShieldD"), "f_pc/f_pc_node_req.cpp"),
+            Object(MatchingFor(ALL_GCN, ALL_SHIELD), "f_pc/f_pc_priority.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_profile.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_searcher.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_line_tag.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_line_iter.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_method_iter.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_method_tag.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_pause.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_draw.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_fstcreate_req.cpp"),
+            Object(MatchingFor(ALL), "f_pc/f_pc_stdcreate_req.cpp"),
             Object(MatchingFor("ShieldD"), "f_pc/f_pc_debug_sv.cpp"),
         ],
     },
@@ -752,12 +752,12 @@ config.libs = [
             Object(Custom, "d/d_debug_viewer.cpp"),
             Object(NonMatching, "d/d_debug_pad.cpp"),
             Object(NonMatching, "d/d_debug_camera.cpp"),
-            Object(Equivalent, "d/actor/d_a_alink.cpp"), # weak func order, vtable order
+            Object(Custom, "d/actor/d_a_alink.cpp"), # weak func order, vtable order
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_itembase.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_no_chg_room.cpp"),
-            Object(Equivalent, "d/actor/d_a_npc.cpp"), # weak func order (daNpcF_MoveBgActor_c::Delete)
+            Object(MatchingFor(ALL_GCN), "d/actor/d_a_npc.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_npc_cd.cpp"),
-            Object(NonMatching, "d/actor/d_a_npc_cd2.cpp"), # stripped vtable order
+            Object(MatchingFor(ALL_GCN), "d/actor/d_a_npc_cd2.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_obj_item.cpp"),
             Object(MatchingFor(ALL_GCN), "d/d_insect.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_obj_ss_base.cpp"),
@@ -1084,7 +1084,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "JSystem/JAudio2/JASOscillator.cpp"),
             Object(MatchingFor(ALL_GCN), "JSystem/JAudio2/JASAiCtrl.cpp"),
             Object(MatchingFor(ALL_GCN), "JSystem/JAudio2/JASAudioThread.cpp"),
-            Object(MatchingFor(ALL_GCN, "ShieldD"), "JSystem/JAudio2/JASAudioReseter.cpp"),
+            Object(MatchingFor(ALL_GCN), "JSystem/JAudio2/JASAudioReseter.cpp"),
             Object(MatchingFor(ALL_GCN, "ShieldD"), "JSystem/JAudio2/JASDSPChannel.cpp"),
             Object(MatchingFor(ALL_GCN), "JSystem/JAudio2/JASDSPInterface.cpp"),
             Object(MatchingFor(ALL_GCN), "JSystem/JAudio2/JASDriverIF.cpp"),
@@ -1211,7 +1211,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2SeMgr.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2SeqMgr.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2StatusMgr.cpp"),
-            Object(Equivalent, "Z2AudioLib/Z2SceneMgr.cpp"), # weak func order
+            Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2SceneMgr.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2FxLineMgr.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2SoundInfo.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2Audience.cpp"),
@@ -1222,7 +1222,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2EnvSeMgr.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2WolfHowlMgr.cpp"),
             Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2SpeechMgr2.cpp"),
-            Object(Equivalent, "Z2AudioLib/Z2AudioMgr.cpp"), # weak func order
+            Object(MatchingFor(ALL_GCN), "Z2AudioLib/Z2AudioMgr.cpp"),
             Object(NonMatching, "Z2AudioLib/Z2DebugSys.cpp"),
             Object(NonMatching, "Z2AudioLib/Z2F1TestWindow.cpp"),
             Object(NonMatching, "Z2AudioLib/Z2SoundPlayer.cpp"),
@@ -2868,24 +2868,25 @@ config.libs = [
         "cflags": cflags_framework,
         "objects": [
             Object(Custom, "dolphin/card/CARDDelete.c"),
-            Object(Custom, "gz/gz_notification.cpp"),
+            Object(Custom, "gz/gz_utility_notification.cpp"),
             Object(Custom, "gz/gz.cpp"),
+            Object(Custom, "gz/gz_textbox.cpp"),
+            Object(Custom, "gz/gz_utility_keyboard.cpp"),
             Object(Custom, "gz/gz_menu.cpp"),
-            Object(Custom, "gz/gz_tab.cpp"),
-            Object(Custom, "gz/gz_settings.cpp"),
-            Object(Custom, "gz/gz_credits.cpp"),
-            Object(Custom, "gz/gz_confirm.cpp"),
-            Object(Custom, "gz/gz_framework.cpp"),
-            Object(Custom, "gz/gz_tools.cpp"),
-            Object(Custom, "gz/gz_keyboard.cpp"),
-            Object(Custom, "gz/gz_practice.cpp"),
-            Object(Custom, "gz/gz_memory.cpp"),
-            Object(Custom, "gz/gz_cheats.cpp"),
-            Object(Custom, "gz/gz_flags.cpp"),
-            Object(Custom, "gz/gz_heaps.cpp"),
-            Object(Custom, "gz/gz_savemgr.cpp"),
-            Object(Custom, "gz/gz_cheatsmgr.cpp"),
-            Object(Custom, "gz/gz_toolsmgr.cpp"),
+            Object(Custom, "gz/gz_menu_settings.cpp"),
+            Object(Custom, "gz/gz_utility_confirm.cpp"),
+            Object(Custom, "gz/gz_menu_credits.cpp"),
+            Object(Custom, "gz/gz_menu_framework.cpp"),
+            Object(Custom, "gz/gz_menu_tools.cpp"),
+            Object(Custom, "gz/gz_menu_practice.cpp"),
+            Object(Custom, "gz/gz_menu_memory.cpp"),
+            Object(Custom, "gz/gz_menu_cheats.cpp"),
+            Object(Custom, "gz/gz_menu_flags.cpp"),
+            Object(Custom, "gz/gz_menu_heaps.cpp"),
+            Object(Custom, "gz/gz_menu_main.cpp"),
+            Object(Custom, "gz/gz_manager_practice.cpp"),
+            Object(Custom, "gz/gz_manager_cheats.cpp"),
+            Object(Custom, "gz/gz_manager_tools.cpp"),
         ],
     },
 ]
@@ -2905,6 +2906,7 @@ config.custom_build_steps = {}
 # Grab the specific GameID so we can format our strings properly
 version = VERSIONS[version_num]
 out_dir = config.build_dir / version
+
 
 
 # This generates the build steps needed for preprocessing
@@ -2959,24 +2961,25 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
         return objects + [
                 "dolphin/card/CARDDelete.c",
                 "d/d_debug_viewer.cpp",
+                "gz/gz_utility_notification.cpp",
                 "gz/gz.cpp",
+                "gz/gz_textbox.cpp",
+                "gz/gz_utility_keyboard.cpp",
                 "gz/gz_menu.cpp",
-                "gz/gz_tab.cpp",
-                "gz/gz_settings.cpp",
-                "gz/gz_credits.cpp",
-                "gz/gz_confirm.cpp",
-                "gz/gz_notification.cpp",
-                "gz/gz_framework.cpp",
-                "gz/gz_tools.cpp",
-                "gz/gz_keyboard.cpp",
-                "gz/gz_practice.cpp",
-                "gz/gz_memory.cpp",
-                "gz/gz_cheats.cpp",
-                "gz/gz_flags.cpp",
-                "gz/gz_heaps.cpp",
-                "gz/gz_savemgr.cpp",
-                "gz/gz_cheatsmgr.cpp",
-                "gz/gz_toolsmgr.cpp",
+                "gz/gz_menu_flags.cpp",
+                "gz/gz_menu_settings.cpp",
+                "gz/gz_menu_credits.cpp",
+                "gz/gz_utility_confirm.cpp",
+                "gz/gz_menu_framework.cpp",
+                "gz/gz_menu_tools.cpp",
+                "gz/gz_menu_practice.cpp",
+                "gz/gz_menu_memory.cpp",
+                "gz/gz_menu_cheats.cpp",
+                "gz/gz_menu_heaps.cpp",
+                "gz/gz_menu_main.cpp",
+                "gz/gz_manager_practice.cpp",
+                "gz/gz_manager_cheats.cpp",
+                "gz/gz_manager_tools.cpp",
             ]
     return objects
 
@@ -3002,6 +3005,47 @@ config.progress_report_args = [
 if args.mode == "configure":
     # Write build.ninja and objdiff.json
     generate_build(config)
+
+    # For non-matching builds, add ISO rebuild step directly to build.ninja
+    if config.non_matching:
+        with open("build.ninja", "r") as f:
+            content = f.read()
+
+        output_iso = f"tpgz-{version}.iso"
+        orig_iso = f"orig/{version}/{version}.iso"
+        dol_output = f"build/{version}/framework.dol"
+
+        # Add the rebuild_iso rule after the custom build rules section
+        iso_rule = f"""
+rule rebuild_iso
+  command = $python tools/rebuild-decomp-tp.py {orig_iso} $out ./ --version {version}
+  description = REBUILD ISO {version}
+
+"""
+        # Insert rule before "# Source files" comment
+        content = content.replace(
+            "# Source files",
+            iso_rule + "# Source files"
+        )
+
+        # Add the build step before the default rule
+        iso_build = f"""# Rebuild ISO
+build {output_iso}: rebuild_iso | {dol_output} tools/rebuild-decomp-tp.py
+
+"""
+        content = content.replace(
+            "# Default rule\n",
+            iso_build + "# Default rule\n"
+        )
+
+        # Add ISO to the default target
+        content = content.replace(
+            "# Default rule\ndefault ",
+            f"# Default rule\ndefault {output_iso} $\n    "
+        )
+
+        with open("build.ninja", "w") as f:
+            f.write(content)
 elif args.mode == "progress":
     # Print progress information
     calculate_progress(config)
