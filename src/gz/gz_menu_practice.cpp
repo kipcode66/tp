@@ -52,7 +52,8 @@ void gzPracticeMenu_c::_delete() {
 
 void gzPracticeMenu_c::execute() {
     if (checkInputWait()) return;
-    if (handleBackButton(gzMainMenu_c::MENU_PRACTICE)) return;
+    // make sure keyboard is exited before handling menu back button
+    if (mMemfileTab.mpKeyboard == NULL && handleBackButton(gzMainMenu_c::MENU_PRACTICE)) return;
 
     gzCursor* l_cursor = gzInfo_getCursor();
     int current_max_line;

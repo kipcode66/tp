@@ -54,6 +54,10 @@ gzKeyboard_c::gzKeyboard_c(kbCallback finishCb, kbCallback returnCb, void* cbDat
     }
 
     mpStringBox = gzTextBox_allocate();
+    if (mpStringBox == NULL) {
+        OSReport("keyboard mpStringBox couldn't allocate!!\n");
+    }
+
     memset(mString, 0, sizeof(mString));
     mStringIndex = 0;
 
