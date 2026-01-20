@@ -8423,4 +8423,6 @@ inline daAlink_c* daAlink_getAlinkActorClass() {
     return (daAlink_c*)dComIfGp_getLinkPlayer();
 }
 
+extern BOOL l_debugMode;
+
 #endif /* D_A_D_A_ALINK_H */
