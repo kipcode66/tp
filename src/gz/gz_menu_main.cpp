@@ -10,7 +10,7 @@
 #include "gz/gz_menu_practice.h"
 #include "gz/gz_menu_settings.h"
 #include "gz/gz_menu_tools.h"
-#include "f_op/f_op_scene_mng.h"
+#include "gz/gz_menu_warp.h"
 #include "SSystem/SComponent/c_counter.h"
 
 void gzMainMenu_c::startForwardTransition() {
@@ -48,7 +48,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mpMenus[MENU_SCENE] = NULL;
     mpMenus[MENU_SETTINGS] = new gzSettingsMenu_c();
     mpMenus[MENU_TOOLS] = new gzToolsMenu_c();
-    mpMenus[MENU_WARPING] = NULL;
+    mpMenus[MENU_WARPING] = new gzWarpMenu_c();
 
     mpLines[MENU_ACTORS] = new gzLine("actors", "create, read, update or delete actors in the current scene");
     mpLines[MENU_CHEATS] = new gzLine("cheats", "toggle cheats");
@@ -118,15 +118,6 @@ void gzMainMenu_c::execute() {
             l_cursor->y = 0;
             g_gzInfo.mInputWaitTimer = 2;
             gzInfo_seStart(Z2SE_SY_EXP_WIN_OPEN);
-        }
-
-        switch (l_cursor->y) {
-        case MENU_WARPING:
-            scene_class* playScene = fopScnM_SearchByID(dStage_roomControl_c::getProcID());
-            if (playScene != NULL)
-                fopScnM_ChangeReq(playScene, PROC_MENU_SCENE, 0, 5);
-            g_gzInfo.mDisplay = false;
-            return;
         }
     }
 }

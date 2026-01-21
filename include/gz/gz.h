@@ -60,6 +60,25 @@ struct gzCommandCombos_s {
     u32 mTeleportLoad;
 };
 
+// Automation state for Python scripts to read via memory
+// Address dumped via OSReport on boot: "tpgz auto: 0x%08X"
+struct gzAutoState_s {
+    u32 magic;           // 0x475A4155 = "GZAU" to verify struct found
+    bool menuVisible;    // g_gzInfo.mDisplay
+    bool optionMode;     // g_gzInfo.mMenuOption
+    s32 cursorX;         // g_gzInfo.mCursor.x
+    s32 cursorY;         // g_gzInfo.mCursor.y
+    s32 warpTypeIdx;     // Current warp menu type selection
+    s32 warpStageIdx;    // Current warp menu stage selection
+    s32 warpRoomIdx;     // Current warp menu room selection
+    s32 warpSpawnIdx;    // Current warp menu spawn selection
+    bool warpExecuted;   // Set true when executeWarp() called, script clears it
+    char currentStage[8]; // Current stage ID after warp
+    s32 faderStatus;     // 0 = no fade, 1 = fading in progress
+};
+
+extern gzAutoState_s g_gzAutoState;
+
 struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
     bool mDropShadows;

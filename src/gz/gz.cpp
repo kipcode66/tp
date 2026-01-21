@@ -93,6 +93,18 @@ private:
 
 gzInfo_c g_gzInfo;
 
+// Automation state for Python scripts - address dumped on boot
+gzAutoState_s g_gzAutoState = {
+    0x475A4155,  // magic = "GZAU"
+    false,       // menuVisible
+    false,       // optionMode
+    0, 0,        // cursorX, cursorY
+    3, 0, 0, 0,  // warpTypeIdx (OVERWORLD default), stage, room, spawn
+    false,       // warpExecuted
+    {0},         // currentStage
+    0            // faderStatus
+};
+
 int gzPrint(int x, int y, u32 color, char const* string, ...) {
     JUTDbPrint::getManager()->setVisible(true);
     char buffer[256];
@@ -212,6 +224,9 @@ int gzInfo_c::_create() {
 
     mInputWaitTimer = 2;
     mGZInitialized = true;
+
+    // Dump automation state address for Python scripts
+    OSReport("tpgz auto: 0x%08X\n", (u32)&g_gzAutoState);
 
     loadSettingsMemcard();
 
@@ -361,6 +376,15 @@ int gzInfo_c::execute() {
         }
         dComIfGp_offPauseFlag();
     }
+
+    // Update automation state for Python scripts
+    g_gzAutoState.menuVisible = mDisplay;
+    g_gzAutoState.optionMode = mMenuOption;
+    g_gzAutoState.cursorX = mCursor.x;
+    g_gzAutoState.cursorY = mCursor.y;
+    strncpy(g_gzAutoState.currentStage, dComIfGp_getStartStageName(), 7);
+    g_gzAutoState.currentStage[7] = '\0';
+    g_gzAutoState.faderStatus = mDoGph_gInf_c::getFader()->getStatus();
 
     return 1;
 }
