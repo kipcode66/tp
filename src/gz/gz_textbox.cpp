@@ -4,7 +4,7 @@
 #include "gz/gz_utility_notification.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 
-static const u32 TEXTBOX_POOL_SIZE = 700;
+static const u32 TEXTBOX_POOL_SIZE = 720;
 static gzTextBox* sTextBoxPool = NULL;
 static u8* sTextBoxUsed = NULL;
 static bool sPoolInitialized = false;
