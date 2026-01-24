@@ -15,7 +15,6 @@ static const char* STAGE_TYPE_NAMES[gzWarpMenu_c::STAGE_TYPE_MAX] = {
 
 static const u8 DEFAULT_LAYER = 0xFF;
 static const u32 HEADER_SIZE = 8;
-static const u32 STAGE_ENTRY_SIZE = 68;
 
 gzWarpMenu_c::gzWarpMenu_c() {
     mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
@@ -95,23 +94,43 @@ void gzWarpMenu_c::unloadTypeFile() {
     mpCurrentRoom = NULL;
 }
 
-gzStageEntry_s* gzWarpMenu_c::getStageEntry(int idx) {
-    if (!mpTypeData) return NULL;
+u32 gzWarpMenu_c::getStageOffset(int idx) {
+    if (!mpTypeData) return 0;
 
     gzStageHeader_s* header = (gzStageHeader_s*)mpTypeData;
-    if (idx < 0 || idx >= header->num_stages) return NULL;
+    if (idx < 0 || idx >= header->num_stages) return 0;
 
-    return (gzStageEntry_s*)(mpTypeData + HEADER_SIZE + (idx * STAGE_ENTRY_SIZE));
+    u32* stageIndexTable = (u32*)(mpTypeData + HEADER_SIZE);
+    return stageIndexTable[idx];
 }
 
-gzRoomEntry_s* gzWarpMenu_c::getRoomEntry(gzStageEntry_s* stage, int idx) {
-    if (!mpTypeData || !stage) return NULL;
-    if (idx < 0 || idx >= stage->num_rooms) return NULL;
-
-    u16 offset = stage->room_offsets[idx];
+gzStageEntryHeader_s* gzWarpMenu_c::getStageEntry(int idx) {
+    u32 offset = getStageOffset(idx);
     if (offset == 0 || offset >= mTypeDataSize) return NULL;
 
-    return (gzRoomEntry_s*)(mpTypeData + offset);
+    return (gzStageEntryHeader_s*)(mpTypeData + offset);
+}
+
+u32 gzWarpMenu_c::getRoomOffset(gzStageEntryHeader_s* stage, int idx) {
+    if (!mpTypeData || !stage) return 0;
+    if (idx < 0 || idx >= stage->num_rooms) return 0;
+
+    u32* roomOffsets = (u32*)((u8*)stage + sizeof(gzStageEntryHeader_s));
+    return roomOffsets[idx];
+}
+
+gzRoomEntryHeader_s* gzWarpMenu_c::getRoomEntry(gzStageEntryHeader_s* stage, int idx) {
+    u32 offset = getRoomOffset(stage, idx);
+    if (offset == 0 || offset >= mTypeDataSize) return NULL;
+
+    return (gzRoomEntryHeader_s*)(mpTypeData + offset);
+}
+
+u8 gzWarpMenu_c::getSpawnId(gzRoomEntryHeader_s* room, int idx) {
+    if (!room || idx < 0 || idx >= room->num_spawns) return 0;
+
+    u8* spawnIds = (u8*)room + sizeof(gzRoomEntryHeader_s);
+    return spawnIds[idx];
 }
 
 void gzWarpMenu_c::selectStage(int idx) {
@@ -154,7 +173,7 @@ void gzWarpMenu_c::selectSpawn(int idx) {
 void gzWarpMenu_c::executeWarp() {
     if (!mpCurrentStage || !mpCurrentRoom) return;
 
-    u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? mpCurrentRoom->spawn_ids[mSpawnIdx] : 0;
+    u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
 
     OSReport("tpgz warp: executing %s room %d spawn %d\n",
              mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
@@ -185,7 +204,7 @@ void gzWarpMenu_c::updateLineText() {
 
     if (mpCurrentRoom) {
         mpLines[WARP_ROOM]->getOptionBox()->setStringf("%s", mpCurrentRoom->room_name);
-        u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? mpCurrentRoom->spawn_ids[mSpawnIdx] : 0;
+        u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
         mpLines[WARP_SPAWN]->getOptionBox()->setStringf("%d", spawnId);
     } else {
         mpLines[WARP_ROOM]->getOptionBox()->setString("none");
@@ -325,7 +344,7 @@ void gzWarpMenu_c::draw() {
     drawLines((gzLine**)mpLines, LINE_NUM, haihai_flags, 0, LINE_NUM);
 
     if (mpCurrentStage && mpCurrentRoom) {
-        u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? mpCurrentRoom->spawn_ids[mSpawnIdx] : 0;
+        u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
         mPreview.loadPreview(mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
         mPreview.draw(400.0f, 100.0f, 192.0f, 144.0f);
     }

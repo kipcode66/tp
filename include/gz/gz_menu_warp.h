@@ -5,9 +5,7 @@
 #include "gz/gz_textbox.h"
 #include "gz/gz_warp_preview.h"
 
-static const u8 STAGE_INFO_VERSION = 1;
-static const u8 MAX_ROOMS_PER_STAGE = 12;
-static const u8 MAX_SPAWNS_PER_ROOM = 14;
+static const u8 STAGE_INFO_VERSION = 2;
 
 
 struct gzStageHeader_s {
@@ -18,19 +16,17 @@ struct gzStageHeader_s {
 };
 
 
-struct gzStageEntry_s {
+struct gzStageEntryHeader_s {
     char stage_id[8];
     char stage_name[32];
     u8 num_rooms;
     u8 reserved[3];
-    u16 room_offsets[12];
 };
 
-struct gzRoomEntry_s {
+struct gzRoomEntryHeader_s {
     char room_name[32];
     u8 room_id;
     u8 num_spawns;
-    u8 spawn_ids[14];
 };
 
 class gzWarpMenu_c : public gzMenu_c {
@@ -68,8 +64,13 @@ public:
 private:
     void loadTypeFile(int stageType);
     void unloadTypeFile();
-    gzStageEntry_s* getStageEntry(int idx);
-    gzRoomEntry_s* getRoomEntry(gzStageEntry_s* stage, int idx);
+
+    u32 getStageOffset(int idx);
+    gzStageEntryHeader_s* getStageEntry(int idx);
+    u32 getRoomOffset(gzStageEntryHeader_s* stage, int idx);
+    gzRoomEntryHeader_s* getRoomEntry(gzStageEntryHeader_s* stage, int idx);
+    u8 getSpawnId(gzRoomEntryHeader_s* room, int idx);
+
     void selectStage(int idx);
     void selectRoom(int idx);
     void selectSpawn(int idx);
@@ -89,8 +90,8 @@ private:
     u8 mLayer;
 
     // Cache for current entries
-    gzStageEntry_s* mpCurrentStage;
-    gzRoomEntry_s* mpCurrentRoom;
+    gzStageEntryHeader_s* mpCurrentStage;
+    gzRoomEntryHeader_s* mpCurrentRoom;
 };
 
 #endif // GZ_MENU_WARP_H
