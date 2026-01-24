@@ -20,11 +20,30 @@ class gzNotification_c;
 class gzToolsMng_c;
 class dSelect_cursor_c;
 class gzCapture_c;
+class JKRHeap;
 
 #define COLOR_WHITE 0xFFFFFFFFu
 #define COLOR_RED 0xFF0000FFu
 #define COLOR_BLUE 0x0000FFFFu
 #define COLOR_GREEN 0x00FF00FFu
+#define COLOR_CYAN 0x00FFFFFFu
+#define COLOR_YELLOW 0xFFFF00FFu
+#define COLOR_MAGENTA 0xFF00FFFFu
+#define COLOR_ORANGE 0xFFA500FFu
+#define COLOR_GRAY 0x808080FFu
+
+enum gzGroupId_e {
+    GZ_GROUP_MIN      = 0x60,
+
+    GZ_GROUP_TEXTBOX  = 0x60,
+    GZ_GROUP_MENU     = 0x61,
+    GZ_GROUP_UI       = 0x62,
+    GZ_GROUP_GRAPHICS = 0x63,
+    GZ_GROUP_TRACKER  = 0x64,
+    GZ_GROUP_OTHER    = 0x65,
+
+    GZ_GROUP_MAX      = 0x66,
+};
 
 #define COLOR_AMETHYST 0x9966FFFF
 #define COLOR_AQUAMARINE 0x71D9E2FF
@@ -813,6 +832,16 @@ namespace gzPad {
 
 int gzPrint(int x, int y, u32 color, char const* string, ...);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
+
+// Check if a group ID belongs to gz
+inline bool gzIsGzGroupId(u8 groupId) {
+    return groupId >= GZ_GROUP_MIN && groupId < GZ_GROUP_MAX;
+}
+
+void gzCreateHeap();
+void gzSetGzHeap(JKRHeap* heap);
+JKRHeap* gzGetGzHeap();
+JKRHeap* gzHeap(gzGroupId_e groupId);
 
 // Sets up 2D orthographic context for GZ overlay drawing.
 // Call this before drawing J2DScreen-based elements (like haihai arrows).

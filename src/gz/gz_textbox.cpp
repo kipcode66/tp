@@ -4,7 +4,7 @@
 #include "gz/gz_utility_notification.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 
-static const u32 TEXTBOX_POOL_SIZE = 720;
+static const u32 TEXTBOX_POOL_SIZE = 800;
 static gzTextBox* sTextBoxPool = NULL;
 static u8* sTextBoxUsed = NULL;
 static bool sPoolInitialized = false;
@@ -12,7 +12,7 @@ static bool sPoolInitialized = false;
 static void initPool() {
     if (sPoolInitialized) return;
 
-    JKRExpHeap* heap = (JKRExpHeap*)mDoExt_getCurrentHeap();
+    JKRExpHeap* heap = (JKRExpHeap*)gzGetGzHeap();
 
     u32 poolBytes = TEXTBOX_POOL_SIZE * sizeof(gzTextBox);
     u32 freeSize = heap->getFreeSize();
@@ -21,7 +21,7 @@ static void initPool() {
         return;
     }
 
-    void* poolMem = heap->alloc(poolBytes, 32);
+    void* poolMem = gzHeap(GZ_GROUP_TEXTBOX)->alloc(poolBytes, 32);
     if (!poolMem) {
         gzInfo_sendNotification("TextBox pool alloc failed!", gzNotification_c::NOTIFY_ERROR);
         return;
@@ -33,7 +33,7 @@ static void initPool() {
     }
 
     u32 bitmapBytes = (TEXTBOX_POOL_SIZE / 8) + 1;
-    sTextBoxUsed = (u8*)(heap->alloc(bitmapBytes, 4));
+    sTextBoxUsed = (u8*)(gzHeap(GZ_GROUP_TEXTBOX)->alloc(bitmapBytes, 4));
     if (!sTextBoxUsed) {
         for (u32 i = 0; i < TEXTBOX_POOL_SIZE; ++i) {
             sTextBoxPool[i].~gzTextBox();
@@ -50,7 +50,7 @@ static void initPool() {
 void gzTextBox_shutdownPool() {
     if (!sPoolInitialized) return;
 
-    JKRExpHeap* heap = (JKRExpHeap*)mDoExt_getCurrentHeap();
+    JKRExpHeap* heap = (JKRExpHeap*)gzGetGzHeap();
 
     for (u32 i = 0; i < TEXTBOX_POOL_SIZE; ++i) {
         sTextBoxPool[i].~gzTextBox();
@@ -86,4 +86,22 @@ void gzTextBox_free(gzTextBox* box) {
     u8 byte = (u8)(idx / 8);
     u8 bit = (u8)(idx % 8);
     sTextBoxUsed[byte] &= ~(1 << bit);
+}
+
+u32 gzTextBox_getPoolUsed() {
+    if (!sPoolInitialized) return 0;
+
+    u32 count = 0;
+    for (u32 i = 0; i < TEXTBOX_POOL_SIZE; i++) {
+        u8 byte = (u8)(i / 8);
+        u8 bit = (u8)(i % 8);
+        if (sTextBoxUsed[byte] & (1 << bit)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+u32 gzTextBox_getPoolSize() {
+    return TEXTBOX_POOL_SIZE;
 }

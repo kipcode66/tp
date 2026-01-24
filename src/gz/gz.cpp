@@ -170,38 +170,31 @@ void gzInfo_c::loadDefaultSettings() {
 int gzInfo_c::_create() {
     OSReport("creating gzInfo_c\n");
 
-    // Store current heap settings until gz is done allocating
-    JKRHeap* oldHeap = mDoExt_getCurrentHeap();
-    JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
-    u8 oldGroupId = archiveHeap->mCurrentGroupId;
-
-    // Alloc on archive heap
-    // Set group ID for identifying gz allocations in heaps menu
-    mDoExt_setCurrentHeap(archiveHeap);
-    archiveHeap->mCurrentGroupId = mGzGroupID = 0x69;
+    // Create dedicated GZ heap
+    gzCreateHeap();
 
     // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
 
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
-    mpIcon = new J2DPicture(icon);
+    mpIcon = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(icon);
 
-    // TODO: replace this with something better or alloc it on ARAM
-    void* buf = JKRHeap::alloc(108960, 32, NULL);
+    void* buf = JKRHeap::alloc(108960, 32, gzHeap(GZ_GROUP_GRAPHICS));
     gzDVDLoadFile("/gz/bg.bti", buf, 108960, 0);
     ResTIMG* bg = (ResTIMG*)buf;
-    mpBackground = new J2DPicture(bg);
+    mpBackground = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(bg);
+
     mpHeader = gzTextBox_allocate();
     mpHeader->setString("tpgz v2.0.0");
-    
-    mpMainMenu = new gzMainMenu_c();
+
+    mpMainMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzMainMenu_c();
     if (mpMainMenu == NULL) {
         return 0;
     }
 
-    mpNotification = new gzNotification_c();
+    mpNotification = new (gzHeap(GZ_GROUP_UI), 4) gzNotification_c();
 
-    mpTPCursor = new dSelect_cursor_c(2, 1.0f, NULL);
+    mpTPCursor = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dSelect_cursor_c(2, 1.0f, NULL);
     mpTPCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
     mpTPCursor->setAlphaRate(1.0f);
 
@@ -224,14 +217,10 @@ int gzInfo_c::_create() {
     dComIfGp_setOxygen(600);
     dComIfGp_setNowOxygen(600);
     dComIfGp_setMaxOxygen(600);
-    
+
     // load the default menu
     gzChangeMenu(mpMainMenu->getMenu(0));
 
-    // Restore original group ID and heap
-    archiveHeap->mCurrentGroupId = oldGroupId;
-    mDoExt_setCurrentHeap(oldHeap);
-    
     return 1;
 }
 
@@ -324,7 +313,7 @@ int gzInfo_c::execute() {
     // Handle menu OPEN transition
     if (!wasDisplayed && mDisplay) {
         if (isMenuPausesGame() && !dComIfGp_isPauseFlag() && mpCapture == NULL) {
-            mpCapture = new gzCapture_c();
+            mpCapture = new (gzHeap(GZ_GROUP_UI), 4) gzCapture_c();
             mpCapture->setCaptureFlag();
         }
     }
@@ -344,7 +333,7 @@ int gzInfo_c::execute() {
             mpCapture = NULL;
             dComIfGp_offPauseFlag();
         } else if (isMenuPausesGame() && mpCapture == NULL && !dComIfGp_isPauseFlag()) {
-            mpCapture = new gzCapture_c();
+            mpCapture = new (gzHeap(GZ_GROUP_UI), 4) gzCapture_c();
             mpCapture->setCaptureFlag();
         }
     } else {
@@ -492,4 +481,27 @@ void gzInfo_c::sendNotification(const char* msg) {
 
 void gzInfo_c::sendNotification(const char* msg, int i_notificationType) {
     if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
+}
+
+static JKRExpHeap* s_gzHeap = NULL;
+static const u32 GZ_HEAP_SIZE = 0x80000;  // 512KB
+
+void gzCreateHeap() {
+    if (s_gzHeap != NULL) return;
+
+    JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
+    s_gzHeap = JKRExpHeap::create(GZ_HEAP_SIZE, archiveHeap, true);
+}
+
+void gzSetGzHeap(JKRHeap* heap) {
+    s_gzHeap = (JKRExpHeap*)heap;
+}
+
+JKRHeap* gzGetGzHeap() {
+    return s_gzHeap;
+}
+
+JKRHeap* gzHeap(gzGroupId_e groupId) {
+    s_gzHeap->mCurrentGroupId = (u8)groupId;
+    return s_gzHeap;
 }

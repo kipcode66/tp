@@ -43,6 +43,9 @@ void gzNotification_c::send(const char* message, NotificationType i_notification
     }
 
     mpNotifications[mNumNotifications] = gzTextBox_allocate();
+    if (mpNotifications[mNumNotifications] == NULL) {
+        return;  // Can't display notification without textbox
+    }
     mpNotifications[mNumNotifications]->setString(message);
     mStartFrames[mNumNotifications] = cCt_getFrameCount();
     mTypes[mNumNotifications] = i_notificationType;

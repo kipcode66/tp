@@ -142,31 +142,31 @@ gzFlagsMenu_c::gzFlagsMenu_c() {
 
     // General tab - all gzBoolOptionLine
     for (int i = 0; i < G_FLAG_MAX; i++) {
-        mpLinesGeneral[i] = new gzBoolOptionLine(generalFlags[i].name, generalFlags[i].desc,
+        mpLinesGeneral[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(generalFlags[i].name, generalFlags[i].desc,
                                                   generalFlags[i].is, generalFlags[i].on, generalFlags[i].off);
     }
 
     // Dungeon tab
-    mpLinesDungeon[D_FLAG_SELECT_DUNGEON] = new gzListOptionLine("dungeon:", "Select dungeon to modify flags", nextDungeon, prevDungeon);
-    mpLinesDungeon[D_FLAG_SMALL_KEY] = new gzListOptionLine("small keys:", "Selected dungeon small keys", addSmallKey, removeSmallKey);
+    mpLinesDungeon[D_FLAG_SELECT_DUNGEON] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("dungeon:", "Select dungeon to modify flags", nextDungeon, prevDungeon);
+    mpLinesDungeon[D_FLAG_SMALL_KEY] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("small keys:", "Selected dungeon small keys", addSmallKey, removeSmallKey);
     for (int i = 0; i < 7; i++) {
-        mpLinesDungeon[D_FLAG_BOSS_KEY + i] = new gzBoolOptionLine(dungeonFlags[i].name, dungeonFlags[i].desc);
+        mpLinesDungeon[D_FLAG_BOSS_KEY + i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(dungeonFlags[i].name, dungeonFlags[i].desc);
     }
-    mpLinesDungeon[D_FLAG_CLEAR_DUNGEON] = new gzLine("clear flags", "Clear all selected dungeon flags");
+    mpLinesDungeon[D_FLAG_CLEAR_DUNGEON] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("clear flags", "Clear all selected dungeon flags");
 
     // Portal tab
-    mpLinesPortal[P_FLAG_SELECT_REGION] = new gzListOptionLine("region:", "Select region to view flags", nextRegion, prevRegion);
-    mpLinesPortal[P_FLAG_REGION] = new gzBoolOptionLine("enabled:", "Toggle the selected region flag");
+    mpLinesPortal[P_FLAG_SELECT_REGION] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("region:", "Select region to view flags", nextRegion, prevRegion);
+    mpLinesPortal[P_FLAG_REGION] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("enabled:", "Toggle the selected region flag");
     for (int i = 0; i < 15; i++) {
-        mpLinesPortal[P_FLAG_SPRING_WARP + i] = new gzBoolOptionLine(warpFlags[i].name, warpFlags[i].desc,
+        mpLinesPortal[P_FLAG_SPRING_WARP + i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(warpFlags[i].name, warpFlags[i].desc,
                                                                       warpFlags[i].is, warpFlags[i].on, warpFlags[i].off);
     }
 
     // Rupee tab
-    mpLinesRupee[R_FLAG_DONATION_AMT] = new gzListOptionLine("donation amount:", "Sets the amount of rupees donated to Charlo");
-    mpLinesRupee[R_FLAG_FUNDRAISING_AMT] = new gzListOptionLine("fundraising amount:", "Sets the current fundraising amount");
+    mpLinesRupee[R_FLAG_DONATION_AMT] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("donation amount:", "Sets the amount of rupees donated to Charlo");
+    mpLinesRupee[R_FLAG_FUNDRAISING_AMT] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("fundraising amount:", "Sets the current fundraising amount");
     for (int i = 0; i < 3; i++) {
-        mpLinesRupee[R_FLAG_FUNDRAISING_1 + i] = new gzBoolOptionLine(rupeeFlags[i].name, rupeeFlags[i].desc,
+        mpLinesRupee[R_FLAG_FUNDRAISING_1 + i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(rupeeFlags[i].name, rupeeFlags[i].desc,
                                                                        rupeeFlags[i].is, rupeeFlags[i].on, rupeeFlags[i].off);
     }
 

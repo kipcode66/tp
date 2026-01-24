@@ -17,6 +17,7 @@ public:
 
     enum gzHeaps_HeapTrackerList_e {
         HEAP_ARCHIVE_e,
+        HEAP_GZ_e,
         HEAP_GAME_e,
         HEAP_J2D_e,
         HEAP_ZELDA_e,
@@ -74,6 +75,7 @@ public:
 private:
     void updateDynamicLines();
     void updateHeapTracker(HeapTracker_c* tracker);
+    void updateGroupUsage();
     void drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, f32 width);
     void drawLegend(f32 legend_x, f32 legend_y);
     void drawSwatch(f32 x, f32 y, f32 size, u32 color);
@@ -87,8 +89,19 @@ private:
     bool mShowOverview;
     HeapTracker_c* mTrackers[HEAP_TRACKER_MAX_e];
     gzTextBox* mpLegendUsed;
-    gzTextBox* mpLegendMenuUsed;
+    gzTextBox* mpLegendTextBox;
+    gzTextBox* mpLegendMenu;
+    gzTextBox* mpLegendUI;
+    gzTextBox* mpLegendGraphics;
+    gzTextBox* mpLegendTracker;
+    gzTextBox* mpLegendOther;
     gzTextBox* mpLegendFree;
+    gzTextBox* mpLegendGzHeap;
+
+    u32 mGroupUsageKB[6];
+    gzTextBox* mpGroupUsageTitle;
+    gzTextBox* mpGroupUsageLines[6];
+    gzTextBox* mpTextBoxPoolUsage;
 
     // Overview mode text boxes
     gzTextBox* mpOverviewTitle;

@@ -72,7 +72,7 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
     mpHeaders[3]->setString("Layer");
     mpHeaders[4]->setString("Status");
 
-    mpMeterHaihai = new dMeterHaihai_c(3);
+    mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
     mpTitle = gzTextBox_allocate();
 }
 
@@ -207,7 +207,7 @@ void gzFrameworkMenu_c::execute() {
 
     if (gzPad::getTrigZ()) {
         if (mNumProcesses > 0) {
-            mpConfirm = new gzConfirm_c(deleteProcessConfirmCb, deleteProcessReturnCb, this, "delete process?");
+            mpConfirm = new (gzHeap(GZ_GROUP_UI), 4) gzConfirm_c(deleteProcessConfirmCb, deleteProcessReturnCb, this, "delete process?");
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
         }
     }

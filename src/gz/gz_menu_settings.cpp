@@ -84,22 +84,22 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
     mpConfirm = NULL;
 
-    mpCursorType = new gzListOptionLine("cursor type", "sets the cursor type to classic, tp or both", gzInfo_nextCursorType, gzInfo_prevCursorType);
-    mpDisplayMode = new gzBoolOptionLine("display mode", "change between progressive and interlaced display modes", gzInfo_getDisplayMode, gzInfo_setDisplayModeProgressive, gzInfo_setDisplayModeInterlaced);
-    mpDropShadows = new gzBoolOptionLine("drop shadows", "adds drop shadows to tpgz menu text", gzInfo_isDropShadows, gzInfo_onDropShadows, gzInfo_offDropShadows);
-    mpFont = new gzListOptionLine("font", "changes tpgz menu font", gzInfo_nextFont, gzInfo_prevFont);
-    mpMenuPausesGame = new gzBoolOptionLine("menu pauses game", "opening gz menu pauses game", gzInfo_isMenuPausesGame, gzInfo_onMenuPausesGame, gzInfo_offMenuPausesGame);
-    mpBootToMenu = new gzBoolOptionLine("boot to menu", "boot directly to gz menu on startup", gzInfo_isBootToMenu, gzInfo_onBootToMenu, gzInfo_offBootToMenu);
-    mpMenuSfx = new gzBoolOptionLine("menu sfx", "turn on/off gz menu sound effects", gzInfo_isMenuSfx, gzInfo_onMenuSfx, gzInfo_offMenuSfx);
-    mpReloadType = new gzBoolOptionLine("reload type", "changes reload type to last file or last area", gzInfo_isReloadArea, gzInfo_setReloadArea, gzInfo_setReloadFile);
-    mpTextColor = new gzListOptionLine("text color", "changes tpgz menu text color", gzInfo_nextTextColor, gzInfo_prevTextColor);
-    mpSwapEquips = new gzBoolOptionLine("swap equips", "", gzInfo_isSwapEquips, gzInfo_onSwapEquips, gzInfo_offSwapEquips);
-    mpSaveCard = new gzLine("save card", "saves tpgz settings to memory card");
-    mpLoadCard = new gzLine("load card", "loads tpgz settings from memory card");
-    mpDeleteCard = new gzLine("delete card", "deletes tpgz settings from memory card");
-    mpCommandCombos = new gzLine("command combos", "change default command combos");
-    mpMenuPositions = new gzLine("menu positions", "set positions of overlay menus");
-    mpCredits = new gzLine("credits", "show the tpgz credits");
+    mpCursorType = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("cursor type", "sets the cursor type to classic, tp or both", gzInfo_nextCursorType, gzInfo_prevCursorType);
+    mpDisplayMode = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("display mode", "change between progressive and interlaced display modes", gzInfo_getDisplayMode, gzInfo_setDisplayModeProgressive, gzInfo_setDisplayModeInterlaced);
+    mpDropShadows = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("drop shadows", "adds drop shadows to tpgz menu text", gzInfo_isDropShadows, gzInfo_onDropShadows, gzInfo_offDropShadows);
+    mpFont = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("font", "changes tpgz menu font", gzInfo_nextFont, gzInfo_prevFont);
+    mpMenuPausesGame = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("menu pauses game", "opening gz menu pauses game", gzInfo_isMenuPausesGame, gzInfo_onMenuPausesGame, gzInfo_offMenuPausesGame);
+    mpBootToMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("boot to menu", "boot directly to gz menu on startup", gzInfo_isBootToMenu, gzInfo_onBootToMenu, gzInfo_offBootToMenu);
+    mpMenuSfx = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("menu sfx", "turn on/off gz menu sound effects", gzInfo_isMenuSfx, gzInfo_onMenuSfx, gzInfo_offMenuSfx);
+    mpReloadType = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("reload type", "changes reload type to last file or last area", gzInfo_isReloadArea, gzInfo_setReloadArea, gzInfo_setReloadFile);
+    mpTextColor = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("text color", "changes tpgz menu text color", gzInfo_nextTextColor, gzInfo_prevTextColor);
+    mpSwapEquips = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("swap equips", "", gzInfo_isSwapEquips, gzInfo_onSwapEquips, gzInfo_offSwapEquips);
+    mpSaveCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("save card", "saves tpgz settings to memory card");
+    mpLoadCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("load card", "loads tpgz settings from memory card");
+    mpDeleteCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("delete card", "deletes tpgz settings from memory card");
+    mpCommandCombos = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("command combos", "change default command combos");
+    mpMenuPositions = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("menu positions", "set positions of overlay menus");
+    mpCredits = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("credits", "show the tpgz credits");
 
     mpLines[SETTING_CURSOR_TYPE] = mpCursorType;
     mpLines[SETTING_DISPLAY_MODE] = mpDisplayMode;
@@ -219,7 +219,7 @@ void gzSettingsMenu_c::execute() {
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             break;
         case SETTING_DELETE_CARD:
-            mpConfirm = new gzConfirm_c(deleteCardConfirmCb, deleteCardReturnCb, this, "delete settings?");
+            mpConfirm = new (gzHeap(GZ_GROUP_UI), 4) gzConfirm_c(deleteCardConfirmCb, deleteCardReturnCb, this, "delete settings?");
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             return;
         case SETTING_MENU_POSITIONS:

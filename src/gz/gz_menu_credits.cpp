@@ -12,7 +12,7 @@ gzCreditsMenu_c::gzCreditsMenu_c() {
         if (i > 20 && i % 2 == 1) mpLines[i]->setString("c");
     }
 
-    mpMeterHaihai = new dMeterHaihai_c(3);
+    mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
     mpMeterHaihai->setScale(0.5f);
     gzInfo_resetTopLine();
 }
