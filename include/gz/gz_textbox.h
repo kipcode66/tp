@@ -5,11 +5,12 @@
 #include "JSystem/JUtility/JUTFont.h"
 #include "gz/gz.h"
 
-// TextBox pool functions (implemented in gz_textbox.cpp)
 class gzTextBox;
 gzTextBox* gzTextBox_allocate();
 void gzTextBox_free(gzTextBox* box);
 void gzTextBox_shutdownPool();
+u32 gzTextBox_getPoolUsed();
+u32 gzTextBox_getPoolSize();
 
 class gzTextBox : public J2DTextBox {
 public:

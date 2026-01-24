@@ -49,19 +49,19 @@ gzToolsMenu_c::gzToolsMenu_c() {
 
     // Checkers tab
     for (int i = 0; i < C_MAX; i++) {
-        mpLinesCheckers[i] = new gzBoolOptionLine(checkerFlags[i].name, checkerFlags[i].desc,
+        mpLinesCheckers[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(checkerFlags[i].name, checkerFlags[i].desc,
                                                    checkerFlags[i].is, checkerFlags[i].on, checkerFlags[i].off);
     }
 
     // Displays tab
     for (int i = 0; i < D_MAX; i++) {
-        mpLinesDisplays[i] = new gzBoolOptionLine(displayFlags[i].name, displayFlags[i].desc,
+        mpLinesDisplays[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(displayFlags[i].name, displayFlags[i].desc,
                                                    displayFlags[i].is, displayFlags[i].on, displayFlags[i].off);
     }
 
     // Link tab
     for (int i = 0; i < L_MAX; i++) {
-        mpLinesLink[i] = new gzBoolOptionLine(linkFlags[i].name, linkFlags[i].desc,
+        mpLinesLink[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine(linkFlags[i].name, linkFlags[i].desc,
                                                linkFlags[i].is, linkFlags[i].on, linkFlags[i].off);
     }
 

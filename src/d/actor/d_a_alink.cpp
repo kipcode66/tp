@@ -66,9 +66,7 @@ BOOL daAlink_c::getE3Zhint() {
 
 #include "d/actor/d_a_alink_HIO.inc"
 
-#if DEBUG
-static BOOL l_debugMode;
-#endif
+BOOL l_debugMode;
 
 static const char l_wArcName[] = "Wmdl";
 
@@ -4438,9 +4436,7 @@ void daAlink_c::playerInit() {
     mAnmHeap4.createHeap(daPy_anmHeap_c::HEAP_TYPE_4);
     setShieldModel();
 
-    #if DEBUG
     l_debugMode = FALSE;
-    #endif
 
     mSwordModel = mpSwAModel;
     mSheathModel = mpSwASheathModel;
@@ -9231,17 +9227,20 @@ void daAlink_c::setPlayerPosAndAngle(Mtx i_mtx) {
     }
 }
 
-#if DEBUG
 BOOL daAlink_c::checkDebugMoveInput() {
-    if (mDoCPd_c::isConnect(PAD_3)) {
+    /* if (mDoCPd_c::isConnect(PAD_3)) {
         return mDoCPd_c::getHoldB(PAD_1)
                 && mDoCPd_c::getAnalogR(PAD_1) > 0.8f
                 && mDoCPd_c::getTrigA(PAD_1);
-    }
+    } */
+    
+    // TODO: replace with actual gz combo checker
+    return mDoCPd_c::getHoldL(PAD_1)
+            && mDoCPd_c::getHoldR(PAD_1)
+            && mDoCPd_c::getTrigY(PAD_1); 
 
     return FALSE;
 }
-#endif
 
 BOOL daAlink_c::itemTriggerCheck(u8 i_btnFlag) {
     mUseButtonFlags |= i_btnFlag;
@@ -12860,10 +12859,6 @@ void daAlink_c::setFootSpeed() {
 }
 
 void daAlink_c::posMove() {
-    if (gzInfo_isMoveLinkActive()) {
-        return;
-    }
-
     f32 temp_f30 = cM_ssin(shape_angle.y);
     f32 temp_f29 = cM_scos(shape_angle.y);
     cXyz sp108;
@@ -17951,8 +17946,7 @@ int daAlink_c::execute() {
     }
 
     BOOL isTrigDebugMoveInput = FALSE;
-    #if DEBUG
-    if (daPy_getPlayerActorClass() == this && checkDebugMoveInput()) {
+    if (gzInfo_isMoveLink() && daPy_getPlayerActorClass() == this && checkDebugMoveInput()) {
         isTrigDebugMoveInput = TRUE;
         if (l_debugMode) {
             l_debugMode = FALSE;
@@ -17970,7 +17964,7 @@ int daAlink_c::execute() {
             }
         } else {
             f32 moveSpeed;
-            if (mDoCPd_c::getHoldLockR(PAD_1)) {
+            if (mDoCPd_c::getHoldZ(PAD_1)) {
                 moveSpeed = 100.0f;
             } else {
                 moveSpeed = 50.0f;
@@ -17997,17 +17991,13 @@ int daAlink_c::execute() {
 
         setBodyPartPos();
         setAttentionPos();
-    } else
-    #endif
-    {
+    } else {
         if (isTrigDebugMoveInput) {
             mItemButton = 0;
             mItemTrigger = 0;
         }
 
-        if (!gzInfo_isMoveLinkActive()) {
-            allAnimePlay();
-        }
+        allAnimePlay();
 
         if (mDamageTimer != 0) {
             damageTimerCount();
@@ -18079,9 +18069,7 @@ int daAlink_c::execute() {
         }
 
         checkLightSwordMtrl();
-        if (!gzInfo_isMoveLinkActive()) {
-            (this->*mpProcFunc)();
-        }
+        (this->*mpProcFunc)();
 
         if (!checkEndResetFlg0(ERFLG0_UNK_2000) && checkWindDashAnime()) {
             resetUpperAnime(UPPER_2, 3.0f);
@@ -18093,21 +18081,17 @@ int daAlink_c::execute() {
             cXyz old_pos = current.pos;
             posMove();
 
-            if (!gzInfo_isMoveLinkActive()) {
-                if (checkWolf()) {
-                    wolfBgCheck();
-                } else if (checkModeFlg(MODE_SWIMMING)) {
-                    swimBgCheck(120.0f);
-                }
+            if (checkWolf()) {
+                wolfBgCheck();
+            } else if (checkModeFlg(MODE_SWIMMING)) {
+                swimBgCheck(120.0f);
             }
 
             cXyz pos = current.pos;
             field_0x3528 = speed;
 
-            if (!gzInfo_isMoveLinkActive()) {
-                mLinkAcch.ClrGroundHit();
-                mLinkAcch.CrrPos(dComIfG_Bgsp());
-            }
+            mLinkAcch.ClrGroundHit();
+            mLinkAcch.CrrPos(dComIfG_Bgsp());
 
             if (checkMagneBootsOn()) {
                 current.pos = pos;
@@ -18475,11 +18459,7 @@ int daAlink_c::execute() {
 
             if (checkDeadHP()) {
                 eventInfo.offCondition(fopAcCnd_NOEXEC_e);
-            } else
-            #if DEBUG
-            if (!l_debugMode)
-            #endif
-            {
+            } else if (!l_debugMode) {
                 if (!checkMagneBootsOn()) {
                     f32 gnd_nrm_y;
                     if (mLinkAcch.ChkGroundHit()) {

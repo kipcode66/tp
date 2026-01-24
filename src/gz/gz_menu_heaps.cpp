@@ -92,17 +92,17 @@ gzHeapsMenu_c::HeapTracker_c::HeapTracker_c(int block_max) : mpHeap(NULL),
         mpLargestFree = gzTextBox_allocate();
         mpLargestFree->setFontSize(12.0f, 12.0f);
 
-        mBlocks = new JKRExpHeap::CMemBlock*[mMaxBlocks];
+        mBlocks = new (gzHeap(GZ_GROUP_TRACKER), 4) JKRExpHeap::CMemBlock*[mMaxBlocks];
         for (int i = 0; i < mMaxBlocks; ++i) {
             mBlocks[i] = NULL;
         }
 
-        mAramBlocks = new JKRAramBlock*[mMaxBlocks];
+        mAramBlocks = new (gzHeap(GZ_GROUP_TRACKER), 4) JKRAramBlock*[mMaxBlocks];
         for (int i = 0; i < mMaxBlocks; ++i) {
             mAramBlocks[i] = NULL;
         }
 
-        mStarts = new u32[mMaxBlocks];
+        mStarts = new (gzHeap(GZ_GROUP_TRACKER), 4) u32[mMaxBlocks];
 }
 
 gzHeapsMenu_c::HeapTracker_c::~HeapTracker_c() {
@@ -182,8 +182,9 @@ gzHeapsMenu_c::gzHeapsMenu_c() {
     OSReport("creating gzHeapsMenu_c\n");
     mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
 
+    // Heap tracker allocations (meta - tracking the tracker)
     for (int i = 0; i < HEAP_TRACKER_MAX_e; i++) {
-        mTrackers[i] = new HeapTracker_c(256);
+        mTrackers[i] = new (gzHeap(GZ_GROUP_TRACKER), 4) HeapTracker_c(256);
         mTrackers[i]->mpUsedPercent = gzTextBox_allocate();
         mTrackers[i]->mpUsedPercent->setFontSize(12.0f, 12.0f);
         mTrackers[i]->mpFreePercent = gzTextBox_allocate();
@@ -192,21 +193,59 @@ gzHeapsMenu_c::gzHeapsMenu_c() {
 
     mpLegendUsed = gzTextBox_allocate();
     mpLegendUsed->setFontSize(12.0f, 12.0f);
-    mpLegendUsed->setString("used");
+    mpLegendUsed->setString("game");
 
-    mpLegendMenuUsed = gzTextBox_allocate();
-    mpLegendMenuUsed->setFontSize(12.0f, 12.0f);
-    mpLegendMenuUsed->setString("tpgz used");
+    mpLegendTextBox = gzTextBox_allocate();
+    mpLegendTextBox->setFontSize(12.0f, 12.0f);
+    mpLegendTextBox->setString("textbox");
+
+    mpLegendMenu = gzTextBox_allocate();
+    mpLegendMenu->setFontSize(12.0f, 12.0f);
+    mpLegendMenu->setString("menu");
+
+    mpLegendUI = gzTextBox_allocate();
+    mpLegendUI->setFontSize(12.0f, 12.0f);
+    mpLegendUI->setString("ui");
+
+    mpLegendGraphics = gzTextBox_allocate();
+    mpLegendGraphics->setFontSize(12.0f, 12.0f);
+    mpLegendGraphics->setString("gfx");
+
+    mpLegendTracker = gzTextBox_allocate();
+    mpLegendTracker->setFontSize(12.0f, 12.0f);
+    mpLegendTracker->setString("tracker");
+
+    mpLegendOther = gzTextBox_allocate();
+    mpLegendOther->setFontSize(12.0f, 12.0f);
+    mpLegendOther->setString("other");
 
     mpLegendFree = gzTextBox_allocate();
     mpLegendFree->setFontSize(12.0f, 12.0f);
     mpLegendFree->setString("free");
+
+    mpLegendGzHeap = gzTextBox_allocate();
+    mpLegendGzHeap->setFontSize(12.0f, 12.0f);
+    mpLegendGzHeap->setString("gz");
+
+    mpGroupUsageTitle = gzTextBox_allocate();
+    mpGroupUsageTitle->setFontSize(12.0f, 12.0f);
+    mpGroupUsageTitle->setString("gz memory usage:");
+    for (int i = 0; i < 6; i++) {
+        mpGroupUsageLines[i] = gzTextBox_allocate();
+        mpGroupUsageLines[i]->setFontSize(12.0f, 12.0f);
+        mGroupUsageKB[i] = 0;
+    }
+    mpTextBoxPoolUsage = gzTextBox_allocate();
+    mpTextBoxPoolUsage->setFontSize(12.0f, 12.0f);
 
     mTrackers[HEAP_J2D_e]->mpHeap = mDoExt_getJ2dHeap();
     mTrackers[HEAP_J2D_e]->mpTitle->setString("j2d heap");
     
     mTrackers[HEAP_ARCHIVE_e]->mpHeap = mDoExt_getArchiveHeap();
     mTrackers[HEAP_ARCHIVE_e]->mpTitle->setString("archive heap");
+
+    mTrackers[HEAP_GZ_e]->mpHeap = (JKRExpHeap*)gzGetGzHeap();
+    mTrackers[HEAP_GZ_e]->mpTitle->setString("gz heap");
 
     mTrackers[HEAP_GAME_e]->mpHeap = mDoExt_getGameHeap();
     mTrackers[HEAP_GAME_e]->mpTitle->setString("game heap");
@@ -265,8 +304,19 @@ void gzHeapsMenu_c::_delete() {
     OSReport("deleting gzHeapsMenu_c\n");
 
     gzTextBox_free(mpLegendUsed);
-    gzTextBox_free(mpLegendMenuUsed);
+    gzTextBox_free(mpLegendTextBox);
+    gzTextBox_free(mpLegendMenu);
+    gzTextBox_free(mpLegendUI);
+    gzTextBox_free(mpLegendGraphics);
+    gzTextBox_free(mpLegendTracker);
+    gzTextBox_free(mpLegendOther);
     gzTextBox_free(mpLegendFree);
+    gzTextBox_free(mpLegendGzHeap);
+    gzTextBox_free(mpGroupUsageTitle);
+    for (int i = 0; i < 6; i++) {
+        gzTextBox_free(mpGroupUsageLines[i]);
+    }
+    gzTextBox_free(mpTextBoxPoolUsage);
     for (int i = 0; i < HEAP_TRACKER_MAX_e; i++) {
         gzTextBox_free(mTrackers[i]->mpUsedPercent);
         gzTextBox_free(mTrackers[i]->mpFreePercent);
@@ -306,8 +356,8 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
             delete[] tracker->mAramBlocks;
             delete[] tracker->mStarts;
 
-            tracker->mAramBlocks = new JKRAramBlock*[newMax];
-            tracker->mStarts = new u32[newMax];
+            tracker->mAramBlocks = new (gzHeap(GZ_GROUP_TRACKER), 4) JKRAramBlock*[newMax];
+            tracker->mStarts = new (gzHeap(GZ_GROUP_TRACKER), 4) u32[newMax];
             tracker->mMaxBlocks = newMax;
         }
 
@@ -352,20 +402,11 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
             int newMax = totalCount * 3 / 2;
             if (newMax < 256) newMax = 256;
 
-            JKRHeap* oldHeap = mDoExt_getCurrentHeap();
-            mDoExt_setCurrentHeap(mDoExt_getArchiveHeap());
-
-            JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
-            u8 oldGroupId = archiveHeap->mCurrentGroupId;
-            archiveHeap->mCurrentGroupId = g_gzInfo.mGzGroupID;
-
-            JKRExpHeap::CMemBlock** newBlocks = new JKRExpHeap::CMemBlock*[newMax];
+            JKRExpHeap::CMemBlock** newBlocks = new (gzHeap(GZ_GROUP_TRACKER), 4) JKRExpHeap::CMemBlock*[newMax];
             for (int i = 0; i < newMax; ++i) {
                 newBlocks[i] = NULL;
             }
-            u32* newStarts = new u32[newMax];
-
-            archiveHeap->mCurrentGroupId = oldGroupId;
+            u32* newStarts = new (gzHeap(GZ_GROUP_TRACKER), 4) u32[newMax];
 
             delete[] tracker->mBlocks;
             delete[] tracker->mStarts;
@@ -373,8 +414,6 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
             tracker->mBlocks = newBlocks;
             tracker->mStarts = newStarts;
             tracker->mMaxBlocks = newMax;
-
-            mDoExt_setCurrentHeap(oldHeap);
         }
 
         int idx = 0;
@@ -424,6 +463,48 @@ void gzHeapsMenu_c::updateHeapTracker(HeapTracker_c* tracker) {
     }
 }
 
+void gzHeapsMenu_c::updateGroupUsage() {
+    // Reset counters
+    for (int i = 0; i < 6; i++) {
+        mGroupUsageKB[i] = 0;
+    }
+
+    JKRExpHeap* heap = (JKRExpHeap*)gzGetGzHeap();
+    if (heap == NULL) return;
+
+    heap->lock();
+    for (JKRExpHeap::CMemBlock* block = heap->mHeadUsedList; block != NULL; block = block->getNextBlock()) {
+        if (!block->isValid()) continue;
+        if (!gzIsGzGroupId(block->mGroupId)) continue;
+
+        u32 blockSize = block->getSize() + 0x10;  // include header
+        int idx = -1;
+        switch (block->mGroupId) {
+        case GZ_GROUP_TEXTBOX:  idx = 0; break;
+        case GZ_GROUP_MENU:     idx = 1; break;
+        case GZ_GROUP_UI:       idx = 2; break;
+        case GZ_GROUP_GRAPHICS: idx = 3; break;
+        case GZ_GROUP_TRACKER:  idx = 4; break;
+        default:                idx = 5; break;
+        }
+        if (idx >= 0) {
+            mGroupUsageKB[idx] += blockSize;
+        }
+    }
+    heap->unlock();
+
+    for (int i = 0; i < 6; i++) {
+        mGroupUsageKB[i] = mGroupUsageKB[i] / 1024;
+    }
+
+    mpGroupUsageLines[0]->setStringf("  textbox: %d kb", mGroupUsageKB[0]);
+    mpGroupUsageLines[1]->setStringf("  menu: %d kb", mGroupUsageKB[1]);
+    mpGroupUsageLines[2]->setStringf("  ui: %d kb", mGroupUsageKB[2]);
+    mpGroupUsageLines[3]->setStringf("  gfx: %d kb", mGroupUsageKB[3]);
+    mpGroupUsageLines[4]->setStringf("  tracker: %d kb", mGroupUsageKB[4]);
+    mpGroupUsageLines[5]->setStringf("  other: %d kb", mGroupUsageKB[5]);
+}
+
 void gzHeapsMenu_c::execute() {
     if (g_gzInfo.mInputWaitTimer != 0) {
         g_gzInfo.mInputWaitTimer--;
@@ -433,6 +514,24 @@ void gzHeapsMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (cCt_getFrameCount() % 5 == 0) {
+        // Refresh heap pointers (Zelda heap in particular can change during gameplay)
+        mTrackers[HEAP_J2D_e]->mpHeap = mDoExt_getJ2dHeap();
+        mTrackers[HEAP_ARCHIVE_e]->mpHeap = mDoExt_getArchiveHeap();
+        mTrackers[HEAP_GZ_e]->mpHeap = (JKRExpHeap*)gzGetGzHeap();
+        mTrackers[HEAP_GAME_e]->mpHeap = mDoExt_getGameHeap();
+
+        // Only use Zelda heap if it's valid and distinct from other heaps
+        JKRExpHeap* zeldaHeap = mDoExt_getZeldaHeap();
+
+        if (zeldaHeap != NULL &&
+            zeldaHeap != mTrackers[HEAP_ARCHIVE_e]->mpHeap &&
+            zeldaHeap != mTrackers[HEAP_GAME_e]->mpHeap &&
+            zeldaHeap != mTrackers[HEAP_J2D_e]->mpHeap) {
+            mTrackers[HEAP_ZELDA_e]->mpHeap = zeldaHeap;
+        } else {
+            mTrackers[HEAP_ZELDA_e]->mpHeap = NULL;
+        }
+
         for (int i = 0; i < HEAP_TRACKER_MAX_e; i++) {
             if (mTrackers[i] != NULL) {
                 if (mTrackers[i]->mIsAram && mTrackers[i]->mpAramHeap != NULL) {
@@ -442,6 +541,7 @@ void gzHeapsMenu_c::execute() {
                 }
             }
         }
+        updateGroupUsage();
     }
 
     if (gzPad::getTrigX()) {
@@ -478,6 +578,8 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
         heap_start_addr = (u32)tracker->mpHeap->getStartAddr();
         heap_size = tracker->mpHeap->getSize();
     }
+
+    if (heap_size == 0) return;
 
     // Set up GX for 2D drawing
     Mtx44 proj;
@@ -570,14 +672,34 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
             f32 pixel_w = ((f32)block_byte_size / (f32)heap_size) * width;
 
             u8 r, g, blue, a = 255;
-            if (b->isValid()) {
-                if (b->mGroupId == g_gzInfo.mGzGroupID) {
-                    r = 0; g = 0; blue = 255;
-                } else {
-                    r = 255; g = 0; blue = 0;
+            if (!b->isValid()) {
+                // Free block - green
+                r = 0; g = 255; blue = 0;
+            } else if (gzIsGzGroupId(b->mGroupId)) {
+                // GZ allocation - color by category
+                switch (b->mGroupId) {
+                case GZ_GROUP_TEXTBOX:
+                    r = 0; g = 0; blue = 255;    // Blue
+                    break;
+                case GZ_GROUP_MENU:
+                    r = 0; g = 255; blue = 255;  // Cyan
+                    break;
+                case GZ_GROUP_UI:
+                    r = 255; g = 255; blue = 0;  // Yellow
+                    break;
+                case GZ_GROUP_GRAPHICS:
+                    r = 255; g = 0; blue = 255;  // Magenta
+                    break;
+                case GZ_GROUP_TRACKER:
+                    r = 255; g = 165; blue = 0;  // Orange
+                    break;
+                default:
+                    r = 128; g = 128; blue = 128; // Gray (other gz)
+                    break;
                 }
             } else {
-                r = 0; g = 255; blue = 0;
+                // Game allocation - red
+                r = 255; g = 0; blue = 0;
             }
 
             GXBegin(GX_QUADS, GX_VTXFMT0, 4);
@@ -590,6 +712,70 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
             GXPosition2f32(pixel_x, y + bar_h);
             GXColor4u8(r, g, blue, a);
             GXEnd();
+        }
+
+        // Highlight the GZ heap region on its parent heap with a white border
+        JKRExpHeap* gzHeap = (JKRExpHeap*)gzGetGzHeap();
+        if (gzHeap != NULL && tracker->mpHeap == gzHeap->getParent()) {
+                u32 gz_start = (u32)gzHeap->getStartAddr();
+                u32 gz_size = gzHeap->getSize();
+
+                // Calculate pixel position for GZ heap region
+                u32 gz_start_byte = gz_start - heap_start_addr;
+                f32 gz_pixel_x = x + ((f32)gz_start_byte / (f32)heap_size) * width;
+                f32 gz_pixel_w = ((f32)gz_size / (f32)heap_size) * width;
+
+                // Draw white border around GZ heap region
+                f32 border = 2.0f;
+                u8 br = 255, bg = 255, bb = 255;
+
+                // Top border
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition2f32(gz_pixel_x, y);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w, y);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w, y + border);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x, y + border);
+                GXColor4u8(br, bg, bb, 255);
+                GXEnd();
+
+                // Bottom border
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition2f32(gz_pixel_x, y + bar_h - border);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w, y + bar_h - border);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w, y + bar_h);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x, y + bar_h);
+                GXColor4u8(br, bg, bb, 255);
+                GXEnd();
+
+                // Left border
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition2f32(gz_pixel_x, y);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + border, y);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + border, y + bar_h);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x, y + bar_h);
+                GXColor4u8(br, bg, bb, 255);
+                GXEnd();
+
+                // Right border
+                GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w - border, y);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w, y);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w, y + bar_h);
+                GXColor4u8(br, bg, bb, 255);
+                GXPosition2f32(gz_pixel_x + gz_pixel_w - border, y + bar_h);
+                GXColor4u8(br, bg, bb, 255);
+                GXEnd();
         }
     }
 
@@ -610,19 +796,33 @@ void gzHeapsMenu_c::drawSwatch(f32 x, f32 y, f32 size, u32 color) {
 }
 
 void gzHeapsMenu_c::drawLegend(f32 legend_x, f32 legend_y) {
+    static const int NUM_LEGEND = 9;
     f32 swatch_size = 10.0f;
-    f32 text_offset_x = swatch_size + 5.0f;
+    f32 text_offset_x = swatch_size + 4.0f;
     f32 text_y = legend_y + 10.0f;
+    f32 gap = 8.0f;
 
-    // Item widths: swatch + gap + text width (approximate)
-    // "used" ~24px, "tpgz used" ~54px, "free" ~24px
-    f32 item1_width = swatch_size + 5.0f + 24.0f;   // used
-    f32 item2_width = swatch_size + 5.0f + 54.0f;   // tpgz used
-    f32 gap = 20.0f;  // equal gap between items
+    // Update bounds to get accurate text widths
+    gzTextBox* labels[NUM_LEGEND] = {
+        mpLegendUsed, mpLegendTextBox, mpLegendMenu, mpLegendUI,
+        mpLegendGraphics, mpLegendTracker, mpLegendOther, mpLegendFree, mpLegendGzHeap
+    };
+    u32 colors[NUM_LEGEND] = {
+        COLOR_RED, COLOR_BLUE, COLOR_CYAN, COLOR_YELLOW,
+        COLOR_MAGENTA, COLOR_ORANGE, COLOR_GRAY, COLOR_GREEN, COLOR_WHITE
+    };
 
-    f32 item1_x = legend_x;
-    f32 item2_x = item1_x + item1_width + gap;
-    f32 item3_x = item2_x + item2_width + gap;
+    for (int i = 0; i < NUM_LEGEND; i++) {
+        labels[i]->updateBounds();
+    }
+
+    // Calculate positions dynamically based on text width
+    f32 item_x[NUM_LEGEND];
+    item_x[0] = legend_x;
+    for (int i = 1; i < NUM_LEGEND; i++) {
+        f32 prev_width = swatch_size + text_offset_x + labels[i-1]->getWidth();
+        item_x[i] = item_x[i-1] + prev_width + gap;
+    }
 
     Mtx44 proj;
     MTXOrtho(proj, 0, 480, 0, 640, 0, 1);
@@ -659,17 +859,17 @@ void gzHeapsMenu_c::drawLegend(f32 legend_x, f32 legend_y) {
     GXInvalidateVtxCache();
     GXPixModeSync();
 
-    // Draw swatches at calculated positions
-    drawSwatch(item1_x, legend_y, swatch_size, COLOR_RED);
-    drawSwatch(item2_x, legend_y, swatch_size, COLOR_BLUE);
-    drawSwatch(item3_x, legend_y, swatch_size, COLOR_GREEN);
+    // Draw swatches
+    for (int i = 0; i < NUM_LEGEND; i++) {
+        drawSwatch(item_x[i], legend_y, swatch_size, colors[i]);
+    }
 
     GXFlush();
 
     // Draw text labels
-    mpLegendUsed->draw(item1_x + text_offset_x, text_y, COLOR_WHITE);
-    mpLegendMenuUsed->draw(item2_x + text_offset_x, text_y, COLOR_WHITE);
-    mpLegendFree->draw(item3_x + text_offset_x, text_y, COLOR_WHITE);
+    for (int i = 0; i < NUM_LEGEND; i++) {
+        labels[i]->draw(item_x[i] + text_offset_x, text_y, COLOR_WHITE);
+    }
 }
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -749,8 +949,34 @@ void gzHeapsMenu_c::drawOverview() {
             mpRootChildren->setStringf("  graph heap: %d kb used, %d kb free",
                                         heapUsed / 1024, heapFree / 1024);
             mpRootChildren->draw(mXPos, y_pos, COLOR_WHITE);
+            y_pos += SECTION_SPACING;
         }
     }
+
+    // GZ group usage breakdown
+    u32 totalGzKB = 0;
+    for (int i = 0; i < 6; i++) {
+        totalGzKB += mGroupUsageKB[i];
+    }
+    mpGroupUsageTitle->setStringf("gz memory usage: %d kb total", totalGzKB);
+    mpGroupUsageTitle->draw(mXPos, y_pos, COLOR_WHITE);
+    y_pos += LINE_SPACING;
+
+    // Draw group usage lines in two columns
+    f32 col2_x = mXPos + 150.0f;
+    mpGroupUsageLines[0]->draw(mXPos, y_pos, COLOR_BLUE);
+    mpGroupUsageLines[1]->draw(col2_x, y_pos, COLOR_CYAN);
+    y_pos += LINE_SPACING;
+    mpGroupUsageLines[2]->draw(mXPos, y_pos, COLOR_YELLOW);
+    mpGroupUsageLines[3]->draw(col2_x, y_pos, COLOR_MAGENTA);
+    y_pos += LINE_SPACING;
+    mpGroupUsageLines[4]->draw(mXPos, y_pos, COLOR_ORANGE);
+    mpGroupUsageLines[5]->draw(col2_x, y_pos, COLOR_GRAY);
+    y_pos += SECTION_SPACING;
+
+    // TextBox pool usage
+    mpTextBoxPoolUsage->setStringf("textbox pool: %d / %d used", gzTextBox_getPoolUsed(), gzTextBox_getPoolSize());
+    mpTextBoxPoolUsage->draw(mXPos, y_pos, COLOR_WHITE);
 
     // Draw description
     if (gzInfo_isSubMenuVisible() && gzInfo_getMenuDescription() != NULL) {
@@ -809,7 +1035,7 @@ void gzHeapsMenu_c::draw() {
 
             f32 size_based_width = (max_size_kb > 0) ? ((f32)mTrackers[i]->mTotalSizeKB / (f32)max_size_kb) * MAX_VIS_WIDTH : MAX_VIS_WIDTH;
             f32 block_based_min = (f32)mTrackers[i]->mNumBlocks * MIN_PIXELS_PER_BLOCK;
-            f32 vis_width = MAX(size_based_width, block_based_min);
+            f32 vis_width = size_based_width;
             if (vis_width > MAX_VIS_WIDTH) {
                 vis_width = MAX_VIS_WIDTH;
             }
@@ -818,7 +1044,7 @@ void gzHeapsMenu_c::draw() {
         }
     }
 
-    f32 legend_x = mXPos + 200.0f;
+    f32 legend_x = mXPos;
     f32 legend_y = Y_ALIGNMENT - 65.0f;
     drawLegend(legend_x, legend_y);
 

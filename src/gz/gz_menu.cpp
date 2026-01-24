@@ -388,7 +388,7 @@ void gzMenu_c::finishExecute(int maxLines) {
 }
 
 gzMenu_c::gzMenu_c() : mXPos(0.0f), mpHaihai(NULL) {
-    mpHaihai = new dMeterHaihai_c(3);
+    mpHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
     mpHaihai->setScale(0.04f);
 }
 

@@ -34,91 +34,7 @@ void gzToolsMng_c::executeFastMovement() {
     }
 }
 
-void gzToolsMng_c::executeMoveLink() {
-    daAlink_c* link = daAlink_getAlinkActorClass();
-    if (link == NULL) return;
-
-    u32 combo = g_gzInfo.mSettings.mCommandCombos.mMoveLink;
-    mPrevMoveLink = mMoveLink;
-    bool comboPressed = combo && ((gzPad::getHold() & combo) == combo);
-
-    if (comboPressed && !mMoveLinkComboHeld) {
-        mMoveLink = !mMoveLink;
-        if (mMoveLink) {
-            link->checkWolf() ? link->procWolfWaitInit() : link->procWaitInit();
-            mMoveLinkCamAngle = (f32)link->shape_angle.y / 65536.0f * (2.0f * M_PI);
-        }
-    }
-    mMoveLinkComboHeld = comboPressed;
-
-    if (mMoveLink) {
-        g_drawHIO.mParentAlpha = 0.0f;
-        dComIfGp_getEventManager().setCameraPlay(1);
-        dComIfGp_getEvent()->mEventStatus = 1;
-        link->speed = cXyz::Zero;
-
-        f32 stickX = gzPad::getStickX();
-        f32 stickY = gzPad::getStickY();
-        f32 cstickX = gzPad::getSubStickX();
-        f32 cstickY = gzPad::getSubStickY();
-
-        f32 moveSpeed = 72.0f, rotSpeed = 30.0f;
-        if (gzPad::getHoldZ() && gzPad::getHoldR()) {
-            moveSpeed = 720.0f;
-            rotSpeed = 800.0f;
-        } else if (gzPad::getHoldZ()) {
-            moveSpeed = 180.0f;
-            rotSpeed = 80.0f;
-        }
-
-        if (!gzPad::getHoldL())
-            mMoveLinkCamAngle = (f32)link->shape_angle.y / 65536.0f * (2.0f * M_PI);
-
-        dCamera_c* camera = dCam_getBody();
-        cXyz& actorPos = link->current.pos;
-        cXyz camTarget(actorPos.x, actorPos.y + 200.0f, actorPos.z);
-        cXyz camPos(actorPos.x - 600.0f * sinf(mMoveLinkCamAngle),
-                    actorPos.y + 200.0f,
-                    actorPos.z - 600.0f * cosf(mMoveLinkCamAngle));
-
-        f64 yaw = atan2(camTarget.z - camPos.z, camTarget.x - camPos.x);
-        f64 dy = gzPad::getHoldL() ? 0.0f : cstickY;
-        f64 dx = stickY * cos(yaw) - stickX * sin(yaw);
-        f64 dz = stickY * sin(yaw) + stickX * cos(yaw);
-
-        actorPos.x += moveSpeed * dx;
-        actorPos.y += moveSpeed * dy;
-        actorPos.z += moveSpeed * dz;
-
-        s32 rawCstickX = (s32)(-cstickX * 72.0f);
-        s32 rawCstickY = (s32)(cstickY * 72.0f);
-        s32 iRotSpeed = (s32)rotSpeed;
-        s32 rotDeltaX = gzPad::getHoldL() ? -rawCstickX * iRotSpeed : rawCstickX * iRotSpeed;
-
-        if (gzPad::getHoldL()) {
-            s32 rotDeltaY = -rawCstickY * iRotSpeed;
-            if (rotDeltaY > 32767) rotDeltaY = 32767;
-            if (rotDeltaY < -32768) rotDeltaY = -32768;
-            link->shape_angle.x -= (s16)rotDeltaY;
-        }
-
-        if (rotDeltaX > 32767) rotDeltaX = 32767;
-        if (rotDeltaX < -32768) rotDeltaX = -32768;
-        link->shape_angle.y -= (s16)rotDeltaX;
-        link->current.angle.y = link->shape_angle.y;
-
-        if (camera != NULL)
-            camera->Reset(camTarget, camPos, camera->mFovy, camera->mBank.Val());
-
-        gzClearControllerInput();
-    } else if (mPrevMoveLink) {
-        g_drawHIO.mParentAlpha = 1.0f;
-        dComIfGp_getEventManager().setCameraPlay(0);
-        dComIfGp_getEvent()->mEventStatus = 0;
-        mPrevMoveLink = false;
-        gzClearControllerInput();
-    }
-}
+void gzToolsMng_c::executeMoveLink() {}
 
 void gzToolsMng_c::executeNoSinkSand() {
     daAlink_c* link = daAlink_getAlinkActorClass();
@@ -186,7 +102,6 @@ void gzToolsMng_c::execute() {
         mFastMovement = false;
     }
 
-    if (gzInfo_isMoveLink()) executeMoveLink();
     if (gzInfo_isNoSinkingInSand()) executeNoSinkSand();
     if (gzInfo_isTeleport()) executeTeleport();
 }

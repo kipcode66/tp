@@ -52,7 +52,8 @@ void gzPracticeMenu_c::_delete() {
 
 void gzPracticeMenu_c::execute() {
     if (checkInputWait()) return;
-    if (handleBackButton(gzMainMenu_c::MENU_PRACTICE)) return;
+    // make sure keyboard is exited before handling menu back button
+    if (mMemfileTab.mpKeyboard == NULL && handleBackButton(gzMainMenu_c::MENU_PRACTICE)) return;
 
     gzCursor* l_cursor = gzInfo_getCursor();
     int current_max_line;
@@ -396,7 +397,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::execute() {
         if (isMemfileExist(l_cursor->y)) {
             loadMemfile(l_cursor->y);
         } else {
-            mpKeyboard = new gzKeyboard_c(memfileNameFinishCb, NULL, this);
+            mpKeyboard = new (gzHeap(GZ_GROUP_UI), 4) gzKeyboard_c(memfileNameFinishCb, NULL, this);
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
         }
     }
@@ -404,7 +405,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::execute() {
     if (gzPad::getTrigZ()) {
         if (isMemfileExist(l_cursor->y)) {
             mPendingDeleteSlot = l_cursor->y;
-            mpConfirm = new gzConfirm_c(memfileDeleteConfirmCb, memfileDeleteReturnCb, this, "delete memfile?");
+            mpConfirm = new (gzHeap(GZ_GROUP_UI), 4) gzConfirm_c(memfileDeleteConfirmCb, memfileDeleteReturnCb, this, "delete memfile?");
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
         }
     }
@@ -450,14 +451,14 @@ void gzPracticeMenu_c::gzMemfileTab_c::draw(f32 xPos) {
 void gzPracticeMenu_c::gzSavesTab_c::create() {
     int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum((gzSaveLoaderMng_c::SaveCategory_e)mCategory);
 
-    mpLines = new gzLine*[mMaxLines];
+    mpLines = new (gzHeap(GZ_GROUP_MENU), 4) gzLine*[mMaxLines];
     gzSaveLoaderMng_c::saveMetadata_s ATTRIBUTE_ALIGN(32) metadata;
     for (int i = 0; i < mMaxLines; i++) {
         if (i < save_num) {
             g_gzInfo.mSaveLoaderMng.getSaveMetadata((gzSaveLoaderMng_c::SaveCategory_e)mCategory, i, &metadata);
-            mpLines[i] = new gzLine(metadata.name, metadata.desc);
+            mpLines[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine(metadata.name, metadata.desc);
         } else {
-            mpLines[i] = new gzLine("", "");
+            mpLines[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("", "");
         }
     }
 }

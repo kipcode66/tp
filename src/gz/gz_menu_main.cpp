@@ -38,32 +38,32 @@ gzMainMenu_c::gzMainMenu_c() {
     OSReport("creating gzMainMenu_c\n");
 
     mpMenus[MENU_ACTORS] = NULL;
-    mpMenus[MENU_CHEATS] = new gzCheatsMenu_c();
-    mpMenus[MENU_FLAGS] = new gzFlagsMenu_c();
-    mpMenus[MENU_FRAMEWORK] = new gzFrameworkMenu_c();
-    mpMenus[MENU_HEAPS] = new gzHeapsMenu_c();
+    mpMenus[MENU_CHEATS] = new (gzHeap(GZ_GROUP_MENU), 4) gzCheatsMenu_c();
+    mpMenus[MENU_FLAGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzFlagsMenu_c();
+    mpMenus[MENU_FRAMEWORK] = new (gzHeap(GZ_GROUP_MENU), 4) gzFrameworkMenu_c();
+    mpMenus[MENU_HEAPS] = new (gzHeap(GZ_GROUP_MENU), 4) gzHeapsMenu_c();
     mpMenus[MENU_INVENTORY] = NULL;
-    mpMenus[MENU_MEMORY] = new gzMemoryMenu_c();
-    mpMenus[MENU_PRACTICE] = new gzPracticeMenu_c();
+    mpMenus[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzMemoryMenu_c();
+    mpMenus[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzPracticeMenu_c();
     mpMenus[MENU_SCENE] = NULL;
-    mpMenus[MENU_SETTINGS] = new gzSettingsMenu_c();
-    mpMenus[MENU_TOOLS] = new gzToolsMenu_c();
-    mpMenus[MENU_WARPING] = new gzWarpMenu_c();
+    mpMenus[MENU_SETTINGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzSettingsMenu_c();
+    mpMenus[MENU_TOOLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzToolsMenu_c();
+    mpMenus[MENU_WARPING] = new (gzHeap(GZ_GROUP_MENU), 4) gzWarpMenu_c();
 
-    mpLines[MENU_ACTORS] = new gzLine("actors", "create, read, update or delete actors in the current scene");
-    mpLines[MENU_CHEATS] = new gzLine("cheats", "toggle cheats");
-    mpLines[MENU_FLAGS] = new gzLine("flags", "toggle in-game flags");
-    mpLines[MENU_FRAMEWORK] = new gzLine("framework", "view and edit running processes");
-    mpLines[MENU_HEAPS] = new gzLine("heaps", "see how cooked we are");
-    mpLines[MENU_INVENTORY] = new gzLine("inventory", "set items and equipment");
-    mpLines[MENU_MEMORY] = new gzLine("memory", "view and edit memory");
-    mpLines[MENU_PRACTICE] = new gzLine("practice", "load practice files");
-    mpLines[MENU_SCENE] = new gzLine("scene", "adjust current scene settings");
-    mpLines[MENU_SETTINGS] = new gzLine("settings", "configure tpgz settings");
-    mpLines[MENU_TOOLS] = new gzLine("tools", "use various tools for practice and testing");
-    mpLines[MENU_WARPING] = new gzLine("warping", "warp to any area");
+    mpLines[MENU_ACTORS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("actors", "create, read, update or delete actors in the current scene");
+    mpLines[MENU_CHEATS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("cheats", "toggle cheats");
+    mpLines[MENU_FLAGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("flags", "toggle in-game flags");
+    mpLines[MENU_FRAMEWORK] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("framework", "view and edit running processes");
+    mpLines[MENU_HEAPS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("heaps", "see how cooked we are");
+    mpLines[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("inventory", "set items and equipment");
+    mpLines[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("memory", "view and edit memory");
+    mpLines[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("practice", "load practice files");
+    mpLines[MENU_SCENE] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("scene", "adjust current scene settings");
+    mpLines[MENU_SETTINGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("settings", "configure tpgz settings");
+    mpLines[MENU_TOOLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("tools", "use various tools for practice and testing");
+    mpLines[MENU_WARPING] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("warping", "warp to any area");
 
-    mpMeterHaihai = new dMeterHaihai_c(3);
+    mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
 
     mTransitioning = false;
     mTransitionForward = true;
