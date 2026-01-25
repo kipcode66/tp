@@ -16,7 +16,7 @@ public:
 
     static const int C_MAX = 7;  // checkers tab count
     static const int D_MAX = 7;  // displays tab count
-    static const int L_MAX = 5;  // link tab count
+    static const int L_MAX = 6;  // link tab count
 
     gzToolsMenu_c();
     ~gzToolsMenu_c();

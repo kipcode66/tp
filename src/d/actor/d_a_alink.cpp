@@ -17946,16 +17946,9 @@ int daAlink_c::execute() {
     }
 
     BOOL isTrigDebugMoveInput = FALSE;
-    if (gzInfo_isMoveLink() && daPy_getPlayerActorClass() == this && checkDebugMoveInput()) {
-        isTrigDebugMoveInput = TRUE;
-        if (l_debugMode) {
-            l_debugMode = FALSE;
-        } else {
-            l_debugMode = TRUE;
-        }
-    }
 
-    if (l_debugMode) {
+    if (gzInfo_isMoveLinkActive() && daPy_getPlayerActorClass() == this) {
+        isTrigDebugMoveInput = TRUE;
         if (checkModeFlg(0x400) && !checkBoardRide() && !checkSpinnerRide()) {
             if (checkCanoeRide()) {
                 setSyncCanoePos();
@@ -17970,10 +17963,9 @@ int daAlink_c::execute() {
                 moveSpeed = 50.0f;
             }
 
-            if (mDoCPd_c::getHoldY(PAD_1)) {
-                current.pos.y += moveSpeed;
-            } else if (mDoCPd_c::getHoldX(PAD_1)) {
-                current.pos.y -= moveSpeed;
+            f32 cStickY = mDoCPd_c::getSubStickY(PAD_1);
+            if (cStickY > 0.3f || cStickY < -0.3f) {
+                current.pos.y += moveSpeed * cStickY;
             }
 
             current.pos.x += moveSpeed * mStickValue * cM_ssin(mMoveAngle);
@@ -18459,7 +18451,7 @@ int daAlink_c::execute() {
 
             if (checkDeadHP()) {
                 eventInfo.offCondition(fopAcCnd_NOEXEC_e);
-            } else if (!l_debugMode) {
+            } else if (!gzInfo_isMoveLinkActive()) {
                 if (!checkMagneBootsOn()) {
                     f32 gnd_nrm_y;
                     if (mLinkAcch.ChkGroundHit()) {

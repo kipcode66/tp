@@ -16,6 +16,7 @@ public:
     void execute();
     void executeFastBonkRecovery();
     void executeFastMovement();
+    void executeFreeCam();
     void executeMoveLink();
     void executeNoSinkSand();
     void executeTeleport();
@@ -23,7 +24,6 @@ public:
     bool isMoveLinkActive() const { return mMoveLink; }
 
 private:
-    // for "run once" reenable checks
     SavedCameraState mCamera;
     bool mFastBonkRecovery;
     bool mFastMovement;
@@ -33,6 +33,14 @@ private:
     bool mPrevMoveLink;
     bool mMoveLinkComboHeld;
     f32 mMoveLinkCamAngle;
+    bool mTeleportSaveComboHeld;
+    bool mTeleportLoadComboHeld;
+    bool mFreeCamActive;
+    bool mFreeCamInitialized;
+    bool mFreeCamComboHeld;
+    f32 mFreeCamPitch;
+    f32 mFreeCamYaw;
+    SavedCameraState mFreeCamSavedState;
 };
 
 #endif // GZ_MANAGER_TOOLS_H

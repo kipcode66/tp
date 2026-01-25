@@ -31,6 +31,9 @@ void gzMainMenu_c::startReverseTransition() {
     mMainEndX = mMainVisibleX;
     mSubStartX = mSubVisibleX;
     mSubEndX = mSubHiddenX;
+    if (g_gzInfo.mpCurrentMenu != NULL) {
+        g_gzInfo.mpCurrentMenu->onExitMenu();
+    }
     g_gzInfo.mInputWaitTimer = 2;
 }
 
@@ -140,6 +143,9 @@ void gzMainMenu_c::draw() {
             mXPos = mMainEndX;
             if (g_gzInfo.mpCurrentMenu != NULL) {
                 g_gzInfo.mpCurrentMenu->setXPos(mSubEndX);
+                if (mTransitionForward) {
+                    g_gzInfo.mpCurrentMenu->onEnterMenu();
+                }
             }
         } else {
             mXPos = calcSlidePosition(currentFrame, mTransitionStart, mMainStartX, mMainEndX, mTransitionDuration);

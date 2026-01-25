@@ -36,6 +36,10 @@ struct gzIntOption_s {
     void (*off)(int);
 };
 
+struct ScissorState {
+    u32 left, top, width, height;
+};
+
 class gzMenu_c : public dDlst_base_c {
 public:
     enum gzMenu_Haihai_e {
@@ -55,6 +59,14 @@ public:
     virtual f32 getXPos() { return mXPos; }
     virtual void setXPos(f32 x) { mXPos = x; }
     virtual u8 getHaihaiFlags(int idx) { return ARROW_LEFT | ARROW_RIGHT; }
+
+    void onEnterMenu();
+    void onExitMenu();
+    f32 getCurrentOptionsXOffset();
+    bool isEntered() { return mIsEntered; }
+    void setMenuScissor();
+    void restoreScissor(const ScissorState& saved);
+    ScissorState saveScissor();
 
 protected:
     bool checkInputWait();
@@ -80,6 +92,8 @@ protected:
     void drawLinesWithHaihai(gzLine** lines, s32 numLines, s32 topLine, s32 visibleLines);
 
     f32 mXPos;
+    f32 mOptionsXOffset;
+    bool mIsEntered;
     dMeterHaihai_c* mpHaihai;
 };
 

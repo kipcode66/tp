@@ -586,9 +586,9 @@ void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, 
     MTXOrtho(proj, 0, 480, 0, 640, 0, 1);
     GXSetProjection(proj, GX_ORTHOGRAPHIC);
 
-    // Set viewport and scissor to match ortho
+    // Set viewport and scissor to menu bounds
     GXSetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    GXSetScissor(0, 0, 640, 480);
+    setMenuScissor();
 
     Mtx model;
     MTXIdentity(model);
@@ -829,7 +829,7 @@ void gzHeapsMenu_c::drawLegend(f32 legend_x, f32 legend_y) {
     GXSetProjection(proj, GX_ORTHOGRAPHIC);
 
     GXSetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    GXSetScissor(0, 0, 640, 480);
+    setMenuScissor();
 
     Mtx model;
     MTXIdentity(model);

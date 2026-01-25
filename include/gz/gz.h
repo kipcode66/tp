@@ -77,6 +77,7 @@ struct gzCommandCombos_s {
     u32 mMoonJump;
     u32 mTeleportSave;
     u32 mTeleportLoad;
+    u32 mFreeCamToggle;
 };
 
 // Automation state for Python scripts to read via memory
@@ -143,6 +144,7 @@ struct gzSettings_s {
     bool mStageInfo;
     bool mTeleport;
     bool mTimer;
+    bool mFreeCam;
 };
 
 // tpgz config file header
@@ -256,6 +258,7 @@ public:
     bool isSwapEquips() const { return mSettings.mSwapEquips; }
     bool isTeleport() { return mSettings.mTeleport; }
     bool isTimer() { return mSettings.mTimer; }
+    bool isFreeCam() { return mSettings.mFreeCam; }
     bool isTransformAnywhere() { return mSettings.mTransformAnywhere; }
     bool isTransformWarp() { return dComIfGs_isEventBit(0x0D04);}
     bool isUniversalMapDelay() { return mSettings.mUniversalMapDelay; }
@@ -316,6 +319,7 @@ public:
     void setTeleport(bool i_opt) { mSettings.mTeleport = i_opt; }
     void setTextColor(u32 i_textColor) { mSettings.mTextColor = i_textColor; }
     void setTimer(bool i_opt) { mSettings.mTimer = i_opt; }
+    void setFreeCam(bool i_opt) { mSettings.mFreeCam = i_opt; }
     void setTransformAnywhere(bool i_opt) { mSettings.mTransformAnywhere = i_opt; }
     void setTransformWarp(bool i_opt) { i_opt ? dComIfGs_onEventBit(0x0D04) : dComIfGs_offEventBit(0x0D04); }
     void setUniversalMapDelay(bool i_opt) { mSettings.mUniversalMapDelay = i_opt; }
@@ -617,6 +621,7 @@ inline bool gzInfo_isFastBonkRecovery() { return g_gzInfo.isFastBonkRecovery(); 
 inline bool gzInfo_isFastMovement() { return g_gzInfo.isFastMovement(); }
 inline bool gzInfo_isNoSinkingInSand() { return g_gzInfo.isNoSinkingInSand(); }
 inline bool gzInfo_isTeleport() { return g_gzInfo.isTeleport(); }
+inline bool gzInfo_isFreeCam() { return g_gzInfo.isFreeCam(); }
 
 
 inline void gzInfo_setBossFlag(u8 value) { g_gzInfo.setBossFlag(value); }
@@ -711,6 +716,7 @@ inline void gzInfo_offSuperClawshot() { g_gzInfo.setSuperClawshot(false); }
 inline void gzInfo_offSwapEquips() { g_gzInfo.setSwapEquips(false); }
 inline void gzInfo_offTeleport() { g_gzInfo.setTeleport(false); }
 inline void gzInfo_offTimer() { g_gzInfo.setTimer(false); }
+inline void gzInfo_offFreeCam() { g_gzInfo.setFreeCam(false); }
 inline void gzInfo_offTransformAnywhere() { g_gzInfo.setTransformAnywhere(false); }
 inline void gzInfo_offTransformWarp() { g_gzInfo.setTransformWarp(false); }
 inline void gzInfo_offUniversalMapDelay() { g_gzInfo.setUniversalMapDelay(false); }
@@ -797,6 +803,7 @@ inline void gzInfo_onSuperClawshot() { g_gzInfo.setSuperClawshot(true); }
 inline void gzInfo_onSwapEquips() { g_gzInfo.setSwapEquips(true); }
 inline void gzInfo_onTeleport() { g_gzInfo.setTeleport(true); }
 inline void gzInfo_onTimer() { g_gzInfo.setTimer(true); }
+inline void gzInfo_onFreeCam() { g_gzInfo.setFreeCam(true); }
 inline void gzInfo_onTransformAnywhere() { g_gzInfo.setTransformAnywhere(true); }
 inline void gzInfo_onTransformWarp() { g_gzInfo.setTransformWarp(true); }
 inline void gzInfo_onUniversalMapDelay() { g_gzInfo.setUniversalMapDelay(true); }
@@ -851,6 +858,14 @@ namespace gzPad {
 
 int gzPrint(int x, int y, u32 color, char const* string, ...);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
+
+inline bool gzCheckComboToggle(u32 combo, bool& wasHeld) {
+    u32 rawHold = mDoCPd_c::getHold(0);
+    bool comboHeld = combo && (rawHold & combo) == combo;
+    bool shouldToggle = comboHeld && !wasHeld;
+    wasHeld = comboHeld;
+    return shouldToggle;
+}
 
 // Check if a group ID belongs to gz
 inline bool gzIsGzGroupId(u8 groupId) {

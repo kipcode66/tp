@@ -19,6 +19,7 @@ private:
     char mCurrentStage[8];
     u8 mCurrentRoom;
     u8 mCurrentSpawn;
+    bool mOwnsTextureData;
 };
 
 #endif // GZ_WARP_PREVIEW_H

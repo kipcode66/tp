@@ -41,7 +41,7 @@ void gzMenu_c::drawLines(gzTextBox** lines, gzTextBox** lineOptions, u8 haihaiFl
     f32 lineY_start = g_gzInfo.mBackgroundYPos + 78.0f;
     f32 line_spacing = g_gzInfo.mBackgroundHeight / 20;
 
-    f32 optionX = mXPos - 20.0f;
+    f32 optionX = mXPos + getCurrentOptionsXOffset();
     f32 haihaiX = optionX + 305.0f;
 
     u32 cursorColor = gzInfo_getCursorColor();
@@ -70,7 +70,7 @@ void gzMenu_c::drawLines(gzLine** lines, s32 numLines, u8 haihai_flags, s32 topL
     f32 lineX = mXPos;
     f32 lineY_start = g_gzInfo.mBackgroundYPos + 78.0f;
     f32 line_spacing = g_gzInfo.mBackgroundHeight / 20;
-    f32 optionX = mXPos - 20.0f;
+    f32 optionX = mXPos + getCurrentOptionsXOffset();
     f32 haihaiX = optionX + 305.0f;
     u32 cursorColor = gzInfo_getCursorColor();
     s32 endLine = topLine + visibleLines;
@@ -247,7 +247,7 @@ void gzMenu_c::drawLinesWithHaihai(gzLine** lines, s32 numLines, s32 topLine, s3
     f32 lineX = mXPos;
     f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
     f32 line_spacing = gzMenuLayout::LINE_SPACING;
-    f32 optionX = mXPos + gzMenuLayout::OPTIONS_X_OFFSET;
+    f32 optionX = mXPos + getCurrentOptionsXOffset();
     f32 haihaiX = optionX + gzMenuLayout::HAIHAI_X_OFFSET;
     u32 cursorColor = gzInfo_getCursorColor();
     s32 endLine = topLine + visibleLines;
@@ -387,9 +387,23 @@ void gzMenu_c::finishExecute(int maxLines) {
     mpHaihai->_execute(0);
 }
 
-gzMenu_c::gzMenu_c() : mXPos(0.0f), mpHaihai(NULL) {
+gzMenu_c::gzMenu_c() : mXPos(0.0f), mOptionsXOffset(gzMenuLayout::OPTIONS_X_OFFSET),
+                       mIsEntered(false), mpHaihai(NULL) {
+    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
     mpHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
     mpHaihai->setScale(0.04f);
+}
+
+void gzMenu_c::onEnterMenu() {
+    mIsEntered = true;
+}
+
+void gzMenu_c::onExitMenu() {
+    mIsEntered = false;
+}
+
+f32 gzMenu_c::getCurrentOptionsXOffset() {
+    return mOptionsXOffset;
 }
 
 gzMenu_c::~gzMenu_c() {
@@ -397,4 +411,23 @@ gzMenu_c::~gzMenu_c() {
         delete mpHaihai;
         mpHaihai = NULL;
     }
+}
+
+gzMenu_c::ScissorState gzMenu_c::saveScissor() {
+    ScissorState state;
+    GXGetScissor(&state.left, &state.top, &state.width, &state.height);
+    return state;
+}
+
+void gzMenu_c::setMenuScissor() {
+    static const u32 PADDING = 8;
+    u32 left = (u32)g_gzInfo.mBackgroundXPos + PADDING;
+    u32 top = (u32)g_gzInfo.mBackgroundYPos + PADDING;
+    u32 width = (u32)g_gzInfo.mBackgroundWidth - (PADDING * 2);
+    u32 height = (u32)g_gzInfo.mBackgroundHeight - (PADDING * 2);
+    GXSetScissor(left, top, width, height);
+}
+
+void gzMenu_c::restoreScissor(const ScissorState& saved) {
+    GXSetScissor(saved.left, saved.top, saved.width, saved.height);
 }

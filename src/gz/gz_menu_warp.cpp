@@ -17,13 +17,13 @@ static const u8 DEFAULT_LAYER = 0xFF;
 static const u32 HEADER_SIZE = 8;
 
 gzWarpMenu_c::gzWarpMenu_c() {
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mOptionsXOffset = -40.0f;
 
-    mpLines[WARP_TYPE] = new gzListOptionLine("type:", "stage type category");
-    mpLines[WARP_STAGE] = new gzListOptionLine("stage:", "current stage");
-    mpLines[WARP_ROOM] = new gzListOptionLine("room:", "current room");
-    mpLines[WARP_SPAWN] = new gzListOptionLine("spawn:", "spawn point");
-    mpLines[WARP_LAYER] = new gzListOptionLine("layer:", "layer override");
+    mpLines[WARP_TYPE] = new gzListOptionLine("type", "stage type category");
+    mpLines[WARP_STAGE] = new gzListOptionLine("stage", "current stage");
+    mpLines[WARP_ROOM] = new gzListOptionLine("room", "current room");
+    mpLines[WARP_SPAWN] = new gzListOptionLine("spawn", "spawn point");
+    mpLines[WARP_LAYER] = new gzListOptionLine("layer", "layer override");
     mpLines[WARP_EXECUTE] = new gzLine("warp", "execute warp");
 
     mpTypeData = NULL;
@@ -343,9 +343,9 @@ void gzWarpMenu_c::draw() {
 
     drawLines((gzLine**)mpLines, LINE_NUM, haihai_flags, 0, LINE_NUM);
 
-    if (mpCurrentStage && mpCurrentRoom) {
+    if (isEntered() && mpCurrentStage && mpCurrentRoom) {
         u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
         mPreview.loadPreview(mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
-        mPreview.draw(400.0f, 100.0f, 192.0f, 144.0f);
+        mPreview.draw(200.0f, 200.0f, 256.0f, 192.0f);
     }
 }

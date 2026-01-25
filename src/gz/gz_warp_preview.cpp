@@ -1,13 +1,14 @@
 #include "gz/gz_warp_preview.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
+#include "d/d_com_inf_game.h"
 #include "m_Do/m_Do_ext.h"
 #include "dolphin/dvd.h"
 #include <cstring>
 #include <cstdio>
 
-// 256x192 CMPR format = 256 * 192 * 0.5 bytes/pixel = 24576 bytes
-// Add BTI header size (32 bytes) = 24608, round up to 25600 for safety
-static const u32 PREVIEW_BUFFER_SIZE = 25600;
+// 512x384 CMPR format = 512 * 384 * 0.5 bytes/pixel = 98304 bytes
+// Add BTI header size (32 bytes) = 98336, round up to 99000
+static const u32 PREVIEW_BUFFER_SIZE = 99000;
 
 static bool tryLoadPreviewFile(const char* path, void* buffer, u32 maxSize) {
     DVDFileInfo fileInfo;
@@ -23,7 +24,8 @@ static bool tryLoadPreviewFile(const char* path, void* buffer, u32 maxSize) {
 }
 
 gzWarpPreview_c::gzWarpPreview_c()
-    : mpPicture(NULL), mpTextureData(NULL), mCurrentRoom(0xFF), mCurrentSpawn(0xFF) {
+    : mpPicture(NULL), mpTextureData(NULL), mCurrentRoom(0xFF), mCurrentSpawn(0xFF),
+      mOwnsTextureData(false) {
     mCurrentStage[0] = '\0';
 }
 
@@ -34,8 +36,8 @@ gzWarpPreview_c::~gzWarpPreview_c() {
 void gzWarpPreview_c::loadPreview(const char* stageId, u8 roomId, u8 spawnId) {
     if (stageId == NULL) return;
 
-    // Skip if already attempted for this exact location (whether successful or not)
-    if (strcmp(mCurrentStage, stageId) == 0 && mCurrentRoom == roomId && mCurrentSpawn == spawnId)
+    // Skip if already attempted for this stage/room (whether successful or not)
+    if (strcmp(mCurrentStage, stageId) == 0 && mCurrentRoom == roomId)
         return;
 
     unloadPreview();
@@ -51,14 +53,25 @@ void gzWarpPreview_c::loadPreview(const char* stageId, u8 roomId, u8 spawnId) {
     if (mpTextureData == NULL) return;
 
     char path[64];
-    snprintf(path, sizeof(path), "/gz/previews/%s_%02d_%02d.bti", stageId, roomId, spawnId);
+    snprintf(path, sizeof(path), "/gz/previews/%s_%02d.bti", stageId, roomId);
     bool loaded = tryLoadPreviewFile(path, mpTextureData, PREVIEW_BUFFER_SIZE);
 
     if (loaded) {
         mpPicture = new J2DPicture((ResTIMG*)mpTextureData);
+        mOwnsTextureData = true;
     } else {
         archiveHeap->free(mpTextureData);
         mpTextureData = NULL;
+
+        // Use tt_block8x8.bti from Main2D archive as placeholder
+        ResTIMG* fallbackTex =
+            (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_block8x8.bti");
+        if (fallbackTex != NULL) {
+            mpPicture = new J2DPicture(fallbackTex);
+            mpPicture->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
+                                     JUtility::TColor(48, 48, 48, 255));
+            mOwnsTextureData = false;
+        }
     }
 }
 
@@ -67,11 +80,12 @@ void gzWarpPreview_c::unloadPreview() {
         delete mpPicture;
         mpPicture = NULL;
     }
-    if (mpTextureData != NULL) {
+    if (mpTextureData != NULL && mOwnsTextureData) {
         JKRExpHeap* archiveHeap = mDoExt_getArchiveHeap();
         archiveHeap->free(mpTextureData);
-        mpTextureData = NULL;
     }
+    mpTextureData = NULL;
+    mOwnsTextureData = false;
     mCurrentStage[0] = '\0';
     mCurrentRoom = 0xFF;
     mCurrentSpawn = 0xFF;

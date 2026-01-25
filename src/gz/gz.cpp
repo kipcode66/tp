@@ -14,6 +14,8 @@
 #include "m_Do/m_Do_MemCard.h"
 #include "dolphin/card.h"
 #include "dolphin/gx/GXTexture.h"
+#include "dolphin/gx/GXCull.h"
+#include "dolphin/gx/GXGet.h"
 
 class gzCapture_c : public dDlst_base_c {
 public:
@@ -149,6 +151,7 @@ void gzInfo_c::loadDefaultSettings() {
     mSettings.mCommandCombos.mMoonJump = (PAD_TRIGGER_R | PAD_BUTTON_A);
     mSettings.mCommandCombos.mTeleportSave = (PAD_TRIGGER_R | PAD_BUTTON_UP);
     mSettings.mCommandCombos.mTeleportLoad = (PAD_TRIGGER_R | PAD_BUTTON_DOWN);
+    mSettings.mCommandCombos.mFreeCamToggle = (PAD_TRIGGER_Z | PAD_BUTTON_B | PAD_BUTTON_A);
     mSettings.mDropShadows = true;
     mSettings.mMenuPausesGame = true;
     setCursorType(1);
@@ -191,8 +194,8 @@ int gzInfo_c::_create() {
     ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
     mpIcon = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(icon);
 
-    void* buf = JKRHeap::alloc(108960, 32, gzHeap(GZ_GROUP_GRAPHICS));
-    gzDVDLoadFile("/gz/bg.bti", buf, 108960, 0);
+    void* buf = JKRHeap::alloc(54432, 32, gzHeap(GZ_GROUP_GRAPHICS));
+    gzDVDLoadFile("/gz/bg.bti", buf, 54432, 0);
     ResTIMG* bg = (ResTIMG*)buf;
     mpBackground = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(bg);
 
@@ -378,6 +381,9 @@ int gzInfo_c::execute() {
     return 1;
 }
 
+// Scissor padding to prevent drawing right up to menu edge
+static const u32 SCISSOR_PADDING = 8;
+
 int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
@@ -387,12 +393,26 @@ int gzInfo_c::draw() {
     }
 
     if (mDisplay) {
-        if (mpBackground != NULL) mpBackground->draw(mBackgroundXPos, mBackgroundYPos, mBackgroundWidth, mBackgroundHeight, false, false, false);
+        if (mpBackground != NULL) {
+            mpBackground->setAlpha(isMenuPausesGame() ? 255 : 128);
+            mpBackground->draw(mBackgroundXPos, mBackgroundYPos, mBackgroundWidth, mBackgroundHeight, false, false, false);
+        }
         if (mpIcon != NULL) mpIcon->draw(mIconXPos, mIconYPos, mIconWidth, mIconHeight, false, false, false);
         if (mpHeader != NULL) mpHeader->draw(mHeaderXPos, mHeaderYPos, mSettings.mTextColor);
+
+        u32 savedLeft, savedTop, savedWidth, savedHeight;
+        GXGetScissor(&savedLeft, &savedTop, &savedWidth, &savedHeight);
+        GXSetScissor((u32)mBackgroundXPos + SCISSOR_PADDING,
+                     (u32)mBackgroundYPos + SCISSOR_PADDING,
+                     (u32)mBackgroundWidth - (SCISSOR_PADDING * 2),
+                     (u32)mBackgroundHeight - (SCISSOR_PADDING * 2));
+
         // Draw menus directly to avoid issues with deferred rendering
         if (mpMainMenu != NULL) mpMainMenu->draw();
         if (mpCurrentMenu != NULL) mpCurrentMenu->draw();
+
+        // Restore scissor
+        GXSetScissor(savedLeft, savedTop, savedWidth, savedHeight);
     }
 
     // Draw any notifications
@@ -409,6 +429,15 @@ void gzSetup2DContext() {
     static J2DOrthoGraph sGzOrtho(0.0f, 0.0f, 608.0f, 448.0f, -1.0f, 1.0f);
     sGzOrtho.setPort();
     dComIfGp_setCurrentGrafPort(&sGzOrtho);
+
+    // Restore menu scissor after J2D setup (J2D resets scissor)
+    if (g_gzInfo.mDisplay) {
+        u32 left = (u32)g_gzInfo.mBackgroundXPos + SCISSOR_PADDING;
+        u32 top = (u32)g_gzInfo.mBackgroundYPos + SCISSOR_PADDING;
+        u32 width = (u32)g_gzInfo.mBackgroundWidth - (SCISSOR_PADDING * 2);
+        u32 height = (u32)g_gzInfo.mBackgroundHeight - (SCISSOR_PADDING * 2);
+        GXSetScissor(left, top, width, height);
+    }
 }
 
 int gzInfo_c::storeSettingsMemcard() {
