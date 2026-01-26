@@ -56,6 +56,7 @@ public:
     virtual ~gzWarpMenu_c();
 
     virtual void _delete();
+    virtual void onEnterMenu();
     virtual void execute();
     virtual void draw();
 

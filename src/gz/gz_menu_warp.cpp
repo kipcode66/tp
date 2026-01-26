@@ -315,6 +315,11 @@ void gzWarpMenu_c::execute() {
     finishExecute(LINE_NUM);
 }
 
+void gzWarpMenu_c::onEnterMenu() {
+    gzMenu_c::onEnterMenu();
+    mPreview.startAsyncPreload();
+}
+
 void gzWarpMenu_c::draw() {
     if (!mpTypeData) {
         loadTypeFile(mTypeIdx);
@@ -343,8 +348,10 @@ void gzWarpMenu_c::draw() {
     drawLines((gzLine**)mpLines, LINE_NUM, haihai_flags, 0, LINE_NUM);
 
     if (isEntered() && mpCurrentStage && mpCurrentRoom) {
-        u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
-        mPreview.loadPreview(mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
+        if (!mPreview.hasRealPreview() && mPreview.isPreloadComplete()) {
+            mPreview.forceReload();
+        }
+        mPreview.loadPreview(mTypeIdx, mpCurrentStage->stage_id, mpCurrentRoom->room_id);
 
         f32 previewX = 140.0f;
         f32 previewY = 200.0f;

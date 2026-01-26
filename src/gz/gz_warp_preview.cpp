@@ -1,77 +1,219 @@
 #include "gz/gz_warp_preview.h"
 #include "gz/gz.h"
 #include "d/d_com_inf_game.h"
-#include "dolphin/dvd.h"
 #include <cstring>
 #include <cstdio>
 
-// 512x384 CMPR format = 512 * 384 * 0.5 bytes/pixel = 98304 bytes
-// Add BTI header size (32 bytes) = 98336, round up to 99000
-static const u32 PREVIEW_BUFFER_SIZE = 99000;
-
-static bool tryLoadPreviewFile(const char* path, void* buffer, u32 maxSize) {
-    DVDFileInfo fileInfo;
-    if (!DVDOpen(path, &fileInfo)) return false;
-
-    // Read only actual file size, not buffer size
-    u32 readSize = fileInfo.length;
-    if (readSize > maxSize) readSize = maxSize;
-
-    s32 bytesRead = DVDReadPrio(&fileInfo, buffer, readSize, 0, 2);
-    DVDClose(&fileInfo);
-    return bytesRead > 0;
-}
+static const char* TYPE_NAMES[] = {"cave", "dungeon", "interior", "overworld", "special"};
+static const u32 MAX_INDEX_SIZE = 8192;
 
 gzWarpPreview_c::gzWarpPreview_c()
-    : mpPicture(NULL), mpTextureData(NULL), mCurrentRoom(0xFF), mCurrentSpawn(0xFF),
-      mOwnsTextureData(false) {
+    : mpPicture(NULL), mpTextureData(NULL), mCurrentRoom(0xFF), mCurrentType(-1),
+      mOwnsTextureData(false), mIndexesLoaded(false), mAsyncLoadIdx(-1) {
     mCurrentStage[0] = '\0';
+    for (int i = 0; i < PREVIEW_NUM_TYPES; i++) {
+        mpIndexes[i] = NULL;
+        mIndexSizes[i] = 0;
+        mAsyncPending[i] = false;
+    }
 }
 
 gzWarpPreview_c::~gzWarpPreview_c() {
     unloadPreview();
 }
 
-void gzWarpPreview_c::loadPreview(const char* stageId, u8 roomId, u8 spawnId) {
-    if (stageId == NULL) return;
+void gzWarpPreview_c::unloadIndexes() {
+    for (int i = 0; i < PREVIEW_NUM_TYPES; i++) {
+        if (mAsyncPending[i]) {
+            DVDCancel(&mFileInfos[i].cb);
+            DVDClose(&mFileInfos[i]);
+            mAsyncPending[i] = false;
+        }
+        if (mpIndexes[i] != NULL) {
+            JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+            heap->free(mpIndexes[i]);
+            mpIndexes[i] = NULL;
+        }
+        mIndexSizes[i] = 0;
+    }
+    mIndexesLoaded = false;
+    mAsyncLoadIdx = -1;
+}
 
-    // Skip if already attempted for this stage/room (whether successful or not)
-    if (strcmp(mCurrentStage, stageId) == 0 && mCurrentRoom == roomId)
+void gzWarpPreview_c::startAsyncPreload() {
+    if (mIndexesLoaded || mAsyncLoadIdx >= 0) return;
+
+    JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+    mAsyncLoadIdx = 0;
+
+    for (int i = 0; i < PREVIEW_NUM_TYPES; i++) {
+        char path[64];
+        snprintf(path, sizeof(path), "/gz/previews/%s.bin", TYPE_NAMES[i]);
+
+        if (!DVDOpen(path, &mFileInfos[i])) {
+            continue;
+        }
+
+        u32 readSize = (mFileInfos[i].length < MAX_INDEX_SIZE) ? mFileInfos[i].length : MAX_INDEX_SIZE;
+        readSize = (readSize + 31) & ~31;
+
+        mpIndexes[i] = (u8*)heap->alloc(readSize, 32);
+        if (mpIndexes[i] == NULL) {
+            DVDClose(&mFileInfos[i]);
+            continue;
+        }
+
+        mIndexSizes[i] = readSize;
+        mAsyncPending[i] = true;
+        DVDReadAsync(&mFileInfos[i], mpIndexes[i], readSize, 0, NULL);
+    }
+}
+
+void gzWarpPreview_c::finishAsyncLoad(int idx) {
+    if (!mAsyncPending[idx]) return;
+
+    DVDClose(&mFileInfos[idx]);
+    mAsyncPending[idx] = false;
+
+    if (mpIndexes[idx] == NULL) return;
+
+    gzPreviewHeader_s* header = (gzPreviewHeader_s*)mpIndexes[idx];
+    if (header->magic != PREVIEW_MAGIC || header->version != PREVIEW_VERSION) {
+        JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+        heap->free(mpIndexes[idx]);
+        mpIndexes[idx] = NULL;
+        mIndexSizes[idx] = 0;
+    }
+}
+
+bool gzWarpPreview_c::isPreloadComplete() {
+    if (mIndexesLoaded) return true;
+    if (mAsyncLoadIdx < 0) return false;
+
+    bool allDone = true;
+    for (int i = 0; i < PREVIEW_NUM_TYPES; i++) {
+        if (mAsyncPending[i]) {
+            s32 status = DVDGetFileInfoStatus(&mFileInfos[i]);
+            if (status == DVD_STATE_END) {
+                finishAsyncLoad(i);
+            } else if (status != DVD_STATE_FATAL_ERROR) {
+                allDone = false;
+            } else {
+                finishAsyncLoad(i);
+            }
+        }
+    }
+
+    if (allDone) {
+        mIndexesLoaded = true;
+        mAsyncLoadIdx = -1;
+    }
+    return allDone;
+}
+
+u32 gzWarpPreview_c::findBtiOffset(int typeIdx, const char* stageId, u8 roomId) {
+    if (typeIdx < 0 || typeIdx >= PREVIEW_NUM_TYPES) return 0;
+    if (mpIndexes[typeIdx] == NULL) return 0;
+
+    u8* index = mpIndexes[typeIdx];
+    u32 indexSize = mIndexSizes[typeIdx];
+
+    gzPreviewHeader_s* header = (gzPreviewHeader_s*)index;
+    gzPreviewStageIndex_s* stages = (gzPreviewStageIndex_s*)(index + sizeof(gzPreviewHeader_s));
+
+    for (int i = 0; i < header->num_stages; i++) {
+        if (strncmp(stages[i].stage_id, stageId, 7) == 0) {
+            u32 roomTableOffset = stages[i].room_table_offset;
+            if (roomTableOffset >= indexSize) return 0;
+
+            gzPreviewRoomTable_s* roomTable = (gzPreviewRoomTable_s*)(index + roomTableOffset);
+            gzPreviewRoomEntry_s* rooms = (gzPreviewRoomEntry_s*)(index + roomTableOffset + sizeof(gzPreviewRoomTable_s));
+
+            for (int j = 0; j < roomTable->num_rooms; j++) {
+                if (rooms[j].room_id == roomId) {
+                    return rooms[j].bti_offset;
+                }
+            }
+            return 0;
+        }
+    }
+    return 0;
+}
+
+void gzWarpPreview_c::loadFallback(JKRHeap* heap) {
+    ResTIMG* fallbackTex =
+        (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_block8x8.bti");
+    if (fallbackTex != NULL) {
+        mpPicture = new (heap, 4) J2DPicture(fallbackTex);
+        mpPicture->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
+                                 JUtility::TColor(48, 48, 48, 255));
+        mOwnsTextureData = false;
+    }
+}
+
+void gzWarpPreview_c::forceReload() {
+    mCurrentType = -1;
+    mCurrentStage[0] = '\0';
+    mCurrentRoom = 0xFF;
+}
+
+void gzWarpPreview_c::loadPreview(int typeIdx, const char* stageId, u8 roomId) {
+    if (stageId == NULL || typeIdx < 0 || typeIdx >= PREVIEW_NUM_TYPES) return;
+
+    if (mCurrentType == typeIdx && strcmp(mCurrentStage, stageId) == 0 && mCurrentRoom == roomId)
         return;
 
-    unloadPreview();
+    if (mpPicture != NULL) {
+        delete mpPicture;
+        mpPicture = NULL;
+    }
+    if (mpTextureData != NULL && mOwnsTextureData) {
+        JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+        heap->free(mpTextureData);
+    }
+    mpTextureData = NULL;
+    mOwnsTextureData = false;
 
-    // Track what we're attempting to load (even if it fails)
     strncpy(mCurrentStage, stageId, 7);
     mCurrentStage[7] = '\0';
     mCurrentRoom = roomId;
-    mCurrentSpawn = spawnId;
+    mCurrentType = typeIdx;
 
     JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
-    mpTextureData = heap->alloc(PREVIEW_BUFFER_SIZE, 32);
-    if (mpTextureData == NULL) return;
+
+    if (!isPreloadComplete()) {
+        loadFallback(heap);
+        return;
+    }
+
+    u32 btiOffset = findBtiOffset(typeIdx, stageId, roomId);
+    if (btiOffset == 0) {
+        loadFallback(heap);
+        return;
+    }
+
+    mpTextureData = heap->alloc(PREVIEW_BTI_SIZE, 32);
+    if (mpTextureData == NULL) {
+        loadFallback(heap);
+        return;
+    }
 
     char path[64];
-    snprintf(path, sizeof(path), "/gz/previews/%s_%02d.bti", stageId, roomId);
-    bool loaded = tryLoadPreviewFile(path, mpTextureData, PREVIEW_BUFFER_SIZE);
+    snprintf(path, sizeof(path), "/gz/previews/%s.bin", TYPE_NAMES[typeIdx]);
 
-    if (loaded) {
-        mpPicture = new (heap, 4) J2DPicture((ResTIMG*)mpTextureData);
-        mOwnsTextureData = true;
-    } else {
+    DVDFileInfo fileInfo;
+    if (!DVDOpen(path, &fileInfo)) {
         heap->free(mpTextureData);
         mpTextureData = NULL;
-
-        // Use tt_block8x8.bti from Main2D archive as placeholder
-        ResTIMG* fallbackTex =
-            (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_block8x8.bti");
-        if (fallbackTex != NULL) {
-            mpPicture = new (heap, 4) J2DPicture(fallbackTex);
-            mpPicture->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
-                                     JUtility::TColor(48, 48, 48, 255));
-            mOwnsTextureData = false;
-        }
+        loadFallback(heap);
+        return;
     }
+
+    DVDReadPrio(&fileInfo, mpTextureData, PREVIEW_BTI_SIZE, btiOffset, 2);
+    DVDClose(&fileInfo);
+
+    mpPicture = new (heap, 4) J2DPicture((ResTIMG*)mpTextureData);
+    mOwnsTextureData = true;
 }
 
 void gzWarpPreview_c::unloadPreview() {
@@ -87,7 +229,9 @@ void gzWarpPreview_c::unloadPreview() {
     mOwnsTextureData = false;
     mCurrentStage[0] = '\0';
     mCurrentRoom = 0xFF;
-    mCurrentSpawn = 0xFF;
+    mCurrentType = -1;
+
+    unloadIndexes();
 }
 
 void gzWarpPreview_c::draw(f32 x, f32 y, f32 w, f32 h) {

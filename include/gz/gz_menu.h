@@ -78,8 +78,8 @@ public:
     virtual u8 getHaihaiFlags(int idx) { return ARROW_LEFT | ARROW_RIGHT; }
     virtual gzButtonHints_s getButtonHints();
 
-    void onEnterMenu();
-    void onExitMenu();
+    virtual void onEnterMenu();
+    virtual void onExitMenu();
     f32 getCurrentOptionsXOffset();
     bool isEntered() { return mIsEntered; }
     void setMenuScissor();
