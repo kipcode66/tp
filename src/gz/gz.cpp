@@ -2,6 +2,7 @@
 
 #include "gz/gz.h"
 #include "gz/gz_menu_main.h"
+#include "SSystem/SComponent/c_counter.h"
 #include "gz/gz_utility_notification.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_drawlist.h"
@@ -16,6 +17,14 @@
 #include "dolphin/gx/GXTexture.h"
 #include "dolphin/gx/GXCull.h"
 #include "dolphin/gx/GXGet.h"
+#include "dolphin/gx/GXTransform.h"
+#include "dolphin/gx/GXGeometry.h"
+#include "dolphin/gx/GXVert.h"
+#include "dolphin/gx/GXPixel.h"
+#include "dolphin/gx/GXTev.h"
+#include "dolphin/gx/GXLighting.h"
+#include "m_Do/m_Do_mtx.h"
+#include <cmath>
 
 class gzCapture_c : public dDlst_base_c {
 public:
@@ -145,8 +154,160 @@ void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
     }
 }
 
+void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color) {
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    f32 x1 = x;
+    f32 y1 = y;
+    f32 x2 = x + w;
+    f32 y2 = y + h;
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 16);
+
+    GXPosition2f32(x1, y1);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y1);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y1 + thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x1, y1 + thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+
+    GXPosition2f32(x1, y2 - thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y2 - thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y2);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x1, y2);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+
+    GXPosition2f32(x1, y1 + thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x1 + thickness, y1 + thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x1 + thickness, y2 - thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x1, y2 - thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+
+    GXPosition2f32(x2 - thickness, y1 + thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y1 + thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y2 - thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2 - thickness, y2 - thickness);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+
+    GXEnd();
+}
+
+void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color) {
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    f32 halfThick = thickness / 2.0f;
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x - halfThick, y1);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + halfThick, y1);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + halfThick, y2);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x - halfThick, y2);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXEnd();
+}
+
+void gzDrawHorizontalLine(f32 x1, f32 x2, f32 y, f32 thickness, GXColor color) {
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    f32 halfThick = thickness / 2.0f;
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x1, y - halfThick);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y - halfThick);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x2, y + halfThick);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x1, y + halfThick);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXEnd();
+}
+
 void gzInfo_c::loadDefaultSettings() {
-    mSettings.mTextColor = 0xEE8000FF;
+    mSettings.mTextColor = COLOR_GOLD_DROP;
     mSettings.mCommandCombos.mMoveLink = (PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y);
     mSettings.mCommandCombos.mMoonJump = (PAD_TRIGGER_R | PAD_BUTTON_A);
     mSettings.mCommandCombos.mTeleportSave = (PAD_TRIGGER_R | PAD_BUTTON_UP);
@@ -172,13 +333,20 @@ void gzInfo_c::loadDefaultSettings() {
     mBackgroundWidth = 595.0f;
     mBackgroundHeight = 415.0f;
 
-    mIconXPos = mBackgroundXPos + 5.0f;
-    mIconYPos = mBackgroundYPos + 5.0f;
+    mBorderAnimTimer = 0.0f;
+    mBorderHighlightAlpha = 200;
+
+    mSeparatorVisibleX = mBackgroundXPos + 165.0f;
+    mSeparatorHiddenX = mBackgroundXPos - 10.0f;
+    mSeparatorXPos = mSeparatorVisibleX;
+
+    mIconXPos = mBackgroundXPos + 8.0f;
+    mIconYPos = mBackgroundYPos + 7.0f;
     mIconWidth = 30.0f;
     mIconHeight = 30.0f;
 
-    mHeaderXPos = mBackgroundXPos + 35.0f;
-    mHeaderYPos = mBackgroundYPos + 25.0f;
+    mHeaderXPos = mBackgroundXPos + 40.0f;
+    mHeaderYPos = mBackgroundYPos + 30.0f;
 }
 
 
@@ -198,6 +366,84 @@ int gzInfo_c::_create() {
     gzDVDLoadFile("/gz/bg.bti", buf, 54432, 0);
     ResTIMG* bg = (ResTIMG*)buf;
     mpBackground = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(bg);
+    mpBackground->setWhite(JUtility::TColor(55, 52, 40, 255));
+
+    JKRArchive* collectArc = dComIfGp_getCollectResArchive();
+    ResTIMG* decoSrc = (ResTIMG*)collectArc->getResource('TIMG', "tt_gold_uzu_long2.bti");
+    if (decoSrc != NULL) {
+        u32 imgSize = GXGetTexBufferSize(decoSrc->width, decoSrc->height, decoSrc->format,
+                                          decoSrc->mipmapEnabled, decoSrc->mipmapCount);
+        u32 decoSize = decoSrc->imageOffset + imgSize;
+        void* decoBuf = JKRHeap::alloc(decoSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
+        memcpy(decoBuf, decoSrc, decoSize);
+        mpDecoration = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)decoBuf);
+    } else {
+        mpDecoration = NULL;
+    }
+
+    ResTIMG* bannerSrc = (ResTIMG*)collectArc->getResource('TIMG', "tt_line2.bti");
+    if (bannerSrc != NULL) {
+        u32 bannerImgSize = GXGetTexBufferSize(bannerSrc->width, bannerSrc->height, bannerSrc->format,
+                                                bannerSrc->mipmapEnabled, bannerSrc->mipmapCount);
+        u32 bannerSize = bannerSrc->imageOffset + bannerImgSize;
+        void* bannerBuf = JKRHeap::alloc(bannerSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
+        memcpy(bannerBuf, bannerSrc, bannerSize);
+        mpBanner = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)bannerBuf);
+    } else {
+        mpBanner = NULL;
+    }
+
+    JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
+    if (msgArc != NULL) {
+        ResTIMG* bgSrc = (ResTIMG*)msgArc->getResource('TIMG', "i4_gra.bti");
+        if (bgSrc != NULL) {
+            u32 bgImgSize = GXGetTexBufferSize(bgSrc->width, bgSrc->height, bgSrc->format,
+                                                bgSrc->mipmapEnabled, bgSrc->mipmapCount);
+            u32 bgSize = bgSrc->imageOffset + bgImgSize;
+            void* bgBuf = JKRHeap::alloc(bgSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
+            memcpy(bgBuf, bgSrc, bgSize);
+            mpBannerBg = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)bgBuf);
+        } else {
+            mpBannerBg = NULL;
+        }
+    } else {
+        mpBannerBg = NULL;
+    }
+
+    JKRArchive* main2dArc = dComIfGp_getMain2DArchive();
+    mpBtnABBase = NULL;
+    mpBtnAText = NULL;
+    mpBtnBText = NULL;
+    mpBtnXBase = NULL;
+    mpBtnXText = NULL;
+    mpBtnYBase = NULL;
+    mpBtnYText = NULL;
+    if (main2dArc != NULL) {
+        const char* btnNames[] = {
+            "tt_zelda_button_ab_maru.bti",
+            "tt_zelda_button_a_text.bti",
+            "tt_zelda_button_b_text.bti",
+            "tt_zelda_button_x_base.bti",
+            "tt_zelda_button_x_text.bti",
+            "tt_zelda_button_y_base.bti",
+            "tt_zelda_button_y_text.bti"
+        };
+        J2DPicture** btnPtrs[] = {
+            &mpBtnABBase, &mpBtnAText, &mpBtnBText,
+            &mpBtnXBase, &mpBtnXText, &mpBtnYBase, &mpBtnYText
+        };
+        for (int i = 0; i < 7; i++) {
+            ResTIMG* src = (ResTIMG*)main2dArc->getResource('TIMG', btnNames[i]);
+            if (src != NULL) {
+                u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                                  src->mipmapEnabled, src->mipmapCount);
+                u32 totalSize = src->imageOffset + imgSize;
+                void* buf = JKRHeap::alloc(totalSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
+                memcpy(buf, src, totalSize);
+                *btnPtrs[i] = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)buf);
+            }
+        }
+    }
 
     mpHeader = gzTextBox_allocate();
     mpHeader->setString("tpgz v2.0.0");
@@ -210,13 +456,15 @@ int gzInfo_c::_create() {
     mpNotification = new (gzHeap(GZ_GROUP_UI), 4) gzNotification_c();
 
     mpTPCursor = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dSelect_cursor_c(2, 1.0f, NULL);
-    mpTPCursor->setParam(0.96f, 0.84f, 0.06f, 0.5f, 0.5f);
+    mpTPCursor->setParam(0.96f, 0.84f, 0.03f, 0.5f, 0.5f);
     mpTPCursor->setAlphaRate(1.0f);
 
     mpMenuDescription = gzTextBox_allocate();
     mMenuOption = false;
     mTopLine = 0;
     mVisibleLines = 15;
+
+    mpButtonHintText = gzTextBox_allocate();
 
     mInputWaitTimer = 2;
     mGZInitialized = true;
@@ -253,6 +501,30 @@ int gzInfo_c::_delete() {
     delete mpBackground;
     mpBackground = NULL;
 
+    delete mpDecoration;
+    mpDecoration = NULL;
+
+    delete mpBanner;
+    mpBanner = NULL;
+
+    delete mpBannerBg;
+    mpBannerBg = NULL;
+
+    delete mpBtnABBase;
+    mpBtnABBase = NULL;
+    delete mpBtnAText;
+    mpBtnAText = NULL;
+    delete mpBtnBText;
+    mpBtnBText = NULL;
+    delete mpBtnXBase;
+    mpBtnXBase = NULL;
+    delete mpBtnXText;
+    mpBtnXText = NULL;
+    delete mpBtnYBase;
+    mpBtnYBase = NULL;
+    delete mpBtnYText;
+    mpBtnYText = NULL;
+
     mpCurrentMenu = NULL;
 
     delete mpMainMenu;
@@ -266,6 +538,10 @@ int gzInfo_c::_delete() {
 
     gzTextBox_free(mpMenuDescription);
     mpMenuDescription = NULL;
+
+    gzTextBox_free(mpButtonHintText);
+    mpButtonHintText = NULL;
+
     return 1;
 }
 
@@ -337,6 +613,10 @@ int gzInfo_c::execute() {
     }
 
     if (mDisplay) {
+        mBorderAnimTimer += 0.07f;
+        f32 sineVal = sinf(mBorderAnimTimer);
+        mBorderHighlightAlpha = (u8)(168 + (s32)(87.0f * sineVal));
+
         if (mInputWaitTimer != 0) {
             mInputWaitTimer--;
             return 1;
@@ -384,6 +664,73 @@ int gzInfo_c::execute() {
 // Scissor padding to prevent drawing right up to menu edge
 static const u32 SCISSOR_PADDING = 8;
 
+static void getThemeRGB(u32 theme, u8& r, u8& g, u8& b) {
+    r = (theme >> 24) & 0xFF;
+    g = (theme >> 16) & 0xFF;
+    b = (theme >> 8) & 0xFF;
+}
+
+static void warmBlendRGB(u8& r, u8& g, u8& b, f32 blend) {
+    static const f32 WARM_R = 165.0f;
+    static const f32 WARM_G = 218.0f;
+    static const f32 WARM_B = 115.0f;
+    r = (u8)(r * (1.0f - blend) + WARM_R * blend);
+    g = (u8)(g * (1.0f - blend) + WARM_G * blend);
+    b = (u8)(b * (1.0f - blend) + WARM_B * blend);
+}
+
+GXColor gzGetThemedBorderColor(u32 theme, u8 alpha) {
+    GXColor c;
+    getThemeRGB(theme, c.r, c.g, c.b);
+    warmBlendRGB(c.r, c.g, c.b, 0.52f);
+    c.a = alpha;
+    return c;
+}
+
+
+GXColor gzGetThemedHighlightColor(u32 theme, u8 alpha) {
+    GXColor c;
+    u8 r, g, b;
+    getThemeRGB(theme, r, g, b);
+    warmBlendRGB(r, g, b, 0.52f);
+
+    // Brighten toward white
+    c.r = (u8)((r + 255) / 2);
+    c.g = (u8)((g + 255) / 2);
+    c.b = (u8)((b + 255) / 2);
+    c.a = alpha;
+    return c;
+}
+
+static GXColor getThemedSeparatorColor(u32 theme, u8 alpha) {
+    GXColor c;
+    u8 r, g, b;
+    getThemeRGB(theme, r, g, b);
+    warmBlendRGB(r, g, b, 0.6f);
+    c.r = (u8)(r * 0.85f);
+    c.g = (u8)(g * 0.85f);
+    c.b = (u8)(b * 0.85f);
+    c.a = alpha;
+    return c;
+}
+
+static JUtility::TColor getThemedDecorationColor(u32 theme) {
+    u8 r, g, b;
+    getThemeRGB(theme, r, g, b);
+    warmBlendRGB(r, g, b, 0.6f);
+    r = (u8)(r * 0.7f);
+    g = (u8)(g * 0.7f);
+    b = (u8)(b * 0.7f);
+    return JUtility::TColor(r, g, b, 255);
+}
+
+static JUtility::TColor getThemedBannerLineColor(u32 theme) {
+    u8 r, g, b;
+    getThemeRGB(theme, r, g, b);
+    warmBlendRGB(r, g, b, 0.52f);
+    return JUtility::TColor(r, g, b, 255);
+}
+
 int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
@@ -393,12 +740,197 @@ int gzInfo_c::draw() {
     }
 
     if (mDisplay) {
+        u8 baseAlpha = isMenuPausesGame() ? 255 : 128;
+        u32 theme = mSettings.mTextColor;
+
         if (mpBackground != NULL) {
-            mpBackground->setAlpha(isMenuPausesGame() ? 255 : 128);
+            mpBackground->setAlpha(baseAlpha);
             mpBackground->draw(mBackgroundXPos, mBackgroundYPos, mBackgroundWidth, mBackgroundHeight, false, false, false);
         }
+
+        static const f32 OUTER_THICKNESS = 3.0f;
+        GXColor outerShadow = {30, 28, 20, baseAlpha};
+        gzDrawRectOutline(mBackgroundXPos, mBackgroundYPos,
+                          mBackgroundWidth, mBackgroundHeight,
+                          OUTER_THICKNESS, outerShadow);
+
+        static const f32 GOLD_THICKNESS = 2.0f;
+        static const f32 GOLD_INSET = OUTER_THICKNESS;
+        GXColor goldBorder = gzGetThemedBorderColor(theme, baseAlpha);
+        gzDrawRectOutline(mBackgroundXPos + GOLD_INSET, mBackgroundYPos + GOLD_INSET,
+                          mBackgroundWidth - (GOLD_INSET * 2), mBackgroundHeight - (GOLD_INSET * 2),
+                          GOLD_THICKNESS, goldBorder);
+
+        static const f32 HIGHLIGHT_THICKNESS = 2.0f;
+        static const f32 HIGHLIGHT_INSET = GOLD_INSET + GOLD_THICKNESS;
+        u8 highlightAlpha = (u8)((mBorderHighlightAlpha * baseAlpha) / 255);
+        GXColor highlightBorder = gzGetThemedHighlightColor(theme, highlightAlpha);
+        gzDrawRectOutline(mBackgroundXPos + HIGHLIGHT_INSET, mBackgroundYPos + HIGHLIGHT_INSET,
+                          mBackgroundWidth - (HIGHLIGHT_INSET * 2), mBackgroundHeight - (HIGHLIGHT_INSET * 2),
+                          HIGHLIGHT_THICKNESS, highlightBorder);
+
+        if (mpDecoration != NULL) {
+            u8 decoAlpha = (u8)((baseAlpha * 180) / 255);
+            mpDecoration->setAlpha(decoAlpha);
+            mpDecoration->setWhite(getThemedDecorationColor(theme));
+
+            f32 decoW = 100.0f;
+            f32 decoH = 50.0f;
+            f32 inset = 8.0f;
+
+            f32 leftX = mBackgroundXPos + inset;
+            f32 rightX = mBackgroundXPos + mBackgroundWidth - decoW - inset;
+            f32 topY = mBackgroundYPos + inset;
+            f32 bottomY = mBackgroundYPos + mBackgroundHeight - decoH - inset;
+
+            mpDecoration->draw(leftX, topY, decoW, decoH, false, false, false);
+            mpDecoration->draw(rightX, topY, decoW, decoH, true, false, false);
+            mpDecoration->draw(leftX, bottomY, decoW, decoH, false, true, false);
+            mpDecoration->draw(rightX, bottomY, decoW, decoH, true, true, false);
+        }
+
+        if (mpMainMenu != NULL) {
+            if (mpMainMenu->isTransitioning()) {
+                u32 currentFrame = cCt_getFrameCount();
+                f32 sepStartX = mpMainMenu->isTransitionForward() ? mSeparatorVisibleX : mSeparatorHiddenX;
+                f32 sepEndX = mpMainMenu->isTransitionForward() ? mSeparatorHiddenX : mSeparatorVisibleX;
+                mSeparatorXPos = calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
+                                                   sepStartX, sepEndX, mpMainMenu->getTransitionDuration());
+            } else {
+                mSeparatorXPos = (mCursor.x == 0) ? mSeparatorVisibleX : mSeparatorHiddenX;
+            }
+        }
+
+        f32 separatorY = mBackgroundYPos + 40.0f;
+        f32 separatorLeft = mBackgroundXPos + HIGHLIGHT_INSET + 2.0f;
+        f32 separatorRight = mBackgroundXPos + mBackgroundWidth - HIGHLIGHT_INSET - 2.0f;
+        GXColor separatorColor = getThemedSeparatorColor(theme, baseAlpha);
+        if (mpBanner != NULL) {
+            mpBanner->setAlpha(baseAlpha);
+            mpBanner->setWhite(getThemedBannerLineColor(theme));
+            mpBanner->draw(separatorLeft, separatorY - 1.0f, separatorRight - separatorLeft, 3.0f, false, false, false);
+        }
+
+        if (mSeparatorXPos > mBackgroundXPos + HIGHLIGHT_INSET) {
+            f32 separatorBottom = mBackgroundYPos + mBackgroundHeight - 10.0f;
+            gzDrawVerticalLine(mSeparatorXPos, separatorY, separatorBottom, 2.0f, separatorColor);
+        }
+
         if (mpIcon != NULL) mpIcon->draw(mIconXPos, mIconYPos, mIconWidth, mIconHeight, false, false, false);
         if (mpHeader != NULL) mpHeader->draw(mHeaderXPos, mHeaderYPos, mSettings.mTextColor);
+
+        bool inMainMenu = (mCursor.x == 0);
+
+        f32 circleRadius = 9.0f;
+        f32 iconY = mBackgroundYPos + 21.0f;
+        f32 textY = mBackgroundYPos + 30.0f;
+
+        f32 bannerX = mSeparatorVisibleX;
+        f32 bannerY = mBackgroundYPos + 8.0f;
+        f32 bannerW = mBackgroundXPos + mBackgroundWidth - bannerX - 8.0f;
+        f32 bannerH = 30.0f;
+
+        if (mpBannerBg != NULL) {
+            u8 bgAlpha = (u8)((baseAlpha * 180) / 255);
+            mpBannerBg->setAlpha(bgAlpha);
+            mpBannerBg->setWhite(JUtility::TColor(60, 55, 45, 255));
+            mpBannerBg->draw(bannerX, bannerY, bannerW, bannerH, false, false, false);
+        }
+
+        if (mpDecoration != NULL) {
+            u8 swirlAlpha = (u8)((baseAlpha * 200) / 255);
+            mpDecoration->setAlpha(swirlAlpha);
+            mpDecoration->setWhite(getThemedDecorationColor(theme));
+            f32 swirlW = 50.0f;
+            f32 swirlH = 26.0f;
+            mpDecoration->draw(bannerX + 2.0f, bannerY + 2.0f, swirlW, swirlH, false, false, false);
+        }
+
+        f32 hintStartX = mSeparatorVisibleX + 55.0f;
+        f32 btnSize = 16.0f;
+        f32 letterSizeAB = 10.0f;
+        f32 letterSizeXY = 8.0f;
+        f32 letterOffsetAB = (btnSize - letterSizeAB) / 2.0f;
+        f32 letterOffsetXY = (btnSize - letterSizeXY) / 2.0f;
+
+        // Gamecube Button Colors
+        static const JUtility::TColor colorA(0, 200, 80, 255);
+        static const JUtility::TColor colorB(200, 60, 60, 255);
+        static const JUtility::TColor colorXY(180, 180, 180, 255);
+
+        if (inMainMenu) {
+            f32 iconX = hintStartX;
+            f32 btnY = iconY - btnSize/2;
+            if (mpBtnABBase != NULL) {
+                mpBtnABBase->setAlpha(255);
+                mpBtnABBase->setWhite(colorA);
+                mpBtnABBase->draw(iconX, btnY, btnSize, btnSize, false, false, false);
+            }
+            if (mpBtnAText != NULL) {
+                mpBtnAText->setAlpha(255);
+                mpBtnAText->draw(iconX + letterOffsetAB, btnY + letterOffsetAB, letterSizeAB, letterSizeAB, false, false, false);
+            }
+            if (mpButtonHintText != NULL) {
+                mpButtonHintText->setFontSize(18.0f, 18.0f);
+                mpButtonHintText->setString("Enter Menu");
+                mpButtonHintText->draw(iconX + btnSize + 4.0f, textY, COLOR_WHITE);
+            }
+        } else if (mpCurrentMenu != NULL) {
+            gzButtonHints_s hints = mpCurrentMenu->getButtonHints();
+            f32 currentX = hintStartX;
+
+            for (int i = 0; i < hints.count && i < 4; i++) {
+                J2DPicture* base = NULL;
+                J2DPicture* text = NULL;
+                JUtility::TColor baseColor(255, 255, 255, 255);
+                f32 lSize = letterSizeAB;
+                f32 lOffset = letterOffsetAB;
+                switch (hints.hints[i].button) {
+                case GZ_BTN_A:
+                    base = mpBtnABBase;
+                    text = mpBtnAText;
+                    baseColor = colorA;
+                    break;
+                case GZ_BTN_B:
+                    base = mpBtnABBase;
+                    text = mpBtnBText;
+                    baseColor = colorB;
+                    break;
+                case GZ_BTN_X:
+                    base = mpBtnXBase;
+                    text = mpBtnXText;
+                    baseColor = colorXY;
+                    lSize = letterSizeXY;
+                    lOffset = letterOffsetXY;
+                    break;
+                case GZ_BTN_Y:
+                    base = mpBtnYBase;
+                    text = mpBtnYText;
+                    baseColor = colorXY;
+                    lSize = letterSizeXY;
+                    lOffset = letterOffsetXY;
+                    break;
+                }
+                f32 btnY = iconY - btnSize/2;
+                if (base != NULL) {
+                    base->setAlpha(255);
+                    base->setWhite(baseColor);
+                    base->draw(currentX, btnY, btnSize, btnSize, false, false, false);
+                }
+                if (text != NULL) {
+                    text->setAlpha(255);
+                    text->draw(currentX + lOffset, btnY + lOffset, lSize, lSize, false, false, false);
+                }
+
+                if (mpButtonHintText != NULL) {
+                    mpButtonHintText->setFontSize(18.0f, 18.0f);
+                    mpButtonHintText->setString(hints.hints[i].text);
+                    f32 textX = currentX + btnSize + 3.0f;
+                    mpButtonHintText->draw(textX, textY, COLOR_WHITE);
+                }
+                currentX += 90.0f;
+            }
+        }
 
         u32 savedLeft, savedTop, savedWidth, savedHeight;
         GXGetScissor(&savedLeft, &savedTop, &savedWidth, &savedHeight);
@@ -411,8 +943,12 @@ int gzInfo_c::draw() {
         if (mpMainMenu != NULL) mpMainMenu->draw();
         if (mpCurrentMenu != NULL) mpCurrentMenu->draw();
 
-        // Restore scissor
         GXSetScissor(savedLeft, savedTop, savedWidth, savedHeight);
+
+        if (mpMenuDescription != NULL && mpMenuDescription->getStringPtr() != NULL && mpMenuDescription->getStringPtr()[0] != '\0') {
+            f32 description_y = mBackgroundYPos + mBackgroundHeight + 15.0f;
+            mpMenuDescription->draw(0.0f, description_y, gzInfo_getCursorColor(), HBIND_CENTER);
+        }
     }
 
     // Draw any notifications
@@ -534,6 +1070,61 @@ void gzInfo_c::sendNotification(const char* msg) {
 
 void gzInfo_c::sendNotification(const char* msg, int i_notificationType) {
     if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
+}
+
+void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor outlineColor, f32 outlineWidth) {
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    static const int NUM_SEGMENTS = 16;
+
+    f32 outerRadius = radius;
+    GXBegin(GX_TRIANGLEFAN, GX_VTXFMT0, NUM_SEGMENTS + 2);
+    GXPosition2f32(cx, cy);
+    GXColor4u8(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+    for (int i = 0; i <= NUM_SEGMENTS; i++) {
+        f32 angle = (f32)i * (2.0f * 3.14159f / (f32)NUM_SEGMENTS);
+        f32 x = cx + outerRadius * cosf(angle);
+        f32 y = cy + outerRadius * sinf(angle);
+        GXPosition2f32(x, y);
+        GXColor4u8(outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+    }
+    GXEnd();
+
+    f32 innerRadius = radius - outlineWidth;
+    GXBegin(GX_TRIANGLEFAN, GX_VTXFMT0, NUM_SEGMENTS + 2);
+    GXPosition2f32(cx, cy);
+    GXColor4u8(fillColor.r, fillColor.g, fillColor.b, fillColor.a);
+    for (int i = 0; i <= NUM_SEGMENTS; i++) {
+        f32 angle = (f32)i * (2.0f * 3.14159f / (f32)NUM_SEGMENTS);
+        f32 x = cx + innerRadius * cosf(angle);
+        f32 y = cy + innerRadius * sinf(angle);
+        GXPosition2f32(x, y);
+        GXColor4u8(fillColor.r, fillColor.g, fillColor.b, fillColor.a);
+    }
+    GXEnd();
 }
 
 static JKRExpHeap* s_gzHeap = NULL;

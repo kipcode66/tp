@@ -1,7 +1,6 @@
 #include "gz/gz_warp_preview.h"
-#include "JSystem/JKernel/JKRExpHeap.h"
+#include "gz/gz.h"
 #include "d/d_com_inf_game.h"
-#include "m_Do/m_Do_ext.h"
 #include "dolphin/dvd.h"
 #include <cstring>
 #include <cstdio>
@@ -48,8 +47,8 @@ void gzWarpPreview_c::loadPreview(const char* stageId, u8 roomId, u8 spawnId) {
     mCurrentRoom = roomId;
     mCurrentSpawn = spawnId;
 
-    JKRExpHeap* archiveHeap = mDoExt_getArchiveHeap();
-    mpTextureData = archiveHeap->alloc(PREVIEW_BUFFER_SIZE, 32);
+    JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+    mpTextureData = heap->alloc(PREVIEW_BUFFER_SIZE, 32);
     if (mpTextureData == NULL) return;
 
     char path[64];
@@ -57,17 +56,17 @@ void gzWarpPreview_c::loadPreview(const char* stageId, u8 roomId, u8 spawnId) {
     bool loaded = tryLoadPreviewFile(path, mpTextureData, PREVIEW_BUFFER_SIZE);
 
     if (loaded) {
-        mpPicture = new J2DPicture((ResTIMG*)mpTextureData);
+        mpPicture = new (heap, 4) J2DPicture((ResTIMG*)mpTextureData);
         mOwnsTextureData = true;
     } else {
-        archiveHeap->free(mpTextureData);
+        heap->free(mpTextureData);
         mpTextureData = NULL;
 
         // Use tt_block8x8.bti from Main2D archive as placeholder
         ResTIMG* fallbackTex =
             (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_block8x8.bti");
         if (fallbackTex != NULL) {
-            mpPicture = new J2DPicture(fallbackTex);
+            mpPicture = new (heap, 4) J2DPicture(fallbackTex);
             mpPicture->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
                                      JUtility::TColor(48, 48, 48, 255));
             mOwnsTextureData = false;
@@ -81,8 +80,8 @@ void gzWarpPreview_c::unloadPreview() {
         mpPicture = NULL;
     }
     if (mpTextureData != NULL && mOwnsTextureData) {
-        JKRExpHeap* archiveHeap = mDoExt_getArchiveHeap();
-        archiveHeap->free(mpTextureData);
+        JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+        heap->free(mpTextureData);
     }
     mpTextureData = NULL;
     mOwnsTextureData = false;

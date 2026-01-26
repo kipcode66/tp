@@ -32,6 +32,7 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual gzButtonHints_s getButtonHints();
     void drawMagic(s16 i_max, s16 i_magic, f32 i_posX, f32 i_posY);
     void setAlphaMagicChange(bool i_forceSet);
     void drawHeapText();

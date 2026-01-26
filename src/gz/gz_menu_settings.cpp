@@ -35,7 +35,7 @@ u8 gzSettingsMenu_c::getHaihaiFlags(int i) {
     case gzSettingsMenu_c::SETTING_SWAP_EQUIPS:
         !gzInfo_isSwapEquips() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
-    case gzSettingsMenu_c::SETTING_TEXT_COLOR: {
+    case gzSettingsMenu_c::SETTING_THEME: {
         break;
     }
     }
@@ -64,7 +64,7 @@ void gzSettingsMenu_c::updateDynamicLines() {
     mpBootToMenu->getOptionBox()->setStringf("%s", getBootToMenuText());
     mpMenuSfx->getOptionBox()->setStringf("%s", getMenuSfxText());
     mpReloadType->getOptionBox()->setStringf("%s", getReloadTypeText());
-    mpTextColor->getOptionBox()->setStringf("%s", getTextColorText());
+    mpTheme->getOptionBox()->setStringf("%s", getThemeText());
     mpSwapEquips->getOptionBox()->setStringf("%s", getSwapEquipsText());
     updateLineBounds(mpLines, LINE_NUM);
 }
@@ -92,7 +92,7 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpBootToMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("boot to menu", "boot directly to gz menu on startup", gzInfo_isBootToMenu, gzInfo_onBootToMenu, gzInfo_offBootToMenu);
     mpMenuSfx = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("menu sfx", "turn on/off gz menu sound effects", gzInfo_isMenuSfx, gzInfo_onMenuSfx, gzInfo_offMenuSfx);
     mpReloadType = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("reload type", "changes reload type to last file or last area", gzInfo_isReloadArea, gzInfo_setReloadArea, gzInfo_setReloadFile);
-    mpTextColor = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("text color", "changes tpgz menu text color", gzInfo_nextTextColor, gzInfo_prevTextColor);
+    mpTheme = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("theme", "changes tpgz menu color theme", gzInfo_nextTextColor, gzInfo_prevTextColor);
     mpSwapEquips = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("swap equips", "", gzInfo_isSwapEquips, gzInfo_onSwapEquips, gzInfo_offSwapEquips);
     mpSaveCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("save card", "saves tpgz settings to memory card");
     mpLoadCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("load card", "loads tpgz settings from memory card");
@@ -109,7 +109,7 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpLines[SETTING_BOOT_TO_MENU] = mpBootToMenu;
     mpLines[SETTING_MENU_SFX] = mpMenuSfx;
     mpLines[SETTING_RELOAD_TYPE] = mpReloadType;
-    mpLines[SETTING_TEXT_COLOR] = mpTextColor;
+    mpLines[SETTING_THEME] = mpTheme;
     mpLines[SETTING_SWAP_EQUIPS] = mpSwapEquips;
     mpLines[SETTING_SAVE_CARD] = mpSaveCard;
     mpLines[SETTING_LOAD_CARD] = mpLoadCard;
@@ -147,8 +147,8 @@ void gzSettingsMenu_c::_delete() {
     delete mpReloadType;
     mpReloadType = NULL;
 
-    delete mpTextColor;
-    mpTextColor = NULL;
+    delete mpTheme;
+    mpTheme = NULL;
 
     delete mpSwapEquips;
     mpSwapEquips = NULL;
@@ -206,7 +206,7 @@ void gzSettingsMenu_c::execute() {
         case SETTING_MENU_PAUSES_GAME:
         case SETTING_BOOT_TO_MENU:
         case SETTING_MENU_SFX:
-        case SETTING_TEXT_COLOR:
+        case SETTING_THEME:
             gzInfo_setMenuOption(!gzInfo_isMenuOption());
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             break;
@@ -283,8 +283,8 @@ void gzSettingsMenu_c::execute() {
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 }
                 break;
-            case SETTING_TEXT_COLOR:
-                gzInfo_setTextColor(mpTextColor->mpNext());
+            case SETTING_THEME:
+                gzInfo_setTextColor(mpTheme->mpNext());
                 gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 break;
             }
@@ -340,8 +340,8 @@ void gzSettingsMenu_c::execute() {
                     gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 }
                 break;
-            case SETTING_TEXT_COLOR:
-                gzInfo_setTextColor(mpTextColor->mpPrev());
+            case SETTING_THEME:
+                gzInfo_setTextColor(mpTheme->mpPrev());
                 gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
                 break;
             }

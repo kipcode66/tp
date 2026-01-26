@@ -15,7 +15,7 @@ public:
         SETTING_BOOT_TO_MENU,
         SETTING_MENU_SFX,
         SETTING_RELOAD_TYPE,
-        SETTING_TEXT_COLOR,
+        SETTING_THEME,
         SETTING_SWAP_EQUIPS,
         SETTING_SAVE_CARD,
         SETTING_LOAD_CARD,
@@ -53,7 +53,7 @@ public:
         }
     }
 
-    char* getTextColorText() {
+    char* getThemeText() {
         switch (gzInfo_getTextColor()) {
         case COLOR_AMETHYST: return "amethyst";
         case COLOR_AQUAMARINE: return "aquamarine";
@@ -112,7 +112,7 @@ private:
     gzBoolOptionLine* mpBootToMenu;
     gzBoolOptionLine* mpMenuSfx;
     gzBoolOptionLine* mpReloadType;
-    gzListOptionLine* mpTextColor;
+    gzListOptionLine* mpTheme;
     gzBoolOptionLine* mpSwapEquips;
     gzLine* mpSaveCard;
     gzLine* mpLoadCard;

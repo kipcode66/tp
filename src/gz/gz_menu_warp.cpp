@@ -3,8 +3,6 @@
 #include "gz/gz_menu_warp.h"
 #include "gz/gz_menu_main.h"
 #include "d/d_com_inf_game.h"
-#include "m_Do/m_Do_ext.h"
-#include "JSystem/JKernel/JKRExpHeap.h"
 #include "dolphin/dvd.h"
 #include <cstring>
 #include <cstdio>
@@ -17,14 +15,15 @@ static const u8 DEFAULT_LAYER = 0xFF;
 static const u32 HEADER_SIZE = 8;
 
 gzWarpMenu_c::gzWarpMenu_c() {
+    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
     mOptionsXOffset = -40.0f;
 
-    mpLines[WARP_TYPE] = new gzListOptionLine("type", "stage type category");
-    mpLines[WARP_STAGE] = new gzListOptionLine("stage", "current stage");
-    mpLines[WARP_ROOM] = new gzListOptionLine("room", "current room");
-    mpLines[WARP_SPAWN] = new gzListOptionLine("spawn", "spawn point");
-    mpLines[WARP_LAYER] = new gzListOptionLine("layer", "layer override");
-    mpLines[WARP_EXECUTE] = new gzLine("warp", "execute warp");
+    mpLines[WARP_TYPE] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("type", "stage type category");
+    mpLines[WARP_STAGE] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("stage", "current stage");
+    mpLines[WARP_ROOM] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("room", "current room");
+    mpLines[WARP_SPAWN] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("spawn", "spawn point");
+    mpLines[WARP_LAYER] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("layer", "layer override");
+    mpLines[WARP_EXECUTE] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("warp", "execute warp");
 
     mpTypeData = NULL;
     mTypeDataSize = 0;
@@ -64,8 +63,8 @@ void gzWarpMenu_c::loadTypeFile(int stageType) {
     }
 
     mTypeDataSize = fileInfo.length;
-    JKRExpHeap* archiveHeap = mDoExt_getArchiveHeap();
-    mpTypeData = (u8*)archiveHeap->alloc(mTypeDataSize, 32);
+    JKRHeap* heap = gzHeap(GZ_GROUP_OTHER);
+    mpTypeData = (u8*)heap->alloc(mTypeDataSize, 32);
     if (!mpTypeData) {
         OSReport("tpgz: failed to allocate %d bytes\n", mTypeDataSize);
         DVDClose(&fileInfo);
@@ -85,8 +84,8 @@ void gzWarpMenu_c::loadTypeFile(int stageType) {
 
 void gzWarpMenu_c::unloadTypeFile() {
     if (mpTypeData) {
-        JKRExpHeap* archiveHeap = mDoExt_getArchiveHeap();
-        archiveHeap->free(mpTypeData);
+        JKRHeap* heap = gzHeap(GZ_GROUP_OTHER);
+        heap->free(mpTypeData);
         mpTypeData = NULL;
     }
     mTypeDataSize = 0;
@@ -175,7 +174,7 @@ void gzWarpMenu_c::executeWarp() {
 
     u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
 
-    OSReport("tpgz warp: executing %s room %d spawn %d\n",
+    OSReport("tpgz warp: %s room %d spawn %d\n",
              mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
 
     g_dComIfG_gameInfo.play.setNextStage(
@@ -346,6 +345,23 @@ void gzWarpMenu_c::draw() {
     if (isEntered() && mpCurrentStage && mpCurrentRoom) {
         u8 spawnId = (mpCurrentRoom->num_spawns > 0) ? getSpawnId(mpCurrentRoom, mSpawnIdx) : 0;
         mPreview.loadPreview(mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
-        mPreview.draw(200.0f, 200.0f, 256.0f, 192.0f);
+
+        f32 previewX = 140.0f;
+        f32 previewY = 200.0f;
+        f32 previewW = 256.0f;
+        f32 previewH = 192.0f;
+
+        u32 theme = gzInfo_getTextColor();
+
+        GXColor shadowColor = {30, 28, 20, 255};
+        gzDrawRectOutline(previewX - 7.0f, previewY - 7.0f, previewW + 14.0f, previewH + 14.0f, 3.0f, shadowColor);
+
+        GXColor borderColor = gzGetThemedBorderColor(theme, 255);
+        gzDrawRectOutline(previewX - 4.0f, previewY - 4.0f, previewW + 8.0f, previewH + 8.0f, 2.0f, borderColor);
+
+        GXColor highlightColor = gzGetThemedHighlightColor(theme, 200);
+        gzDrawRectOutline(previewX - 2.0f, previewY - 2.0f, previewW + 4.0f, previewH + 4.0f, 2.0f, highlightColor);
+
+        mPreview.draw(previewX, previewY, previewW, previewH);
     }
 }

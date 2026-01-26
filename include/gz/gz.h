@@ -9,6 +9,7 @@
 #include "gz/gz_manager_tools.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
+#include "dolphin/gx/GXStruct.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "m_Do/m_Do_machine.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
@@ -374,7 +375,7 @@ public:
                 return sTextColors[(i + 1) % sNumColors];
             }
         }
-        return COLOR_WHITE;
+        return sTextColors[0];
     }
 
     u32 prevTextColor() {
@@ -395,12 +396,25 @@ public:
                 return sTextColors[(i - 1 + sNumColors) % sNumColors];
             }
         }
-        return COLOR_WHITE;
+        return sTextColors[0];
     }
 
     J2DPicture* mpIcon;
     J2DPicture* mpBackground;
+    J2DPicture* mpDecoration;
+    J2DPicture* mpBanner;
+    J2DPicture* mpBannerBg;
+    
+    J2DPicture* mpBtnABBase;
+    J2DPicture* mpBtnAText;
+    J2DPicture* mpBtnBText;
+    J2DPicture* mpBtnXBase;
+    J2DPicture* mpBtnXText;
+    J2DPicture* mpBtnYBase;
+    J2DPicture* mpBtnYText;
     gzTextBox* mpHeader;
+
+    gzTextBox* mpButtonHintText;
 
     gzMenu_c* mpCurrentMenu;
     gzMainMenu_c* mpMainMenu;
@@ -439,6 +453,13 @@ public:
     f32 mBackgroundYPos;
     f32 mBackgroundWidth;
     f32 mBackgroundHeight;
+
+    f32 mBorderAnimTimer;
+    u8 mBorderHighlightAlpha;
+
+    f32 mSeparatorXPos;
+    f32 mSeparatorVisibleX;
+    f32 mSeparatorHiddenX;
 
     u8 mGzGroupID;
 };
@@ -858,6 +879,12 @@ namespace gzPad {
 
 int gzPrint(int x, int y, u32 color, char const* string, ...);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
+void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color);
+void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color);
+void gzDrawHorizontalLine(f32 x1, f32 x2, f32 y, f32 thickness, GXColor color);
+void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor outlineColor, f32 outlineWidth);
+GXColor gzGetThemedBorderColor(u32 theme, u8 alpha);
+GXColor gzGetThemedHighlightColor(u32 theme, u8 alpha);
 
 inline bool gzCheckComboToggle(u32 combo, bool& wasHeld) {
     u32 rawHold = mDoCPd_c::getHold(0);

@@ -21,6 +21,7 @@ void gzMainMenu_c::startForwardTransition() {
     mMainEndX = mMainHiddenX;
     mSubStartX = mSubHiddenX;
     mSubEndX = mSubVisibleX;
+    g_gzInfo.mSeparatorXPos = g_gzInfo.mSeparatorVisibleX;
 }
 
 void gzMainMenu_c::startReverseTransition() {
@@ -31,6 +32,7 @@ void gzMainMenu_c::startReverseTransition() {
     mMainEndX = mMainVisibleX;
     mSubStartX = mSubVisibleX;
     mSubEndX = mSubHiddenX;
+    g_gzInfo.mSeparatorXPos = g_gzInfo.mSeparatorHiddenX;
     if (g_gzInfo.mpCurrentMenu != NULL) {
         g_gzInfo.mpCurrentMenu->onExitMenu();
     }
@@ -73,7 +75,8 @@ gzMainMenu_c::gzMainMenu_c() {
     mTransitionStart = 0;
     mTransitionDuration = 5.0f;
 
-    mXPos = mMainVisibleX = mSubVisibleX = g_gzInfo.mBackgroundXPos + 15.0f;
+    mXPos = mMainVisibleX = g_gzInfo.mBackgroundXPos + 15.0f;
+    mSubVisibleX = g_gzInfo.mBackgroundXPos + 20.0f;
     mMainHiddenX = mXPos - 160.0f;
     mSubHiddenX = mXPos + 180.0f;
 }
@@ -175,13 +178,11 @@ void gzMainMenu_c::draw() {
         }
     }
 
-    // Draw description if valid and on menu
     if (gzInfo_isMainMenuVisible()) {
         if (mpLines[l_cursor->y] && mpLines[l_cursor->y]->m_description[0] != 0) {
-            f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
-
             gzInfo_getMenuDescription()->setString(mpLines[l_cursor->y]->m_description);
-            gzInfo_getMenuDescription()->draw(DESCRIPTION_X, description_y, cursor_color, HBIND_CENTER);
+        } else {
+            gzInfo_getMenuDescription()->setString("");
         }
     }
 

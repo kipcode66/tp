@@ -505,6 +505,18 @@ void gzHeapsMenu_c::updateGroupUsage() {
     mpGroupUsageLines[5]->setStringf("  other: %d kb", mGroupUsageKB[5]);
 }
 
+gzButtonHints_s gzHeapsMenu_c::getButtonHints() {
+    gzButtonHints_s hints;
+    hints.hints[0].button = GZ_BTN_B;
+    hints.hints[0].text = "Back";
+    hints.hints[1].button = GZ_BTN_X;
+    hints.hints[1].text = "View";
+    hints.hints[2].button = GZ_BTN_Y;
+    hints.hints[2].text = "Overview";
+    hints.count = 3;
+    return hints;
+}
+
 void gzHeapsMenu_c::execute() {
     if (g_gzInfo.mInputWaitTimer != 0) {
         g_gzInfo.mInputWaitTimer--;
@@ -566,7 +578,7 @@ void gzHeapsMenu_c::execute() {
 }
 
 void gzHeapsMenu_c::drawHeapVisualization(HeapTracker_c* tracker, f32 x, f32 y, f32 width) {
-    f32 bar_h = 20.0f;
+    f32 bar_h = 16.0f;
 
     u32 heap_start_addr;
     u32 heap_size;
@@ -995,8 +1007,8 @@ void gzHeapsMenu_c::draw() {
 
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 Y_ALIGNMENT = 110.0f;
-    static const f32 LINE_SPACING = 60.0f;
+    static const f32 Y_ALIGNMENT = 115.0f;
+    static const f32 LINE_SPACING = 55.0f;
     static const f32 MAX_VIS_WIDTH = 550.0f;
     static const f32 MIN_PIXELS_PER_BLOCK = 1.0f;
 
@@ -1045,7 +1057,7 @@ void gzHeapsMenu_c::draw() {
     }
 
     f32 legend_x = mXPos;
-    f32 legend_y = Y_ALIGNMENT - 65.0f;
+    f32 legend_y = Y_ALIGNMENT - 63.0f;
     drawLegend(legend_x, legend_y);
 
     if (gzInfo_isSubMenuVisible() && gzInfo_getMenuDescription() != NULL) {

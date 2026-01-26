@@ -28,6 +28,9 @@ public:
     ~gzMainMenu_c();
     gzMenu_c* getMenu(int idx) { return mpMenus[idx]; }
     bool isTransitioning() const { return mTransitioning; }
+    bool isTransitionForward() const { return mTransitionForward; }
+    u32 getTransitionStart() const { return mTransitionStart; }
+    f32 getTransitionDuration() const { return mTransitionDuration; }
     void startForwardTransition();
     void startReverseTransition();
     void setDefaultMenuXPos();

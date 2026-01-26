@@ -389,7 +389,7 @@ void gzMenu_c::finishExecute(int maxLines) {
 
 gzMenu_c::gzMenu_c() : mXPos(0.0f), mOptionsXOffset(gzMenuLayout::OPTIONS_X_OFFSET),
                        mIsEntered(false), mpHaihai(NULL) {
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 240.0f;
     mpHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
     mpHaihai->setScale(0.04f);
 }
@@ -413,7 +413,17 @@ gzMenu_c::~gzMenu_c() {
     }
 }
 
-gzMenu_c::ScissorState gzMenu_c::saveScissor() {
+gzButtonHints_s gzMenu_c::getButtonHints() {
+    gzButtonHints_s hints;
+    hints.hints[0].button = GZ_BTN_A;
+    hints.hints[0].text = "Select";
+    hints.hints[1].button = GZ_BTN_B;
+    hints.hints[1].text = "Back";
+    hints.count = 2;
+    return hints;
+}
+
+ScissorState gzMenu_c::saveScissor() {
     ScissorState state;
     GXGetScissor(&state.left, &state.top, &state.width, &state.height);
     return state;

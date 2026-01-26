@@ -7,14 +7,14 @@
 
 // Common layout constants for menu drawing
 namespace gzMenuLayout {
-    const f32 Y_ALIGNMENT = 78.0f;
+    const f32 Y_ALIGNMENT = 85.0f;
     const f32 LINE_SPACING = 22.0f;
     const f32 OPTIONS_X_OFFSET = -20.0f;
     const f32 HAIHAI_X_OFFSET = 305.0f;
     const f32 HAIHAI_Y_OFFSET = -7.0f;
     const f32 HAIHAI_EXTRA_SPACING = 30.0f;
     const f32 HAIHAI_SCALE_FACTOR = 0.04f;
-    const f32 TAB_HEADER_Y_OFFSET = 48.0f;
+    const f32 TAB_HEADER_Y_OFFSET = 55.0f;
     const f32 TP_CURSOR_X_OFFSET = -3.0f;
     const f32 TP_CURSOR_Y_OFFSET = -17.0f;
     const s32 VISIBLE_LINES = 15;
@@ -40,6 +40,23 @@ struct ScissorState {
     u32 left, top, width, height;
 };
 
+enum gzButtonType_e {
+    GZ_BTN_A,
+    GZ_BTN_B,
+    GZ_BTN_X,
+    GZ_BTN_Y
+};
+
+struct gzButtonHint_s {
+    gzButtonType_e button;
+    const char* text;
+};
+
+struct gzButtonHints_s {
+    gzButtonHint_s hints[4];
+    int count;
+};
+
 class gzMenu_c : public dDlst_base_c {
 public:
     enum gzMenu_Haihai_e {
@@ -59,6 +76,7 @@ public:
     virtual f32 getXPos() { return mXPos; }
     virtual void setXPos(f32 x) { mXPos = x; }
     virtual u8 getHaihaiFlags(int idx) { return ARROW_LEFT | ARROW_RIGHT; }
+    virtual gzButtonHints_s getButtonHints();
 
     void onEnterMenu();
     void onExitMenu();
