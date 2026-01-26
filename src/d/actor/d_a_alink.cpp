@@ -50,7 +50,6 @@
 #include "d/actor/d_a_canoe.h"
 #include "d/actor/d_a_ni.h"
 #include "d/d_s_play.h"
-#include "gz/gz.h"
 
 #include "res/Object/Alink.h"
 
@@ -66,7 +65,9 @@ BOOL daAlink_c::getE3Zhint() {
 
 #include "d/actor/d_a_alink_HIO.inc"
 
-BOOL l_debugMode;
+#if DEBUG
+static BOOL l_debugMode;
+#endif
 
 static const char l_wArcName[] = "Wmdl";
 
@@ -4436,7 +4437,9 @@ void daAlink_c::playerInit() {
     mAnmHeap4.createHeap(daPy_anmHeap_c::HEAP_TYPE_4);
     setShieldModel();
 
+    #if DEBUG
     l_debugMode = FALSE;
+    #endif
 
     mSwordModel = mpSwAModel;
     mSheathModel = mpSwASheathModel;
@@ -5272,7 +5275,7 @@ void daAlink_c::setIceSlipSpeed() {
 
 void daAlink_c::setPolygonSpeed() {
     offNoResetFlg3(daPy_FLG3(FLG3_UNK_1000 | FLG3_UNK_2000));
-    if ((!checkEventRun() || checkNoResetFlg0(daPy_FLG0(FLG0_UNK_10000 | FLG0_UNK_4000))) && !checkMagneBootsOn()) {
+    if ((!checkEventRun() || checkNoResetFlg0(daPy_FLG0(FLG0_DEMO_STREAM_ACCEPT | FLG0_UNK_4000))) && !checkMagneBootsOn()) {
         cM3dGPla tripla;
         if (checkNoResetFlg3(FLG3_MIDNA_TALK_POLY_SPEED)) {
             offNoResetFlg3(FLG3_MIDNA_TALK_POLY_SPEED);
@@ -9227,20 +9230,17 @@ void daAlink_c::setPlayerPosAndAngle(Mtx i_mtx) {
     }
 }
 
+#if DEBUG
 BOOL daAlink_c::checkDebugMoveInput() {
-    /* if (mDoCPd_c::isConnect(PAD_3)) {
+    if (mDoCPd_c::isConnect(PAD_3)) {
         return mDoCPd_c::getHoldB(PAD_1)
                 && mDoCPd_c::getAnalogR(PAD_1) > 0.8f
                 && mDoCPd_c::getTrigA(PAD_1);
-    } */
-    
-    // TODO: replace with actual gz combo checker
-    return mDoCPd_c::getHoldL(PAD_1)
-            && mDoCPd_c::getHoldR(PAD_1)
-            && mDoCPd_c::getTrigY(PAD_1); 
+    }
 
     return FALSE;
 }
+#endif
 
 BOOL daAlink_c::itemTriggerCheck(u8 i_btnFlag) {
     mUseButtonFlags |= i_btnFlag;
@@ -13097,7 +13097,7 @@ void daAlink_c::posMove() {
                 current.pos.x += mWindSpeed.x;
                 current.pos.z += mWindSpeed.z;
             }
-        } else if (checkNoResetFlg0(daPy_FLG0(FLG0_UNK_10000 | FLG0_UNK_4000))) {
+        } else if (checkNoResetFlg0(daPy_FLG0(FLG0_DEMO_STREAM_ACCEPT | FLG0_UNK_4000))) {
             current.pos += field_0x3594;
         }
     } else if (checkOctaIealSpecialCollect()) {
@@ -14320,8 +14320,6 @@ bool daAlink_c::checkNotAutoJumpStage() {
 }
 
 bool daAlink_c::checkCastleTownUseItem(u16 i_itemNo) {
-    if (gzInfo_isUnrestrictedItems()) return true;
-
     if (checkNotBattleStage()) {
         if (i_itemNo == fpcNm_ITEM_KANTERA
             || checkTradeItem(i_itemNo)
@@ -17946,9 +17944,17 @@ int daAlink_c::execute() {
     }
 
     BOOL isTrigDebugMoveInput = FALSE;
-
-    if (gzInfo_isMoveLinkActive() && daPy_getPlayerActorClass() == this) {
+    #if DEBUG
+    if (daPy_getPlayerActorClass() == this && checkDebugMoveInput()) {
         isTrigDebugMoveInput = TRUE;
+        if (l_debugMode) {
+            l_debugMode = FALSE;
+        } else {
+            l_debugMode = TRUE;
+        }
+    }
+
+    if (l_debugMode) {
         if (checkModeFlg(0x400) && !checkBoardRide() && !checkSpinnerRide()) {
             if (checkCanoeRide()) {
                 setSyncCanoePos();
@@ -17957,15 +17963,16 @@ int daAlink_c::execute() {
             }
         } else {
             f32 moveSpeed;
-            if (mDoCPd_c::getHoldZ(PAD_1)) {
+            if (mDoCPd_c::getHoldLockR(PAD_1)) {
                 moveSpeed = 100.0f;
             } else {
                 moveSpeed = 50.0f;
             }
 
-            f32 cStickY = mDoCPd_c::getSubStickY(PAD_1);
-            if (cStickY > 0.3f || cStickY < -0.3f) {
-                current.pos.y += moveSpeed * cStickY;
+            if (mDoCPd_c::getHoldY(PAD_1)) {
+                current.pos.y += moveSpeed;
+            } else if (mDoCPd_c::getHoldX(PAD_1)) {
+                current.pos.y -= moveSpeed;
             }
 
             current.pos.x += moveSpeed * mStickValue * cM_ssin(mMoveAngle);
@@ -17983,7 +17990,9 @@ int daAlink_c::execute() {
 
         setBodyPartPos();
         setAttentionPos();
-    } else {
+    } else
+    #endif
+    {
         if (isTrigDebugMoveInput) {
             mItemButton = 0;
             mItemTrigger = 0;
@@ -18451,7 +18460,11 @@ int daAlink_c::execute() {
 
             if (checkDeadHP()) {
                 eventInfo.offCondition(fopAcCnd_NOEXEC_e);
-            } else if (!gzInfo_isMoveLinkActive()) {
+            } else
+            #if DEBUG
+            if (!l_debugMode)
+            #endif
+            {
                 if (!checkMagneBootsOn()) {
                     f32 gnd_nrm_y;
                     if (mLinkAcch.ChkGroundHit()) {

@@ -296,23 +296,23 @@ void daNpc_ykM_HIO_c::listenPropertyEvent(const JORPropertyEvent* event) {
 
 void daNpc_ykM_HIO_c::genMessage(JORMContext* ctx) {
     daNpcT_cmnGenMessage(ctx, &m.common);
-    ctx->genSlider("ステップの速さ  ", &m.step_speed, 0.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("注目距離        ", &m.attention_dist, 0.0f, 10000.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("会話距離        ", &m.conversation_dist, 0.0f, 10000.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("飛び出し速度    ", &m.jump_speed, 0.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("飛び出し角度    ", &m.push_out_angle, 0.0f, 90.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("飛ばしフレ－ム  ", &m.skip_frame, 0.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("飛ばし速度      ", &m.fly_speed, 0.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("飛ばし角度      ", &m.fly_angle, 0.0f, 90.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("ジャンプ初速    ", &m.jump_init_speed, 0.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("滑り加速        ", &m.slide_acceleration, 0.0f, 8.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("滑り速度        ", &m.slide_speed, 0.0f, 128.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("ウエイト時間    ", &m.wait_time, 0.0f, 10000.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("走り速度        ", &m.run_speed, 0.0f, 64.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("競争パラメ－タａ", &m.competition_prm_a, -100.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("競争パラメ－タｂ", &m.competition_prm_b, 1.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genSlider("競争パラメ－タｃ", &m.competition_prm_c, 0.0f, 10.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    ctx->genButton("ファイル書き出し", 0x40000002, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
+    ctx->genSlider("ステップの速さ  ", &m.step_speed, 0.0f, 100.0f);
+    ctx->genSlider("注目距離        ", &m.attention_dist, 0.0f, 10000.0f);
+    ctx->genSlider("会話距離        ", &m.conversation_dist, 0.0f, 10000.0f);
+    ctx->genSlider("飛び出し速度    ", &m.jump_speed, 0.0f, 100.0f);
+    ctx->genSlider("飛び出し角度    ", &m.push_out_angle, 0.0f, 90.0f);
+    ctx->genSlider("飛ばしフレ－ム  ", &m.skip_frame, 0.0f, 100.0f);
+    ctx->genSlider("飛ばし速度      ", &m.fly_speed, 0.0f, 100.0f);
+    ctx->genSlider("飛ばし角度      ", &m.fly_angle, 0.0f, 90.0f);
+    ctx->genSlider("ジャンプ初速    ", &m.jump_init_speed, 0.0f, 100.0f);
+    ctx->genSlider("滑り加速        ", &m.slide_acceleration, 0.0f, 8.0f);
+    ctx->genSlider("滑り速度        ", &m.slide_speed, 0.0f, 128.0f);
+    ctx->genSlider("ウエイト時間    ", &m.wait_time, 0.0f, 10000.0f);
+    ctx->genSlider("走り速度        ", &m.run_speed, 0.0f, 64.0f);
+    ctx->genSlider("競争パラメ－タａ", &m.competition_prm_a, -100.0f, 100.0f);
+    ctx->genSlider("競争パラメ－タｂ", &m.competition_prm_b, 1.0f, 100.0f);
+    ctx->genSlider("競争パラメ－タｃ", &m.competition_prm_c, 0.0f, 10.0f);
+    ctx->genButton("ファイル書き出し", 0x40000002);
 }
 #endif
 
@@ -572,14 +572,14 @@ daNpc_ykM_c::~daNpc_ykM_c() {
     daNpcT_offTmpBit(0x54); // dSv_event_tmp_flag_c::T_0084 - Snowpeak mountain - Racing with Yeto
 }
 
-cPhs__Step daNpc_ykM_c::create() {
+cPhs_Step daNpc_ykM_c::create() {
     daNpcT_ct(this, daNpc_ykM_c, l_faceMotionAnmData, l_motionAnmData, l_faceMotionSequenceData,
                                                   4, l_motionSequenceData, 4, l_evtList, l_resNameList);
     mType = getType();
     mFlowNodeNo = getFlowNodeNo();
     mTwilight = false;
 
-    cPhs__Step phase = (cPhs__Step)loadRes(l_loadResPtrnList[mType], (const char**)l_resNameList);
+    cPhs_Step phase = loadRes(l_loadResPtrnList[mType], (const char**)l_resNameList);
     if (phase == cPhs_COMPLEATE_e) {
         OS_REPORT("\t(%s:%d) flowNo:%d, PathID:%02x, BitTRB:%02x<%08x> ", fopAcM_getProcNameString(this), mType, mFlowNodeNo,
                   getPathID(), getBitTRB() & 0xFF, fopAcM_GetParam(this));
@@ -771,14 +771,7 @@ int daNpc_ykM_c::Draw() {
         mdlData_p->getMaterialNodePointer(3)->getShape()->hide();
     }
 
-    rv = draw(
-        #if DEBUG
-        chkAction(&daNpc_ykM_c::test),
-        #else
-        FALSE,
-        #endif
-        FALSE, mRealShadowSize, NULL, 0.0f, FALSE, field_0x1581 == 1, FALSE
-    );
+    rv = draw(NpcT_CHK_ACTION(daNpc_ykM_c), FALSE, mRealShadowSize, NULL, 0.0f, FALSE, field_0x1581 == 1, FALSE);
 
     if (field_0x157a != 0) {
         mdlData_p->getMaterialNodePointer(3)->getShape()->show();

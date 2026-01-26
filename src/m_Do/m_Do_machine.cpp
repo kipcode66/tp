@@ -29,8 +29,8 @@
 #include "DynamicLink.h"
 
 #if !PLATFORM_GCN
-#include "revolution/sc.h"
-#include "revolution/wpad.h"
+#include <revolution/sc.h>
+#include <revolution/wpad.h>
 #endif
 
 #if PLATFORM_GCN
@@ -343,8 +343,9 @@ static void myMemoryErrorRoutine(void* p_heap, u32 size, int alignment) {
     }
 
     if (notSolidHeap) {
+        // "Error: Can't allocate memory %d(0x%x)Bytes, %d Byte Alignment from %08x\n"
         OSReport_Error(
-            "Error: Can't allocate memory %d(0x%x)Bytes, %d Byte Alignment from %08x\n",
+            "エラー: メモリを確保できません %d(0x%x)バイト、 %d バイトアライメント from %08x\n",
             size, size, alignment, p_heap);
     }
 
@@ -490,7 +491,7 @@ void forever() {
 #if !PLATFORM_GCN
 void exceptionShutdown() {
     mDoRst_reset(2, 0, 0);
-    //OSShutdownSystem();
+    OSShutdownSystem();
     forever();
 }
 #endif
@@ -500,7 +501,7 @@ void exceptionRestart() {
 #if PLATFORM_GCN
     OSResetSystem(0, 0, 0);
 #else
-    //OSRestart(0);
+    OSRestart(0);
 #endif
     while (true) {}
 }
@@ -512,14 +513,14 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
     mDoMain::sHungUpTime = OSGetTime();
     OSReportEnable();
     cAPICPad_recalibrate();
-    OSReport("-------------\n");
-    OSReport("tpgz crashed!\n");
-    OSReport("Vibration stopping & resetting to default\n");
+    // "Vibration stopping & resetting to default\n"
+    OSReport("振動停止＆原点復帰\n");
 
     JUTException* manager = JUTException::getManager();
 
     if (manager == NULL) {
-        OSReport("Exception Manager doesn't exist\n");
+        // "Exception Manager doesn't exist\n"
+        OSReport("例外マネージャがありません\n");
         PPCHalt();
     } else {
         manager->setTraceSuppress(0x80);
@@ -530,7 +531,8 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
 #endif
             if (manager != NULL) {
                 OSEnableInterrupts();
-                OSReport("Accepting Key input\n");
+                // "Accepting Key input\n"
+                OSReport("キー入力を受け付けています\n");
                 while (mDoMain::developmentMode == 0) {
                     exceptionReadPad(&btnTrig, &btnHold);
                     developKeyCheck(btnTrig, btnHold);
@@ -552,7 +554,8 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
                     }
 #endif
                 }
-                OSReport("JUTAssertion is visible\n");
+                // "JUTAssertion is visible\n"
+                OSReport("JUTAssertionを可視化しました\n");
                 JUTAssertion::setVisible(true);
                 JUTDbPrint::getManager()->setVisible(true);
                 JUTConsole* console = JFWSystem::getSystemConsole();
@@ -561,7 +564,8 @@ void myExceptionCallback(u16, OSContext*, u32, u32) {
                 PPCHalt();
             }
         } else {
-            OSReport("Wait for 3 seconds\n");
+            // "Wait for 3 seconds\n"
+            OSReport("3秒間停止\n");
             JUTException::waitTime(3000);
         }
     }

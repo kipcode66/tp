@@ -447,7 +447,7 @@ public:
 
     dMsgObject_c* getMsgObjectClass() { return mItemInfo.mMsgObjectClass; }
     dStage_roomControl_c* getRoomControl() { return &mRoomControl; }
-    dStage_dt_c& getStage() { return mStageData; }
+    dStage_stageDt_c& getStage() { return mStageData; }
     dEvt_control_c* getEvent() { return &mEvent; }
     daHorse_c* getHorseActor() { return (daHorse_c*)mPlayerPtr[1]; }
     J2DGrafContext* getCurrentGrafPort() { return (J2DGrafContext*)mCurrentGrafPort; }
@@ -940,11 +940,11 @@ public:
     /* 0x03F90 */ dEvt_control_c mEvent;
     /* 0x040C0 */ dEvent_manager_c mEvtManager;
     /* 0x04780 */ dAttention_c mAttention;
+    #if PLATFORM_WII || VERSION == VERSION_SHIELD
+    /* 0x04C9C */ u8 unk_0x4c9c[8];
+    #endif
     /* 0x04C9C */ dVibration_c mVibration;
     /* 0x04D2C */ u8 field_0x4d2c[4];
-    #if PLATFORM_WII || VERSION == VERSION_SHIELD
-    /* 0x04D38 */ u8 unk_0x4d38[8];
-    #endif
     /* 0x04D30 */ JKRArchive* mFieldMapArchive2;
     /* 0x04D34 */ JKRArchive* mMsgArchive[11];
     /* 0x04D60 */ JKRArchive* mDemoMsgArchive;
@@ -2108,7 +2108,7 @@ inline u32 dComIfGs_getTurnRestartParam() {
     return g_dComIfG_gameInfo.info.getTurnRestart().getParam();
 }
 
-inline cXyz& dComIfGs_getTurnRestartPos() {
+inline const cXyz& dComIfGs_getTurnRestartPos() {
     return g_dComIfG_gameInfo.info.getTurnRestart().getPos();
 }
 
@@ -2124,7 +2124,7 @@ inline u32 dComIfGs_getRestartRoomParam() {
     return g_dComIfG_gameInfo.info.getRestart().getRoomParam();
 }
 
-inline cXyz& dComIfGs_getRestartRoomPos() {
+inline const cXyz& dComIfGs_getRestartRoomPos() {
     return g_dComIfG_gameInfo.info.getRestart().getRoomPos();
 }
 
@@ -3029,7 +3029,7 @@ inline void dComIfGp_setItem(u8 slot, u8 i_no) {
     g_dComIfG_gameInfo.play.setItem(slot, i_no);
 }
 
-inline dStage_dt_c* dComIfGp_getStage() {
+inline dStage_stageDt_c* dComIfGp_getStage() {
     return &g_dComIfG_gameInfo.play.getStage();
 }
 

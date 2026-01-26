@@ -1842,17 +1842,20 @@ int dCamera_c::ModeFix(s32 param_0) {
     return 1;
 }
 
+static int l_debugMode;
+
 s32 dCamera_c::nextType(s32 i_curType) {
     s32 next_type = i_curType;
     int sp30 = 0;
     s8 var_r28 = 0x20;
 
+#if DEBUG
     if (l_debugMode == true) {
         next_type = GetCameraTypeFromCameraName("Cheat");
     } else if (mCamSetup.ForceType() != -1) {
         next_type = mCamSetup.ForceType();
     } else
-
+#endif
     {
 #if DEBUG
         if (mEngineHoldState == 0) {

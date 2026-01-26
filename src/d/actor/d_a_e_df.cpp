@@ -25,8 +25,8 @@ STATIC_ASSERT(sizeof(daE_DF_HIO_c) == 0xC);
 
 #if DEBUG
 inline void daE_DF_HIO_c::genMessage(JORMContext* i_ctx) {
-    i_ctx->genLabel("デクレシア", 0x80000001, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
-    i_ctx->genSlider("速度", &field_0x8, 0.0f, 100.0f, 0, NULL, 0xffff, 0xffff, 0x200, 0x18);
+    i_ctx->genLabel("デクレシア", 0x80000001);
+    i_ctx->genSlider("速度", &field_0x8, 0.0f, 100.0f);
 }
 #endif
 
@@ -649,7 +649,7 @@ static int daE_DF_Delete(daE_DF_c* i_this) {
 int daE_DF_c::Create() {
     fopAcM_ct(this, daE_DF_c);
 
-    cPhs__Step rv = (cPhs__Step)dComIfG_resLoad(&mPhaseReq, "E_DF");
+    cPhs_Step rv = dComIfG_resLoad(&mPhaseReq, "E_DF");
     if (rv == cPhs_COMPLEATE_e) {
         OS_REPORT("E_DF PARAM %x\n", fopAcM_GetParam(this));
         mArg0 = (u8)fopAcM_GetParam(this);
