@@ -175,8 +175,9 @@ config.dtk_path = args.dtk
 config.objdiff_path = args.objdiff
 config.binutils_path = args.binutils
 config.compilers_path = args.compilers
-config.generate_map = args.map
-config.non_matching = args.non_matching
+# Always enable non-matching and map generation for tpgz
+config.non_matching = True
+config.generate_map = True
 config.sjiswrap_path = args.sjiswrap
 config.ninja_path = args.ninja
 config.progress = args.progress
@@ -522,6 +523,7 @@ Matching = True                   # Object matches and should be linked
 NonMatching = False               # Object does not match and should not be linked
 Equivalent = config.non_matching  # Object should be linked when configured with --non-matching
 
+Custom = config.non_matching  # new custom object
 
 ALL_GCN = ["GZ2E01", "GZ2P01", "GZ2J01"]
 ALL_WII = ["RZDE01_00", "RZDE01_02", "RZDP01", "RZDJ01"] # , "RZDK01"]
@@ -756,10 +758,10 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "d/d_model.cpp"),
             Object(MatchingFor(ALL_GCN), "d/d_eye_hl.cpp"),
             Object(MatchingFor(ALL_GCN), "d/d_error_msg.cpp"),
-            Object(Equivalent, "d/d_debug_viewer.cpp"), # debug weak func order
+            Object(Custom, "d/d_debug_viewer.cpp"),
             Object(NonMatching, "d/d_debug_pad.cpp"),
             Object(NonMatching, "d/d_debug_camera.cpp"),
-            Object(Equivalent, "d/actor/d_a_alink.cpp"), # weak func order, vtable order
+            Object(Custom, "d/actor/d_a_alink.cpp"), # weak func order, vtable order
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_itembase.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_no_chg_room.cpp"),
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_npc.cpp"),
@@ -2867,6 +2869,37 @@ config.libs = [
     ActorRel(MatchingFor(ALL_GCN, "Shield"), "d_a_tboxSw"),
     ActorRel(MatchingFor(ALL_GCN), "d_a_title"),
     ActorRel(MatchingFor(ALL_GCN), "d_a_warp_bug"),
+
+    # gz
+    {
+        "lib": "gz",
+        "mw_version": MWVersion(config.version),
+        "cflags": cflags_framework,
+        "objects": [
+            Object(Custom, "dolphin/card/CARDDelete.c"),
+            Object(Custom, "gz/gz_utility_notification.cpp"),
+            Object(Custom, "gz/gz.cpp"),
+            Object(Custom, "gz/gz_textbox.cpp"),
+            Object(Custom, "gz/gz_utility_keyboard.cpp"),
+            Object(Custom, "gz/gz_menu.cpp"),
+            Object(Custom, "gz/gz_menu_settings.cpp"),
+            Object(Custom, "gz/gz_utility_confirm.cpp"),
+            Object(Custom, "gz/gz_menu_credits.cpp"),
+            Object(Custom, "gz/gz_menu_framework.cpp"),
+            Object(Custom, "gz/gz_menu_tools.cpp"),
+            Object(Custom, "gz/gz_menu_practice.cpp"),
+            Object(Custom, "gz/gz_menu_memory.cpp"),
+            Object(Custom, "gz/gz_menu_cheats.cpp"),
+            Object(Custom, "gz/gz_menu_flags.cpp"),
+            Object(Custom, "gz/gz_menu_heaps.cpp"),
+            Object(Custom, "gz/gz_menu_warp.cpp"),
+            Object(Custom, "gz/gz_menu_main.cpp"),
+            Object(Custom, "gz/gz_warp_preview.cpp"),
+            Object(Custom, "gz/gz_manager_practice.cpp"),
+            Object(Custom, "gz/gz_manager_cheats.cpp"),
+            Object(Custom, "gz/gz_manager_tools.cpp"),
+        ],
+    },
 ]
 
 
@@ -2933,11 +2966,34 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
     if not config.non_matching:
         return objects
     if module_id == 0:  # DOL
-        return objects + ["dummy.c"]
+        return objects + [
+                "dolphin/card/CARDDelete.c",
+                "d/d_debug_viewer.cpp",
+                "gz/gz_utility_notification.cpp",
+                "gz/gz.cpp",
+                "gz/gz_textbox.cpp",
+                "gz/gz_utility_keyboard.cpp",
+                "gz/gz_menu.cpp",
+                "gz/gz_menu_flags.cpp",
+                "gz/gz_menu_settings.cpp",
+                "gz/gz_menu_credits.cpp",
+                "gz/gz_utility_confirm.cpp",
+                "gz/gz_menu_framework.cpp",
+                "gz/gz_menu_tools.cpp",
+                "gz/gz_menu_practice.cpp",
+                "gz/gz_menu_memory.cpp",
+                "gz/gz_menu_cheats.cpp",
+                "gz/gz_menu_heaps.cpp",
+                "gz/gz_menu_warp.cpp",
+                "gz/gz_menu_main.cpp",
+                "gz/gz_warp_preview.cpp",
+                "gz/gz_manager_practice.cpp",
+                "gz/gz_manager_cheats.cpp",
+                "gz/gz_manager_tools.cpp",
+            ]
     return objects
 
-# Uncomment to enable the link order callback.
-# config.link_order_callback = link_order_callback
+config.link_order_callback = link_order_callback
 
 # Optional extra categories for progress tracking
 config.progress_categories = [
@@ -2957,6 +3013,47 @@ config.progress_report_args = [
 if args.mode == "configure":
     # Write build.ninja and objdiff.json
     generate_build(config)
+
+    # For non-matching builds, add ISO rebuild step directly to build.ninja
+    if config.non_matching:
+        with open("build.ninja", "r") as f:
+            content = f.read()
+
+        output_iso = f"tpgz-{version}.iso"
+        orig_iso = f"orig/{version}/{version}.iso"
+        dol_output = f"build/{version}/framework.dol"
+        rel_output = f"build/{version}/f_pc_profile_lst/f_pc_profile_lst.rel"
+
+        # Add the rebuild_iso rule after the custom build rules section
+        iso_rule = f"""
+rule rebuild_iso
+  command = $python tools/rebuild-decomp-tp.py {orig_iso} $out ./ --version {version}
+  description = REBUILD ISO {version}
+
+"""
+        content = content.replace(
+            "# Source files",
+            iso_rule + "# Source files"
+        )
+
+        # Add the build step before the default rule
+        iso_build = f"""# Rebuild ISO
+build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py
+
+"""
+        content = content.replace(
+            "# Default rule\n",
+            iso_build + "# Default rule\n"
+        )
+
+        # Add ISO to the default target
+        content = content.replace(
+            "# Default rule\ndefault ",
+            f"# Default rule\ndefault {output_iso} $\n    "
+        )
+
+        with open("build.ninja", "w") as f:
+            f.write(content)
 elif args.mode == "progress":
     # Print progress information
     calculate_progress(config)
