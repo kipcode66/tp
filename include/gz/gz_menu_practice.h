@@ -14,6 +14,7 @@ public:
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual gzButtonHints_s getButtonHints();
 
     // static const int VISIBLE_TABS = 3;
 

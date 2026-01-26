@@ -15,7 +15,7 @@ static const u8 DEFAULT_LAYER = 0xFF;
 static const u32 HEADER_SIZE = 8;
 
 gzWarpMenu_c::gzWarpMenu_c() {
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
     mOptionsXOffset = -40.0f;
 
     mpLines[WARP_TYPE] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("type", "stage type category");
@@ -177,6 +177,8 @@ void gzWarpMenu_c::executeWarp() {
     OSReport("tpgz warp: %s room %d spawn %d\n",
              mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
 
+    mPreview.unloadPreview();
+
     g_dComIfG_gameInfo.play.setNextStage(
         mpCurrentStage->stage_id,
         mpCurrentRoom->room_id,
@@ -225,7 +227,7 @@ void gzWarpMenu_c::execute() {
         if (gzInfo_isMenuOption()) {
             gzInfo_offMenuOption();
             gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
-        } else {
+        } else if (!g_gzInfo.mpMainMenu->isTransitioning() || !g_gzInfo.mpMainMenu->isTransitionForward()) {
             mPreview.unloadPreview();
 
             gzCursor* l_cursor = gzInfo_getCursor();
@@ -348,7 +350,7 @@ void gzWarpMenu_c::draw() {
     drawLines((gzLine**)mpLines, LINE_NUM, haihai_flags, 0, LINE_NUM);
 
     if (isEntered() && mpCurrentStage && mpCurrentRoom) {
-        if (!mPreview.hasRealPreview() && mPreview.isPreloadComplete()) {
+        if (!mPreview.hasRealPreview() && mPreview.isPreloadComplete() && !mPreview.allocationFailed()) {
             mPreview.forceReload();
         }
         mPreview.loadPreview(mTypeIdx, mpCurrentStage->stage_id, mpCurrentRoom->room_id);

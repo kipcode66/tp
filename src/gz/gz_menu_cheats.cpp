@@ -29,7 +29,7 @@ void gzCheatsMenu_c::updateDynamicLines() {
 
 gzCheatsMenu_c::gzCheatsMenu_c() {
     OSReport("creating gzCheatsMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     mpLines[CHEAT_DISABLE_ITEM_TIMER] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("disable item timer", "disables item delete timer", gzInfo_isDisableItemTimer, gzInfo_onDisableItemTimer, gzInfo_offDisableItemTimer);
     mpLines[CHEAT_DISABLE_WALLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("disable walls", "disables most wall collision", gzInfo_isDisableWalls, gzInfo_onDisableWalls, gzInfo_offDisableWalls);

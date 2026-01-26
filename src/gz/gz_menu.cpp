@@ -331,6 +331,9 @@ bool gzMenu_c::handleBackButton(int mainMenuIndex) {
             gzInfo_offMenuOption();
             gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         } else {
+            if (g_gzInfo.mpMainMenu->isTransitioning() && g_gzInfo.mpMainMenu->isTransitionForward()) {
+                return false;
+            }
             gzCursor* l_cursor = gzInfo_getCursor();
             l_cursor->x--;
             l_cursor->y = mainMenuIndex;

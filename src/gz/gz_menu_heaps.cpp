@@ -180,7 +180,7 @@ void gzHeapsMenu_c::updateDynamicLines() {
 
 gzHeapsMenu_c::gzHeapsMenu_c() {
     OSReport("creating gzHeapsMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     // Heap tracker allocations (meta - tracking the tracker)
     for (int i = 0; i < HEAP_TRACKER_MAX_e; i++) {
@@ -569,11 +569,13 @@ void gzHeapsMenu_c::execute() {
     }
 
     if (gzPad::getTrigB()) {
-        l_cursor->x--;
-        l_cursor->y = gzMainMenu_c::MENU_HEAPS;
-        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
-        g_gzInfo.mpMainMenu->startReverseTransition();
-        return;
+        if (!g_gzInfo.mpMainMenu->isTransitioning() || !g_gzInfo.mpMainMenu->isTransitionForward()) {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_HEAPS;
+            gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+            g_gzInfo.mpMainMenu->startReverseTransition();
+            return;
+        }
     }
 }
 

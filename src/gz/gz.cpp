@@ -418,6 +418,8 @@ int gzInfo_c::_create() {
     mpBtnXText = NULL;
     mpBtnYBase = NULL;
     mpBtnYText = NULL;
+    mpBtnZBase = NULL;
+    mpBtnZText = NULL;
     if (main2dArc != NULL) {
         const char* btnNames[] = {
             "tt_zelda_button_ab_maru.bti",
@@ -426,13 +428,16 @@ int gzInfo_c::_create() {
             "tt_zelda_button_x_base.bti",
             "tt_zelda_button_x_text.bti",
             "tt_zelda_button_y_base.bti",
-            "tt_zelda_button_y_text.bti"
+            "tt_zelda_button_y_text.bti",
+            "im_zelda_button_z_base.bti",
+            "im_zelda_button_z_text.bti"
         };
         J2DPicture** btnPtrs[] = {
             &mpBtnABBase, &mpBtnAText, &mpBtnBText,
-            &mpBtnXBase, &mpBtnXText, &mpBtnYBase, &mpBtnYText
+            &mpBtnXBase, &mpBtnXText, &mpBtnYBase, &mpBtnYText,
+            &mpBtnZBase, &mpBtnZText
         };
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 9; i++) {
             ResTIMG* src = (ResTIMG*)main2dArc->getResource('TIMG', btnNames[i]);
             if (src != NULL) {
                 u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
@@ -524,6 +529,10 @@ int gzInfo_c::_delete() {
     mpBtnYBase = NULL;
     delete mpBtnYText;
     mpBtnYText = NULL;
+    delete mpBtnZBase;
+    mpBtnZBase = NULL;
+    delete mpBtnZText;
+    mpBtnZText = NULL;
 
     mpCurrentMenu = NULL;
 
@@ -857,6 +866,7 @@ int gzInfo_c::draw() {
         static const JUtility::TColor colorA(0, 200, 80, 255);
         static const JUtility::TColor colorB(200, 60, 60, 255);
         static const JUtility::TColor colorXY(180, 180, 180, 255);
+        static const JUtility::TColor colorZ(100, 100, 200, 255);
 
         if (inMainMenu) {
             f32 iconX = hintStartX;
@@ -879,7 +889,7 @@ int gzInfo_c::draw() {
             gzButtonHints_s hints = mpCurrentMenu->getButtonHints();
             f32 currentX = hintStartX;
 
-            for (int i = 0; i < hints.count && i < 4; i++) {
+            for (int i = 0; i < hints.count && i < 5; i++) {
                 J2DPicture* base = NULL;
                 J2DPicture* text = NULL;
                 JUtility::TColor baseColor(255, 255, 255, 255);
@@ -907,6 +917,13 @@ int gzInfo_c::draw() {
                     base = mpBtnYBase;
                     text = mpBtnYText;
                     baseColor = colorXY;
+                    lSize = letterSizeXY;
+                    lOffset = letterOffsetXY;
+                    break;
+                case GZ_BTN_Z:
+                    base = mpBtnZBase;
+                    text = mpBtnZText;
+                    baseColor = colorZ;
                     lSize = letterSizeXY;
                     lOffset = letterOffsetXY;
                     break;
@@ -1128,7 +1145,7 @@ void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor o
 }
 
 static JKRExpHeap* s_gzHeap = NULL;
-static const u32 GZ_HEAP_SIZE = 0x80000;  // 512KB
+static const u32 GZ_HEAP_SIZE = 0xC0000;  // 768KB
 
 void gzCreateHeap() {
     if (s_gzHeap != NULL) return;

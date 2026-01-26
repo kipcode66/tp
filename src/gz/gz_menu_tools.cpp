@@ -37,7 +37,7 @@ static gzBoolOption_s linkFlags[] = {
 
 gzToolsMenu_c::gzToolsMenu_c() {
     OSReport("creating gzToolsMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     for (int i = 0; i < TAB_MAX_e; i++) {
         mpTabHeaders[i] = gzTextBox_allocate();

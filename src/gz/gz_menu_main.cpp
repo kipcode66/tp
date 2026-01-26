@@ -17,6 +17,8 @@ void gzMainMenu_c::startForwardTransition() {
     mTransitioning = true;
     mTransitionForward = true;
     mTransitionStart = cCt_getFrameCount();
+    mpTransitioningMenu = g_gzInfo.mpCurrentMenu;
+    mSubHiddenX = mpTransitioningMenu->getXPos();
     mMainStartX = mMainVisibleX;
     mMainEndX = mMainHiddenX;
     mSubStartX = mSubHiddenX;
@@ -28,13 +30,14 @@ void gzMainMenu_c::startReverseTransition() {
     mTransitioning = true;
     mTransitionForward = false;
     mTransitionStart = cCt_getFrameCount();
+    mpTransitioningMenu = g_gzInfo.mpCurrentMenu;
     mMainStartX = mMainHiddenX;
     mMainEndX = mMainVisibleX;
     mSubStartX = mSubVisibleX;
     mSubEndX = mSubHiddenX;
     g_gzInfo.mSeparatorXPos = g_gzInfo.mSeparatorHiddenX;
-    if (g_gzInfo.mpCurrentMenu != NULL) {
-        g_gzInfo.mpCurrentMenu->onExitMenu();
+    if (mpTransitioningMenu != NULL) {
+        mpTransitioningMenu->onExitMenu();
     }
     g_gzInfo.mInputWaitTimer = 2;
 }
@@ -70,6 +73,7 @@ gzMainMenu_c::gzMainMenu_c() {
 
     mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
 
+    mpTransitioningMenu = NULL;
     mTransitioning = false;
     mTransitionForward = true;
     mTransitionStart = 0;
@@ -99,6 +103,10 @@ void gzMainMenu_c::_delete() {
 
 void gzMainMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
+
+    if (mTransitioning) {
+        return;
+    }
 
     if (gzPad::getTrigDown()) {
         l_cursor->y = (l_cursor->y + 1) % LINE_NUM;
@@ -144,17 +152,18 @@ void gzMainMenu_c::draw() {
         if (age >= mTransitionDuration) {
             mTransitioning = false;
             mXPos = mMainEndX;
-            if (g_gzInfo.mpCurrentMenu != NULL) {
-                g_gzInfo.mpCurrentMenu->setXPos(mSubEndX);
+            if (mpTransitioningMenu != NULL) {
+                mpTransitioningMenu->setXPos(mSubEndX);
                 if (mTransitionForward) {
-                    g_gzInfo.mpCurrentMenu->onEnterMenu();
+                    mpTransitioningMenu->onEnterMenu();
                 }
             }
+            mpTransitioningMenu = NULL;
         } else {
             mXPos = calcSlidePosition(currentFrame, mTransitionStart, mMainStartX, mMainEndX, mTransitionDuration);
 
-            if (g_gzInfo.mpCurrentMenu != NULL)
-                g_gzInfo.mpCurrentMenu->setXPos(calcSlidePosition(currentFrame, mTransitionStart, mSubStartX, mSubEndX, mTransitionDuration));
+            if (mpTransitioningMenu != NULL)
+                mpTransitioningMenu->setXPos(calcSlidePosition(currentFrame, mTransitionStart, mSubStartX, mSubEndX, mTransitionDuration));
         }
 
         for (int i = 0; i < LINE_NUM; i++) {

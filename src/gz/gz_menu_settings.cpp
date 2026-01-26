@@ -81,7 +81,7 @@ int gzSettingsMenu_c::deleteCardReturnCb(gzConfirm_c* i_confirm, void* i_data) {
 
 gzSettingsMenu_c::gzSettingsMenu_c() {
     OSReport("creating gzSettingsMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
     mpConfirm = NULL;
 
     mpCursorType = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("cursor type", "sets the cursor type to classic, tp or both", gzInfo_nextCursorType, gzInfo_prevCursorType);

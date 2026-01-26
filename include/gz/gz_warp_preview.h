@@ -47,6 +47,7 @@ public:
     void draw(f32 x, f32 y, f32 w, f32 h);
     bool isLoaded() const { return mpPicture != NULL; }
     bool hasRealPreview() const { return mpPicture != NULL && mOwnsTextureData; }
+    bool allocationFailed() const { return mAllocationFailed; }
 
 private:
     void unloadIndexes();
@@ -68,6 +69,7 @@ private:
     bool mAsyncPending[PREVIEW_NUM_TYPES];
     bool mIndexesLoaded;
     int mAsyncLoadIdx;
+    bool mAllocationFailed;
 };
 
 #endif

@@ -44,7 +44,8 @@ enum gzButtonType_e {
     GZ_BTN_A,
     GZ_BTN_B,
     GZ_BTN_X,
-    GZ_BTN_Y
+    GZ_BTN_Y,
+    GZ_BTN_Z
 };
 
 struct gzButtonHint_s {
@@ -53,7 +54,7 @@ struct gzButtonHint_s {
 };
 
 struct gzButtonHints_s {
-    gzButtonHint_s hints[4];
+    gzButtonHint_s hints[5];
     int count;
 };
 

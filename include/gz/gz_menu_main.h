@@ -49,6 +49,7 @@ private:
     gzLine* mpLines[LINE_NUM];
     gzMenu_c* mpMenus[LINE_NUM];
     dMeterHaihai_c* mpMeterHaihai;
+    gzMenu_c* mpTransitioningMenu;
     bool mTransitioning;
     bool mTransitionForward;
     u32 mTransitionStart;

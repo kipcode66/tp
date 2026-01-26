@@ -6,7 +6,7 @@
 
 gzMemoryMenu_c::gzMemoryMenu_c() {
     OSReport("creating gzMemoryMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     for (int i = 0; i < LINE_NUM; i++) {
         mpLines[i] = gzTextBox_allocate();
@@ -43,11 +43,13 @@ void gzMemoryMenu_c::execute() {
     }
 
     if (gzPad::getTrigB()) {
-        l_cursor->x--;
-        l_cursor->y = gzMainMenu_c::MENU_MEMORY;
-        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
-        g_gzInfo.mpMainMenu->startReverseTransition();
-        return;
+        if (!g_gzInfo.mpMainMenu->isTransitioning() || !g_gzInfo.mpMainMenu->isTransitionForward()) {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_MEMORY;
+            gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+            g_gzInfo.mpMainMenu->startReverseTransition();
+            return;
+        }
     }
 }
 

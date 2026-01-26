@@ -412,6 +412,8 @@ public:
     J2DPicture* mpBtnXText;
     J2DPicture* mpBtnYBase;
     J2DPicture* mpBtnYText;
+    J2DPicture* mpBtnZBase;
+    J2DPicture* mpBtnZText;
     gzTextBox* mpHeader;
 
     gzTextBox* mpButtonHintText;

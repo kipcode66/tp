@@ -51,7 +51,7 @@ int gzFrameworkMenu_c::deleteProcessReturnCb(gzConfirm_c* i_confirm, void* i_dat
 
 gzFrameworkMenu_c::gzFrameworkMenu_c() {
     OSReport("creating gzFrameworkMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     mNumProcesses = 0;
     mSelectedProcess = 0;
@@ -73,7 +73,6 @@ gzFrameworkMenu_c::gzFrameworkMenu_c() {
     mpHeaders[4]->setString("Status");
 
     mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
-    mpTitle = gzTextBox_allocate();
 }
 
 gzFrameworkMenu_c::~gzFrameworkMenu_c() {
@@ -95,9 +94,6 @@ void gzFrameworkMenu_c::_delete() {
 
     delete mpMeterHaihai;
     mpMeterHaihai = NULL;
-
-    gzTextBox_free(mpTitle);
-    mpTitle = NULL;
 }
 
 void gzFrameworkMenu_c::setActiveProcesses() {
@@ -193,11 +189,13 @@ void gzFrameworkMenu_c::execute() {
     }
 
     if (gzPad::getTrigB()) {
-        l_cursor->x--;
-        l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
-        gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
-        g_gzInfo.mpMainMenu->startReverseTransition();
-        return;
+        if (!g_gzInfo.mpMainMenu->isTransitioning() || !g_gzInfo.mpMainMenu->isTransitionForward()) {
+            l_cursor->x--;
+            l_cursor->y = gzMainMenu_c::MENU_FRAMEWORK;
+            gzInfo_seStart(Z2SE_SY_EXP_WIN_CLOSE);
+            g_gzInfo.mpMainMenu->startReverseTransition();
+            return;
+        }
     }
 
     if (gzPad::getTrigA()) {
@@ -230,10 +228,8 @@ void gzFrameworkMenu_c::draw() {
     static const f32 HAIHAI_SCALE_FACTOR = 0.04f;
 
     f32 X_POS[NUM_COLUMNS] = {mXPos, mXPos+140.0f, mXPos+200.0f, mXPos+270.0f, mXPos+350.0f};
-    f32 X_TITLE = mXPos+50.0f;
     f32 HAIHAI_X = mXPos;
     f32 Y_HEADER = g_gzInfo.mBackgroundYPos + 78.0f;
-    f32 Y_TITLE = Y_HEADER - 25.0f;
     f32 Y_START = Y_HEADER + 22.0f;
     f32 HAIHAI_Y = Y_START + 80.0f;
 
@@ -242,10 +238,6 @@ void gzFrameworkMenu_c::draw() {
     J2DTextBox::TFontSize font_size;
     mpHeaders[0]->getFontSize(font_size); // assume all have the same font size
     mpMeterHaihai->setScale(font_size.mSizeY * HAIHAI_SCALE_FACTOR);
-
-    // Draw title
-    mpTitle->setStringf("(%d processes)", mNumProcesses);
-    mpTitle->draw(X_TITLE, Y_TITLE, COLOR_WHITE);
 
     // Draw headers
     for (int c = 0; c < NUM_COLUMNS; c++) {
@@ -312,4 +304,16 @@ void gzFrameworkMenu_c::draw() {
         f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
         gzInfo_getMenuDescription()->draw(0.0f, description_y, COLOR_WHITE, HBIND_CENTER);
     }
+}
+
+gzButtonHints_s gzFrameworkMenu_c::getButtonHints() {
+    gzButtonHints_s hints;
+    hints.hints[0].button = GZ_BTN_A;
+    hints.hints[0].text = "Pause";
+    hints.hints[1].button = GZ_BTN_B;
+    hints.hints[1].text = "Back";
+    hints.hints[2].button = GZ_BTN_Z;
+    hints.hints[2].text = "Delete";
+    hints.count = 3;
+    return hints;
 }

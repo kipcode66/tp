@@ -13,7 +13,7 @@ gzPracticeMenu_c::gzPracticeMenu_c()
       mHundoSavesTab(gzSaveLoaderMng_c::CATEGORY_HUNDO_e, HUNDO_LINE_NUM),
       mGlitchlessSavesTab(gzSaveLoaderMng_c::CATEGORY_GLITCHLESS_e, GLITCHLESS_LINE_NUM) {
     OSReport("creating gzPracticeMenu_c\n");
-    mXPos = g_gzInfo.mBackgroundXPos + 195.0f;
+    mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     for (int i = 0; i < TAB_MAX; i++) {
         mpTabHeaders[i] = gzTextBox_allocate();
@@ -270,7 +270,6 @@ int gzPracticeMenu_c::gzMemfileTab_c::memfileNameFinishCb(gzKeyboard_c* i_keyboa
                 gzInfo_sendNotification("memfile saved!");
                 menu->mpLines[l_cursor->y]->setStringf("%d. %s", slot_no, i_keyboard->mString);
                 menu->setMemfileExists(l_cursor->y, true);
-                g_gzInfo.mDisplay = false;
             }
 
             CARDClose(&file);
@@ -477,4 +476,20 @@ int gzPracticeMenu_c::gzSavesTab_c::execute() {
     }
 
     return 1;
+}
+
+gzButtonHints_s gzPracticeMenu_c::getButtonHints() {
+    gzButtonHints_s hints;
+    hints.hints[0].button = GZ_BTN_A;
+    hints.hints[0].text = "Load";
+    hints.hints[1].button = GZ_BTN_B;
+    hints.hints[1].text = "Back";
+    if (mCurrentTab == TAB_MEMFILES) {
+        hints.hints[2].button = GZ_BTN_Z;
+        hints.hints[2].text = "Delete";
+        hints.count = 3;
+    } else {
+        hints.count = 2;
+    }
+    return hints;
 }

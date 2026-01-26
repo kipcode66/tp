@@ -18,6 +18,7 @@ public:
     void execute();
     void draw();
     void _delete();
+    gzButtonHints_s getButtonHints();
 
     static const int MAX_VISIBLE_ROWS = 10;
     static const int NUM_COLUMNS = 5;
@@ -35,7 +36,6 @@ private:
     int mNumProcesses;
     int mSelectedProcess;
     int mScrollOffset;
-    gzTextBox* mpTitle;
     gzTextBox* mpRowTexts[MAX_VISIBLE_ROWS * NUM_COLUMNS];
     gzTextBox* mpHeaders[NUM_COLUMNS];
     dMeterHaihai_c* mpMeterHaihai;

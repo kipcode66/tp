@@ -9,7 +9,7 @@ static const u32 MAX_INDEX_SIZE = 8192;
 
 gzWarpPreview_c::gzWarpPreview_c()
     : mpPicture(NULL), mpTextureData(NULL), mCurrentRoom(0xFF), mCurrentType(-1),
-      mOwnsTextureData(false), mIndexesLoaded(false), mAsyncLoadIdx(-1) {
+      mOwnsTextureData(false), mIndexesLoaded(false), mAsyncLoadIdx(-1), mAllocationFailed(false) {
     mCurrentStage[0] = '\0';
     for (int i = 0; i < PREVIEW_NUM_TYPES; i++) {
         mpIndexes[i] = NULL;
@@ -155,6 +155,7 @@ void gzWarpPreview_c::forceReload() {
     mCurrentType = -1;
     mCurrentStage[0] = '\0';
     mCurrentRoom = 0xFF;
+    mAllocationFailed = false;
 }
 
 void gzWarpPreview_c::loadPreview(int typeIdx, const char* stageId, u8 roomId) {
@@ -162,6 +163,8 @@ void gzWarpPreview_c::loadPreview(int typeIdx, const char* stageId, u8 roomId) {
 
     if (mCurrentType == typeIdx && strcmp(mCurrentStage, stageId) == 0 && mCurrentRoom == roomId)
         return;
+
+    mAllocationFailed = false;
 
     if (mpPicture != NULL) {
         delete mpPicture;
@@ -194,6 +197,7 @@ void gzWarpPreview_c::loadPreview(int typeIdx, const char* stageId, u8 roomId) {
 
     mpTextureData = heap->alloc(PREVIEW_BTI_SIZE, 32);
     if (mpTextureData == NULL) {
+        mAllocationFailed = true;
         loadFallback(heap);
         return;
     }
@@ -230,6 +234,7 @@ void gzWarpPreview_c::unloadPreview() {
     mCurrentStage[0] = '\0';
     mCurrentRoom = 0xFF;
     mCurrentType = -1;
+    mAllocationFailed = false;
 
     unloadIndexes();
 }
