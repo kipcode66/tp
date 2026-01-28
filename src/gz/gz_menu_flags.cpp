@@ -542,15 +542,15 @@ void gzFlagsMenu_c::execute() {
 }
 
 void gzFlagsMenu_c::draw() {
-    static const f32 TAB_HEADER_OFFSET = 15.0f;
-
-    // Set up tab header x positions
+    // Set up tab header x positions based on text width + padding
+    static const f32 TAB_PADDING = 5.0f;
     f32 tabXPositions[TAB_MAX_e];
-    f32 tabBaseX = mXPos + TAB_HEADER_OFFSET;
-    tabXPositions[TAB_GENERAL] = tabBaseX;
-    tabXPositions[TAB_DUNGEON] = tabBaseX + 70.0f;
-    tabXPositions[TAB_PORTAL] = tabBaseX + 150.0f;
-    tabXPositions[TAB_RUPEE] = tabBaseX + 210.0f;
+    f32 tabBaseX = mXPos;
+    tabXPositions[0] = tabBaseX;
+    for (int i = 1; i < TAB_MAX_e; i++) {
+        mpTabHeaders[i - 1]->updateBounds();
+        tabXPositions[i] = tabXPositions[i - 1] + mpTabHeaders[i - 1]->mBounds.f.x + TAB_PADDING;
+    }
 
     updateDynamicLines();
 
@@ -583,4 +583,25 @@ void gzFlagsMenu_c::draw() {
     // Draw lines with per-line haihai flags
     s32 topLine = gzInfo_getTopLine();
     drawLinesWithHaihai(currentLines, currentLineNum, topLine, gzMenuLayout::VISIBLE_LINES);
+}
+
+gzTabInfo_s gzFlagsMenu_c::getTabInfo() {
+    gzTabInfo_s info;
+    info.hasTabs = true;
+    info.currentTab = mCurrentTab;
+    info.numTabs = TAB_MAX_e;
+
+    // Calculate positions and widths based on text content
+    static const f32 TAB_PADDING = 5.0f;
+    f32 tabBaseX = mXPos;
+    info.tabX[0] = tabBaseX;
+    for (int i = 0; i < TAB_MAX_e; i++) {
+        mpTabHeaders[i]->updateBounds();
+        info.tabWidth[i] = mpTabHeaders[i]->mBounds.f.x;
+        if (i < TAB_MAX_e - 1) {
+            info.tabX[i + 1] = info.tabX[i] + info.tabWidth[i] + TAB_PADDING;
+        }
+    }
+
+    return info;
 }

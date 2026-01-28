@@ -38,21 +38,22 @@ void gzMenu_c::drawLines(gzTextBox** lines, gzTextBox** lineOptions, u8 haihaiFl
     mpHaihai->setScale(font_size.mSizeY * 0.04f);
 
     f32 lineX = mXPos;
-    f32 lineY_start = g_gzInfo.mBackgroundYPos + 78.0f;
-    f32 line_spacing = g_gzInfo.mBackgroundHeight / 20;
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
+    f32 line_spacing = gzMenuLayout::LINE_SPACING;
 
     f32 optionX = mXPos + getCurrentOptionsXOffset();
-    f32 haihaiX = optionX + 305.0f;
 
     u32 cursorColor = gzInfo_getCursorColor();
 
     for (int i = 0; i < numLines; i++) {
-        f32 lineY = lineY_start + ((i - 1) * line_spacing);
-        f32 haihaiY = lineY - 7.0f;
+        f32 lineY = lineY_start + (i * line_spacing);
+        f32 haihaiY = lineY + gzMenuLayout::HAIHAI_Y_OFFSET;
         bool isSelected = (l_cursor->y == i && gzInfo_isSubMenuVisible());
-        
+
         f32 haihaiWidth = lineOptions[i]->mBounds.f.x + 30.0f;
         bool showHaihai = gzInfo_isMenuOption() && l_cursor->y == i;
+        // Calculate haihaiX per-line based on option text width (for left alignment)
+        f32 haihaiX = optionX + (lineOptions[i]->mBounds.f.x / 2.0f) + gzMenuLayout::HAIHAI_X_OFFSET;
 
         drawLineWithOption(lines[i], lineOptions[i], lineX, optionX, lineY, isSelected, cursorColor, showHaihai, haihaiFlags, haihaiX, haihaiY, haihaiWidth);
     }
@@ -68,10 +69,9 @@ void gzMenu_c::drawLines(gzLine** lines, s32 numLines, u8 haihai_flags, s32 topL
     }
 
     f32 lineX = mXPos;
-    f32 lineY_start = g_gzInfo.mBackgroundYPos + 78.0f;
-    f32 line_spacing = g_gzInfo.mBackgroundHeight / 20;
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
+    f32 line_spacing = gzMenuLayout::LINE_SPACING;
     f32 optionX = mXPos + getCurrentOptionsXOffset();
-    f32 haihaiX = optionX + 305.0f;
     u32 cursorColor = gzInfo_getCursorColor();
     s32 endLine = topLine + visibleLines;
 
@@ -79,9 +79,9 @@ void gzMenu_c::drawLines(gzLine** lines, s32 numLines, u8 haihai_flags, s32 topL
     for (s32 i = topLine; i < endLine; i++) {
         gzLine* line = lines[i];
         if (line == NULL) continue;
-        
+
         f32 lineY = lineY_start + ((i - topLine) * line_spacing);
-        f32 haihaiY = lineY - 7.0f;
+        f32 haihaiY = lineY + gzMenuLayout::HAIHAI_Y_OFFSET;
         bool isSelected = (l_cursor->y == i && gzInfo_isSubMenuVisible());
         u32 color = isSelected ? cursorColor : COLOR_WHITE;
         f32 haihaiWidth = 0.0f;
@@ -94,8 +94,11 @@ void gzMenu_c::drawLines(gzLine** lines, s32 numLines, u8 haihai_flags, s32 topL
         bool showHaihai = gzInfo_isMenuOption() && l_cursor->y == i && haihai_flags != 0;
         line->mText->draw(lineX, lineY, color);
 
+        // Calculate haihaiX per-line based on option text width (for left alignment)
+        f32 haihaiX = optionX + gzMenuLayout::HAIHAI_X_OFFSET;
         if (opt != NULL) {
-            opt->draw(optionX, lineY, color, HBIND_CENTER);
+            haihaiX = optionX + (opt->mBounds.f.x / 2.0f) + gzMenuLayout::HAIHAI_X_OFFSET;
+            opt->draw(optionX, lineY, color, HBIND_LEFT);
         }
 
         if (showHaihai && mpHaihai != NULL) {
@@ -142,7 +145,7 @@ void gzMenu_c::drawLineWithOption(gzTextBox* line, gzTextBox* option, f32 lineX,
 
     if (line) line->draw(lineX, lineY, color);
 
-    if (option) option->draw(optionX, lineY, color, HBIND_CENTER);
+    if (option) option->draw(optionX, lineY, color, HBIND_LEFT);
 
     if (showHaihai && option && option->mStringLength != 0 && haihaiFlags != 0) {
         gzSetup2DContext();
@@ -248,7 +251,6 @@ void gzMenu_c::drawLinesWithHaihai(gzLine** lines, s32 numLines, s32 topLine, s3
     f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
     f32 line_spacing = gzMenuLayout::LINE_SPACING;
     f32 optionX = mXPos + getCurrentOptionsXOffset();
-    f32 haihaiX = optionX + gzMenuLayout::HAIHAI_X_OFFSET;
     u32 cursorColor = gzInfo_getCursorColor();
     s32 endLine = topLine + visibleLines;
 
@@ -267,8 +269,11 @@ void gzMenu_c::drawLinesWithHaihai(gzLine** lines, s32 numLines, s32 topLine, s3
         line->mText->draw(lineX, lineY, color);
 
         gzTextBox* opt = line->getOptionBox();
+        // Calculate haihaiX per-line based on option text width (for left alignment)
+        f32 haihaiX = optionX + gzMenuLayout::HAIHAI_X_OFFSET;
         if (opt != NULL) {
-            opt->draw(optionX, lineY, color, HBIND_CENTER);
+            haihaiX = optionX + (opt->mBounds.f.x / 2.0f) + gzMenuLayout::HAIHAI_X_OFFSET;
+            opt->draw(optionX, lineY, color, HBIND_LEFT);
 
             // Get per-line haihai flags via virtual method
             if (isSelected && gzInfo_isMenuOption()) {

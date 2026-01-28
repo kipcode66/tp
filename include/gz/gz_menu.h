@@ -7,14 +7,14 @@
 
 // Common layout constants for menu drawing
 namespace gzMenuLayout {
-    const f32 Y_ALIGNMENT = 85.0f;
+    const f32 Y_ALIGNMENT = 88.0f;
     const f32 LINE_SPACING = 22.0f;
-    const f32 OPTIONS_X_OFFSET = -20.0f;
-    const f32 HAIHAI_X_OFFSET = 305.0f;
+    const f32 OPTIONS_X_OFFSET = 270.0f;
+    const f32 HAIHAI_X_OFFSET = 0.5f;
     const f32 HAIHAI_Y_OFFSET = -7.0f;
     const f32 HAIHAI_EXTRA_SPACING = 30.0f;
     const f32 HAIHAI_SCALE_FACTOR = 0.04f;
-    const f32 TAB_HEADER_Y_OFFSET = 55.0f;
+    const f32 TAB_HEADER_Y_OFFSET = 58.0f;
     const f32 TP_CURSOR_X_OFFSET = -3.0f;
     const f32 TP_CURSOR_Y_OFFSET = -17.0f;
     const s32 VISIBLE_LINES = 15;
@@ -58,6 +58,16 @@ struct gzButtonHints_s {
     int count;
 };
 
+static const int GZ_MAX_TABS = 8;
+
+struct gzTabInfo_s {
+    bool hasTabs;
+    int currentTab;
+    int numTabs;
+    f32 tabX[GZ_MAX_TABS];
+    f32 tabWidth[GZ_MAX_TABS];
+};
+
 class gzMenu_c : public dDlst_base_c {
 public:
     enum gzMenu_Haihai_e {
@@ -78,6 +88,7 @@ public:
     virtual void setXPos(f32 x) { mXPos = x; }
     virtual u8 getHaihaiFlags(int idx) { return ARROW_LEFT | ARROW_RIGHT; }
     virtual gzButtonHints_s getButtonHints();
+    virtual gzTabInfo_s getTabInfo() { gzTabInfo_s info; info.hasTabs = false; return info; }
 
     virtual void onEnterMenu();
     virtual void onExitMenu();

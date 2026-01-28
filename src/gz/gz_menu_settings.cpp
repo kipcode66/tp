@@ -8,12 +8,11 @@ u8 gzSettingsMenu_c::getHaihaiFlags(int i) {
     u8 haihai_flags = gzMenu_c::ARROW_LEFT | gzMenu_c::ARROW_RIGHT;
 
     switch (i) {
-    case gzSettingsMenu_c::SETTING_RELOAD_TYPE:
-        !gzInfo_getReloadType() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
+    case gzSettingsMenu_c::SETTING_BOOT_TO_MENU:
+        !gzInfo_isBootToMenu() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
-    case gzSettingsMenu_c::SETTING_CURSOR_TYPE: {
+    case gzSettingsMenu_c::SETTING_CURSOR_TYPE:
         break;
-    }
     case gzSettingsMenu_c::SETTING_DISPLAY_MODE:
         !gzInfo_getDisplayMode() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
@@ -23,21 +22,17 @@ u8 gzSettingsMenu_c::getHaihaiFlags(int i) {
     case gzSettingsMenu_c::SETTING_MENU_PAUSES_GAME:
         !gzInfo_isMenuPausesGame() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
-    case gzSettingsMenu_c::SETTING_BOOT_TO_MENU:
-        !gzInfo_isBootToMenu() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
-        break;
     case gzSettingsMenu_c::SETTING_MENU_SFX:
         !gzInfo_isMenuSfx() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
-    case gzSettingsMenu_c::SETTING_FONT:
-        haihai_flags = 0;
+    case gzSettingsMenu_c::SETTING_RELOAD_TYPE:
+        !gzInfo_getReloadType() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
     case gzSettingsMenu_c::SETTING_SWAP_EQUIPS:
         !gzInfo_isSwapEquips() ? haihai_flags &= ~gzMenu_c::ARROW_LEFT : haihai_flags &= ~gzMenu_c::ARROW_RIGHT;
         break;
-    case gzSettingsMenu_c::SETTING_THEME: {
+    case gzSettingsMenu_c::SETTING_THEME:
         break;
-    }
     }
 
     return haihai_flags;
@@ -56,16 +51,15 @@ static void returnToSettings() {
 }
 
 void gzSettingsMenu_c::updateDynamicLines() {
+    mpBootToMenu->getOptionBox()->setStringf("%s", getBootToMenuText());
     mpCursorType->getOptionBox()->setStringf("%s", getCursorTypeText());
     mpDisplayMode->getOptionBox()->setStringf("%s", getDisplayModeText());
     mpDropShadows->getOptionBox()->setStringf("%s", getDropShadowsText());
-    mpFont->getOptionBox()->setStringf("%s", "rodan");
     mpMenuPausesGame->getOptionBox()->setStringf("%s", getMenuPausesGameText());
-    mpBootToMenu->getOptionBox()->setStringf("%s", getBootToMenuText());
     mpMenuSfx->getOptionBox()->setStringf("%s", getMenuSfxText());
     mpReloadType->getOptionBox()->setStringf("%s", getReloadTypeText());
-    mpTheme->getOptionBox()->setStringf("%s", getThemeText());
     mpSwapEquips->getOptionBox()->setStringf("%s", getSwapEquipsText());
+    mpTheme->getOptionBox()->setStringf("%s", getThemeText());
     updateLineBounds(mpLines, LINE_NUM);
 }
 
@@ -84,39 +78,37 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
     mpConfirm = NULL;
 
+    // Options (alphabetical)
+    mpBootToMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("boot to menu", "boot directly to gz menu on startup", gzInfo_isBootToMenu, gzInfo_onBootToMenu, gzInfo_offBootToMenu);
     mpCursorType = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("cursor type", "sets the cursor type to classic, tp or both", gzInfo_nextCursorType, gzInfo_prevCursorType);
     mpDisplayMode = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("display mode", "change between progressive and interlaced display modes", gzInfo_getDisplayMode, gzInfo_setDisplayModeProgressive, gzInfo_setDisplayModeInterlaced);
     mpDropShadows = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("drop shadows", "adds drop shadows to tpgz menu text", gzInfo_isDropShadows, gzInfo_onDropShadows, gzInfo_offDropShadows);
-    mpFont = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("font", "changes tpgz menu font", gzInfo_nextFont, gzInfo_prevFont);
     mpMenuPausesGame = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("menu pauses game", "opening gz menu pauses game", gzInfo_isMenuPausesGame, gzInfo_onMenuPausesGame, gzInfo_offMenuPausesGame);
-    mpBootToMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("boot to menu", "boot directly to gz menu on startup", gzInfo_isBootToMenu, gzInfo_onBootToMenu, gzInfo_offBootToMenu);
     mpMenuSfx = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("menu sfx", "turn on/off gz menu sound effects", gzInfo_isMenuSfx, gzInfo_onMenuSfx, gzInfo_offMenuSfx);
     mpReloadType = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("reload type", "changes reload type to last file or last area", gzInfo_isReloadArea, gzInfo_setReloadArea, gzInfo_setReloadFile);
-    mpTheme = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("theme", "changes tpgz menu color theme", gzInfo_nextTextColor, gzInfo_prevTextColor);
     mpSwapEquips = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("swap equips", "", gzInfo_isSwapEquips, gzInfo_onSwapEquips, gzInfo_offSwapEquips);
+    mpTheme = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("theme", "changes tpgz menu color theme", gzInfo_nextTextColor, gzInfo_prevTextColor);
+    // Actions
+    mpCommandCombos = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("command combos", "change default command combos");
+    mpMenuPositions = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("menu positions", "set positions of overlay menus");
     mpSaveCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("save card", "saves tpgz settings to memory card");
     mpLoadCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("load card", "loads tpgz settings from memory card");
     mpDeleteCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("delete card", "deletes tpgz settings from memory card");
-    mpCommandCombos = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("command combos", "change default command combos");
-    mpMenuPositions = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("menu positions", "set positions of overlay menus");
-    mpCredits = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("credits", "show the tpgz credits");
 
+    mpLines[SETTING_BOOT_TO_MENU] = mpBootToMenu;
     mpLines[SETTING_CURSOR_TYPE] = mpCursorType;
     mpLines[SETTING_DISPLAY_MODE] = mpDisplayMode;
     mpLines[SETTING_DROP_SHADOW] = mpDropShadows;
-    mpLines[SETTING_FONT] = mpFont;
     mpLines[SETTING_MENU_PAUSES_GAME] = mpMenuPausesGame;
-    mpLines[SETTING_BOOT_TO_MENU] = mpBootToMenu;
     mpLines[SETTING_MENU_SFX] = mpMenuSfx;
     mpLines[SETTING_RELOAD_TYPE] = mpReloadType;
-    mpLines[SETTING_THEME] = mpTheme;
     mpLines[SETTING_SWAP_EQUIPS] = mpSwapEquips;
+    mpLines[SETTING_THEME] = mpTheme;
+    mpLines[SETTING_COMMAND_COMBOS] = mpCommandCombos;
+    mpLines[SETTING_MENU_POSITIONS] = mpMenuPositions;
     mpLines[SETTING_SAVE_CARD] = mpSaveCard;
     mpLines[SETTING_LOAD_CARD] = mpLoadCard;
     mpLines[SETTING_DELETE_CARD] = mpDeleteCard;
-    mpLines[SETTING_COMMAND_COMBOS] = mpCommandCombos;
-    mpLines[SETTING_MENU_POSITIONS] = mpMenuPositions;
-    mpLines[SETTING_CREDITS] = mpCredits;
 }
 
 gzSettingsMenu_c::~gzSettingsMenu_c() {
@@ -125,6 +117,10 @@ gzSettingsMenu_c::~gzSettingsMenu_c() {
 
 void gzSettingsMenu_c::_delete() {
     OSReport("deleting gzSettingsMenu_c\n");
+
+    // Options (alphabetical)
+    delete mpBootToMenu;
+    mpBootToMenu = NULL;
 
     delete mpCursorType;
     mpCursorType = NULL;
@@ -135,9 +131,6 @@ void gzSettingsMenu_c::_delete() {
     delete mpDropShadows;
     mpDropShadows = NULL;
 
-    delete mpFont;
-    mpFont = NULL;
-
     delete mpMenuPausesGame;
     mpMenuPausesGame = NULL;
 
@@ -147,11 +140,18 @@ void gzSettingsMenu_c::_delete() {
     delete mpReloadType;
     mpReloadType = NULL;
 
+    delete mpSwapEquips;
+    mpSwapEquips = NULL;
+
     delete mpTheme;
     mpTheme = NULL;
 
-    delete mpSwapEquips;
-    mpSwapEquips = NULL;
+    // Actions
+    delete mpCommandCombos;
+    mpCommandCombos = NULL;
+
+    delete mpMenuPositions;
+    mpMenuPositions = NULL;
 
     delete mpSaveCard;
     mpSaveCard = NULL;
@@ -161,18 +161,6 @@ void gzSettingsMenu_c::_delete() {
 
     delete mpDeleteCard;
     mpDeleteCard = NULL;
-
-    delete mpCommandCombos;
-    mpCommandCombos = NULL;
-
-    delete mpMenuPositions;
-    mpMenuPositions = NULL;
-
-    delete mpCredits;
-    mpCredits = NULL;
-
-    delete mpBootToMenu;
-    mpBootToMenu = NULL;
 
     for (int i = 0; i < LINE_NUM; i++) {
         delete mpLines[i];
@@ -227,9 +215,6 @@ void gzSettingsMenu_c::execute() {
             gzInfo_sendNotification("test!", 2);
             gzInfo_sendNotification("test2!");
             break;
-        case SETTING_CREDITS:
-            // gzChangeMenu(mpCreditsMenu);
-            return;
         }
     }
 

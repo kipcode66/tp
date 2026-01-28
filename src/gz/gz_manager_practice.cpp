@@ -86,7 +86,7 @@ void gzSaveLoaderMng_c::loadSave(SaveCategory_e i_category, int i_entryNo) {
     getSaveMetadata(i_category, i_entryNo, &mSaveMetadata);
 
     char pathbuf[64];
-    sprintf(pathbuf, "/gz/%s/%s.bin", getCategoryFolder(i_category), mSaveMetadata.filename);
+    snprintf(pathbuf, sizeof(pathbuf), "/gz/%s/%s.bin", getCategoryFolder(i_category), mSaveMetadata.filename);
     gzDVDLoadFile(pathbuf, mDoMemCd_Ctrl_c::sTmpBuf, SAVE_READ_SIZE, 0);
 
     dSv_save_c* savep = (dSv_save_c*)mDoMemCd_Ctrl_c::sTmpBuf;
@@ -109,7 +109,7 @@ void gzSaveLoaderMng_c::getSaveMetadata(SaveCategory_e i_category, int i_entryNo
     const int METADATA_OFFSET = 32;
 
     char pathbuf[64];
-    sprintf(pathbuf, "/gz/%s.bin", getCategoryMetadataPath(i_category));
+    snprintf(pathbuf, sizeof(pathbuf), "/gz/%s.bin", getCategoryMetadataPath(i_category));
     gzDVDLoadFile(pathbuf, o_data, sizeof(saveMetadata_s), METADATA_OFFSET + (i_entryNo * sizeof(saveMetadata_s)));
 }
 
@@ -119,7 +119,7 @@ int gzSaveLoaderMng_c::getSaveEntryNum(SaveCategory_e i_category) {
     u8 ATTRIBUTE_ALIGN(32) read_buffer[MIN_READ_SIZE];
 
     char pathbuf[64];
-    sprintf(pathbuf, "/gz/%s.bin", getCategoryMetadataPath(i_category));
+    snprintf(pathbuf, sizeof(pathbuf), "/gz/%s.bin", getCategoryMetadataPath(i_category));
     gzDVDLoadFile(pathbuf, read_buffer, MIN_READ_SIZE, 0);
 
     int entry_num = *(int*)read_buffer;

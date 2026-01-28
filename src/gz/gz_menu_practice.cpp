@@ -109,8 +109,6 @@ void gzPracticeMenu_c::execute() {
 }
 
 void gzPracticeMenu_c::draw() {
-    static const f32 TAB_HEADER_OFFSET = 15.0f;
-
     if (mMemfileTab.mpKeyboard != NULL) {
         mMemfileTab.mpKeyboard->draw();
         return;
@@ -121,15 +119,15 @@ void gzPracticeMenu_c::draw() {
         return;
     }
 
-    // Set up tab header x positions
+    // Set up tab header x positions based on text width + padding
+    static const f32 TAB_PADDING = 5.0f;
     f32 tabXPositions[TAB_MAX];
-    f32 tabBaseX = mXPos + TAB_HEADER_OFFSET;
-    tabXPositions[TAB_ANY] = tabBaseX;
-    tabXPositions[TAB_NOSQ] = tabBaseX + 50.0f;
-    tabXPositions[TAB_HUNDO] = tabBaseX + 100.0f;
-    tabXPositions[TAB_ALLDUNGEONS] = tabBaseX + 150.0f;
-    tabXPositions[TAB_GLITCHLESS] = tabBaseX + 250.0f;
-    tabXPositions[TAB_MEMFILES] = tabBaseX + 325.0f;
+    f32 tabBaseX = mXPos;
+    tabXPositions[0] = tabBaseX;
+    for (int i = 1; i < TAB_MAX; i++) {
+        mpTabHeaders[i - 1]->updateBounds();
+        tabXPositions[i] = tabXPositions[i - 1] + mpTabHeaders[i - 1]->mBounds.f.x + TAB_PADDING;
+    }
 
     // Draw tab headers
     f32 yHeader = g_gzInfo.mBackgroundYPos + gzMenuLayout::TAB_HEADER_Y_OFFSET;
@@ -207,7 +205,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::readMemfileNames() {
 
     for (int i = 0; i < MEMFILE_MAX_NUM; i++) {
         char filename_buf[9];
-        sprintf(filename_buf, "tpgz_s%02d", i + 1);
+        snprintf(filename_buf, sizeof(filename_buf), "tpgz_s%02d", i + 1);
 
         ret = CARDOpen(0, filename_buf, &file);
         if (ret == CARD_RESULT_READY) {
@@ -244,7 +242,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::memfileNameFinishCb(gzKeyboard_c* i_keyboa
     }
 
     char filename_buf[9];
-    sprintf(filename_buf, "tpgz_s%02d", slot_no);
+    snprintf(filename_buf, sizeof(filename_buf), "tpgz_s%02d", slot_no);
 
     ret = CARDCreate(0, filename_buf, SECTOR_SIZE, &file);
     if (ret == CARD_RESULT_READY || ret == CARD_RESULT_EXIST) {
@@ -259,7 +257,8 @@ int gzPracticeMenu_c::gzMemfileTab_c::memfileNameFinishCb(gzKeyboard_c* i_keyboa
 
             // write any extra data we want
             gzSaveLoaderMng_c::memfileExData_s exdata;
-            strcpy(exdata.name, i_keyboard->mString);
+            strncpy(exdata.name, i_keyboard->mString, sizeof(exdata.name) - 1);
+            exdata.name[sizeof(exdata.name) - 1] = '\0';
             exdata.player_pos.set(dComIfGp_getPlayer(0)->current.pos);
 
             memcpy(mDoMemCd_Ctrl_c::sTmpBuf + sizeof(dSv_save_c), &exdata, sizeof(gzSaveLoaderMng_c::memfileExData_s));
@@ -289,7 +288,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::loadMemfile(int i_no) {
     }
 
     char filename_buf[9];
-    sprintf(filename_buf, "tpgz_s%02d", i_no + 1);
+    snprintf(filename_buf, sizeof(filename_buf), "tpgz_s%02d", i_no + 1);
 
     ret = CARDOpen(0, filename_buf, &file);
     if (ret == CARD_RESULT_READY) {
@@ -335,7 +334,7 @@ int gzPracticeMenu_c::gzMemfileTab_c::deleteMemfile(int i_slotNo) {
     }
 
     char filename_buf[9];
-    sprintf(filename_buf, "tpgz_s%02d", i_slotNo);
+    snprintf(filename_buf, sizeof(filename_buf), "tpgz_s%02d", i_slotNo);
 
     ret = CARDDelete(0, filename_buf);
     if (ret == CARD_RESULT_READY) {
@@ -492,4 +491,25 @@ gzButtonHints_s gzPracticeMenu_c::getButtonHints() {
         hints.count = 2;
     }
     return hints;
+}
+
+gzTabInfo_s gzPracticeMenu_c::getTabInfo() {
+    gzTabInfo_s info;
+    info.hasTabs = true;
+    info.currentTab = mCurrentTab;
+    info.numTabs = TAB_MAX;
+
+    // Calculate positions and widths based on text content
+    static const f32 TAB_PADDING = 5.0f;
+    f32 tabBaseX = mXPos;
+    info.tabX[0] = tabBaseX;
+    for (int i = 0; i < TAB_MAX; i++) {
+        mpTabHeaders[i]->updateBounds();
+        info.tabWidth[i] = mpTabHeaders[i]->mBounds.f.x;
+        if (i < TAB_MAX - 1) {
+            info.tabX[i + 1] = info.tabX[i] + info.tabWidth[i] + TAB_PADDING;
+        }
+    }
+
+    return info;
 }

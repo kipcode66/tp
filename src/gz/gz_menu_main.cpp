@@ -6,6 +6,7 @@
 #include "gz/gz_menu_flags.h"
 #include "gz/gz_menu_framework.h"
 #include "gz/gz_menu_heaps.h"
+#include "gz/gz_menu_inventory.h"
 #include "gz/gz_menu_memory.h"
 #include "gz/gz_menu_practice.h"
 #include "gz/gz_menu_settings.h"
@@ -50,7 +51,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mpMenus[MENU_FLAGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzFlagsMenu_c();
     mpMenus[MENU_FRAMEWORK] = new (gzHeap(GZ_GROUP_MENU), 4) gzFrameworkMenu_c();
     mpMenus[MENU_HEAPS] = new (gzHeap(GZ_GROUP_MENU), 4) gzHeapsMenu_c();
-    mpMenus[MENU_INVENTORY] = NULL;
+    mpMenus[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzInventoryMenu_c();
     mpMenus[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzMemoryMenu_c();
     mpMenus[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzPracticeMenu_c();
     mpMenus[MENU_SCENE] = NULL;
@@ -139,10 +140,9 @@ void gzMainMenu_c::execute() {
 void gzMainMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 Y_ALIGNMENT = 100.0f;
-    static const f32 LINE_SPACING = 22.0f;
     static const f32 DESCRIPTION_X = 0.0f;
 
+    f32 y_alignment = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
     u32 cursor_color = gzInfo_getCursorColor();
 
     if (mTransitioning) {
@@ -168,7 +168,7 @@ void gzMainMenu_c::draw() {
 
         for (int i = 0; i < LINE_NUM; i++) {
             if (mpLines[i] != NULL && mXPos >= g_gzInfo.mBackgroundXPos) {
-                f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+                f32 y_pos = y_alignment + ((i - 1) * gzMenuLayout::LINE_SPACING);
                 u32 color = (l_cursor->y == i && gzInfo_isMainMenuVisible() && gzInfo_isCursorTypeClassic()) ? gzInfo_getTextColor() : COLOR_WHITE;
                 mpLines[i]->draw(mXPos, y_pos, color);
             }
@@ -176,7 +176,7 @@ void gzMainMenu_c::draw() {
     } else {
         for (int i = 0; i < LINE_NUM; i++) {
             if (mpLines[i] != NULL) {
-                f32 y_pos = Y_ALIGNMENT + ((i - 1) * LINE_SPACING);
+                f32 y_pos = y_alignment + ((i - 1) * gzMenuLayout::LINE_SPACING);
 
                 if (l_cursor->y == i && gzInfo_isMainMenuVisible() && gzInfo_isCursorTypeClassic()) {
                     mpLines[i]->draw(mXPos, y_pos, gzInfo_getTextColor());
@@ -199,7 +199,7 @@ void gzMainMenu_c::draw() {
         // Update bounds for selected line and set cursor position
         if (mpLines[l_cursor->y] != NULL) {
             mpLines[l_cursor->y]->mText->updateBounds();
-            f32 y_pos = Y_ALIGNMENT + ((l_cursor->y - 1) * LINE_SPACING);
+            f32 y_pos = y_alignment + ((l_cursor->y - 1) * gzMenuLayout::LINE_SPACING);
             
             // setPos expects center position, so calculate center of text
             f32 cursorX = mXPos + (mpLines[l_cursor->y]->mText->getWidth() / 2.0f) + gzMenuLayout::TP_CURSOR_X_OFFSET;

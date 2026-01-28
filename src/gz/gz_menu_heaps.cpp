@@ -1009,7 +1009,7 @@ void gzHeapsMenu_c::draw() {
 
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 Y_ALIGNMENT = 115.0f;
+    f32 y_alignment = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT + 27.0f;  // Extra offset for heap visualization
     static const f32 LINE_SPACING = 55.0f;
     static const f32 MAX_VIS_WIDTH = 550.0f;
     static const f32 MIN_PIXELS_PER_BLOCK = 1.0f;
@@ -1026,7 +1026,7 @@ void gzHeapsMenu_c::draw() {
     for (int i = 0; i < HEAP_TRACKER_MAX_e; i++) {
         bool hasHeap = mTrackers[i]->mIsAram ? (mTrackers[i]->mpAramHeap != NULL) : (mTrackers[i]->mpHeap != NULL);
         if (hasHeap) {
-            f32 y_pos = Y_ALIGNMENT + (i * LINE_SPACING);
+            f32 y_pos = y_alignment + (i * LINE_SPACING);
 
             mTrackers[i]->mpTitle->draw(mXPos, y_pos - 40.0f, COLOR_WHITE);
 
@@ -1059,7 +1059,7 @@ void gzHeapsMenu_c::draw() {
     }
 
     f32 legend_x = mXPos;
-    f32 legend_y = Y_ALIGNMENT - 63.0f;
+    f32 legend_y = y_alignment - 63.0f;
     drawLegend(legend_x, legend_y);
 
     if (gzInfo_isSubMenuVisible() && gzInfo_getMenuDescription() != NULL) {

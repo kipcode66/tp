@@ -42,6 +42,8 @@ public:
     void setMainHiddenX(f32 x) { mMainHiddenX = x; }
     void setSubVisibleX(f32 x) { mSubVisibleX = x; }
     void setSubHiddenX(f32 x) { mSubHiddenX = x; }
+    f32 getSubVisibleX() const { return mSubVisibleX; }
+    f32 getSubHiddenX() const { return mSubHiddenX; }
 
     static const int LINE_NUM = MENU_MAX;
     

@@ -7,22 +7,22 @@
 class gzSettingsMenu_c : public gzMenu_c {
 public:
     enum gzSettingsMenu_Settings_e {
+        // Options (alphabetical)
+        SETTING_BOOT_TO_MENU,
         SETTING_CURSOR_TYPE,
         SETTING_DISPLAY_MODE,
         SETTING_DROP_SHADOW,
-        SETTING_FONT,
         SETTING_MENU_PAUSES_GAME,
-        SETTING_BOOT_TO_MENU,
         SETTING_MENU_SFX,
         SETTING_RELOAD_TYPE,
-        SETTING_THEME,
         SETTING_SWAP_EQUIPS,
+        SETTING_THEME,
+        // Actions
+        SETTING_COMMAND_COMBOS,
+        SETTING_MENU_POSITIONS,
         SETTING_SAVE_CARD,
         SETTING_LOAD_CARD,
         SETTING_DELETE_CARD,
-        SETTING_COMMAND_COMBOS,
-        SETTING_MENU_POSITIONS,
-        SETTING_CREDITS,
 
         SETTING_MAX
     };
@@ -104,22 +104,22 @@ public:
     gzConfirm_c* mpConfirm;
 
 private:
+    // Options (alphabetical)
+    gzBoolOptionLine* mpBootToMenu;
     gzListOptionLine* mpCursorType;
     gzBoolOptionLine* mpDisplayMode;
     gzBoolOptionLine* mpDropShadows;
-    gzListOptionLine* mpFont;
     gzBoolOptionLine* mpMenuPausesGame;
-    gzBoolOptionLine* mpBootToMenu;
     gzBoolOptionLine* mpMenuSfx;
     gzBoolOptionLine* mpReloadType;
-    gzListOptionLine* mpTheme;
     gzBoolOptionLine* mpSwapEquips;
+    gzListOptionLine* mpTheme;
+    // Actions
+    gzLine* mpCommandCombos;
+    gzLine* mpMenuPositions;
     gzLine* mpSaveCard;
     gzLine* mpLoadCard;
     gzLine* mpDeleteCard;
-    gzLine* mpCommandCombos;
-    gzLine* mpMenuPositions;
-    gzLine* mpCredits;
     gzLine* mpLines[LINE_NUM];
 };
 

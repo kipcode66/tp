@@ -226,6 +226,129 @@ void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color)
     GXEnd();
 }
 
+void gzDrawFilledRect(f32 x, f32 y, f32 w, f32 h, GXColor color) {
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x, y);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + w, y);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + w, y + h);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x, y + h);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXEnd();
+}
+
+void gzDrawFilledRoundedTopRect(f32 x, f32 y, f32 w, f32 h, f32 radius, GXColor color) {
+    GXSetNumChans(1);
+    GXSetNumTexGens(0);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+
+    // Clamp radius to half of width/height
+    if (radius > w / 2.0f) radius = w / 2.0f;
+    if (radius > h / 2.0f) radius = h / 2.0f;
+
+    // Draw main body (below the rounded corners)
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x, y + radius);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + w, y + radius);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + w, y + h);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x, y + h);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXEnd();
+
+    // Draw top middle strip (between the two corners)
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x + radius, y);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + w - radius, y);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + w - radius, y + radius);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXPosition2f32(x + radius, y + radius);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    GXEnd();
+
+    // Draw rounded corners using triangle fans
+    static const int CORNER_SEGMENTS = 8;
+    static const f32 PI = 3.14159265f;
+
+    // Top-left corner
+    f32 cx = x + radius;
+    f32 cy = y + radius;
+    GXBegin(GX_TRIANGLEFAN, GX_VTXFMT0, CORNER_SEGMENTS + 2);
+    GXPosition2f32(cx, cy);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    for (int i = 0; i <= CORNER_SEGMENTS; i++) {
+        f32 angle = PI + (PI / 2.0f) * (f32)i / (f32)CORNER_SEGMENTS;
+        GXPosition2f32(cx + radius * cosf(angle), cy + radius * sinf(angle));
+        GXColor4u8(color.r, color.g, color.b, color.a);
+    }
+    GXEnd();
+
+    // Top-right corner
+    cx = x + w - radius;
+    cy = y + radius;
+    GXBegin(GX_TRIANGLEFAN, GX_VTXFMT0, CORNER_SEGMENTS + 2);
+    GXPosition2f32(cx, cy);
+    GXColor4u8(color.r, color.g, color.b, color.a);
+    for (int i = 0; i <= CORNER_SEGMENTS; i++) {
+        f32 angle = (3.0f * PI / 2.0f) + (PI / 2.0f) * (f32)i / (f32)CORNER_SEGMENTS;
+        GXPosition2f32(cx + radius * cosf(angle), cy + radius * sinf(angle));
+        GXColor4u8(color.r, color.g, color.b, color.a);
+    }
+    GXEnd();
+}
+
 void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color) {
     GXSetNumChans(1);
     GXSetNumTexGens(0);
@@ -485,9 +608,9 @@ int gzInfo_c::_create() {
     }
 
     // initialize oxygen now instead of waiting to go to the file select screen
-    dComIfGp_setOxygen(600);
-    dComIfGp_setNowOxygen(600);
-    dComIfGp_setMaxOxygen(600);
+    dComIfGp_setOxygen(OXYGEN_MAX);
+    dComIfGp_setNowOxygen(OXYGEN_MAX);
+    dComIfGp_setMaxOxygen(OXYGEN_MAX);
 
     // load the default menu
     gzChangeMenu(mpMainMenu->getMenu(0));
@@ -805,6 +928,14 @@ int gzInfo_c::draw() {
                 f32 sepEndX = mpMainMenu->isTransitionForward() ? mSeparatorHiddenX : mSeparatorVisibleX;
                 mSeparatorXPos = calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
                                                    sepStartX, sepEndX, mpMainMenu->getTransitionDuration());
+
+                // Sync submenu position for tab connector drawing
+                if (mpCurrentMenu != NULL) {
+                    f32 subStartX = mpMainMenu->isTransitionForward() ? mpMainMenu->getSubHiddenX() : mpMainMenu->getSubVisibleX();
+                    f32 subEndX = mpMainMenu->isTransitionForward() ? mpMainMenu->getSubVisibleX() : mpMainMenu->getSubHiddenX();
+                    mpCurrentMenu->setXPos(calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
+                                                             subStartX, subEndX, mpMainMenu->getTransitionDuration()));
+                }
             } else {
                 mSeparatorXPos = (mCursor.x == 0) ? mSeparatorVisibleX : mSeparatorHiddenX;
             }
@@ -820,9 +951,23 @@ int gzInfo_c::draw() {
             mpBanner->draw(separatorLeft, separatorY - 1.0f, separatorRight - separatorLeft, 3.0f, false, false, false);
         }
 
+        // Draw submenu content box - left edge follows separator, clamped to menu bounds
+        {
+            f32 boxPadding = HIGHLIGHT_INSET + 2.0f;
+            f32 boxTop = separatorY;
+            f32 boxBottom = mBackgroundYPos + mBackgroundHeight - boxPadding;
+            f32 boxRight = mBackgroundXPos + mBackgroundWidth - boxPadding;
+            // Clamp left edge: follows separator when visible, snaps to left edge when separator is hidden
+            f32 boxLeft = (mSeparatorXPos > mBackgroundXPos + boxPadding) ? mSeparatorXPos : mBackgroundXPos + boxPadding;
+
         if (mSeparatorXPos > mBackgroundXPos + HIGHLIGHT_INSET) {
-            f32 separatorBottom = mBackgroundYPos + mBackgroundHeight - 10.0f;
+            f32 separatorBottom = boxBottom;
             gzDrawVerticalLine(mSeparatorXPos, separatorY, separatorBottom, 2.0f, separatorColor);
+        }
+
+            // Semi-transparent filled box (flat rectangle)
+            GXColor boxColor = gzGetThemedBorderColor(theme, (u8)((baseAlpha * 90) / 255));
+            gzDrawFilledRect(boxLeft, boxTop, boxRight - boxLeft, boxBottom - boxTop, boxColor);
         }
 
         if (mpIcon != NULL) mpIcon->draw(mIconXPos, mIconYPos, mIconWidth, mIconHeight, false, false, false);

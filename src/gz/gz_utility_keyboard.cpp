@@ -42,8 +42,7 @@ gzKeyboard_c::gzKeyboard_c(kbCallback finishCb, kbCallback returnCb, void* cbDat
     for (int i = 0; i < CHARACTER_COUNT; i++) {
         mpCharacters[i] = gzTextBox_allocate();
         if (mpCharacters[i] != NULL) {
-            char buf[2];
-            sprintf(buf, "%c", l_keyboard[i]);
+            char buf[2] = { l_keyboard[i], '\0' };
             mpCharacters[i]->setString(buf);
         }
     }

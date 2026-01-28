@@ -56,10 +56,9 @@ void gzMemoryMenu_c::execute() {
 void gzMemoryMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
-    static const f32 Y_ALIGNMENT = 100.0f;
-    static const f32 LINE_SPACING = 22.0f;
     static const int VISIBLE_LINES = 15;
 
+    f32 y_alignment = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
     u32 cursor_color = gzInfo_getCursorColor();
 
     int current_max_line = LINE_NUM;
@@ -73,7 +72,7 @@ void gzMemoryMenu_c::draw() {
         if (lineIdx >= current_max_line) break;
 
         if (currentLines[lineIdx] != NULL) {
-            f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
+            f32 y_pos = y_alignment + ((screenIdx - 1) * gzMenuLayout::LINE_SPACING);
             bool isSelected = (l_cursor->y == lineIdx && gzInfo_isSubMenuVisible());
 
             if (isSelected) {

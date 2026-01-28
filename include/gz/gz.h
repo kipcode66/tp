@@ -73,6 +73,17 @@ enum gzGroupId_e {
 #define COLOR_WILD_STRAWBERRY 0xFF43A4FF
 #define COLOR_ZESTY_CHARTREUSE 0x7FFF00FF
 
+static const u32 GZ_TEXT_COLORS[] = {
+    COLOR_AMETHYST, COLOR_AQUAMARINE, COLOR_BANANA_MANIA, COLOR_BOLD_CRIMSON,
+    COLOR_BUBBLEGUM_PINK, COLOR_CERULEAN, COLOR_COSMIC_COBALT, COLOR_ELECTRIC_BLUE,
+    COLOR_FIERY_ORANGE, COLOR_FLAMINGO_FEATHER, COLOR_GOLD_DROP, COLOR_LEMON_YELLOW,
+    COLOR_LIME_GREEN, COLOR_MAGENTA_MAGIC, COLOR_MIDNIGHT_BLUE, COLOR_MYSTICAL_PURPLE,
+    COLOR_NEON_CARROT, COLOR_PERIWINKLE, COLOR_SAPPHIRE_SPARKLE, COLOR_SHAMROCK_GREEN,
+    COLOR_SUNNY_YELLOW, COLOR_TANGERINE_TWIST, COLOR_TROPICAL_TURQUOISE, COLOR_VIVID_VIOLET,
+    COLOR_WILD_STRAWBERRY, COLOR_ZESTY_CHARTREUSE
+};
+static const int GZ_NUM_TEXT_COLORS = ARRAY_SIZE(GZ_TEXT_COLORS);
+
 struct gzCommandCombos_s {
     u32 mMoveLink;
     u32 mMoonJump;
@@ -358,45 +369,23 @@ public:
     }
 
     u32 nextTextColor() {
-        static const u32 sTextColors[] = {
-            COLOR_AMETHYST, COLOR_AQUAMARINE, COLOR_BANANA_MANIA, COLOR_BOLD_CRIMSON,
-            COLOR_BUBBLEGUM_PINK, COLOR_CERULEAN, COLOR_COSMIC_COBALT, COLOR_ELECTRIC_BLUE,
-            COLOR_FIERY_ORANGE, COLOR_FLAMINGO_FEATHER, COLOR_GOLD_DROP, COLOR_LEMON_YELLOW,
-            COLOR_LIME_GREEN, COLOR_MAGENTA_MAGIC, COLOR_MIDNIGHT_BLUE, COLOR_MYSTICAL_PURPLE,
-            COLOR_NEON_CARROT, COLOR_PERIWINKLE, COLOR_SAPPHIRE_SPARKLE, COLOR_SHAMROCK_GREEN,
-            COLOR_SUNNY_YELLOW, COLOR_TANGERINE_TWIST, COLOR_TROPICAL_TURQUOISE, COLOR_VIVID_VIOLET,
-            COLOR_WILD_STRAWBERRY, COLOR_ZESTY_CHARTREUSE
-        };
-        static const int sNumColors = sizeof(sTextColors) / sizeof(sTextColors[0]);
-
         u32 current = getTextColor();
-        for (int i = 0; i < sNumColors; i++) {
-            if (sTextColors[i] == current) {
-                return sTextColors[(i + 1) % sNumColors];
+        for (int i = 0; i < GZ_NUM_TEXT_COLORS; i++) {
+            if (GZ_TEXT_COLORS[i] == current) {
+                return GZ_TEXT_COLORS[(i + 1) % GZ_NUM_TEXT_COLORS];
             }
         }
-        return sTextColors[0];
+        return GZ_TEXT_COLORS[0];
     }
 
     u32 prevTextColor() {
-        static const u32 sTextColors[] = {
-            COLOR_AMETHYST, COLOR_AQUAMARINE, COLOR_BANANA_MANIA, COLOR_BOLD_CRIMSON,
-            COLOR_BUBBLEGUM_PINK, COLOR_CERULEAN, COLOR_COSMIC_COBALT, COLOR_ELECTRIC_BLUE,
-            COLOR_FIERY_ORANGE, COLOR_FLAMINGO_FEATHER, COLOR_GOLD_DROP, COLOR_LEMON_YELLOW,
-            COLOR_LIME_GREEN, COLOR_MAGENTA_MAGIC, COLOR_MIDNIGHT_BLUE, COLOR_MYSTICAL_PURPLE,
-            COLOR_NEON_CARROT, COLOR_PERIWINKLE, COLOR_SAPPHIRE_SPARKLE, COLOR_SHAMROCK_GREEN,
-            COLOR_SUNNY_YELLOW, COLOR_TANGERINE_TWIST, COLOR_TROPICAL_TURQUOISE, COLOR_VIVID_VIOLET,
-            COLOR_WILD_STRAWBERRY, COLOR_ZESTY_CHARTREUSE
-        };
-        static const int sNumColors = sizeof(sTextColors) / sizeof(sTextColors[0]);
-
         u32 current = getTextColor();
-        for (int i = 0; i < sNumColors; i++) {
-            if (sTextColors[i] == current) {
-                return sTextColors[(i - 1 + sNumColors) % sNumColors];
+        for (int i = 0; i < GZ_NUM_TEXT_COLORS; i++) {
+            if (GZ_TEXT_COLORS[i] == current) {
+                return GZ_TEXT_COLORS[(i - 1 + GZ_NUM_TEXT_COLORS) % GZ_NUM_TEXT_COLORS];
             }
         }
-        return sTextColors[0];
+        return GZ_TEXT_COLORS[0];
     }
 
     J2DPicture* mpIcon;
@@ -882,6 +871,8 @@ namespace gzPad {
 int gzPrint(int x, int y, u32 color, char const* string, ...);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
 void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color);
+void gzDrawFilledRect(f32 x, f32 y, f32 w, f32 h, GXColor color);
+void gzDrawFilledRoundedTopRect(f32 x, f32 y, f32 w, f32 h, f32 radius, GXColor color);
 void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color);
 void gzDrawHorizontalLine(f32 x1, f32 x2, f32 y, f32 thickness, GXColor color);
 void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor outlineColor, f32 outlineWidth);

@@ -16,7 +16,7 @@ static const u32 HEADER_SIZE = 8;
 
 gzWarpMenu_c::gzWarpMenu_c() {
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
-    mOptionsXOffset = -40.0f;
+    mOptionsXOffset = gzMenuLayout::OPTIONS_X_OFFSET - 30.0f;
 
     mpLines[WARP_TYPE] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("type", "stage type category");
     mpLines[WARP_STAGE] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("stage", "current stage");
@@ -355,7 +355,7 @@ void gzWarpMenu_c::draw() {
         }
         mPreview.loadPreview(mTypeIdx, mpCurrentStage->stage_id, mpCurrentRoom->room_id);
 
-        f32 previewX = 140.0f;
+        f32 previewX = 170.0f;
         f32 previewY = 200.0f;
         f32 previewW = 256.0f;
         f32 previewH = 192.0f;

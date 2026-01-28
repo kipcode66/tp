@@ -25,6 +25,7 @@ public:
     virtual void execute();
     virtual void draw();
     virtual u8 getHaihaiFlags(int idx);
+    virtual gzTabInfo_s getTabInfo();
 
 private:
     void updateDynamicLines();

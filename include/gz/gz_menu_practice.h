@@ -15,6 +15,7 @@ public:
     virtual void execute();
     virtual void draw();
     virtual gzButtonHints_s getButtonHints();
+    virtual gzTabInfo_s getTabInfo();
 
     // static const int VISIBLE_TABS = 3;
 

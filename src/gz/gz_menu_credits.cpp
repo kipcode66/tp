@@ -43,16 +43,15 @@ void gzCreditsMenu_c::execute() {
 
 void gzCreditsMenu_c::draw() {
     gzCursor* l_cursor = gzInfo_getCursor();
-    static const f32 Y_ALIGNMENT = 100.0f;
-    static const f32 LINE_SPACING = 22.0f;
     static const f32 HAIHAI_X_OFFSET = 6.0f;
     static const f32 HAIHAI_Y_OFFSET = 125.0f;
     static const f32 HAIHAI_Y_SIZE = 355.0f; // TODO(Pheenoh): make this dynamic based on VISIBLE_LINES and mFontSizeY
     static const int VISIBLE_LINES = 15;
     u32 cursor_color = gzInfo_getCursorColor();
 
+    f32 y_alignment = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
     f32 x_alignment_haihai = mXPos + HAIHAI_X_OFFSET;
-    f32 y_alignment_haihai = Y_ALIGNMENT + HAIHAI_Y_OFFSET;
+    f32 y_alignment_haihai = y_alignment + HAIHAI_Y_OFFSET;
 
     updateScrolling(LINE_NUM);
     s32 topLine = gzInfo_getTopLine();
@@ -64,7 +63,7 @@ void gzCreditsMenu_c::draw() {
         if (lineIdx >= LINE_NUM) break;
 
         if (mpLines[lineIdx] != NULL) {
-            f32 y_pos = Y_ALIGNMENT + ((screenIdx - 1) * LINE_SPACING);
+            f32 y_pos = y_alignment + ((screenIdx - 1) * gzMenuLayout::LINE_SPACING);
 
             if (l_cursor->y == lineIdx && gzInfo_isSubMenuVisible()) {
                 mpLines[lineIdx]->draw(mXPos, y_pos, cursor_color);
