@@ -52,6 +52,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mpMenus[MENU_FRAMEWORK] = new (gzHeap(GZ_GROUP_MENU), 4) gzFrameworkMenu_c();
     mpMenus[MENU_HEAPS] = new (gzHeap(GZ_GROUP_MENU), 4) gzHeapsMenu_c();
     mpMenus[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzInventoryMenu_c();
+    // mpMenus[MENU_INVENTORY] = NULL;
     mpMenus[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzMemoryMenu_c();
     mpMenus[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzPracticeMenu_c();
     mpMenus[MENU_SCENE] = NULL;

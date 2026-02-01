@@ -23,7 +23,7 @@ void gzMenu_c::execute() {
     }
 
     if (gzPad::getTrigA()) {
-        gzInfo_isMenuOption() ? gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK) : gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+        onAButtonSound();
     }
 
     updateScrolling(visibleLines);
@@ -328,6 +328,10 @@ bool gzMenu_c::checkInputWait() {
         return true;
     }
     return false;
+}
+
+void gzMenu_c::onAButtonSound() {
+    gzInfo_isMenuOption() ? gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK) : gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
 }
 
 bool gzMenu_c::handleBackButton(int mainMenuIndex) {

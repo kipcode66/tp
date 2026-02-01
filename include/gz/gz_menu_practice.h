@@ -41,7 +41,7 @@ public:
     class gzSavesTab_c {
     public:
         gzSavesTab_c(int i_category, int i_maxLines)
-            : mCategory(i_category), mMaxLines(i_maxLines), mLoaded(false) {
+            : mCategory(i_category), mMaxLines(i_maxLines) {
             mpLines = NULL;
         }
 
@@ -51,7 +51,6 @@ public:
         gzLine** mpLines;
         int mCategory;
         int mMaxLines;
-        bool mLoaded;
     };
 
     class gzMemfileTab_c {

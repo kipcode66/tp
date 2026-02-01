@@ -5,6 +5,9 @@
 #include "gz/gz_textbox.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 
+class CPaneMgr;
+class J2DScreen;
+
 class gzInventoryMenu_c : public gzMenu_c {
 public:
     enum gzInventoryMenu_Tabs_e {
@@ -23,8 +26,11 @@ public:
     virtual void execute();
     virtual void draw();
     virtual gzTabInfo_s getTabInfo();
+    virtual gzButtonHints_s getButtonHints();
     virtual void onEnterMenu();
     virtual void onExitMenu();
+    virtual void onAButtonSound() {}
+    void reloadRingScreen();
 
 private:
     void initRingItems();
@@ -67,6 +73,14 @@ private:
     J2DPicture* mpPickerTex[3][3];
     ResTIMG* mpPickerBuf[3][3];
     u8 mPickerItems[3];
+
+    J2DScreen* mpRingScreen;
+    CPaneMgr* mpCenterPaneMgr;
+    CPaneMgr* mpCirclePaneMgr;
+    CPaneMgr* mpLabelPaneMgr;
+    void* mpRingResData;
+
+    u8 mOriginalItem;
 };
 
 #endif // GZ_MENU_INVENTORY_H

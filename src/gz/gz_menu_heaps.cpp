@@ -163,19 +163,6 @@ void gzHeapsMenu_c::updateDynamicLines() {
         mTrackers[i]->mpFreePercent->setStringf("free %.1f%%", free_pct);
     }
 
-    if (mShowOverview) {
-        gzInfo_getMenuDescription()->setString("Press Y for heap details");
-    } else {
-        const char* next_view;
-        if (mViewMode == 0) {
-            next_view = "blocks";
-        } else if (mViewMode == 1) {
-            next_view = "percent";
-        } else {
-            next_view = "KB";
-        }
-        gzInfo_getMenuDescription()->setStringf("Press X to switch to %s view, Y for overview", next_view);
-    }
 }
 
 gzHeapsMenu_c::gzHeapsMenu_c() {
@@ -992,11 +979,6 @@ void gzHeapsMenu_c::drawOverview() {
     mpTextBoxPoolUsage->setStringf("textbox pool: %d / %d used", gzTextBox_getPoolUsed(), gzTextBox_getPoolSize());
     mpTextBoxPoolUsage->draw(mXPos, y_pos, COLOR_WHITE);
 
-    // Draw description
-    if (gzInfo_isSubMenuVisible() && gzInfo_getMenuDescription() != NULL) {
-        f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
-        gzInfo_getMenuDescription()->draw(0.0f, description_y, COLOR_WHITE, HBIND_CENTER);
-    }
 }
 
 void gzHeapsMenu_c::draw() {
@@ -1062,8 +1044,4 @@ void gzHeapsMenu_c::draw() {
     f32 legend_y = y_alignment - 63.0f;
     drawLegend(legend_x, legend_y);
 
-    if (gzInfo_isSubMenuVisible() && gzInfo_getMenuDescription() != NULL) {
-        f32 description_y = g_gzInfo.mBackgroundHeight + 25.0f;
-        gzInfo_getMenuDescription()->draw(0.0f, description_y, COLOR_WHITE, HBIND_CENTER);
-    }
 }

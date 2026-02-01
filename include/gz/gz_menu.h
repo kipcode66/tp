@@ -45,7 +45,9 @@ enum gzButtonType_e {
     GZ_BTN_B,
     GZ_BTN_X,
     GZ_BTN_Y,
-    GZ_BTN_Z
+    GZ_BTN_Z,
+    GZ_BTN_L,
+    GZ_BTN_R
 };
 
 struct gzButtonHint_s {
@@ -54,7 +56,7 @@ struct gzButtonHint_s {
 };
 
 struct gzButtonHints_s {
-    gzButtonHint_s hints[5];
+    gzButtonHint_s hints[7];
     int count;
 };
 
@@ -92,6 +94,7 @@ public:
 
     virtual void onEnterMenu();
     virtual void onExitMenu();
+    virtual void onAButtonSound();
     f32 getCurrentOptionsXOffset();
     bool isEntered() { return mIsEntered; }
     void setMenuScissor();

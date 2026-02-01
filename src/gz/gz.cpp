@@ -1,6 +1,7 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
 #include "gz/gz.h"
+#include "gz/gz_menu_inventory.h"
 #include "gz/gz_menu_main.h"
 #include "SSystem/SComponent/c_counter.h"
 #include "gz/gz_utility_notification.h"
@@ -742,6 +743,12 @@ int gzInfo_c::execute() {
             mpCapture = new (gzHeap(GZ_GROUP_UI), 4) gzCapture_c();
             mpCapture->setCaptureFlag();
         }
+        if (mpMainMenu != NULL) {
+            gzInventoryMenu_c* invMenu = (gzInventoryMenu_c*)mpMainMenu->getMenu(gzMainMenu_c::MENU_INVENTORY);
+            if (invMenu != NULL) {
+                invMenu->reloadRingScreen();
+            }
+        }
     }
 
     if (mDisplay) {
@@ -1034,12 +1041,13 @@ int gzInfo_c::draw() {
             gzButtonHints_s hints = mpCurrentMenu->getButtonHints();
             f32 currentX = hintStartX;
 
-            for (int i = 0; i < hints.count && i < 5; i++) {
+            for (int i = 0; i < hints.count && i < 7; i++) {
                 J2DPicture* base = NULL;
                 J2DPicture* text = NULL;
                 JUtility::TColor baseColor(255, 255, 255, 255);
                 f32 lSize = letterSizeAB;
                 f32 lOffset = letterOffsetAB;
+                const char* btnLabel = NULL;
                 switch (hints.hints[i].button) {
                 case GZ_BTN_A:
                     base = mpBtnABBase;
@@ -1072,25 +1080,45 @@ int gzInfo_c::draw() {
                     lSize = letterSizeXY;
                     lOffset = letterOffsetXY;
                     break;
+                case GZ_BTN_L:
+                    btnLabel = "L";
+                    break;
+                case GZ_BTN_R:
+                    btnLabel = "R";
+                    break;
                 }
                 f32 btnY = iconY - btnSize/2;
-                if (base != NULL) {
-                    base->setAlpha(255);
-                    base->setWhite(baseColor);
-                    base->draw(currentX, btnY, btnSize, btnSize, false, false, false);
-                }
-                if (text != NULL) {
-                    text->setAlpha(255);
-                    text->draw(currentX + lOffset, btnY + lOffset, lSize, lSize, false, false, false);
+                f32 btnWidth = btnSize;
+                if (btnLabel != NULL) {
+                    if (mpButtonHintText != NULL) {
+                        mpButtonHintText->setFontSize(18.0f, 18.0f);
+                        mpButtonHintText->setString(btnLabel);
+                        mpButtonHintText->updateBounds();
+                        mpButtonHintText->draw(currentX, textY, 0xAAAAAAFF);
+                        btnWidth = mpButtonHintText->getWidth();
+                    }
+                } else {
+                    if (base != NULL) {
+                        base->setAlpha(255);
+                        base->setWhite(baseColor);
+                        base->draw(currentX, btnY, btnSize, btnSize, false, false, false);
+                    }
+                    if (text != NULL) {
+                        text->setAlpha(255);
+                        text->draw(currentX + lOffset, btnY + lOffset, lSize, lSize, false, false, false);
+                    }
                 }
 
                 if (mpButtonHintText != NULL) {
                     mpButtonHintText->setFontSize(18.0f, 18.0f);
                     mpButtonHintText->setString(hints.hints[i].text);
-                    f32 textX = currentX + btnSize + 3.0f;
+                    mpButtonHintText->updateBounds();
+                    f32 textX = currentX + btnWidth + 3.0f;
                     mpButtonHintText->draw(textX, textY, COLOR_WHITE);
+                    currentX += btnWidth + 3.0f + mpButtonHintText->getWidth() + 8.0f;
+                } else {
+                    currentX += 90.0f;
                 }
-                currentX += 90.0f;
             }
         }
 

@@ -27,6 +27,13 @@ gzPracticeMenu_c::gzPracticeMenu_c()
     mpTabHeaders[TAB_GLITCHLESS]->setString("glitchless");
     mpTabHeaders[TAB_MEMFILES]->setString("memfiles");
 
+    mAnypSavesTab.create();
+    mNoSQSavesTab.create();
+    mAllDungeonsSavesTab.create();
+    mHundoSavesTab.create();
+    mGlitchlessSavesTab.create();
+    mMemfileTab.create();
+
     mMemfileTab.mNamesLoaded = false;
     for (int i = 0; i < MEMFILE_MAX_NUM; i++) mMemfileTab.mpLines[i] = NULL;
     mMemfileTab.mpKeyboard = NULL;
@@ -447,26 +454,43 @@ void gzPracticeMenu_c::gzMemfileTab_c::draw(f32 xPos) {
 }
 
 void gzPracticeMenu_c::gzSavesTab_c::create() {
-    int save_num = g_gzInfo.mSaveLoaderMng.getSaveEntryNum((gzSaveLoaderMng_c::SaveCategory_e)mCategory);
+    static const int METADATA_HEADER_SIZE = 32;
 
     mpLines = new (gzHeap(GZ_GROUP_MENU), 4) gzLine*[mMaxLines];
-    gzSaveLoaderMng_c::saveMetadata_s ATTRIBUTE_ALIGN(32) metadata;
-    for (int i = 0; i < mMaxLines; i++) {
-        if (i < save_num) {
-            g_gzInfo.mSaveLoaderMng.getSaveMetadata((gzSaveLoaderMng_c::SaveCategory_e)mCategory, i, &metadata);
-            mpLines[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine(metadata.name, metadata.desc);
-        } else {
+
+    int bufferSize = METADATA_HEADER_SIZE + (mMaxLines * sizeof(gzSaveLoaderMng_c::saveMetadata_s));
+    bufferSize = OSRoundUp32B(bufferSize);
+
+    u8* buffer = (u8*)JKRHeap::alloc(bufferSize, 32, NULL);
+    if (buffer != NULL) {
+        static const char* categoryPaths[] = {
+            "any_saves/any", "nosq_saves/nosq", "hundo_saves/hundo",
+            "ad_saves/ad", "glitchless_saves/glitchless"
+        };
+        char pathbuf[64];
+        snprintf(pathbuf, sizeof(pathbuf), "/gz/%s.bin", categoryPaths[mCategory]);
+        gzDVDLoadFile(pathbuf, buffer, bufferSize, 0);
+
+        int save_num = *(int*)buffer;
+        gzSaveLoaderMng_c::saveMetadata_s* metadata = (gzSaveLoaderMng_c::saveMetadata_s*)(buffer + METADATA_HEADER_SIZE);
+
+        for (int i = 0; i < mMaxLines; i++) {
+            if (i < save_num) {
+                mpLines[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine(metadata[i].name, metadata[i].desc);
+            } else {
+                mpLines[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("", "");
+            }
+        }
+
+        JKRHeap::free(buffer, NULL);
+    } else {
+        for (int i = 0; i < mMaxLines; i++) {
             mpLines[i] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("", "");
         }
     }
 }
 
 int gzPracticeMenu_c::gzSavesTab_c::execute() {
-    if (!mLoaded) {
-        create();
-        mLoaded = true;
-    }
-
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (gzPad::getTrigA()) {
