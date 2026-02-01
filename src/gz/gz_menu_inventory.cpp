@@ -77,8 +77,6 @@ static const u8 sRingItemList[] = {
 static const int sRingItemCount = sizeof(sRingItemList) / sizeof(u8);
 
 gzInventoryMenu_c::gzInventoryMenu_c() {
-    JKRExpHeap* j2dHeap = mDoExt_getJ2dHeap();
-    OSReport("creating gzInventoryMenu_c - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
     for (int i = 0; i < TAB_MAX_e; i++) {
@@ -87,7 +85,6 @@ gzInventoryMenu_c::gzInventoryMenu_c() {
     }
     mpTabHeaders[TAB_RING_MENU]->setString("ring menu");
     mpTabHeaders[TAB_PAUSE_MENU]->setString("pause menu");
-    OSReport("after tab headers - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
 
     mCurrentTab = TAB_RING_MENU;
     mCurrentSlot = 0;
@@ -121,34 +118,22 @@ gzInventoryMenu_c::gzInventoryMenu_c() {
     mpRingResData = NULL;
     JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
     JKRHeap* oldHeap = heap->becomeCurrentHeap();
-    OSReport("after becomeCurrentHeap - J2DHeap free: %d, current heap: %p, gzHeap: %p\n",
-             j2dHeap->getTotalFreeSize(), JKRHeap::getCurrentHeap(), heap);
     mpRingScreen = new (heap, 4) J2DScreen();
-    OSReport("after new J2DScreen - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
 
-    // Inline dPaneClass_setPriority with logging
-    JKRArchive* archive = dComIfGp_getRingResArchive();
+    JKRArchive* archive = gzInfo_getGzRingArchive();
     const char* resName = "SCRN/zelda_item_select_icon3_center_parts.blo";
     u32 size = dLib_getExpandSizeFromAramArchive((JKRAramArchive*)archive, resName);
-    OSReport("after getExpandSize - J2DHeap free: %d, size: %d\n", j2dHeap->getTotalFreeSize(), size);
     mpRingResData = heap->alloc(size, 0x20);
-    OSReport("after alloc resData - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
     u32 len = archive->readResource(mpRingResData, size, resName);
-    OSReport("after readResource - J2DHeap free: %d, len: %d\n", j2dHeap->getTotalFreeSize(), len);
     if (len != 0) {
         JSUMemoryInputStream stream(mpRingResData, len);
         mpRingScreen->setPriority(&stream, 0x20000, archive);
     }
-    OSReport("after setPriority - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
     dPaneClass_showNullPane(mpRingScreen);
     mpCenterPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'center_n', 2, (JKRExpHeap*)heap);
-    OSReport("after mpCenterPaneMgr - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
     mpCirclePaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'circle_n', 2, (JKRExpHeap*)heap);
-    OSReport("after mpCirclePaneMgr - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
     mpLabelPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'label_n', 1, (JKRExpHeap*)heap);
-    OSReport("after mpLabelPaneMgr - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
     oldHeap->becomeCurrentHeap();
-    OSReport("end of constructor - J2DHeap free: %d\n", j2dHeap->getTotalFreeSize());
 }
 
 gzInventoryMenu_c::~gzInventoryMenu_c() {
@@ -156,7 +141,6 @@ gzInventoryMenu_c::~gzInventoryMenu_c() {
 }
 
 void gzInventoryMenu_c::_delete() {
-    OSReport("deleting gzInventoryMenu_c\n");
     for (int i = 0; i < TAB_MAX_e; i++) {
         gzTextBox_free(mpTabHeaders[i]);
         mpTabHeaders[i] = NULL;
@@ -215,7 +199,7 @@ void gzInventoryMenu_c::reloadRingScreen() {
     mpRingScreen = new (heap, 4) J2DScreen();
     dPaneClass_setPriority(&mpRingResData, heap, mpRingScreen,
                            "SCRN/zelda_item_select_icon3_center_parts.blo", 0x20000,
-                           dComIfGp_getRingResArchive());
+                           gzInfo_getGzRingArchive());
     dPaneClass_showNullPane(mpRingScreen);
     mpCenterPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'center_n', 2, (JKRExpHeap*)heap);
     mpCirclePaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'circle_n', 2, (JKRExpHeap*)heap);

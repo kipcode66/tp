@@ -21,6 +21,7 @@ class gzNotification_c;
 class gzToolsMng_c;
 class dSelect_cursor_c;
 class gzCapture_c;
+class JKRArchive;
 class JKRHeap;
 
 #define COLOR_WHITE 0xFFFFFFFFu
@@ -422,7 +423,6 @@ public:
     bool mDisplay;
     bool mGZInitialized;
 
-    // Input state for menu navigation (stick + d-pad with repeat)
     u32 mStickTriggers;
     u32 mRepeatDirection;
     s16 mRepeatCounter;
@@ -453,6 +453,7 @@ public:
     f32 mSeparatorHiddenX;
 
     u8 mGzGroupID;
+    JKRArchive* mpGzRingArchive; // loaded separately due to j2dheap issues
 };
 
 extern gzInfo_c g_gzInfo;
@@ -485,6 +486,8 @@ inline u32 gzInfo_prevTextColor() { return g_gzInfo.prevTextColor(); }
 //implementation tbd
 inline u32 gzInfo_nextFont() { return 0; }
 inline u32 gzInfo_prevFont() { return 0; }
+
+inline JKRArchive* gzInfo_getGzRingArchive() { return g_gzInfo.mpGzRingArchive; }
 
 inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }

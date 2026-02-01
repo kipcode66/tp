@@ -11,6 +11,7 @@
 #include "m_Do/m_Do_controller_pad.h"
 #include "m_Do/m_Do_graphic.h"
 #include "JSystem/J2DGraph/J2DOrthoGraph.h"
+#include "JSystem/JKernel/JKRArchive.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JUtility/JUTDbPrint.h"
 #include "m_Do/m_Do_MemCard.h"
@@ -480,6 +481,14 @@ int gzInfo_c::_create() {
     // Create dedicated GZ heap
     gzCreateHeap();
 
+    // Mount ring archive with gzHeap for gz menu use (avoids J2DHeap allocations)
+    mpGzRingArchive = JKRArchive::mount(
+        "/res/Layout/ringres.arc",
+        JKRArchive::MOUNT_ARAM,
+        gzHeap(GZ_GROUP_MENU),
+        JKRArchive::MOUNT_DIRECTION_HEAD
+    );
+
     // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
 
@@ -621,6 +630,12 @@ int gzInfo_c::_create() {
 
 int gzInfo_c::_delete() {
     OSReport("deleting gzInfo_c\n");
+
+    if (mpGzRingArchive != NULL) {
+        delete mpGzRingArchive;
+        mpGzRingArchive = NULL;
+    }
+
     delete mpIcon;
     mpIcon = NULL;
 
