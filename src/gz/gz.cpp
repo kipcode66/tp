@@ -1,7 +1,6 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
 #include "gz/gz.h"
-#include "gz/gz_menu_inventory.h"
 #include "gz/gz_menu_main.h"
 #include "SSystem/SComponent/c_counter.h"
 #include "gz/gz_utility_notification.h"
@@ -12,6 +11,7 @@
 #include "m_Do/m_Do_graphic.h"
 #include "JSystem/J2DGraph/J2DOrthoGraph.h"
 #include "JSystem/JKernel/JKRArchive.h"
+#include "JSystem/JKernel/JKRAramArchive.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JUtility/JUTDbPrint.h"
 #include "m_Do/m_Do_MemCard.h"
@@ -451,6 +451,7 @@ void gzInfo_c::loadDefaultSettings() {
     mRepeatCounter = 0;
 
     mDisplay = false;
+    mWasPausedOnOpen = false;
     mpCapture = NULL;
 
     mBackgroundXPos = 5.0f;
@@ -480,14 +481,6 @@ int gzInfo_c::_create() {
 
     // Create dedicated GZ heap
     gzCreateHeap();
-
-    // Mount ring archive with gzHeap for gz menu use (avoids J2DHeap allocations)
-    mpGzRingArchive = JKRArchive::mount(
-        "/res/Layout/ringres.arc",
-        JKRArchive::MOUNT_ARAM,
-        gzHeap(GZ_GROUP_MENU),
-        JKRArchive::MOUNT_DIRECTION_HEAD
-    );
 
     // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
@@ -583,6 +576,65 @@ int gzInfo_c::_create() {
         }
     }
 
+    mpBtnLRBase = NULL;
+    mpBtnLText = NULL;
+    mpBtnRText = NULL;
+    JKRArchive* buttonArc = dComIfGp_getMeterButtonArchive();
+    if (buttonArc != NULL) {
+        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
+        JKRHeap* oldHeap = gfxHeap->becomeCurrentHeap();
+
+        ResTIMG* src = (ResTIMG*)buttonArc->getResource('TIMG', "tt_zelda_button_l_base.bti");
+        if (src != NULL) {
+            u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                              src->mipmapEnabled, src->mipmapCount);
+            u32 totalSize = src->imageOffset + imgSize;
+            void* buf = gfxHeap->alloc(totalSize, 32);
+            if (buf != NULL) {
+                memcpy(buf, src, totalSize);
+                mpBtnLRBase = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+            }
+        }
+
+        oldHeap->becomeCurrentHeap();
+    }
+
+    JKRArchive* ringArc = dComIfGp_getRingResArchive();
+    if (ringArc != NULL) {
+        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
+
+        ResTIMG* src;
+        {
+            JKRHeapOverrideScope scope(gfxHeap);
+            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_l_text.bti");
+        }
+        if (src != NULL) {
+            u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                              src->mipmapEnabled, src->mipmapCount);
+            u32 totalSize = src->imageOffset + imgSize;
+            void* buf = gfxHeap->alloc(totalSize, 32);
+            if (buf != NULL) {
+                memcpy(buf, src, totalSize);
+                mpBtnLText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+            }
+        }
+
+        {
+            JKRHeapOverrideScope scope(gfxHeap);
+            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_r_text.bti");
+        }
+        if (src != NULL) {
+            u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                              src->mipmapEnabled, src->mipmapCount);
+            u32 totalSize = src->imageOffset + imgSize;
+            void* buf = gfxHeap->alloc(totalSize, 32);
+            if (buf != NULL) {
+                memcpy(buf, src, totalSize);
+                mpBtnRText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+            }
+        }
+    }
+
     mpHeader = gzTextBox_allocate();
     mpHeader->setString("tpgz v2.0.0");
 
@@ -631,11 +683,6 @@ int gzInfo_c::_create() {
 int gzInfo_c::_delete() {
     OSReport("deleting gzInfo_c\n");
 
-    if (mpGzRingArchive != NULL) {
-        delete mpGzRingArchive;
-        mpGzRingArchive = NULL;
-    }
-
     delete mpIcon;
     mpIcon = NULL;
 
@@ -672,6 +719,12 @@ int gzInfo_c::_delete() {
     mpBtnZBase = NULL;
     delete mpBtnZText;
     mpBtnZText = NULL;
+    delete mpBtnLRBase;
+    mpBtnLRBase = NULL;
+    delete mpBtnLText;
+    mpBtnLText = NULL;
+    delete mpBtnRText;
+    mpBtnRText = NULL;
 
     mpCurrentMenu = NULL;
 
@@ -752,17 +805,14 @@ int gzInfo_c::execute() {
             mInputWaitTimer = 2;
     }
 
-    // Handle menu OPEN transition
     if (!wasDisplayed && mDisplay) {
-        if (isMenuPausesGame() && !dComIfGp_isPauseFlag() && mpCapture == NULL) {
+        mWasPausedOnOpen = dComIfGp_isPauseFlag();
+        if (isMenuPausesGame() && !mWasPausedOnOpen && mpCapture == NULL) {
             mpCapture = new (gzHeap(GZ_GROUP_UI), 4) gzCapture_c();
             mpCapture->setCaptureFlag();
         }
-        if (mpMainMenu != NULL) {
-            gzInventoryMenu_c* invMenu = (gzInventoryMenu_c*)mpMainMenu->getMenu(gzMainMenu_c::MENU_INVENTORY);
-            if (invMenu != NULL) {
-                invMenu->reloadRingScreen();
-            }
+        if (mpCurrentMenu != NULL) {
+            mpCurrentMenu->onHighlight();
         }
     }
 
@@ -779,12 +829,13 @@ int gzInfo_c::execute() {
         if (mpMainMenu != NULL && mCursor.x == 0) mpMainMenu->execute();
         if (mpCurrentMenu != NULL && mCursor.x > 0) mpCurrentMenu->execute();
 
-        // Handle setting toggle while menu is displayed
         if (!isMenuPausesGame() && mpCapture != NULL) {
             delete mpCapture;
             mpCapture = NULL;
-            dComIfGp_offPauseFlag();
-        } else if (isMenuPausesGame() && mpCapture == NULL && !dComIfGp_isPauseFlag()) {
+            if (!mWasPausedOnOpen) {
+                dComIfGp_offPauseFlag();
+            }
+        } else if (isMenuPausesGame() && mpCapture == NULL && !mWasPausedOnOpen && !dComIfGp_isPauseFlag()) {
             mpCapture = new (gzHeap(GZ_GROUP_UI), 4) gzCapture_c();
             mpCapture->setCaptureFlag();
         }
@@ -794,13 +845,17 @@ int gzInfo_c::execute() {
         mSaveLoaderMng.execute();
     }
 
-    // Handle menu CLOSE transition
     if (wasDisplayed && !mDisplay) {
+        if (mpCurrentMenu != NULL) {
+            mpCurrentMenu->onUnhighlight();
+        }
         if (mpCapture != NULL) {
             delete mpCapture;
             mpCapture = NULL;
         }
-        dComIfGp_offPauseFlag();
+        if (!mWasPausedOnOpen) {
+            dComIfGp_offPauseFlag();
+        }
     }
 
     // Update automation state for Python scripts
@@ -1022,12 +1077,14 @@ int gzInfo_c::draw() {
             mpDecoration->draw(bannerX + 2.0f, bannerY + 2.0f, swirlW, swirlH, false, false, false);
         }
 
-        f32 hintStartX = mSeparatorVisibleX + 55.0f;
+        f32 hintStartX = mSeparatorVisibleX;
         f32 btnSize = 16.0f;
         f32 letterSizeAB = 10.0f;
         f32 letterSizeXY = 8.0f;
+        f32 letterSizeZ = 6.0f;
         f32 letterOffsetAB = (btnSize - letterSizeAB) / 2.0f;
         f32 letterOffsetXY = (btnSize - letterSizeXY) / 2.0f;
+        f32 letterOffsetZ = (btnSize - letterSizeZ) / 2.0f;
 
         // Gamecube Button Colors
         static const JUtility::TColor colorA(0, 200, 80, 255);
@@ -1092,19 +1149,40 @@ int gzInfo_c::draw() {
                     base = mpBtnZBase;
                     text = mpBtnZText;
                     baseColor = colorZ;
-                    lSize = letterSizeXY;
-                    lOffset = letterOffsetXY;
+                    lSize = letterSizeZ;
+                    lOffset = letterOffsetZ;
                     break;
                 case GZ_BTN_L:
-                    btnLabel = "L";
+                    base = mpBtnLRBase;
+                    text = mpBtnLText;
                     break;
                 case GZ_BTN_R:
-                    btnLabel = "R";
+                    base = mpBtnLRBase;
+                    text = mpBtnRText;
                     break;
                 }
                 f32 btnY = iconY - btnSize/2;
                 f32 btnWidth = btnSize;
-                if (btnLabel != NULL) {
+                if (hints.hints[i].button == GZ_BTN_L || hints.hints[i].button == GZ_BTN_R) {
+                    bool isRBtn = (hints.hints[i].button == GZ_BTN_R);
+                    f32 lrWidth = 27.0f;
+                    f32 lrHeight = 16.0f;
+                    f32 lrY = iconY - lrHeight/2 + 2.0f;
+                    if (base != NULL) {
+                        base->setAlpha(255);
+                        base->setWhite(colorXY);
+                        base->draw(currentX, lrY, lrWidth, lrHeight, isRBtn, false, false);
+                    }
+                    if (text != NULL) {
+                        f32 textWidth = 4.0f;
+                        f32 textHeight = 7.0f;
+                        f32 textX = currentX + (lrWidth - textWidth) / 2.0f + 1.0f;
+                        f32 textY = lrY + (lrHeight - textHeight) / 2.0f - 2.0f;
+                        text->setAlpha(255);
+                        text->draw(textX, textY, textWidth, textHeight, false, false, false);
+                    }
+                    btnWidth = lrWidth;
+                } else if (btnLabel != NULL) {
                     if (mpButtonHintText != NULL) {
                         mpButtonHintText->setFontSize(18.0f, 18.0f);
                         mpButtonHintText->setString(btnLabel);

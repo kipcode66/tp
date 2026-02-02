@@ -19,6 +19,27 @@ public:
 
     static const int RING_MAX_SLOTS = 24;
 
+    static const int PAUSE_MAX_ROWS = 5;
+    static const int PAUSE_MAX_COLS = 4;
+
+    enum PauseSlotType_e {
+        PAUSE_SLOT_SWORD_WOODEN,
+        PAUSE_SLOT_SWORD_MASTER,
+        PAUSE_SLOT_SHIELD_WOODEN,
+        PAUSE_SLOT_SHIELD_HYLIAN,
+        PAUSE_SLOT_TUNIC_HERO,
+        PAUSE_SLOT_TUNIC_ZORA,
+        PAUSE_SLOT_TUNIC_MAGIC,
+        PAUSE_SLOT_WALLET,
+        PAUSE_SLOT_QUIVER,
+        PAUSE_SLOT_BUGS,
+        PAUSE_SLOT_SKILLS,
+        PAUSE_SLOT_SCENT,
+        PAUSE_SLOT_POES,
+        PAUSE_SLOT_FISH,
+        PAUSE_SLOT_LETTERS,
+    };
+
     gzInventoryMenu_c();
     ~gzInventoryMenu_c();
 
@@ -29,8 +50,11 @@ public:
     virtual gzButtonHints_s getButtonHints();
     virtual void onEnterMenu();
     virtual void onExitMenu();
+    virtual void onHighlight();
+    virtual void onUnhighlight();
     virtual void onAButtonSound() {}
     void reloadRingScreen();
+    void freeRingScreen();
 
 private:
     void initRingItems();
@@ -51,8 +75,20 @@ private:
     const char* getItemName(u8 itemId);
 
 private:
-    gzTextBox* mpTabHeaders[TAB_MAX_e];
+    void initPauseMenu();
+    void executePauseMenu();
+    void drawPauseMenuContent();
+    void freePauseTextures();
+    void freePauseItemTextures();
+    void loadPauseItemTexture(int row, int col, u8 itemId);
+    void cyclePauseSlot(int row, int col);
+    void equipPauseSlot(int row, int col);
+    u8 getItemForSlot(int row, int col);
+    int getMaxColsForRow(int row);
+    void readPauseSlotStates();
+    bool isSlotEquipped(int row, int col);
 
+private:
     int mCurrentTab;
     int mCurrentSlot;
     int mItemsTotal;
@@ -81,6 +117,16 @@ private:
     void* mpRingResData;
 
     u8 mOriginalItem;
+
+    int mPauseCursorRow;
+    int mPauseCursorCol;
+    J2DPicture* mpPauseItemTex[PAUSE_MAX_ROWS][PAUSE_MAX_COLS][3];
+    ResTIMG* mpPauseItemBuf[PAUSE_MAX_ROWS][PAUSE_MAX_COLS][3];
+    u8 mPauseSlotState[PAUSE_MAX_ROWS][PAUSE_MAX_COLS];
+    bool mPauseMenuInitialized;
+
+    J2DPicture* mpPauseFramePane;
+    ResTIMG* mpPauseFrameBuf;
 };
 
 #endif // GZ_MENU_INVENTORY_H

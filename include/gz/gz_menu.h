@@ -94,6 +94,8 @@ public:
 
     virtual void onEnterMenu();
     virtual void onExitMenu();
+    virtual void onHighlight() {}
+    virtual void onUnhighlight() {}
     virtual void onAButtonSound();
     f32 getCurrentOptionsXOffset();
     bool isEntered() { return mIsEntered; }

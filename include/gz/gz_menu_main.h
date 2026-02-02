@@ -4,6 +4,7 @@
 #include "gz/gz_menu.h"
 #include "gz/gz_textbox.h"
 #include "JSystem/J2DGraph/J2DAnimation.h"
+#include "JSystem/J2DGraph/J2DPicture.h"
 
 class gzMainMenu_c : public gzMenu_c {
 public:
@@ -46,9 +47,13 @@ public:
     f32 getSubHiddenX() const { return mSubHiddenX; }
 
     static const int LINE_NUM = MENU_MAX;
-    
+    static const int ICON_SIZE = 18;
+    static const int ICON_PADDING = 2;
+
 private:
     gzLine* mpLines[LINE_NUM];
+    J2DPicture* mpIcons[LINE_NUM];
+    void* mpIconBuffers[LINE_NUM];
     gzMenu_c* mpMenus[LINE_NUM];
     dMeterHaihai_c* mpMeterHaihai;
     gzMenu_c* mpTransitioningMenu;
@@ -67,7 +72,13 @@ private:
 };
 
 inline void gzChangeMenu(gzMenu_c* i_menu) {
+    if (g_gzInfo.mpCurrentMenu != NULL) {
+        g_gzInfo.mpCurrentMenu->onUnhighlight();
+    }
     g_gzInfo.mpCurrentMenu = i_menu;
+    if (i_menu != NULL) {
+        i_menu->onHighlight();
+    }
 }
 
 inline f32 calcSlidePosition(u32 currentFrame, u32 startFrame, f32 startPos, f32 endPos, f32 duration) {

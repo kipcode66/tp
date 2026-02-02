@@ -404,6 +404,9 @@ public:
     J2DPicture* mpBtnYText;
     J2DPicture* mpBtnZBase;
     J2DPicture* mpBtnZText;
+    J2DPicture* mpBtnLRBase;
+    J2DPicture* mpBtnLText;
+    J2DPicture* mpBtnRText;
     gzTextBox* mpHeader;
 
     gzTextBox* mpButtonHintText;
@@ -422,6 +425,7 @@ public:
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
+    bool mWasPausedOnOpen;
 
     u32 mStickTriggers;
     u32 mRepeatDirection;
@@ -453,7 +457,6 @@ public:
     f32 mSeparatorHiddenX;
 
     u8 mGzGroupID;
-    JKRArchive* mpGzRingArchive; // loaded separately due to j2dheap issues
 };
 
 extern gzInfo_c g_gzInfo;
@@ -487,7 +490,6 @@ inline u32 gzInfo_prevTextColor() { return g_gzInfo.prevTextColor(); }
 inline u32 gzInfo_nextFont() { return 0; }
 inline u32 gzInfo_prevFont() { return 0; }
 
-inline JKRArchive* gzInfo_getGzRingArchive() { return g_gzInfo.mpGzRingArchive; }
 
 inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
