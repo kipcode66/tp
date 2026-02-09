@@ -72,8 +72,8 @@ gzMainMenu_c::gzMainMenu_c() {
     mpMenus[MENU_FLAGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzFlagsMenu_c();
     mpMenus[MENU_FRAMEWORK] = new (gzHeap(GZ_GROUP_MENU), 4) gzFrameworkMenu_c();
     mpMenus[MENU_HEAPS] = new (gzHeap(GZ_GROUP_MENU), 4) gzHeapsMenu_c();
-    mpMenus[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzInventoryMenu_c();
-    // mpMenus[MENU_INVENTORY] = NULL;
+    // mpMenus[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzInventoryMenu_c();
+    mpMenus[MENU_INVENTORY] = NULL;
     mpMenus[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzMemoryMenu_c();
     mpMenus[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzPracticeMenu_c();
     mpMenus[MENU_SCENE] = NULL;
@@ -94,15 +94,7 @@ gzMainMenu_c::gzMainMenu_c() {
     mpLines[MENU_TOOLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("tools", "use various tools for practice and testing");
     mpLines[MENU_WARPING] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("warping", "warp to any area");
 
-    for (int i = 0; i < LINE_NUM; i++) {
-        mpIconBuffers[i] = JKRHeap::alloc(ICON_BTI_SIZE, 32, gzHeap(GZ_GROUP_GRAPHICS));
-        if (mpIconBuffers[i] != NULL) {
-            gzDVDLoadFile(ICON_PATHS[i], mpIconBuffers[i], ICON_BTI_SIZE, 0);
-            mpIcons[i] = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)mpIconBuffers[i]);
-        } else {
-            mpIcons[i] = NULL;
-        }
-    }
+    loadIcons();
 
     mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
 
@@ -135,7 +127,30 @@ void gzMainMenu_c::_delete() {
         delete mpIcons[i];
         mpIcons[i] = NULL;
 
+        JKRHeap::free(mpIconBuffers[i], gzHeap(GZ_GROUP_GRAPHICS));
+        mpIconBuffers[i] = NULL;
+    }
+}
+
+void gzMainMenu_c::loadIcons() {
+    for (int i = 0; i < LINE_NUM; i++) {
+        mpIconBuffers[i] = JKRHeap::alloc(ICON_BTI_SIZE, 32, gzHeap(GZ_GROUP_GRAPHICS));
+
         if (mpIconBuffers[i] != NULL) {
+            gzDVDLoadFile(ICON_PATHS[i], mpIconBuffers[i], ICON_BTI_SIZE, 0);
+            mpIcons[i] = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)mpIconBuffers[i]);
+        } else {
+            mpIcons[i] = NULL;
+        }
+    }
+}
+
+void gzMainMenu_c::unloadIcons() {
+    for (int i = 0; i < LINE_NUM; i++) {
+        if (mpIcons[i] != NULL) {
+            JKRHeap::free(mpIcons[i], gzHeap(GZ_GROUP_GRAPHICS));
+            mpIcons[i] = NULL;
+
             JKRHeap::free(mpIconBuffers[i], gzHeap(GZ_GROUP_GRAPHICS));
             mpIconBuffers[i] = NULL;
         }
@@ -168,6 +183,7 @@ void gzMainMenu_c::execute() {
 
     if (gzPad::getTrigA()) {
         if (g_gzInfo.mpCurrentMenu != NULL) {
+            unloadIcons();
             startForwardTransition();
             l_cursor->x++;
             l_cursor->y = 0;

@@ -4775,4 +4775,8 @@ inline void dComIfGs_onSaveDungeonItemWarp(int i_stageNo) {
     g_dComIfG_gameInfo.info.getSavedata().getSave(i_stageNo).getBit().onDungeonItemWarp();
 }
 
+inline void dComIfGs_setPohSpiritNum(u8 num) {
+    g_dComIfG_gameInfo.info.getPlayer().getCollect().setPohNum(num);
+}
+
 #endif /* D_COM_D_COM_INF_GAME_H */

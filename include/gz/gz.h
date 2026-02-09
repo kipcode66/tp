@@ -189,6 +189,7 @@ public:
     int _delete();
     int execute();
     int draw();
+    void loadMenuTextures();
     void updateStickTriggers();
 
     void loadDefaultSettings();
@@ -425,6 +426,7 @@ public:
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
+    bool mMenuTexturesLoaded;
     bool mWasPausedOnOpen;
 
     u32 mStickTriggers;

@@ -15,25 +15,6 @@
 #include "JSystem/JMath/JMath.h"
 #include "JSystem/J2DGraph/J2DScreen.h"
 
-static void freeArchiveCacheInHeap(JKRArchive* archive, JKRHeap* heap) {
-    if (archive == NULL || heap == NULL) {
-        return;
-    }
-
-    void* heapStart = heap->getStartAddr();
-    void* heapEnd = heap->getEndAddr();
-    JKRArchive::SDIFileEntry* files = archive->mFiles;
-    u32 count = archive->mArcInfoBlock->num_file_entries;
-
-    for (u32 i = 0; i < count; i++) {
-        void* data = files[i].data;
-        if (data != NULL && data >= heapStart && data < heapEnd) {
-            heap->free(data);
-            files[i].data = NULL;
-        }
-    }
-}
-
 static const u8 sRingItemList[] = {
     fpcNm_ITEM_NOENTRY_19,
     fpcNm_ITEM_BOOMERANG,
@@ -137,6 +118,8 @@ gzInventoryMenu_c::gzInventoryMenu_c() {
     mPauseMenuInitialized = false;
     mpPauseFramePane = NULL;
     mpPauseFrameBuf = NULL;
+    mpPoeIconPane = NULL;
+    mpPoeIconBuf = NULL;
     for (int row = 0; row < PAUSE_MAX_ROWS; row++) {
         for (int col = 0; col < PAUSE_MAX_COLS; col++) {
             mPauseSlotState[row][col] = 0;
@@ -206,8 +189,8 @@ void gzInventoryMenu_c::onExitMenu() {
 }
 
 void gzInventoryMenu_c::onHighlight() {
-    reloadRingScreen();
     if (mCurrentTab == TAB_RING_MENU) {
+        reloadRingScreen();
         initRingItems();
     } else if (mCurrentTab == TAB_PAUSE_MENU) {
         initPauseMenu();
@@ -225,18 +208,17 @@ void gzInventoryMenu_c::reloadRingScreen() {
 
     JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
     JKRHeap* oldHeap = heap->becomeCurrentHeap();
-    mpRingScreen = new (heap, 4) J2DScreen();
 
-    {
-        JKRHeapOverrideScope scope(heap);
-        dPaneClass_setPriority(&mpRingResData, heap, mpRingScreen,
-                               "SCRN/zelda_item_select_icon3_center_parts.blo", 0x20000,
-                               dComIfGp_getRingResArchive());
-        dPaneClass_showNullPane(mpRingScreen);
-        mpCenterPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'center_n', 2, (JKRExpHeap*)heap);
-        mpCirclePaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'circle_n', 2, (JKRExpHeap*)heap);
-        mpLabelPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'label_n', 1, (JKRExpHeap*)heap);
-    }
+    mpRingScreen = new (heap, 4) J2DScreen();
+    JKRHeapOverrideScope heapScope(heap);
+    dPaneClass_setPriority(&mpRingResData, heap, mpRingScreen,
+                            "SCRN/zelda_item_select_icon3_center_parts.blo", 0x20000,
+                            dComIfGp_getRingResArchive());
+    dPaneClass_showNullPane(mpRingScreen);
+
+    mpCenterPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'center_n', 2, (JKRExpHeap*)heap);
+    mpCirclePaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'circle_n', 2, (JKRExpHeap*)heap);
+    mpLabelPaneMgr = new (heap, 4) CPaneMgr(mpRingScreen, 'label_n', 1, (JKRExpHeap*)heap);
 
     oldHeap->becomeCurrentHeap();
 }
@@ -244,18 +226,20 @@ void gzInventoryMenu_c::reloadRingScreen() {
 void gzInventoryMenu_c::freeRingScreen() {
     delete mpLabelPaneMgr;
     mpLabelPaneMgr = NULL;
+
     delete mpCirclePaneMgr;
     mpCirclePaneMgr = NULL;
+
     delete mpCenterPaneMgr;
     mpCenterPaneMgr = NULL;
+
     delete mpRingScreen;
     mpRingScreen = NULL;
+
     if (mpRingResData != NULL) {
         gzHeap(GZ_GROUP_MENU)->free(mpRingResData);
         mpRingResData = NULL;
     }
-
-    freeArchiveCacheInHeap(dComIfGp_getRingResArchive(), gzHeap(GZ_GROUP_MENU));
 }
 
 void gzInventoryMenu_c::freeAllTextures() {
@@ -755,15 +739,27 @@ void gzInventoryMenu_c::freePauseItemTextures() {
     }
 }
 
-void gzInventoryMenu_c::freePauseTextures() {
+void gzInventoryMenu_c::freePauseTextures(bool freeArchiveCache) {
     JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+
     freePauseItemTextures();
+
     delete mpPauseFramePane;
     mpPauseFramePane = NULL;
+
     if (mpPauseFrameBuf != NULL) {
         heap->free(mpPauseFrameBuf);
         mpPauseFrameBuf = NULL;
     }
+
+    delete mpPoeIconPane;
+    mpPoeIconPane = NULL;
+    
+    if (mpPoeIconBuf != NULL) {
+        heap->free(mpPoeIconBuf);
+        mpPoeIconBuf = NULL;
+    }
+
     mPauseMenuInitialized = false;
 }
 
@@ -835,7 +831,6 @@ void gzInventoryMenu_c::readPauseSlotStates() {
     } else {
         mPauseSlotState[4][0] = 0;
     }
-    mPauseSlotState[4][1] = 0;
     mPauseSlotState[4][2] = 0;
     mPauseSlotState[4][3] = 0;
 }
@@ -943,18 +938,22 @@ void gzInventoryMenu_c::loadPauseItemTexture(int row, int col, u8 itemId) {
         JKRArchive* collectArc = dComIfGp_getCollectResArchive();
         if (collectArc != NULL) {
             ResTIMG* tex;
-            {
-                JKRHeapOverrideScope scope(heap);
-                tex = (ResTIMG*)collectArc->getResource('TIMG', scentTex);
-            }
+            JKRHeapOverrideScope scope(heap);
+            tex = (ResTIMG*)collectArc->getResource('TIMG', scentTex);
+
             if (tex != NULL) {
                 u32 imgSize = GXGetTexBufferSize(tex->width, tex->height, tex->format,
                                                   tex->mipmapEnabled, tex->mipmapCount);
                 u32 totalSize = tex->imageOffset + imgSize;
+                if (tex->indexTexture && tex->numColors > 0) {
+                    u32 palEnd = tex->paletteOffset + tex->numColors * 2;
+                    if (palEnd > totalSize) {
+                        totalSize = palEnd;
+                    }
+                }
                 memcpy(mpPauseItemBuf[row][col][0], tex, totalSize);
                 DCStoreRangeNoSync(mpPauseItemBuf[row][col][0], 0xC00);
                 textureNum = 1;
-                freeArchiveCacheInHeap(collectArc, heap);
             }
         }
     } else {
@@ -988,13 +987,14 @@ void gzInventoryMenu_c::initPauseMenu() {
         }
     }
 
+    // Load frame texture WITH JKRHeapOverrideScope to ensure decompression goes to gz_heap.
+    // Without this, uncached textures decompress to J2dHeap which fills up and crashes.
     JKRArchive* collectArc = dComIfGp_getCollectResArchive();
     if (collectArc != NULL && mpPauseFramePane == NULL) {
         ResTIMG* frameTex;
-        {
-            JKRHeapOverrideScope scope(heap);
-            frameTex = (ResTIMG*)collectArc->getResource('TIMG', "tt_spot_square3.bti");
-        }
+        JKRHeapOverrideScope scope(heap);
+        frameTex = (ResTIMG*)collectArc->getResource('TIMG', "tt_spot_square3.bti");
+
         if (frameTex != NULL) {
             JKRHeap* oldHeap = heap->becomeCurrentHeap();
             u32 imgSize = GXGetTexBufferSize(frameTex->width, frameTex->height, frameTex->format,
@@ -1008,7 +1008,38 @@ void gzInventoryMenu_c::initPauseMenu() {
                     mpPauseFramePane->setBasePosition(J2DBasePosition_4);
                 }
             }
-            freeArchiveCacheInHeap(collectArc, heap);
+            oldHeap->becomeCurrentHeap();
+        }
+    }
+
+
+    // Load poe icon texture WITH JKRHeapOverrideScope - not cached by game
+    if (collectArc != NULL && mpPoeIconPane == NULL) {
+        ResTIMG* poeIconTex;
+        JKRHeapOverrideScope scope(heap);
+        poeIconTex = (ResTIMG*)collectArc->getResource('TIMG', "ni_item_icon_pou.bti");
+
+        if (poeIconTex != NULL) {
+            JKRHeap* oldHeap = heap->becomeCurrentHeap();
+            u32 imgSize = GXGetTexBufferSize(poeIconTex->width, poeIconTex->height, poeIconTex->format,
+                                              poeIconTex->mipmapEnabled, poeIconTex->mipmapCount);
+            u32 totalSize = poeIconTex->imageOffset + imgSize;
+            // Include palette data for indexed textures
+            if (poeIconTex->indexTexture && poeIconTex->numColors > 0) {
+                u32 palEnd = poeIconTex->paletteOffset + poeIconTex->numColors * 2;
+                if (palEnd > totalSize) {
+                    totalSize = palEnd;
+                }
+            }
+            mpPoeIconBuf = (ResTIMG*)heap->alloc(totalSize, 32);
+            if (mpPoeIconBuf != NULL) {
+                memcpy(mpPoeIconBuf, poeIconTex, totalSize);
+                DCStoreRangeNoSync(mpPoeIconBuf, totalSize);
+                mpPoeIconPane = new (heap, 4) J2DPicture(mpPoeIconBuf);
+                if (mpPoeIconPane != NULL) {
+                    mpPoeIconPane->setBasePosition(J2DBasePosition_4);
+                }
+            }
             oldHeap->becomeCurrentHeap();
         }
     }
@@ -1094,11 +1125,24 @@ void gzInventoryMenu_c::cyclePauseSlot(int row, int col) {
             dComIfGs_offItemFirstBit(fpcNm_ITEM_SMELL_FISH);
             dComIfGs_offItemFirstBit(fpcNm_ITEM_SMELL_MEDICINE);
             dComIfGs_offItemFirstBit(fpcNm_ITEM_SMELL_POH);
-            if (state == 1) dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_CHILDREN);
-            if (state == 2) dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_YELIA_POUCH);
-            if (state == 3) dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_FISH);
-            if (state == 4) dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_MEDICINE);
-            if (state == 5) dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_POH);
+            if (state == 1) {
+                dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_CHILDREN);
+                dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_CHILDREN);
+            } else if (state == 2) {
+                dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_YELIA_POUCH);
+                dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_YELIA_POUCH);
+            } else if (state == 3) {
+                dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_FISH);
+                dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_FISH);
+            } else if (state == 4) {
+                dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_MEDICINE);
+                dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_MEDICINE);
+            } else if (state == 5) {
+                dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_POH);
+                dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_POH);
+            } else {
+                dComIfGs_setCollectSmell(fpcNm_ITEM_NONE);
+            }
         } else if (col == 1) {
         } else if (col == 2) {
             state = state ? 0 : 1;
@@ -1149,42 +1193,80 @@ void gzInventoryMenu_c::executePauseMenu() {
 
     int maxCols = getMaxColsForRow(mPauseCursorRow);
 
-    if (gzPad::getTrigDown()) {
-        mPauseCursorRow = (mPauseCursorRow + 1) % PAUSE_MAX_ROWS;
-        int newMaxCols = getMaxColsForRow(mPauseCursorRow);
-        if (mPauseCursorCol >= newMaxCols) {
-            mPauseCursorCol = newMaxCols - 1;
+
+    if (inPoeEditMode()) {
+        u8 poeCount = dComIfGs_getPohSpiritNum();
+        
+        if (gzPad::getTrigRight()) {
+            poeCount = (poeCount >= 60) ? 0 : poeCount + 1;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
         }
-        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
-    }
-    if (gzPad::getTrigUp()) {
-        mPauseCursorRow = (mPauseCursorRow - 1 + PAUSE_MAX_ROWS) % PAUSE_MAX_ROWS;
-        int newMaxCols = getMaxColsForRow(mPauseCursorRow);
-        if (mPauseCursorCol >= newMaxCols) {
-            mPauseCursorCol = newMaxCols - 1;
+
+        if (gzPad::getTrigLeft()) {
+            poeCount = (poeCount == 0) ? 60 : poeCount - 1;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
         }
-        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
-    }
-    if (gzPad::getTrigRight()) {
-        mPauseCursorCol = (mPauseCursorCol + 1) % maxCols;
-        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
-    }
-    if (gzPad::getTrigLeft()) {
-        mPauseCursorCol = (mPauseCursorCol - 1 + maxCols) % maxCols;
-        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+
+        dComIfGs_setPohSpiritNum(poeCount);
+
+        if (gzPad::getTrigB()) {
+            gzInfo_offMenuOption();
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else {
+        if (gzPad::getTrigDown()) {
+            mPauseCursorRow = (mPauseCursorRow + 1) % PAUSE_MAX_ROWS;
+            int newMaxCols = getMaxColsForRow(mPauseCursorRow);
+            if (mPauseCursorCol >= newMaxCols) {
+                mPauseCursorCol = newMaxCols - 1;
+            }
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigUp()) {
+            mPauseCursorRow = (mPauseCursorRow - 1 + PAUSE_MAX_ROWS) % PAUSE_MAX_ROWS;
+            int newMaxCols = getMaxColsForRow(mPauseCursorRow);
+            if (mPauseCursorCol >= newMaxCols) {
+                mPauseCursorCol = newMaxCols - 1;
+            }
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigRight()) {
+            mPauseCursorCol = (mPauseCursorCol + 1) % maxCols;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigLeft()) {
+            mPauseCursorCol = (mPauseCursorCol - 1 + maxCols) % maxCols;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
     }
 
     if (gzPad::getTrigZ()) {
-        cyclePauseSlot(mPauseCursorRow, mPauseCursorCol);
-        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        if (isPoeSlotSelected()) {
+            dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_POH);
+            dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_POH);
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        } else {
+            cyclePauseSlot(mPauseCursorRow, mPauseCursorCol);
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        }
     }
 
-    if (gzPad::getTrigA() && mPauseCursorRow <= 2) {
-        bool hasItem = mPauseSlotState[mPauseCursorRow][mPauseCursorCol] > 0;
-        bool alreadyEquipped = isSlotEquipped(mPauseCursorRow, mPauseCursorCol);
-        if (hasItem && !alreadyEquipped) {
-            equipPauseSlot(mPauseCursorRow, mPauseCursorCol);
-            gzInfo_seStart(Z2SE_SY_ITEM_SET_X);
+    if (gzPad::getTrigA()) {
+        if (isPoeSlotSelected()) {
+            if (gzInfo_isMenuOption()) {
+                gzInfo_offMenuOption();
+            } else {
+                gzInfo_onMenuOption();
+            }
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        } else if (mPauseCursorRow <= 2) {
+            bool hasItem = mPauseSlotState[mPauseCursorRow][mPauseCursorCol] > 0;
+            bool alreadyEquipped = isSlotEquipped(mPauseCursorRow, mPauseCursorCol);
+            if (hasItem && !alreadyEquipped) {
+                equipPauseSlot(mPauseCursorRow, mPauseCursorCol);
+                gzInfo_seStart(Z2SE_SY_ITEM_SET_X);
+            }
         }
     }
 
@@ -1245,7 +1327,35 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                 mpPauseFramePane->draw(cellX + 24.0f, cellY + 24.0f, 48.0f, 48.0f, false, false, false);
             }
 
-            if (hasItem) {
+            if (row == 4 && col == 1) {
+                if (mpPoeIconPane != NULL) {
+                    gzSetup2DContext();
+                    f32 itemSize = (mIsEntered && isSelected) ? 56.0f : 48.0f;
+                    mpPoeIconPane->draw(cellX + 24.0f, cellY + 24.0f, itemSize, itemSize, false, false, false);
+                }
+                
+                u8 poeCount = dComIfGs_getPohSpiritNum();
+                char numStr[8];
+                sprintf(numStr, "%d", poeCount);
+                gzTextBox* poeText = gzTextBox_allocate();
+                poeText->setFontSize(14.0f, 14.0f);
+                poeText->setString(numStr);
+                f32 textX = cellX + 24.0f - 305.0f;  // Offset for HBIND_CENTER
+                f32 textY = cellY + 52.0f;
+                poeText->draw(textX, textY, COLOR_WHITE, HBIND_CENTER);
+                gzTextBox_free(poeText);
+
+                if (inPoeEditMode() && mpHaihai != NULL) {
+                    mpHaihai->_execute(0);
+                    mpHaihai->setScale(0.5f);
+                    u8 arrowFlags = ARROW_LEFT | ARROW_RIGHT;
+                    if (poeCount == 0) arrowFlags &= ~ARROW_LEFT;
+                    if (poeCount >= 60) arrowFlags &= ~ARROW_RIGHT;
+                    f32 arrowX = cellX + 24.0f;
+                    f32 arrowY = textY - 5.0f;
+                    mpHaihai->drawHaihai(arrowFlags, arrowX, arrowY, 40.0f, 0.0f);
+                }
+            } else if (hasItem) {
                 gzSetup2DContext();
                 f32 itemSize = (mIsEntered && isSelected) ? 56.0f : 48.0f;
                 for (int k = 0; k < 3; k++) {
@@ -1295,7 +1405,7 @@ void gzInventoryMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
     u32 lrTrig = gzPad::getTrig() & (PAD_TRIGGER_L | PAD_TRIGGER_R);
-    if ((lrTrig & PAD_TRIGGER_R) && mCurrentTab == TAB_RING_MENU) {
+    if ((lrTrig & PAD_TRIGGER_R) && mCurrentTab == TAB_RING_MENU && !inPoeEditMode()) {
         mCurrentTab = TAB_PAUSE_MENU;
         l_cursor->y = 0;
         mCurrentSlot = 0;
@@ -1305,13 +1415,14 @@ void gzInventoryMenu_c::execute() {
         freeRingScreen();
         mPauseMenuInitialized = false;
     }
-    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU) {
+
+    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode()) {
         mCurrentTab = TAB_RING_MENU;
         l_cursor->y = 0;
         mCurrentSlot = 0;
         gzInfo_resetTopLine();
         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-        freePauseTextures();
+        freePauseTextures(false);
         reloadRingScreen();
         initRingItems();
     }
@@ -1426,17 +1537,29 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
     hints.count = 0;
 
     if (mCurrentTab == TAB_PAUSE_MENU) {
+        bool isPoeSlot = (mPauseCursorRow == 4 && mPauseCursorCol == 1);
         bool hasItem = mPauseSlotState[mPauseCursorRow][mPauseCursorCol] > 0;
         bool alreadyEquipped = isSlotEquipped(mPauseCursorRow, mPauseCursorCol);
-        if (mPauseCursorRow <= 2 && hasItem && !alreadyEquipped) {
+
+        if (isPoeSlot) {
             hints.hints[hints.count].button = GZ_BTN_A;
-            hints.hints[hints.count].text = "Equip";
+            hints.hints[hints.count].text = gzInfo_isMenuOption() ? "Done" : "Edit";
+            hints.count++;
+
+            hints.hints[hints.count].button = GZ_BTN_Z;
+            hints.hints[hints.count].text = "Poe Scent";
+            hints.count++;
+        } else {
+            if (mPauseCursorRow <= 2 && hasItem && !alreadyEquipped) {
+                hints.hints[hints.count].button = GZ_BTN_A;
+                hints.hints[hints.count].text = "Equip";
+                hints.count++;
+            }
+
+            hints.hints[hints.count].button = GZ_BTN_Z;
+            hints.hints[hints.count].text = "Toggle";
             hints.count++;
         }
-
-        hints.hints[hints.count].button = GZ_BTN_Z;
-        hints.hints[hints.count].text = "Toggle";
-        hints.count++;
 
         hints.hints[hints.count].button = GZ_BTN_B;
         hints.hints[hints.count].text = "Back";

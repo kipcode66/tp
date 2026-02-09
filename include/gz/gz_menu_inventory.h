@@ -73,12 +73,14 @@ private:
     void drawItemOnRing(int slotIdx, f32 x, f32 y, f32 scale, bool selected);
     void drawItemPicker(f32 centerX, f32 centerY);
     const char* getItemName(u8 itemId);
+    inline bool isPoeSlotSelected() { return (mPauseCursorRow == 4 && mPauseCursorCol == 1); }
+    inline bool inPoeEditMode() { return isPoeSlotSelected() && gzInfo_isMenuOption(); }
 
 private:
     void initPauseMenu();
     void executePauseMenu();
     void drawPauseMenuContent();
-    void freePauseTextures();
+    void freePauseTextures(bool freeArchiveCache = true);
     void freePauseItemTextures();
     void loadPauseItemTexture(int row, int col, u8 itemId);
     void cyclePauseSlot(int row, int col);
@@ -127,6 +129,9 @@ private:
 
     J2DPicture* mpPauseFramePane;
     ResTIMG* mpPauseFrameBuf;
+
+    J2DPicture* mpPoeIconPane;
+    ResTIMG* mpPoeIconBuf;
 };
 
 #endif // GZ_MENU_INVENTORY_H

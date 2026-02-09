@@ -604,10 +604,9 @@ int gzInfo_c::_create() {
         JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
 
         ResTIMG* src;
-        {
-            JKRHeapOverrideScope scope(gfxHeap);
-            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_l_text.bti");
-        }
+        JKRHeapOverrideScope scope(gfxHeap);
+        src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_l_text.bti");
+
         if (src != NULL) {
             u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
                                               src->mipmapEnabled, src->mipmapCount);
@@ -619,10 +618,8 @@ int gzInfo_c::_create() {
             }
         }
 
-        {
-            JKRHeapOverrideScope scope(gfxHeap);
-            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_r_text.bti");
-        }
+        src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_r_text.bti");
+
         if (src != NULL) {
             u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
                                               src->mipmapEnabled, src->mipmapCount);

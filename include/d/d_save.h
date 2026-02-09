@@ -404,6 +404,9 @@ public:
         }
     };
 
+    // gz
+    void setPohNum(u8 num) { mPohNum = num; }
+
 private:
     /* 0x0 */ u8 mItem[8];
     /* 0x8 */ u8 unk8;
