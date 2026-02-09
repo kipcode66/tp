@@ -417,14 +417,16 @@ d/d_bomb.cpp:
 
 d/d_lib.cpp:
 	.text       start:0x800369D0 end:0x800372A0
-	.data       start:0x803E9668 end:0x803E9730
-	.sdata      start:0x8051DBB8 end:0x8051DBD8
-	.sbss       start:0x80520A28 end:0x80520A48
+	.data       start:0x803E9668 end:0x803E96C0
+	.sdata      start:0x8051DBB8 end:0x8051DBC8
+	.sbss       start:0x80520A28 end:0x80520A40
 	.sdata2     start:0x80521E18 end:0x80521E20
 
 d/d_save.cpp:
 	.text       start:0x800372A0 end:0x8003A2FC
 	.rodata     start:0x803BA750 end:0x803BAF30
+	.data       start:0x803E96C0 end:0x803E9730
+	.sdata      start:0x8051DBC8 end:0x8051DBD8
 	.sdata2     start:0x80521E20 end:0x80521E28
 
 d/d_save_init.cpp:
@@ -440,6 +442,7 @@ d/d_a_obj.cpp:
 	.text       start:0x8003B10C end:0x8003B9B0
 	.rodata     start:0x803BAF30 end:0x803BAF40
 	.bss        start:0x80498368 end:0x804983C8
+	.sbss       start:0x80520A40 end:0x80520A48
 	.sdata2     start:0x80521E48 end:0x80521E60
 
 d/d_a_itembase_static.cpp:
@@ -1626,7 +1629,7 @@ JSystem/JParticle/JPAResource.cpp:
 JSystem/JParticle/JPABaseShape.cpp:
 	.text       start:0x8025ECC0 end:0x802620CC
 	.data       start:0x80408760 end:0x80408908
-	.sdata      start:0x8051FB68 end:0x8051FB78
+	.sdata      start:0x8051FB68 end:0x8051FB70
 	.sdata2     start:0x805250F8 end:0x80525130
 
 JSystem/JParticle/JPAExtraShape.cpp:
@@ -1873,6 +1876,7 @@ JSystem/JAudio2/JASSeqParser.cpp:
 	.text       start:0x80279630 end:0x8027B32C
 	.ctors      start:0x803B8D68 end:0x803B8D6C
 	.data       start:0x80409C90 end:0x8040B5C0
+	.sdata      start:0x8051FB70 end:0x8051FB78
 	.sbss       start:0x80520F38 end:0x80520F48
 	.sdata2     start:0x80525408 end:0x80525440
 
@@ -3588,7 +3592,7 @@ revolution/wpad/WPADHIDParser.c:
 	.text       start:0x8036C51C end:0x80370DB8
 	.data       start:0x80427E68 end:0x804282C8
 	.bss        start:0x804E33E8 end:0x804E3400
-	.sbss       start:0x805218A0 end:0x805218B0
+	.sbss       start:0x805218A0 end:0x805218A8
 	.sdata2     start:0x80526648 end:0x80526670
 
 revolution/wpad/WPADMem.c:
@@ -3596,10 +3600,12 @@ revolution/wpad/WPADMem.c:
 
 revolution/wpad/WPADEncrypt.c:
 	.text       start:0x80370DB8 end:0x80371650
-	.data       start:0x804282C8 end:0x80428C48
+	.data       start:0x804282C8 end:0x80428BF8
+	.sbss       start:0x805218A8 end:0x805218B0
 
 revolution/kpad/KPAD.c:
 	.text       start:0x80371650 end:0x803743D4
+	.data       start:0x80428BF8 end:0x80428C48
 	.bss        start:0x804E3450 end:0x804E4460
 	.sdata      start:0x805205C0 end:0x80520630
 	.sbss       start:0x805218B0 end:0x805218E8
@@ -3620,7 +3626,7 @@ revolution/wud/WUD.c:
 	.data       start:0x80429200 end:0x80429FC8
 	.bss        start:0x804E4460 end:0x804E61C0
 	.sdata      start:0x80520640 end:0x80520648
-	.sbss       start:0x80521908 end:0x8052192C
+	.sbss       start:0x80521908 end:0x80521928
 	.sdata2     start:0x805266C8 end:0x805266D0
 
 revolution/wud/WUDHidHost.c:
@@ -3653,7 +3659,7 @@ revolution/bte/uusb_ppc.c:
 	.data       start:0x8042A400 end:0x8042B148
 	.bss        start:0x8050ECE0 end:0x80510D40
 	.sdata      start:0x80520648 end:0x80520668
-	.sbss       start:0x8052192C end:0x80521940
+	.sbss       start:0x80521928 end:0x80521940
 
 revolution/bte/bta_dm_cfg.c:
 	.rodata     start:0x803DF2BC end:0x803DF340
@@ -3969,7 +3975,7 @@ PowerPC_EABI_Support/Runtime/Src/runtime.c:
 	.text       start:0x803A8AF8 end:0x803A9394
 	.rodata     start:0x803DF720 end:0x803DF738
 
-PowerPC_EABI_Support/Runtime/Src/GCN_Mem_Alloc.cpp:
+PowerPC_EABI_Support/Runtime/Src/GCN_mem_alloc.c:
 	.rodata     start:0x803DF738 end:0x803DF7A8
 
 PowerPC_EABI_Support/Runtime/Src/__init_cpp_exceptions.cpp:
@@ -4116,7 +4122,7 @@ PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Src/abort_exit_ppc_eabi.c:
 	.text       start:0x803AE9B4 end:0x803AE9E8
 	.sbss       start:0x80521988 end:0x80521990
 
-PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Src/math_sun.c:
+PowerPC_EABI_Support/MSL/MSL_C/MSL_Common_Embedded/Src/math_sun.c:
 	extab       start:0x80006680 end:0x80006688
 	extabindex  start:0x800068E0 end:0x800068EC
 	.text       start:0x803AE9E8 end:0x803AEA28

@@ -417,14 +417,16 @@ d/d_bomb.cpp:
 
 d/d_lib.cpp:
 	.text       start:0x80036A84 end:0x80037354
-	.data       start:0x803EA418 end:0x803EA4E0
-	.sdata      start:0x8051E4B8 end:0x8051E4D8
-	.sbss       start:0x805211E8 end:0x80521208
+	.data       start:0x803EA418 end:0x803EA470
+	.sdata      start:0x8051E4B8 end:0x8051E4C8
+	.sbss       start:0x805211E8 end:0x80521200
 	.sdata2     start:0x805225D8 end:0x805225E0
 
 d/d_save.cpp:
 	.text       start:0x80037354 end:0x8003A3C8
 	.rodata     start:0x803BABD0 end:0x803BB3B0
+	.data       start:0x803EA470 end:0x803EA4E0
+	.sdata      start:0x8051E4C8 end:0x8051E4D8
 	.sdata2     start:0x805225E0 end:0x805225E8
 
 d/d_save_init.cpp:
@@ -440,6 +442,7 @@ d/d_a_obj.cpp:
 	.text       start:0x8003B1D8 end:0x8003BA7C
 	.rodata     start:0x803BB3B0 end:0x803BB3C0
 	.bss        start:0x80498C60 end:0x80498CC0
+	.sbss       start:0x80521200 end:0x80521208
 	.sdata2     start:0x80522608 end:0x80522620
 
 d/d_a_itembase_static.cpp:
@@ -1623,7 +1626,7 @@ JSystem/JParticle/JPAResource.cpp:
 JSystem/JParticle/JPABaseShape.cpp:
 	.text       start:0x8025F128 end:0x80262534
 	.data       start:0x80409080 end:0x80409228
-	.sdata      start:0x80520310 end:0x80520320
+	.sdata      start:0x80520310 end:0x80520318
 	.sdata2     start:0x805258C8 end:0x80525900
 
 JSystem/JParticle/JPAExtraShape.cpp:
@@ -1870,6 +1873,7 @@ JSystem/JAudio2/JASSeqParser.cpp:
 	.text       start:0x80279A98 end:0x8027B794
 	.ctors      start:0x803B91E8 end:0x803B91EC
 	.data       start:0x8040A5B0 end:0x8040BEE0
+	.sdata      start:0x80520318 end:0x80520320
 	.sbss       start:0x805216F8 end:0x80521708
 	.sdata2     start:0x80525BD8 end:0x80525C10
 
@@ -3584,7 +3588,7 @@ revolution/wpad/WPADHIDParser.c:
 	.text       start:0x8036C9A0 end:0x8037123C
 	.data       start:0x80428768 end:0x80428BC8
 	.bss        start:0x804E3CE8 end:0x804E3D00
-	.sbss       start:0x80522060 end:0x80522070
+	.sbss       start:0x80522060 end:0x80522068
 	.sdata2     start:0x80526E18 end:0x80526E40
 
 revolution/wpad/WPADMem.c:
@@ -3592,10 +3596,12 @@ revolution/wpad/WPADMem.c:
 
 revolution/wpad/WPADEncrypt.c:
 	.text       start:0x8037123C end:0x80371AD4
-	.data       start:0x80428BC8 end:0x80429548
+	.data       start:0x80428BC8 end:0x804294F8
+	.sbss       start:0x80522068 end:0x80522070
 
 revolution/kpad/KPAD.c:
 	.text       start:0x80371B24 end:0x80374858
+	.data       start:0x804294F8 end:0x80429548
 	.bss        start:0x804E3D50 end:0x804E4D60
 	.sdata      start:0x80520D68 end:0x80520DD8
 	.sbss       start:0x80522070 end:0x805220A8
@@ -3611,12 +3617,12 @@ revolution/usb/usb.c:
 	.sdata      start:0x80520DD8 end:0x80520DE8
 	.sbss       start:0x805220B8 end:0x805220C8
 
-revolution/wpad/WUD.c:
+revolution/wud/WUD.c:
 	.text       start:0x80375C68 end:0x80379994
 	.data       start:0x80429B00 end:0x8042A8C8
 	.bss        start:0x804E4D60 end:0x804E6AC0
 	.sdata      start:0x80520DE8 end:0x80520DF0
-	.sbss       start:0x805220C8 end:0x805220EC
+	.sbss       start:0x805220C8 end:0x805220E8
 	.sdata2     start:0x80526E98 end:0x80526EA0
 
 revolution/wud/WUDHidHost.c:
@@ -3649,7 +3655,7 @@ revolution/bte/uusb_ppc.c:
 	.data       start:0x8042AD00 end:0x8042BA48
 	.bss        start:0x8050F5E0 end:0x80511640
 	.sdata      start:0x80520DF0 end:0x80520E10
-	.sbss       start:0x805220EC end:0x80522100
+	.sbss       start:0x805220E8 end:0x80522100
 
 revolution/bte/bta_dm_cfg.c:
 	.rodata     start:0x803DFFD0 end:0x803E0060
@@ -3976,7 +3982,7 @@ PowerPC_EABI_Support/Runtime/Src/Gecko_ExceptionPPC.cp:
 	.text       start:0x803A9888 end:0x803A98EC
 	.bss        start:0x8051B678 end:0x8051B688
 
-PowerPC_EABI_Support/Runtime/Src/GCN_Mem_Alloc.c:
+PowerPC_EABI_Support/Runtime/Src/GCN_mem_alloc.c:
 	.text       start:0x803A98EC end:0x803A99A4
 	.rodata     start:0x803E0458 end:0x803E04C8
 
@@ -4113,7 +4119,7 @@ PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Src/abort_exit_ppc_eabi.c:
 	.text       start:0x803AEE38 end:0x803AEE6C
 	.sbss       start:0x80522148 end:0x80522150
 
-PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Src/math_sun.c:
+PowerPC_EABI_Support/MSL/MSL_C/MSL_Common_Embedded/Src/math_sun.c:
 	extab       start:0x80006680 end:0x80006688
 	extabindex  start:0x800068E0 end:0x800068EC
 	.text       start:0x803AEE6C end:0x803AEEAC
