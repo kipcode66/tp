@@ -156,7 +156,7 @@ void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
     }
 }
 
-void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color) {
+static void gzSetupGXPrimitive() {
     GXSetNumChans(1);
     GXSetNumTexGens(0);
     GXSetNumTevStages(1);
@@ -181,6 +181,10 @@ void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color)
     GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+}
+
+void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color) {
+    gzSetupGXPrimitive();
 
     f32 x1 = x;
     f32 y1 = y;
@@ -229,30 +233,7 @@ void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color)
 }
 
 void gzDrawFilledRect(f32 x, f32 y, f32 w, f32 h, GXColor color) {
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
-
-    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
-    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-    GXSetCullMode(GX_CULL_NONE);
-
-    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
-    GXSetCurrentMtx(0);
-
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    gzSetupGXPrimitive();
 
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
     GXPosition2f32(x, y);
@@ -267,30 +248,7 @@ void gzDrawFilledRect(f32 x, f32 y, f32 w, f32 h, GXColor color) {
 }
 
 void gzDrawFilledRoundedTopRect(f32 x, f32 y, f32 w, f32 h, f32 radius, GXColor color) {
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
-
-    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
-    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-    GXSetCullMode(GX_CULL_NONE);
-
-    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
-    GXSetCurrentMtx(0);
-
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    gzSetupGXPrimitive();
 
     // Clamp radius to half of width/height
     if (radius > w / 2.0f) radius = w / 2.0f;
@@ -352,30 +310,7 @@ void gzDrawFilledRoundedTopRect(f32 x, f32 y, f32 w, f32 h, f32 radius, GXColor 
 }
 
 void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color) {
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
-
-    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
-    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-    GXSetCullMode(GX_CULL_NONE);
-
-    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
-    GXSetCurrentMtx(0);
-
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    gzSetupGXPrimitive();
 
     f32 halfThick = thickness / 2.0f;
 
@@ -392,30 +327,7 @@ void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color) {
 }
 
 void gzDrawHorizontalLine(f32 x1, f32 x2, f32 y, f32 thickness, GXColor color) {
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
-
-    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
-    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-    GXSetCullMode(GX_CULL_NONE);
-
-    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
-    GXSetCurrentMtx(0);
-
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    gzSetupGXPrimitive();
 
     f32 halfThick = thickness / 2.0f;
 
@@ -485,8 +397,14 @@ int gzInfo_c::_create() {
     // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
 
-    ResTIMG* icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
-    mpIcon = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(icon);
+    JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
+
+    ResTIMG* icon;
+    {
+        JKRHeapOverrideScope scope(gfxHeap);
+        icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
+    }
+    mpIcon = new (gfxHeap, 4) J2DPicture(icon);
 
     void* buf = JKRHeap::alloc(54432, 32, gzHeap(GZ_GROUP_GRAPHICS));
     gzDVDLoadFile("/gz/bg.bti", buf, 54432, 0);
@@ -494,46 +412,33 @@ int gzInfo_c::_create() {
     mpBackground = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(bg);
     mpBackground->setWhite(JUtility::TColor(55, 52, 40, 255));
 
-    JKRArchive* collectArc = dComIfGp_getCollectResArchive();
-    ResTIMG* decoSrc = (ResTIMG*)collectArc->getResource('TIMG', "tt_gold_uzu_long2.bti");
-    if (decoSrc != NULL) {
-        u32 imgSize = GXGetTexBufferSize(decoSrc->width, decoSrc->height, decoSrc->format,
-                                          decoSrc->mipmapEnabled, decoSrc->mipmapCount);
-        u32 decoSize = decoSrc->imageOffset + imgSize;
-        void* decoBuf = JKRHeap::alloc(decoSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
-        memcpy(decoBuf, decoSrc, decoSize);
-        mpDecoration = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)decoBuf);
-    } else {
-        mpDecoration = NULL;
-    }
-
-    ResTIMG* bannerSrc = (ResTIMG*)collectArc->getResource('TIMG', "tt_line2.bti");
-    if (bannerSrc != NULL) {
-        u32 bannerImgSize = GXGetTexBufferSize(bannerSrc->width, bannerSrc->height, bannerSrc->format,
-                                                bannerSrc->mipmapEnabled, bannerSrc->mipmapCount);
-        u32 bannerSize = bannerSrc->imageOffset + bannerImgSize;
-        void* bannerBuf = JKRHeap::alloc(bannerSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
-        memcpy(bannerBuf, bannerSrc, bannerSize);
-        mpBanner = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)bannerBuf);
-    } else {
-        mpBanner = NULL;
-    }
-
     JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
+    mpBannerBg = NULL;
+    mpSwirl = NULL;
     if (msgArc != NULL) {
+        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
+        JKRHeapOverrideScope scope(gfxHeap);
+
         ResTIMG* bgSrc = (ResTIMG*)msgArc->getResource('TIMG', "i4_gra.bti");
         if (bgSrc != NULL) {
             u32 bgImgSize = GXGetTexBufferSize(bgSrc->width, bgSrc->height, bgSrc->format,
                                                 bgSrc->mipmapEnabled, bgSrc->mipmapCount);
             u32 bgSize = bgSrc->imageOffset + bgImgSize;
-            void* bgBuf = JKRHeap::alloc(bgSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
+            void* bgBuf = gfxHeap->alloc(bgSize, 32);
             memcpy(bgBuf, bgSrc, bgSize);
-            mpBannerBg = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)bgBuf);
-        } else {
-            mpBannerBg = NULL;
+            mpBannerBg = new (gfxHeap, 4) J2DPicture((ResTIMG*)bgBuf);
         }
-    } else {
-        mpBannerBg = NULL;
+
+        ResTIMG* swirlSrc = (ResTIMG*)msgArc->getResource('TIMG', "tt_gold_uzu_long2.bti");
+        if (swirlSrc != NULL) {
+            u32 imgSize = GXGetTexBufferSize(swirlSrc->width, swirlSrc->height,
+                                              swirlSrc->format, swirlSrc->mipmapEnabled,
+                                              swirlSrc->mipmapCount);
+            u32 totalSize = swirlSrc->imageOffset + imgSize;
+            void* buf = gfxHeap->alloc(totalSize, 32);
+            memcpy(buf, swirlSrc, totalSize);
+            mpSwirl = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+        }
     }
 
     JKRArchive* main2dArc = dComIfGp_getMain2DArchive();
@@ -563,15 +468,16 @@ int gzInfo_c::_create() {
             &mpBtnXBase, &mpBtnXText, &mpBtnYBase, &mpBtnYText,
             &mpBtnZBase, &mpBtnZText
         };
+        JKRHeapOverrideScope main2dScope(gfxHeap);
         for (int i = 0; i < 9; i++) {
             ResTIMG* src = (ResTIMG*)main2dArc->getResource('TIMG', btnNames[i]);
             if (src != NULL) {
                 u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
                                                   src->mipmapEnabled, src->mipmapCount);
                 u32 totalSize = src->imageOffset + imgSize;
-                void* buf = JKRHeap::alloc(totalSize, 32, gzHeap(GZ_GROUP_GRAPHICS));
+                void* buf = JKRHeap::alloc(totalSize, 32, gfxHeap);
                 memcpy(buf, src, totalSize);
-                *btnPtrs[i] = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)buf);
+                *btnPtrs[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
             }
         }
     }
@@ -581,8 +487,7 @@ int gzInfo_c::_create() {
     mpBtnRText = NULL;
     JKRArchive* buttonArc = dComIfGp_getMeterButtonArchive();
     if (buttonArc != NULL) {
-        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
-        JKRHeap* oldHeap = gfxHeap->becomeCurrentHeap();
+        JKRHeapOverrideScope btnScope(gfxHeap);
 
         ResTIMG* src = (ResTIMG*)buttonArc->getResource('TIMG', "tt_zelda_button_l_base.bti");
         if (src != NULL) {
@@ -595,8 +500,6 @@ int gzInfo_c::_create() {
                 mpBtnLRBase = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
             }
         }
-
-        oldHeap->becomeCurrentHeap();
     }
 
     JKRArchive* ringArc = dComIfGp_getRingResArchive();
@@ -689,14 +592,11 @@ int gzInfo_c::_delete() {
     delete mpBackground;
     mpBackground = NULL;
 
-    delete mpDecoration;
-    mpDecoration = NULL;
-
-    delete mpBanner;
-    mpBanner = NULL;
-
     delete mpBannerBg;
     mpBannerBg = NULL;
+
+    delete mpSwirl;
+    mpSwirl = NULL;
 
     delete mpBtnABBase;
     mpBtnABBase = NULL;
@@ -920,23 +820,6 @@ static GXColor getThemedSeparatorColor(u32 theme, u8 alpha) {
     return c;
 }
 
-static JUtility::TColor getThemedDecorationColor(u32 theme) {
-    u8 r, g, b;
-    getThemeRGB(theme, r, g, b);
-    warmBlendRGB(r, g, b, 0.6f);
-    r = (u8)(r * 0.7f);
-    g = (u8)(g * 0.7f);
-    b = (u8)(b * 0.7f);
-    return JUtility::TColor(r, g, b, 255);
-}
-
-static JUtility::TColor getThemedBannerLineColor(u32 theme) {
-    u8 r, g, b;
-    getThemeRGB(theme, r, g, b);
-    warmBlendRGB(r, g, b, 0.52f);
-    return JUtility::TColor(r, g, b, 255);
-}
-
 int gzInfo_c::draw() {
     if (!mGZInitialized) return 0;
 
@@ -975,26 +858,6 @@ int gzInfo_c::draw() {
                           mBackgroundWidth - (HIGHLIGHT_INSET * 2), mBackgroundHeight - (HIGHLIGHT_INSET * 2),
                           HIGHLIGHT_THICKNESS, highlightBorder);
 
-        if (mpDecoration != NULL) {
-            u8 decoAlpha = (u8)((baseAlpha * 180) / 255);
-            mpDecoration->setAlpha(decoAlpha);
-            mpDecoration->setWhite(getThemedDecorationColor(theme));
-
-            f32 decoW = 100.0f;
-            f32 decoH = 50.0f;
-            f32 inset = 8.0f;
-
-            f32 leftX = mBackgroundXPos + inset;
-            f32 rightX = mBackgroundXPos + mBackgroundWidth - decoW - inset;
-            f32 topY = mBackgroundYPos + inset;
-            f32 bottomY = mBackgroundYPos + mBackgroundHeight - decoH - inset;
-
-            mpDecoration->draw(leftX, topY, decoW, decoH, false, false, false);
-            mpDecoration->draw(rightX, topY, decoW, decoH, true, false, false);
-            mpDecoration->draw(leftX, bottomY, decoW, decoH, false, true, false);
-            mpDecoration->draw(rightX, bottomY, decoW, decoH, true, true, false);
-        }
-
         if (mpMainMenu != NULL) {
             if (mpMainMenu->isTransitioning()) {
                 u32 currentFrame = cCt_getFrameCount();
@@ -1019,11 +882,7 @@ int gzInfo_c::draw() {
         f32 separatorLeft = mBackgroundXPos + HIGHLIGHT_INSET + 2.0f;
         f32 separatorRight = mBackgroundXPos + mBackgroundWidth - HIGHLIGHT_INSET - 2.0f;
         GXColor separatorColor = getThemedSeparatorColor(theme, baseAlpha);
-        if (mpBanner != NULL) {
-            mpBanner->setAlpha(baseAlpha);
-            mpBanner->setWhite(getThemedBannerLineColor(theme));
-            mpBanner->draw(separatorLeft, separatorY - 1.0f, separatorRight - separatorLeft, 3.0f, false, false, false);
-        }
+        gzDrawHorizontalLine(separatorLeft, separatorRight, separatorY, 1.0f, separatorColor);
 
         // Draw submenu content box - left edge follows separator, clamped to menu bounds
         {
@@ -1065,16 +924,24 @@ int gzInfo_c::draw() {
             mpBannerBg->draw(bannerX, bannerY, bannerW, bannerH, false, false, false);
         }
 
-        if (mpDecoration != NULL) {
-            u8 swirlAlpha = (u8)((baseAlpha * 200) / 255);
-            mpDecoration->setAlpha(swirlAlpha);
-            mpDecoration->setWhite(getThemedDecorationColor(theme));
-            f32 swirlW = 50.0f;
-            f32 swirlH = 26.0f;
-            mpDecoration->draw(bannerX + 2.0f, bannerY + 2.0f, swirlW, swirlH, false, false, false);
+        if (mpSwirl != NULL) {
+            GXColor sColor = gzGetThemedBorderColor(theme, baseAlpha);
+            mpSwirl->setWhite(JUtility::TColor(sColor.r, sColor.g, sColor.b, 255));
+            mpSwirl->setAlpha(baseAlpha);
+
+            f32 centerY = bannerY + bannerH / 2.0f;
+            f32 pairS = 14.0f;
+            f32 bigS = 17.0f;
+
+            mpSwirl->draw(bannerX, centerY - pairS, pairS, pairS,
+                          false, false, false);
+            mpSwirl->draw(bannerX, centerY, pairS, pairS,
+                          true, false, false);
+            mpSwirl->draw(bannerX - bigS + 3.0f, centerY - bigS / 2.0f,
+                          bigS, bigS, true, false, false);
         }
 
-        f32 hintStartX = mSeparatorVisibleX;
+        f32 hintStartX = mSeparatorVisibleX + 20.0f;
         f32 btnSize = 16.0f;
         f32 letterSizeAB = 10.0f;
         f32 letterSizeXY = 8.0f;
@@ -1353,30 +1220,7 @@ void gzInfo_c::sendNotification(const char* msg, int i_notificationType) {
 }
 
 void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor outlineColor, f32 outlineWidth) {
-    GXSetNumChans(1);
-    GXSetNumTexGens(0);
-    GXSetNumTevStages(1);
-    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR0A0);
-    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_RASC);
-    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_RASA);
-    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-
-    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_VTX, 0, GX_DF_NONE, GX_AF_NONE);
-
-    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
-    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-    GXSetCullMode(GX_CULL_NONE);
-
-    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
-    GXSetCurrentMtx(0);
-
-    GXClearVtxDesc();
-    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-    GXSetVtxDesc(GX_VA_CLR0, GX_DIRECT);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
-    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
+    gzSetupGXPrimitive();
 
     static const int NUM_SEGMENTS = 16;
 

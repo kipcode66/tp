@@ -75,6 +75,8 @@ private:
     const char* getItemName(u8 itemId);
     inline bool isPoeSlotSelected() { return (mPauseCursorRow == 4 && mPauseCursorCol == 1); }
     inline bool inPoeEditMode() { return isPoeSlotSelected() && gzInfo_isMenuOption(); }
+    inline bool isHeartPieceSlotSelected() { return (mPauseCursorCol == 2 && mPauseCursorRow <= 1); }
+    inline bool inHeartPieceEditMode() { return isHeartPieceSlotSelected() && gzInfo_isMenuOption(); }
 
 private:
     void initPauseMenu();
@@ -86,6 +88,7 @@ private:
     void cyclePauseSlot(int row, int col);
     void equipPauseSlot(int row, int col);
     u8 getItemForSlot(int row, int col);
+    u8 getDisplayItemForSlot(int row, int col);
     int getMaxColsForRow(int row);
     void readPauseSlotStates();
     bool isSlotEquipped(int row, int col);
@@ -132,6 +135,22 @@ private:
 
     J2DPicture* mpPoeIconPane;
     ResTIMG* mpPoeIconBuf;
+
+    J2DPicture* mpBugsIconPane;
+    ResTIMG* mpBugsIconBuf;
+    J2DPicture* mpSkillsIconPane;
+    ResTIMG* mpSkillsIconBuf;
+    J2DPicture* mpFishIconPane;
+    ResTIMG* mpFishIconBuf;
+    J2DPicture* mpLettersIconPane;
+    ResTIMG* mpLettersIconBuf;
+    static const int HEART_TEX_COUNT = 5;
+    J2DPicture* mpHeartPiecePanes[HEART_TEX_COUNT];
+    ResTIMG* mpHeartPieceBufs[HEART_TEX_COUNT];
+
+    static const int HUD_HEART_TEX_COUNT = 2;
+    J2DPicture* mpHudHeartPanes[HUD_HEART_TEX_COUNT];
+    ResTIMG* mpHudHeartBufs[HUD_HEART_TEX_COUNT];
 };
 
 #endif // GZ_MENU_INVENTORY_H

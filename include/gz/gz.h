@@ -392,10 +392,9 @@ public:
 
     J2DPicture* mpIcon;
     J2DPicture* mpBackground;
-    J2DPicture* mpDecoration;
-    J2DPicture* mpBanner;
     J2DPicture* mpBannerBg;
-    
+    J2DPicture* mpSwirl;
+
     J2DPicture* mpBtnABBase;
     J2DPicture* mpBtnAText;
     J2DPicture* mpBtnBText;

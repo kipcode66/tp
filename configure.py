@@ -593,7 +593,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_graphic.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_machine.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_mtx.cpp"),
-            Object(MatchingFor(ALL_GCN), "m_Do/m_Do_ext.cpp"),
+            Object(Custom, "m_Do/m_Do_ext.cpp"),
             Object(NonMatching, "m_Do/m_Do_ext2.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_lib.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_Reset.cpp"),
@@ -773,7 +773,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "d/d_eye_hl.cpp"),
             Object(MatchingFor(ALL_GCN), "d/d_error_msg.cpp"),
             Object(Custom, "d/d_debug_viewer.cpp"),
-            Object(NonMatching, "d/d_debug_pad.cpp"),
+            Object(Custom, "d/d_debug_pad.cpp"),
             Object(NonMatching, "d/d_debug_camera.cpp"),
             Object(Custom, "d/actor/d_a_alink.cpp"), # weak func order, vtable order
             Object(MatchingFor(ALL_GCN), "d/actor/d_a_itembase.cpp"),
@@ -1619,6 +1619,7 @@ config.libs = [
             Object(Matching, "dolphin/gx/GXDisplayList.c"),
             Object(Matching, "dolphin/gx/GXTransform.c", extra_cflags=["-fp_contract off"]),
             Object(Matching, "dolphin/gx/GXPerf.c"),
+            Object(Custom, "dolphin/gx/GXDraw.c"),
         ],
     ),
     DolphinLib(
@@ -3010,6 +3011,8 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
     if module_id == 0:  # DOL
         return objects + [
                 "dolphin/card/CARDDelete.c",
+                "dolphin/gx/GXDraw.c",
+                "d/d_debug_pad.cpp",
                 "d/d_debug_viewer.cpp",
                 "gz/gz_utility_notification.cpp",
                 "gz/gz.cpp",
@@ -3037,6 +3040,28 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
     return objects
 
 config.link_order_callback = link_order_callback
+
+# Auto-extract defined symbols from custom DOL objects and add them to the
+# ldscript FORCEACTIVE section so REL modules can resolve references to them.
+custom_dol_objects = link_order_callback(0, [])
+if config.non_matching and custom_dol_objects:
+    nm_path = f"build/binutils/powerpc-eabi-nm"
+    obj_inputs = [f"build/{version}/src/{obj.replace('.cpp', '.o').replace('.c', '.o')}" for obj in custom_dol_objects]
+    ldscript_path = f"build/{version}/ldscript.lcf"
+    stamp_path = f"build/{version}/forceactive.stamp"
+
+    config.custom_build_rules.append({
+        "name": "patch_forceactive",
+        "command": f"$python tools/patch_forceactive.py {ldscript_path} {nm_path} {' '.join(obj_inputs)} && touch $out",
+        "description": "FORCEACTIVE $out",
+        "restat": True,
+    })
+    config.custom_build_steps.setdefault("post-compile", []).append({
+        "outputs": stamp_path,
+        "rule": "patch_forceactive",
+        "inputs": obj_inputs,
+        "implicit": [ldscript_path, "build/binutils", "tools/patch_forceactive.py"],
+    })
 
 # Optional extra categories for progress tracking
 config.progress_categories = [
@@ -3067,8 +3092,15 @@ if args.mode == "configure":
         dol_output = f"build/{version}/framework.dol"
         rel_output = f"build/{version}/f_pc_profile_lst/f_pc_profile_lst.rel"
 
+        assets_stamp = f"build/{version}/mod_assets.stamp"
+
         # Add the rebuild_iso rule after the custom build rules section
         iso_rule = f"""
+rule mod_assets_checksum
+  command = $python tools/check_mod_assets.py $out
+  restat = 1
+  description = CHECK mod_assets
+
 rule rebuild_iso
   command = $python tools/rebuild-decomp-tp.py {orig_iso} $out ./ --version {version}
   description = REBUILD ISO {version}
@@ -3080,10 +3112,16 @@ rule rebuild_iso
         )
 
         # Add the build step before the default rule
-        iso_build = f"""# Rebuild ISO
-build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py
+        iso_build = f"""# mod_assets checksum
+build {assets_stamp}: mod_assets_checksum | always
+
+# Rebuild ISO
+build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py {assets_stamp}
 
 """
+        # Add phony always target if not already present
+        if "build always: phony" not in content:
+            iso_build = "build always: phony\n\n" + iso_build
         content = content.replace(
             "# Default rule\n",
             iso_build + "# Default rule\n"

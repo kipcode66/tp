@@ -178,6 +178,7 @@ void gzWarpMenu_c::executeWarp() {
              mpCurrentStage->stage_id, mpCurrentRoom->room_id, spawnId);
 
     mPreview.unloadPreview();
+    unloadTypeFile();
 
     g_dComIfG_gameInfo.play.setNextStage(
         mpCurrentStage->stage_id,
@@ -229,6 +230,7 @@ void gzWarpMenu_c::execute() {
             gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         } else if (!g_gzInfo.mpMainMenu->isTransitioning() || !g_gzInfo.mpMainMenu->isTransitionForward()) {
             mPreview.unloadPreview();
+            unloadTypeFile();
 
             gzCursor* l_cursor = gzInfo_getCursor();
             l_cursor->x--;
@@ -350,6 +352,7 @@ void gzWarpMenu_c::draw() {
     drawLines((gzLine**)mpLines, LINE_NUM, haihai_flags, 0, LINE_NUM);
 
     if (isEntered() && mpCurrentStage && mpCurrentRoom) {
+        mPreview.startAsyncPreload();
         if (!mPreview.hasRealPreview() && mPreview.isPreloadComplete() && !mPreview.allocationFailed()) {
             mPreview.forceReload();
         }

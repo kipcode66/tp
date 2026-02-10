@@ -36,7 +36,6 @@ public:
     void startReverseTransition();
     void setDefaultMenuXPos();
     void loadIcons();
-    void unloadIcons();
 
     virtual void _delete();
     virtual void execute();

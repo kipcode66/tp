@@ -1,6 +1,7 @@
 #include "gz/gz_warp_preview.h"
 #include "gz/gz.h"
 #include "d/d_com_inf_game.h"
+#include "JSystem/JKernel/JKRAramArchive.h"
 #include <cstring>
 #include <cstdio>
 
@@ -141,8 +142,12 @@ u32 gzWarpPreview_c::findBtiOffset(int typeIdx, const char* stageId, u8 roomId) 
 }
 
 void gzWarpPreview_c::loadFallback(JKRHeap* heap) {
-    ResTIMG* fallbackTex =
-        (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_block8x8.bti");
+    ResTIMG* fallbackTex;
+    {
+        JKRHeapOverrideScope scope(heap);
+        fallbackTex =
+            (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_block8x8.bti");
+    }
     if (fallbackTex != NULL) {
         mpPicture = new (heap, 4) J2DPicture(fallbackTex);
         mpPicture->setBlackWhite(JUtility::TColor(0, 0, 0, 0),

@@ -72,8 +72,8 @@ gzMainMenu_c::gzMainMenu_c() {
     mpMenus[MENU_FLAGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzFlagsMenu_c();
     mpMenus[MENU_FRAMEWORK] = new (gzHeap(GZ_GROUP_MENU), 4) gzFrameworkMenu_c();
     mpMenus[MENU_HEAPS] = new (gzHeap(GZ_GROUP_MENU), 4) gzHeapsMenu_c();
-    // mpMenus[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzInventoryMenu_c();
-    mpMenus[MENU_INVENTORY] = NULL;
+    mpMenus[MENU_INVENTORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzInventoryMenu_c();
+    // mpMenus[MENU_INVENTORY] = NULL;
     mpMenus[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzMemoryMenu_c();
     mpMenus[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzPracticeMenu_c();
     mpMenus[MENU_SCENE] = NULL;
@@ -145,18 +145,6 @@ void gzMainMenu_c::loadIcons() {
     }
 }
 
-void gzMainMenu_c::unloadIcons() {
-    for (int i = 0; i < LINE_NUM; i++) {
-        if (mpIcons[i] != NULL) {
-            JKRHeap::free(mpIcons[i], gzHeap(GZ_GROUP_GRAPHICS));
-            mpIcons[i] = NULL;
-
-            JKRHeap::free(mpIconBuffers[i], gzHeap(GZ_GROUP_GRAPHICS));
-            mpIconBuffers[i] = NULL;
-        }
-    }
-}
-
 void gzMainMenu_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
@@ -183,7 +171,6 @@ void gzMainMenu_c::execute() {
 
     if (gzPad::getTrigA()) {
         if (g_gzInfo.mpCurrentMenu != NULL) {
-            unloadIcons();
             startForwardTransition();
             l_cursor->x++;
             l_cursor->y = 0;

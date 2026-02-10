@@ -120,6 +120,22 @@ gzInventoryMenu_c::gzInventoryMenu_c() {
     mpPauseFrameBuf = NULL;
     mpPoeIconPane = NULL;
     mpPoeIconBuf = NULL;
+    mpBugsIconPane = NULL;
+    mpBugsIconBuf = NULL;
+    mpSkillsIconPane = NULL;
+    mpSkillsIconBuf = NULL;
+    mpFishIconPane = NULL;
+    mpFishIconBuf = NULL;
+    mpLettersIconPane = NULL;
+    mpLettersIconBuf = NULL;
+    for (int i = 0; i < HEART_TEX_COUNT; i++) {
+        mpHeartPiecePanes[i] = NULL;
+        mpHeartPieceBufs[i] = NULL;
+    }
+    for (int i = 0; i < HUD_HEART_TEX_COUNT; i++) {
+        mpHudHeartPanes[i] = NULL;
+        mpHudHeartBufs[i] = NULL;
+    }
     for (int row = 0; row < PAUSE_MAX_ROWS; row++) {
         for (int col = 0; col < PAUSE_MAX_COLS; col++) {
             mPauseSlotState[row][col] = 0;
@@ -239,6 +255,22 @@ void gzInventoryMenu_c::freeRingScreen() {
     if (mpRingResData != NULL) {
         gzHeap(GZ_GROUP_MENU)->free(mpRingResData);
         mpRingResData = NULL;
+    }
+
+    JKRArchive* ringArc = dComIfGp_getRingResArchive();
+    if (ringArc != NULL) {
+        JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+        u8* heapStart = (u8*)heap->getStartAddr();
+        u8* heapEnd = (u8*)heap->getEndAddr();
+        u32 numFiles = ringArc->countFile();
+        JKRArchive::SDIFileEntry* files = ringArc->mFiles;
+        for (u32 i = 0; i < numFiles; i++) {
+            u8* data = (u8*)files[i].data;
+            if (data != NULL && data >= heapStart && data < heapEnd) {
+                heap->free(data);
+                files[i].data = NULL;
+            }
+        }
     }
 }
 
@@ -754,10 +786,55 @@ void gzInventoryMenu_c::freePauseTextures(bool freeArchiveCache) {
 
     delete mpPoeIconPane;
     mpPoeIconPane = NULL;
-    
     if (mpPoeIconBuf != NULL) {
         heap->free(mpPoeIconBuf);
         mpPoeIconBuf = NULL;
+    }
+
+    delete mpBugsIconPane;
+    mpBugsIconPane = NULL;
+    if (mpBugsIconBuf != NULL) {
+        heap->free(mpBugsIconBuf);
+        mpBugsIconBuf = NULL;
+    }
+
+    delete mpSkillsIconPane;
+    mpSkillsIconPane = NULL;
+    if (mpSkillsIconBuf != NULL) {
+        heap->free(mpSkillsIconBuf);
+        mpSkillsIconBuf = NULL;
+    }
+
+    delete mpFishIconPane;
+    mpFishIconPane = NULL;
+    if (mpFishIconBuf != NULL) {
+        heap->free(mpFishIconBuf);
+        mpFishIconBuf = NULL;
+    }
+
+    delete mpLettersIconPane;
+    mpLettersIconPane = NULL;
+    if (mpLettersIconBuf != NULL) {
+        heap->free(mpLettersIconBuf);
+        mpLettersIconBuf = NULL;
+    }
+
+    for (int i = 0; i < HEART_TEX_COUNT; i++) {
+        delete mpHeartPiecePanes[i];
+        mpHeartPiecePanes[i] = NULL;
+        if (mpHeartPieceBufs[i] != NULL) {
+            heap->free(mpHeartPieceBufs[i]);
+            mpHeartPieceBufs[i] = NULL;
+        }
+    }
+
+    for (int i = 0; i < HUD_HEART_TEX_COUNT; i++) {
+        delete mpHudHeartPanes[i];
+        mpHudHeartPanes[i] = NULL;
+        if (mpHudHeartBufs[i] != NULL) {
+            heap->free(mpHudHeartBufs[i]);
+            mpHudHeartBufs[i] = NULL;
+        }
     }
 
     mPauseMenuInitialized = false;
@@ -765,8 +842,8 @@ void gzInventoryMenu_c::freePauseTextures(bool freeArchiveCache) {
 
 int gzInventoryMenu_c::getMaxColsForRow(int row) {
     switch (row) {
-    case 0: return 2;
-    case 1: return 2;
+    case 0: return 3;
+    case 1: return 3;
     case 2: return 3;
     case 3: return 4;
     case 4: return 4;
@@ -895,6 +972,31 @@ u8 gzInventoryMenu_c::getItemForSlot(int row, int col) {
     return fpcNm_ITEM_NONE;
 }
 
+u8 gzInventoryMenu_c::getDisplayItemForSlot(int row, int col) {
+    u8 item = getItemForSlot(row, col);
+    if (item != fpcNm_ITEM_NONE) return item;
+
+    switch (row) {
+    case 0:
+        return (col == 0) ? fpcNm_ITEM_WOOD_STICK : fpcNm_ITEM_MASTER_SWORD;
+    case 1:
+        return (col == 0) ? fpcNm_ITEM_WOOD_SHIELD : fpcNm_ITEM_HYLIA_SHIELD;
+    case 2:
+        if (col == 0) return fpcNm_ITEM_WEAR_KOKIRI;
+        if (col == 1) return fpcNm_ITEM_WEAR_ZORA;
+        if (col == 2) return fpcNm_ITEM_ARMOR;
+        break;
+    case 3:
+        if (col == 0) return fpcNm_ITEM_WALLET_LV1;
+        if (col == 1) return fpcNm_ITEM_ARROW_LV1;
+        break;
+    case 4:
+        if (col == 0) return fpcNm_ITEM_SMELL_CHILDREN;
+        break;
+    }
+    return fpcNm_ITEM_NONE;
+}
+
 static const char* getScentTextureName(u8 itemId) {
     switch (itemId) {
     case fpcNm_ITEM_SMELL_CHILDREN:
@@ -937,21 +1039,9 @@ void gzInventoryMenu_c::loadPauseItemTexture(int row, int col, u8 itemId) {
     if (scentTex != NULL) {
         JKRArchive* collectArc = dComIfGp_getCollectResArchive();
         if (collectArc != NULL) {
-            ResTIMG* tex;
-            JKRHeapOverrideScope scope(heap);
-            tex = (ResTIMG*)collectArc->getResource('TIMG', scentTex);
-
-            if (tex != NULL) {
-                u32 imgSize = GXGetTexBufferSize(tex->width, tex->height, tex->format,
-                                                  tex->mipmapEnabled, tex->mipmapCount);
-                u32 totalSize = tex->imageOffset + imgSize;
-                if (tex->indexTexture && tex->numColors > 0) {
-                    u32 palEnd = tex->paletteOffset + tex->numColors * 2;
-                    if (palEnd > totalSize) {
-                        totalSize = palEnd;
-                    }
-                }
-                memcpy(mpPauseItemBuf[row][col][0], tex, totalSize);
+            u32 readSize = collectArc->readResource(
+                mpPauseItemBuf[row][col][0], 0xC00, 'TIMG', scentTex);
+            if (readSize > 0) {
                 DCStoreRangeNoSync(mpPauseItemBuf[row][col][0], 0xC00);
                 textureNum = 1;
             }
@@ -982,18 +1072,22 @@ void gzInventoryMenu_c::initPauseMenu() {
     for (int row = 0; row < PAUSE_MAX_ROWS; row++) {
         int maxCols = getMaxColsForRow(row);
         for (int col = 0; col < maxCols; col++) {
-            u8 item = getItemForSlot(row, col);
+            u8 item = getDisplayItemForSlot(row, col);
             loadPauseItemTexture(row, col, item);
         }
     }
 
-    // Load frame texture WITH JKRHeapOverrideScope to ensure decompression goes to gz_heap.
-    // Without this, uncached textures decompress to J2dHeap which fills up and crashes.
     JKRArchive* collectArc = dComIfGp_getCollectResArchive();
     if (collectArc != NULL && mpPauseFramePane == NULL) {
+        JKRArchive::SDIFileEntry* frameEntry =
+            collectArc->findTypeResource('TIMG', "tt_spot_square3.bti");
+        bool frameCached = (frameEntry != NULL && frameEntry->data != NULL);
+
         ResTIMG* frameTex;
-        JKRHeapOverrideScope scope(heap);
-        frameTex = (ResTIMG*)collectArc->getResource('TIMG', "tt_spot_square3.bti");
+        {
+            JKRHeapOverrideScope scope(heap);
+            frameTex = (ResTIMG*)collectArc->getResource('TIMG', "tt_spot_square3.bti");
+        }
 
         if (frameTex != NULL) {
             JKRHeap* oldHeap = heap->becomeCurrentHeap();
@@ -1009,22 +1103,30 @@ void gzInventoryMenu_c::initPauseMenu() {
                 }
             }
             oldHeap->becomeCurrentHeap();
+
+            if (!frameCached) {
+                collectArc->detachResource(frameTex);
+                heap->free(frameTex);
+            }
         }
     }
 
-
-    // Load poe icon texture WITH JKRHeapOverrideScope - not cached by game
     if (collectArc != NULL && mpPoeIconPane == NULL) {
+        JKRArchive::SDIFileEntry* poeEntry =
+            collectArc->findTypeResource('TIMG', "ni_item_icon_pou.bti");
+        bool poeCached = (poeEntry != NULL && poeEntry->data != NULL);
+
         ResTIMG* poeIconTex;
-        JKRHeapOverrideScope scope(heap);
-        poeIconTex = (ResTIMG*)collectArc->getResource('TIMG', "ni_item_icon_pou.bti");
+        {
+            JKRHeapOverrideScope scope(heap);
+            poeIconTex = (ResTIMG*)collectArc->getResource('TIMG', "ni_item_icon_pou.bti");
+        }
 
         if (poeIconTex != NULL) {
             JKRHeap* oldHeap = heap->becomeCurrentHeap();
             u32 imgSize = GXGetTexBufferSize(poeIconTex->width, poeIconTex->height, poeIconTex->format,
                                               poeIconTex->mipmapEnabled, poeIconTex->mipmapCount);
             u32 totalSize = poeIconTex->imageOffset + imgSize;
-            // Include palette data for indexed textures
             if (poeIconTex->indexTexture && poeIconTex->numColors > 0) {
                 u32 palEnd = poeIconTex->paletteOffset + poeIconTex->numColors * 2;
                 if (palEnd > totalSize) {
@@ -1041,6 +1143,148 @@ void gzInventoryMenu_c::initPauseMenu() {
                 }
             }
             oldHeap->becomeCurrentHeap();
+
+            if (!poeCached) {
+                collectArc->detachResource(poeIconTex);
+                heap->free(poeIconTex);
+            }
+        }
+    }
+
+    struct CollectIconLoad {
+        const char* texName;
+        J2DPicture** pPane;
+        ResTIMG** pBuf;
+    };
+    CollectIconLoad iconLoads[] = {
+        {"ni_kab_o.bti", &mpBugsIconPane, &mpBugsIconBuf},
+        {"ni_item_icon_makimono.bti", &mpSkillsIconPane, &mpSkillsIconBuf},
+        {"ni_item_icon_fish.bti", &mpFishIconPane, &mpFishIconBuf},
+        {"ni_item_icon_letter.bti", &mpLettersIconPane, &mpLettersIconBuf},
+    };
+    for (int i = 0; i < 4; i++) {
+        if (collectArc != NULL && *iconLoads[i].pPane == NULL) {
+            JKRArchive::SDIFileEntry* entry =
+                collectArc->findTypeResource('TIMG', iconLoads[i].texName);
+            bool wasCached = (entry != NULL && entry->data != NULL);
+
+            ResTIMG* tex;
+            {
+                JKRHeapOverrideScope scope(heap);
+                tex = (ResTIMG*)collectArc->getResource('TIMG', iconLoads[i].texName);
+            }
+
+            if (tex != NULL) {
+                JKRHeap* oldHeap = heap->becomeCurrentHeap();
+                u32 imgSize = GXGetTexBufferSize(tex->width, tex->height, tex->format,
+                                                  tex->mipmapEnabled, tex->mipmapCount);
+                u32 totalSize = tex->imageOffset + imgSize;
+                if (tex->indexTexture && tex->numColors > 0) {
+                    u32 palEnd = tex->paletteOffset + tex->numColors * 2;
+                    if (palEnd > totalSize) {
+                        totalSize = palEnd;
+                    }
+                }
+                *iconLoads[i].pBuf = (ResTIMG*)heap->alloc(totalSize, 32);
+                if (*iconLoads[i].pBuf != NULL) {
+                    memcpy(*iconLoads[i].pBuf, tex, totalSize);
+                    DCStoreRangeNoSync(*iconLoads[i].pBuf, totalSize);
+                    *iconLoads[i].pPane = new (heap, 4) J2DPicture(*iconLoads[i].pBuf);
+                    if (*iconLoads[i].pPane != NULL) {
+                        (*iconLoads[i].pPane)->setBasePosition(J2DBasePosition_4);
+                    }
+                }
+                oldHeap->becomeCurrentHeap();
+
+                if (!wasCached) {
+                    collectArc->detachResource(tex);
+                    heap->free(tex);
+                }
+            }
+        }
+    }
+
+    if (collectArc != NULL && mpHeartPiecePanes[0] == NULL) {
+        static const char* heartTexNames[HEART_TEX_COUNT] = {
+            "zelda_heart_parts_iwasawa_ver2_base_00.bti",
+            "zelda_heart_parts_iwasawa_ver2_parts1.bti",
+            "zelda_heart_parts_iwasawa_ver2_parts2.bti",
+            "zelda_heart_parts_iwasawa_ver2_parts3.bti",
+            "zelda_heart_parts_iwasawa_ver2_parts4.bti",
+        };
+        for (int i = 0; i < HEART_TEX_COUNT; i++) {
+            JKRArchive::SDIFileEntry* entry =
+                collectArc->findTypeResource('TIMG', heartTexNames[i]);
+            bool wasCached = (entry != NULL && entry->data != NULL);
+
+            ResTIMG* tex;
+            {
+                JKRHeapOverrideScope scope(heap);
+                tex = (ResTIMG*)collectArc->getResource('TIMG', heartTexNames[i]);
+            }
+
+            if (tex != NULL) {
+                JKRHeap* oldHeap = heap->becomeCurrentHeap();
+                u32 imgSize = GXGetTexBufferSize(tex->width, tex->height, tex->format,
+                                                  tex->mipmapEnabled, tex->mipmapCount);
+                u32 totalSize = tex->imageOffset + imgSize;
+                if (tex->indexTexture && tex->numColors > 0) {
+                    u32 palEnd = tex->paletteOffset + tex->numColors * 2;
+                    if (palEnd > totalSize) {
+                        totalSize = palEnd;
+                    }
+                }
+                mpHeartPieceBufs[i] = (ResTIMG*)heap->alloc(totalSize, 32);
+                if (mpHeartPieceBufs[i] != NULL) {
+                    memcpy(mpHeartPieceBufs[i], tex, totalSize);
+                    DCStoreRangeNoSync(mpHeartPieceBufs[i], totalSize);
+                    mpHeartPiecePanes[i] = new (heap, 4) J2DPicture(mpHeartPieceBufs[i]);
+                }
+                oldHeap->becomeCurrentHeap();
+
+                if (!wasCached) {
+                    collectArc->detachResource(tex);
+                    heap->free(tex);
+                }
+            }
+        }
+    }
+
+    JKRArchive* main2DArc = dComIfGp_getMain2DArchive();
+    if (main2DArc != NULL && mpHudHeartPanes[0] == NULL) {
+        static const char* hudHeartTexNames[HUD_HEART_TEX_COUNT] = {
+            "tt_heart_00.bti",
+            "tt_heart_base_wave_24.bti",
+        };
+        for (int i = 0; i < HUD_HEART_TEX_COUNT; i++) {
+            JKRArchive::SDIFileEntry* entry =
+                main2DArc->findTypeResource('TIMG', hudHeartTexNames[i]);
+            bool wasCached = (entry != NULL && entry->data != NULL);
+
+            ResTIMG* tex;
+            {
+                JKRHeapOverrideScope scope(heap);
+                tex = (ResTIMG*)main2DArc->getResource('TIMG', hudHeartTexNames[i]);
+            }
+
+            if (tex != NULL) {
+                JKRHeap* oldHeap = heap->becomeCurrentHeap();
+                u32 imgSize = GXGetTexBufferSize(tex->width, tex->height, tex->format,
+                                                  tex->mipmapEnabled, tex->mipmapCount);
+                u32 totalSize = tex->imageOffset + imgSize;
+                mpHudHeartBufs[i] = (ResTIMG*)heap->alloc(totalSize, 32);
+                if (mpHudHeartBufs[i] != NULL) {
+                    memcpy(mpHudHeartBufs[i], tex, totalSize);
+                    DCStoreRangeNoSync(mpHudHeartBufs[i], totalSize);
+                    mpHudHeartPanes[i] = new (heap, 4) J2DPicture(mpHudHeartBufs[i]);
+                }
+                oldHeap->becomeCurrentHeap();
+
+                if (!wasCached) {
+                    main2DArc->detachResource(tex);
+                    heap->free(tex);
+                }
+            }
         }
     }
 
@@ -1154,9 +1398,9 @@ void gzInventoryMenu_c::cyclePauseSlot(int row, int col) {
 
     bool wasEquipped = isSlotEquipped(row, col);
     mPauseSlotState[row][col] = state;
-    u8 item = getItemForSlot(row, col);
+    u8 item = getDisplayItemForSlot(row, col);
     loadPauseItemTexture(row, col, item);
-    if (wasEquipped && item != fpcNm_ITEM_NONE) {
+    if (wasEquipped && getItemForSlot(row, col) != fpcNm_ITEM_NONE) {
         equipPauseSlot(row, col);
     }
 }
@@ -1196,7 +1440,7 @@ void gzInventoryMenu_c::executePauseMenu() {
 
     if (inPoeEditMode()) {
         u8 poeCount = dComIfGs_getPohSpiritNum();
-        
+
         if (gzPad::getTrigRight()) {
             poeCount = (poeCount >= 60) ? 0 : poeCount + 1;
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
@@ -1208,6 +1452,28 @@ void gzInventoryMenu_c::executePauseMenu() {
         }
 
         dComIfGs_setPohSpiritNum(poeCount);
+
+        if (gzPad::getTrigB()) {
+            gzInfo_offMenuOption();
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inHeartPieceEditMode()) {
+        u16 maxLife = dComIfGs_getMaxLife();
+
+        if (gzPad::getTrigRight()) {
+            if (maxLife < 100) {
+                dComIfGs_setMaxLife(maxLife + 1);
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
+        }
+
+        if (gzPad::getTrigLeft()) {
+            if (maxLife > 5) {
+                dComIfGs_setMaxLife(maxLife - 1);
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
+        }
 
         if (gzPad::getTrigB()) {
             gzInfo_offMenuOption();
@@ -1241,19 +1507,13 @@ void gzInventoryMenu_c::executePauseMenu() {
         }
     }
 
-    if (gzPad::getTrigZ()) {
-        if (isPoeSlotSelected()) {
-            dComIfGs_onItemFirstBit(fpcNm_ITEM_SMELL_POH);
-            dComIfGs_setCollectSmell(fpcNm_ITEM_SMELL_POH);
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-        } else {
-            cyclePauseSlot(mPauseCursorRow, mPauseCursorCol);
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-        }
+    if (gzPad::getTrigZ() && !isPoeSlotSelected() && !isHeartPieceSlotSelected()) {
+        cyclePauseSlot(mPauseCursorRow, mPauseCursorCol);
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
     }
 
     if (gzPad::getTrigA()) {
-        if (isPoeSlotSelected()) {
+        if (isPoeSlotSelected() || isHeartPieceSlotSelected()) {
             if (gzInfo_isMenuOption()) {
                 gzInfo_offMenuOption();
             } else {
@@ -1270,8 +1530,21 @@ void gzInventoryMenu_c::executePauseMenu() {
         }
     }
 
-    u8 currentItem = getItemForSlot(mPauseCursorRow, mPauseCursorCol);
+    u8 currentItem = getDisplayItemForSlot(mPauseCursorRow, mPauseCursorCol);
     const char* itemName = getItemName(currentItem);
+    if (mPauseCursorCol == 2 && mPauseCursorRow <= 1) {
+        itemName = "Heart Pieces";
+    } else if (mPauseCursorRow == 3 && mPauseCursorCol == 2) {
+        itemName = "Golden Bugs";
+    } else if (mPauseCursorRow == 3 && mPauseCursorCol == 3) {
+        itemName = "Hidden Skills";
+    } else if (mPauseCursorRow == 4 && mPauseCursorCol == 1) {
+        itemName = "Poe Souls";
+    } else if (mPauseCursorRow == 4 && mPauseCursorCol == 2) {
+        itemName = "Fish Journal";
+    } else if (mPauseCursorRow == 4 && mPauseCursorCol == 3) {
+        itemName = "Letters";
+    }
     gzInfo_getMenuDescription()->setString(itemName);
 }
 
@@ -1293,12 +1566,43 @@ bool gzInventoryMenu_c::isSlotEquipped(int row, int col) {
 
 void gzInventoryMenu_c::drawPauseMenuContent() {
     static const f32 GRID_START_X = -15.0f;
-    static const f32 GRID_START_Y = 40.0f;
+    static const f32 GRID_START_Y = 70.0f;
     static const f32 CELL_SIZE = 52.0f;
     static const f32 ROW_SPACING = 56.0f;
 
     f32 baseX = mXPos + GRID_START_X;
     f32 baseY = g_gzInfo.mBackgroundYPos + GRID_START_Y;
+
+    if (mpHudHeartPanes[0] != NULL && mpHudHeartPanes[1] != NULL) {
+        mpHudHeartPanes[0]->setBlackWhite(
+            JUtility::TColor(231, 25, 0, 0), JUtility::TColor(255, 255, 255, 255));
+        mpHudHeartPanes[1]->setBlackWhite(
+            JUtility::TColor(0, 0, 0, 0), JUtility::TColor(255, 242, 170, 140));
+
+        u16 maxLife = dComIfGs_getMaxLife();
+        int numFull = maxLife / 5;
+        static const f32 HH_W = 20.0f;
+        static const f32 HH_H = 18.0f;
+        static const f32 HH_GAP = 1.0f;
+        static const int HH_PER_ROW = 10;
+        f32 heartsX = baseX + 24.0f;
+        f32 heartsY = g_gzInfo.mBackgroundYPos + 48.0f;
+
+        for (int i = 0; i < numFull; i++) {
+            int hRow = i / HH_PER_ROW;
+            int hCol = i % HH_PER_ROW;
+            f32 hx = heartsX + hCol * (HH_W + HH_GAP);
+            f32 hy = heartsY + hRow * (HH_H + HH_GAP);
+
+            gzSetup2DContext();
+            mpHudHeartPanes[1]->setAlpha(255);
+            mpHudHeartPanes[1]->draw(hx, hy, HH_W, HH_H, true, true, false);
+
+            gzSetup2DContext();
+            mpHudHeartPanes[0]->setAlpha(255);
+            mpHudHeartPanes[0]->draw(hx, hy, HH_W, HH_H, false, false, false);
+        }
+    }
 
     for (int row = 0; row < PAUSE_MAX_ROWS; row++) {
         f32 rowY = baseY + row * ROW_SPACING;
@@ -1308,7 +1612,52 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
             f32 cellX = baseX + col * CELL_SIZE;
             f32 cellY = rowY;
 
+            bool isHeartSlot = (col == 2 && row <= 1);
+            if (isHeartSlot) {
+                cellX += 20.0f;
+                cellY = baseY + ROW_SPACING / 2.0f;
+            }
+
             bool isSelected = (row == mPauseCursorRow && col == mPauseCursorCol);
+
+            if (isHeartSlot) {
+                if (row == 0 && mpHeartPiecePanes[0] != NULL) {
+                    bool heartSelected = mIsEntered && isHeartPieceSlotSelected();
+                    f32 heartW = 80.0f;
+                    f32 heartH = 66.0f;
+                    if (heartSelected) {
+                        heartW *= 1.1f;
+                        heartH *= 1.1f;
+                    }
+                    f32 heartX = cellX + 48.0f - heartW / 2.0f;
+                    f32 heartY = cellY + 48.0f - heartH / 2.0f;
+
+                    gzSetup2DContext();
+                    mpHeartPiecePanes[0]->setAlpha(255);
+                    mpHeartPiecePanes[0]->draw(heartX, heartY, heartW, heartH,
+                                               false, false, false);
+
+                    u16 maxLife = dComIfGs_getMaxLife();
+                    s32 pieces = maxLife % 5;
+                    for (int p = 1; p <= pieces; p++) {
+                        if (mpHeartPiecePanes[p] != NULL) {
+                            gzSetup2DContext();
+                            mpHeartPiecePanes[p]->setAlpha(255);
+                            mpHeartPiecePanes[p]->draw(heartX, heartY, heartW, heartH,
+                                                       false, false, false);
+                        }
+                    }
+                }
+
+                if (isSelected && mIsEntered && gzInfo_isCursorTypeTP() &&
+                    gzInfo_getTPCursor() != NULL) {
+                    gzInfo_getTPCursor()->setPos(cellX + 49.0f, cellY + 49.0f);
+                    gzInfo_getTPCursor()->setParam(1.0f, 1.0f, 0.1f, 0.6f, 0.5f);
+                    gzInfo_getTPCursor()->draw();
+                }
+                continue;
+            }
+
             bool hasItem = mPauseSlotState[row][col] > 0;
             bool isEquipped = isSlotEquipped(row, col);
 
@@ -1327,40 +1676,69 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                 mpPauseFramePane->draw(cellX + 24.0f, cellY + 24.0f, 48.0f, 48.0f, false, false, false);
             }
 
-            if (row == 4 && col == 1) {
-                if (mpPoeIconPane != NULL) {
-                    gzSetup2DContext();
-                    f32 itemSize = (mIsEntered && isSelected) ? 56.0f : 48.0f;
-                    mpPoeIconPane->draw(cellX + 24.0f, cellY + 24.0f, itemSize, itemSize, false, false, false);
-                }
-                
-                u8 poeCount = dComIfGs_getPohSpiritNum();
-                char numStr[8];
-                sprintf(numStr, "%d", poeCount);
-                gzTextBox* poeText = gzTextBox_allocate();
-                poeText->setFontSize(14.0f, 14.0f);
-                poeText->setString(numStr);
-                f32 textX = cellX + 24.0f - 305.0f;  // Offset for HBIND_CENTER
-                f32 textY = cellY + 52.0f;
-                poeText->draw(textX, textY, COLOR_WHITE, HBIND_CENTER);
-                gzTextBox_free(poeText);
+            J2DPicture* staticIcon = NULL;
+            if (row == 3 && col == 2) staticIcon = mpBugsIconPane;
+            if (row == 3 && col == 3) staticIcon = mpSkillsIconPane;
+            if (row == 4 && col == 1) staticIcon = mpPoeIconPane;
+            if (row == 4 && col == 2) staticIcon = mpFishIconPane;
+            if (row == 4 && col == 3) staticIcon = mpLettersIconPane;
 
-                if (inPoeEditMode() && mpHaihai != NULL) {
-                    mpHaihai->_execute(0);
-                    mpHaihai->setScale(0.5f);
-                    u8 arrowFlags = ARROW_LEFT | ARROW_RIGHT;
-                    if (poeCount == 0) arrowFlags &= ~ARROW_LEFT;
-                    if (poeCount >= 60) arrowFlags &= ~ARROW_RIGHT;
-                    f32 arrowX = cellX + 24.0f;
-                    f32 arrowY = textY - 5.0f;
-                    mpHaihai->drawHaihai(arrowFlags, arrowX, arrowY, 40.0f, 0.0f);
-                }
-            } else if (hasItem) {
+            u8 iconAlpha = hasItem ? 255 : 80;
+
+            if (staticIcon != NULL) {
                 gzSetup2DContext();
                 f32 itemSize = (mIsEntered && isSelected) ? 56.0f : 48.0f;
+                if (row == 4 && col == 1) {
+                    iconAlpha = dComIfGs_getPohSpiritNum() > 0 ? 255 : 80;
+                }
+                staticIcon->setAlpha(iconAlpha);
+                f32 sizeOff = (itemSize - 48.0f) / 2.0f;
+                if (row == 3 && col == 3) {
+                    f32 scrollW = itemSize * 32.0f / 80.0f;
+                    f32 scrollH = itemSize;
+                    f32 scrollX = cellX + 48.0f - scrollW / 2.0f;
+                    f32 scrollY = cellY + 24.0f - sizeOff;
+                    staticIcon->rotate(scrollW / 2.0f, scrollH / 2.0f, ROTATE_Z, 45.0f);
+                    staticIcon->draw(scrollX, scrollY, scrollW, scrollH, false, false, false);
+                } else {
+                    staticIcon->draw(cellX + 24.0f - sizeOff, cellY + 24.0f - sizeOff,
+                                     itemSize, itemSize, false, false, false);
+                }
+
+                if (row == 4 && col == 1) {
+                    u8 poeCount = dComIfGs_getPohSpiritNum();
+                    char numStr[8];
+                    sprintf(numStr, "%d", poeCount);
+                    gzTextBox* poeText = gzTextBox_allocate();
+                    f32 fontSize = (mIsEntered && isSelected) ? 16.0f : 14.0f;
+                    poeText->setFontSize(fontSize, fontSize);
+                    poeText->setString(numStr);
+                    f32 textCenter = cellX + 58.0f;
+                    f32 textX = textCenter - 305.0f;
+                    f32 textY = cellY + 76.0f;
+                    poeText->draw(textX, textY, COLOR_WHITE, HBIND_CENTER);
+                    gzTextBox_free(poeText);
+
+                    if (inPoeEditMode() && mpHaihai != NULL) {
+                        mpHaihai->_execute(0);
+                        mpHaihai->setScale(0.5f);
+                        u8 arrowFlags = ARROW_LEFT | ARROW_RIGHT;
+                        if (poeCount == 0) arrowFlags &= ~ARROW_LEFT;
+                        if (poeCount >= 60) arrowFlags &= ~ARROW_RIGHT;
+                        mpHaihai->drawHaihai(arrowFlags, textCenter, textY - 5.0f,
+                                             40.0f, 0.0f);
+                    }
+                }
+            } else {
+                gzSetup2DContext();
+                f32 itemSize = (mIsEntered && isSelected) ? 56.0f : 48.0f;
+                f32 sizeOff = (itemSize - 48.0f) / 2.0f;
                 for (int k = 0; k < 3; k++) {
                     if (mpPauseItemTex[row][col][k] != NULL) {
-                        mpPauseItemTex[row][col][k]->draw(cellX + 24.0f, cellY + 24.0f, itemSize, itemSize, false, false, false);
+                        mpPauseItemTex[row][col][k]->setAlpha(iconAlpha);
+                        mpPauseItemTex[row][col][k]->draw(cellX + 24.0f - sizeOff,
+                                                          cellY + 24.0f - sizeOff,
+                                                          itemSize, itemSize, false, false, false);
                     }
                 }
             }
@@ -1416,7 +1794,7 @@ void gzInventoryMenu_c::execute() {
         mPauseMenuInitialized = false;
     }
 
-    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode()) {
+    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode() && !inHeartPieceEditMode()) {
         mCurrentTab = TAB_RING_MENU;
         l_cursor->y = 0;
         mCurrentSlot = 0;
@@ -1537,17 +1915,14 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
     hints.count = 0;
 
     if (mCurrentTab == TAB_PAUSE_MENU) {
-        bool isPoeSlot = (mPauseCursorRow == 4 && mPauseCursorCol == 1);
+        bool isPoeSlot = isPoeSlotSelected();
+        bool isHeartSlot = isHeartPieceSlotSelected();
         bool hasItem = mPauseSlotState[mPauseCursorRow][mPauseCursorCol] > 0;
         bool alreadyEquipped = isSlotEquipped(mPauseCursorRow, mPauseCursorCol);
 
-        if (isPoeSlot) {
+        if (isPoeSlot || isHeartSlot) {
             hints.hints[hints.count].button = GZ_BTN_A;
             hints.hints[hints.count].text = gzInfo_isMenuOption() ? "Done" : "Edit";
-            hints.count++;
-
-            hints.hints[hints.count].button = GZ_BTN_Z;
-            hints.hints[hints.count].text = "Poe Scent";
             hints.count++;
         } else {
             if (mPauseCursorRow <= 2 && hasItem && !alreadyEquipped) {
@@ -1555,7 +1930,9 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
                 hints.hints[hints.count].text = "Equip";
                 hints.count++;
             }
+        }
 
+        if (!isPoeSlot && !isHeartSlot) {
             hints.hints[hints.count].button = GZ_BTN_Z;
             hints.hints[hints.count].text = "Toggle";
             hints.count++;
@@ -1565,9 +1942,11 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
         hints.hints[hints.count].text = "Back";
         hints.count++;
 
-        hints.hints[hints.count].button = GZ_BTN_L;
-        hints.hints[hints.count].text = "Ring";
-        hints.count++;
+        if (!inPoeEditMode() && !inHeartPieceEditMode()) {
+            hints.hints[hints.count].button = GZ_BTN_L;
+            hints.hints[hints.count].text = "Ring";
+            hints.count++;
+        }
 
         return hints;
     }
@@ -1596,9 +1975,11 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
         }
     }
 
-    hints.hints[hints.count].button = GZ_BTN_R;
-    hints.hints[hints.count].text = "Pause";
-    hints.count++;
+    if (!gzInfo_isMenuOption()) {
+        hints.hints[hints.count].button = GZ_BTN_R;
+        hints.hints[hints.count].text = "Pause";
+        hints.count++;
+    }
 
     return hints;
 }
@@ -1632,7 +2013,7 @@ const char* gzInventoryMenu_c::getItemName(u8 itemId) {
     case fpcNm_ITEM_COPY_ROD: return "Dominion Rod";
     case fpcNm_ITEM_COPY_ROD_2: return "Dominion Rod (Powered)";
     case fpcNm_ITEM_HORSE_FLUTE: return "Horse Call";
-    case fpcNm_ITEM_WOOD_STICK: return "Ordon Sword";
+    case fpcNm_ITEM_WOOD_STICK: return "Wooden Sword";
     case fpcNm_ITEM_EMPTY_BOTTLE: return "Empty Bottle";
     case fpcNm_ITEM_RED_BOTTLE: return "Red Potion";
     case fpcNm_ITEM_GREEN_BOTTLE: return "Green Potion";
@@ -1662,9 +2043,9 @@ const char* gzInventoryMenu_c::getItemName(u8 itemId) {
     case fpcNm_ITEM_SWORD: return "Ordon Sword";
     case fpcNm_ITEM_MASTER_SWORD: return "Master Sword";
     case fpcNm_ITEM_LIGHT_SWORD: return "Master Sword (Light)";
-    case fpcNm_ITEM_WOOD_SHIELD: return "Wooden Shield";
-    case fpcNm_ITEM_SHIELD: return "Hylian Shield";
-    case fpcNm_ITEM_HYLIA_SHIELD: return "Ordon Shield";
+    case fpcNm_ITEM_WOOD_SHIELD: return "Ordon Shield";
+    case fpcNm_ITEM_SHIELD: return "Wooden Shield";
+    case fpcNm_ITEM_HYLIA_SHIELD: return "Hylian Shield";
     case fpcNm_ITEM_WEAR_KOKIRI: return "Hero's Clothes";
     case fpcNm_ITEM_WEAR_ZORA: return "Zora Armor";
     case fpcNm_ITEM_ARMOR: return "Magic Armor";

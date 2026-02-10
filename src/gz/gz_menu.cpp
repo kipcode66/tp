@@ -412,7 +412,6 @@ void gzMenu_c::onEnterMenu() {
 
 void gzMenu_c::onExitMenu() {
     mIsEntered = false;
-    g_gzInfo.mpMainMenu->loadIcons();
 }
 
 f32 gzMenu_c::getCurrentOptionsXOffset() {
