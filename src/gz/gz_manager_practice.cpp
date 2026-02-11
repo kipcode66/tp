@@ -50,6 +50,12 @@ void gzSaveLoaderMng_c::execute() {
     case PHASE_STAGE_INIT_e:
         memcpy(&g_dComIfG_gameInfo.info.mSavedata, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(dSv_save_c));
         dComIfGs_getSave(dComIfGs_getSaveInfo()->getDan().mStageNo);
+
+        if (mSaveCallbacks.stageInitCb != NULL) {
+            OSReport("running stageInit callback\n");
+            mSaveCallbacks.stageInitCb();
+        }
+
         mLoadPhase = PHASE_PLAYER_INIT_e;
         break;
     case PHASE_PLAYER_INIT_e:
@@ -68,6 +74,11 @@ void gzSaveLoaderMng_c::execute() {
                 if (mSaveMetadata.flags & SETFLAG_CAM_e) {
                     // TODO
                 }
+
+                if (mSaveCallbacks.playerInitCb != NULL) {
+                    OSReport("running playerInit callback\n");
+                    mSaveCallbacks.playerInitCb();
+                }
             }
 
             // TODO: would prefer not to do this, but until we can safely modify d_a_alink processes this is the simplest solution
@@ -79,7 +90,7 @@ void gzSaveLoaderMng_c::execute() {
     }
 }
 
-void gzSaveLoaderMng_c::loadSave(SaveCategory_e i_category, int i_entryNo) {
+void gzSaveLoaderMng_c::loadSave(SaveCategory_e i_category, int i_entryNo, const saveCallbacks_s i_callbackList[], int i_callbackListSize) {
     const int SAVE_READ_SIZE = OSRoundUp32B(sizeof(dSv_save_c));
     mMode = MODE_SAVE_e;
 
@@ -96,6 +107,24 @@ void gzSaveLoaderMng_c::loadSave(SaveCategory_e i_category, int i_entryNo) {
                           -1);
 
     start();
+
+    if (i_callbackList != NULL) {
+        // find and set save "specials"
+        for (int i = 0; i < i_callbackListSize; i++) {
+            if (i_entryNo == i_callbackList[i].saveIndex) {
+                OSReport("found save callbacks, now setting...\n");
+                setSaveCallbacks(i_callbackList[i].stageInitCb, i_callbackList[i].playerInitCb);
+                break;
+            }
+        }
+    }
+
+    // NOTE: hold-over from original gz save loading code. Inject the "during" callback early
+    // so that any location changes and such are set before stage loading begins.
+    // May want a cleaner solution later, but just want something that works for now
+    if (mSaveCallbacks.stageInitCb != NULL) {
+        mSaveCallbacks.stageInitCb();
+    }
 
     Z2GetSeqMgr()->bgmStop(0, 0);
     Z2GetSeqMgr()->subBgmStop();

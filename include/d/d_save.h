@@ -851,6 +851,8 @@ public:
         mLastAngleY = angle;
     }
 
+    void setLastMode(u32 mode) { mLastMode = mode; }
+
     s16 getStartPoint() const { return mStartPoint; }
     u32 getLastMode() const { return mLastMode; }
     s8 getRoomNo() const { return mRoomNo; }

@@ -80,6 +80,8 @@ public:
         bool mNamesLoaded;  // Defer memcard read until tab is first accessed
     };
 
+    static const gzSaveLoaderMng_c::saveCallbacks_s mAnypSaveCallbacks[];
+
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzSavesTab_c mAnypSavesTab;
     gzSavesTab_c mNoSQSavesTab;
@@ -89,5 +91,8 @@ public:
     gzMemfileTab_c mMemfileTab;
     int mCurrentTab;
 };
+
+const gzSaveLoaderMng_c::saveCallbacks_s* gzGetSaveCallbackList(int i_category);
+const int gzGetSaveCallbackListSize(int category);
 
 #endif // GZ_MENU_PRACTICE_H

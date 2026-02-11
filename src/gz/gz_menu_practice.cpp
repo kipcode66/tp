@@ -471,7 +471,10 @@ int gzPracticeMenu_c::gzSavesTab_c::execute() {
     gzCursor* l_cursor = gzInfo_getCursor();
 
     if (gzPad::getTrigA()) {
-        g_gzInfo.mSaveLoaderMng.loadSave((gzSaveLoaderMng_c::SaveCategory_e)mCategory, l_cursor->y);
+        g_gzInfo.mSaveLoaderMng.loadSave((gzSaveLoaderMng_c::SaveCategory_e)mCategory,
+                                         l_cursor->y,
+                                         gzGetSaveCallbackList(mCategory),
+                                         gzGetSaveCallbackListSize(mCategory));
         gzInfo_seStart(Z2SE_SY_CURSOR_OK);
     }
 

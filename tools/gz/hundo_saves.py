@@ -15,8 +15,8 @@ HUNDO_SAVES = [
         'description': 'Gate Clip outside Ordon Spring',
         'filename': 'ordon_gate_clip',
         'setflags': SetFlags.POS | SetFlags.CAM,
-        'pos': (827.497559, 329.622986, -4532.90723),
-        'angle': 498,
+        'pos': (400.0, 307.5, -11270.2),
+        'angle': 32768,
         'cam': {
             'center': (833.467468, 477.604675, -4241.97266),
             'eye': (827.497559, 329.622986, -4532.90723)

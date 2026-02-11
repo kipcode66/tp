@@ -1921,6 +1921,10 @@ inline void dComIfGs_setRestartRoomParam(u32 i_param) {
     g_dComIfG_gameInfo.info.getRestart().setRoomParam(i_param);
 }
 
+inline void dComIfGs_setRestartLastMode(u32 i_mode) {
+    g_dComIfG_gameInfo.info.getRestart().setLastMode(i_mode);
+}
+
 inline cXyz& dComIfGs_getHorseRestartPos() {
     return g_dComIfG_gameInfo.info.getPlayer().getHorsePlace().getPos();
 }
