@@ -12,6 +12,14 @@ static void SaveCb_SetEarlyBossFlag() {
     cDmr_SkipInfo = 1;
 }
 
+static void SaveCb_SetCoroTD() {
+    dComIfGs_onTmpBit(0x0002);
+}
+
+static void SaveCb_SpawnOnHorse() {
+    g_dComIfG_gameInfo.info.mRestart.mLastMode = 1;
+}
+
 static void SaveCb_OrdonGateClip() {
     fopAc_ac_c* rock = fopAcM_searchFromName("stoneB", 0xFFFFFFFF, 0x00FF6511);
     if (rock != NULL) {
@@ -163,6 +171,49 @@ static void SaveCb_BeastGanon() {
     g_dComIfG_gameInfo.play.mNextStage.setLayer(1);
 }
 
+static void SaveCb_Goats1() {
+    g_dComIfG_gameInfo.play.mNextStage.setLayer(5);
+}
+
+static void SaveCb_KB2Skip() {
+    g_dComIfG_gameInfo.play.mNextStage.setLayer(3);
+}
+
+static void SaveCb_Escort() {
+    g_dComIfG_gameInfo.play.mNextStage.setRoomNo(13);
+    g_dComIfG_gameInfo.play.mNextStage.setPoint(98);
+    g_dComIfG_gameInfo.play.mNextStage.setLayer(2);
+}
+
+static void SaveCb_GiveEscortKeys() {
+    dComIfGs_setKeyNum(2);  // give 2 keys for field gates
+}
+
+static void SaveCb_EldinCollection() {
+    SaveCb_SpawnOnHorse();
+    g_dComIfG_gameInfo.info.mRestart.mLastSpeedF = 42.0f;
+}
+
+static void SaveCb_Dangoro() {
+    fopAc_ac_c* dangoro = fopAcM_SearchByName(PROC_E_GOB);
+    if (dangoro != NULL) {
+        dComIfGs_onZoneSwitch(21, fopAcM_GetRoomNo(dangoro)); // intro cs off
+    }
+}
+
+static void SaveCb_SPRBossKey() {
+    g_dComIfG_gameInfo.play.mNextStage.setRoomNo(11);
+    g_dComIfG_gameInfo.play.mNextStage.setPoint(0);
+}
+
+static void SaveCb_ToTEarlyHP() {
+    dComIfGs_onSwitch(224, 4);  // gate moved to correct pos
+}
+
+static void SaveCb_CaveOfOrdeals() {
+    dComIfGs_resetDan();
+}
+
 const gzSaveLoaderMng_c::saveCallbacks_s gzPracticeMenu_c::mAnypSaveCallbacks[] = {
     {0, NULL, SaveCb_OrdonGateClip},
     {4, NULL, SaveCb_SetupHugo},
@@ -192,10 +243,40 @@ const gzSaveLoaderMng_c::saveCallbacks_s gzPracticeMenu_c::mAnypSaveCallbacks[] 
     {64, SaveCb_BeastGanon, NULL},
 };
 
+const gzSaveLoaderMng_c::saveCallbacks_s gzPracticeMenu_c::mHundoSaveCallbacks[] = {
+    {0, SaveCb_Goats1, NULL},
+    {13, SaveCb_SetEarlyBossFlag, NULL},
+    {14, SaveCb_SetEarlyBossFlag, NULL},
+    {15, SaveCb_KargorokOoB, NULL},
+    {18, SaveCb_SetCoroTD, NULL},
+    {20, NULL, SaveCb_Dangoro},
+    {22, SaveCb_WaterfallSidehop, NULL},
+    {24, SaveCb_KB2Skip, NULL},
+    {25, SaveCb_Escort, SaveCb_GiveEscortKeys},
+    {26, SaveCb_EldinCollection, NULL},
+    {28, NULL, SaveCb_Morpheel},
+    {34, SaveCb_PlummOoB, NULL},
+    {40, SaveCb_StallordInit, NULL},
+    {43, SaveCb_SetEarlyBossFlag, NULL},
+    {46, SaveCb_SPRBossKey, NULL},
+    {54, NULL, SaveCb_ToTEarlyHP},
+    {69, SaveCb_CityFanTower, NULL},
+    {70, SaveCb_Argorok, NULL},
+    {72, SaveCb_Palace1, NULL},
+    {76, SaveCb_CaveOfOrdeals, NULL},
+    {77, SaveCb_CaveOfOrdeals, NULL},
+    {78, SaveCb_CaveOfOrdeals, NULL},
+    {79, SaveCb_CaveOfOrdeals, NULL},
+    {80, SaveCb_CaveOfOrdeals, NULL},
+};
+
 const gzSaveLoaderMng_c::saveCallbacks_s* gzGetSaveCallbackList(int i_category) {
     switch (i_category) {
     case gzSaveLoaderMng_c::CATEGORY_ANYP_e:
         return gzPracticeMenu_c::mAnypSaveCallbacks;
+        break;
+    case gzSaveLoaderMng_c::CATEGORY_HUNDO_e:
+        return gzPracticeMenu_c::mHundoSaveCallbacks;
         break;
     }
 
@@ -206,6 +287,9 @@ const int gzGetSaveCallbackListSize(int i_category) {
     switch (i_category) {
     case gzSaveLoaderMng_c::CATEGORY_ANYP_e:
         return ARRAY_SIZE(gzPracticeMenu_c::mAnypSaveCallbacks);
+        break;
+    case gzSaveLoaderMng_c::CATEGORY_HUNDO_e:
+        return ARRAY_SIZE(gzPracticeMenu_c::mHundoSaveCallbacks);
         break;
     }
 

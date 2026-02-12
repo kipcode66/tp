@@ -82,8 +82,8 @@ def main():
     file.write(struct.pack(">i", save_count))
     file.write(int(0).to_bytes(28, "big", signed=False)) # padding
 
-    for entry in entries:
-        print(entry)
+    for i, entry in enumerate(entries):
+        print(f"{i}: {entry}")
         file.write(struct.pack(">32s", entry["name"].encode("ascii")))
         file.write(struct.pack(">64s", entry["description"].encode("ascii")))
         file.write(struct.pack(">32s", entry["filename"].encode("ascii")))

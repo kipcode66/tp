@@ -20,7 +20,7 @@ public:
 
     static const int ANY_LINE_NUM = 66;  // TODO: dont hardcode these?
     static const int ALL_DUNGEONS_LINE_NUM = 43;
-    static const int HUNDO_LINE_NUM = 86;
+    static const int HUNDO_LINE_NUM = 87;
     static const int GLITCHLESS_LINE_NUM = 32;
     static const int NOSQ_LINE_NUM = 30;
 
@@ -81,6 +81,7 @@ public:
     };
 
     static const gzSaveLoaderMng_c::saveCallbacks_s mAnypSaveCallbacks[];
+    static const gzSaveLoaderMng_c::saveCallbacks_s mHundoSaveCallbacks[];
 
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzSavesTab_c mAnypSavesTab;
