@@ -18,7 +18,7 @@ public:
 
     // static const int VISIBLE_TABS = 3;
 
-    static const int ANY_LINE_NUM = 50;  // TODO: dont hardcode these?
+    static const int ANY_LINE_NUM = 66;  // TODO: dont hardcode these?
     static const int ALL_DUNGEONS_LINE_NUM = 43;
     static const int HUNDO_LINE_NUM = 86;
     static const int GLITCHLESS_LINE_NUM = 32;

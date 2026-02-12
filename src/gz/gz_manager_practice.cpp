@@ -38,6 +38,16 @@ static const char* getCategoryMetadataPath(gzSaveLoaderMng_c::SaveCategory_e i_c
     }
 }
 
+void gzSaveLoaderMng_c::doSaveInject() {
+    memcpy(&g_dComIfG_gameInfo.info.mSavedata, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(dSv_save_c));
+    dComIfGs_getSave(dComIfGs_getSaveInfo()->getDan().mStageNo);
+
+    if (mSaveCallbacks.stageInitCb != NULL) {
+        OSReport("running stageInit callback\n");
+        mSaveCallbacks.stageInitCb();
+    }
+}
+
 void gzSaveLoaderMng_c::execute() {
     switch (mLoadPhase) {
     case PHASE_WAIT_e:
@@ -47,15 +57,7 @@ void gzSaveLoaderMng_c::execute() {
         mSaveInjectReady = true;
         wait();
         break;
-    case PHASE_STAGE_INIT_e:
-        memcpy(&g_dComIfG_gameInfo.info.mSavedata, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(dSv_save_c));
-        dComIfGs_getSave(dComIfGs_getSaveInfo()->getDan().mStageNo);
-
-        if (mSaveCallbacks.stageInitCb != NULL) {
-            OSReport("running stageInit callback\n");
-            mSaveCallbacks.stageInitCb();
-        }
-
+    case PHASE_STAGE_INIT_e: // TODO: is this phase needed anymore?
         mLoadPhase = PHASE_PLAYER_INIT_e;
         break;
     case PHASE_PLAYER_INIT_e:

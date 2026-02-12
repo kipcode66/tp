@@ -35,6 +35,11 @@ ANY_PERCENT_SAVES = [
         'filename': 'goats',
     },
     {
+        'name': 'sewers',
+        'description': 'Hyrule Castle Sewers',
+        'filename': 'sewers',
+    },
+    {
         'name': 'sword and shield skip',
         'description': 'Hangin\' with Hugo',
         'filename': 'hugo',
@@ -109,7 +114,15 @@ ANY_PERCENT_SAVES = [
         },
     },
     {
-        'name': 'kargorok flight',
+        'name': 'kargorok fight',
+        'description': 'Kargarok fight in Lake Hylia Twilight',
+        'filename': 'karg_fight',
+        'setflags': SetFlags.POS,
+        'pos': (-107015.05, -23436.449, 47115.9219),
+        'angle': 52164,
+    },
+    {
+        'name': 'kargorok oob',
         'description': 'Clip OoB with trumpet bird',
         'filename': 'karg',
     },
@@ -172,6 +185,11 @@ ANY_PERCENT_SAVES = [
         'filename': 'lakebed_1',
     },
     {
+        'name': 'wormhole',
+        'description': 'OoB swim to Lakebed east wing',
+        'filename': 'wormhole',
+    },
+    {
         'name': 'deku toad',
         'description': 'Lakebed Temple miniboss',
         'filename': 'deku_toad',
@@ -207,6 +225,11 @@ ANY_PERCENT_SAVES = [
         'filename': 'mdh_bridge',
     },
     {
+        'name': 'post mdh',
+        'description': 'After completing MDH',
+        'filename': 'post_mdh',
+    },
+    {
         'name': 'messenger skip',
         'description': 'LJA to skip the Snowpeak messengers',
         'filename': 'spr_warp',
@@ -217,6 +240,14 @@ ANY_PERCENT_SAVES = [
             'center': (-9309.65137, 1280.4469, -12130.7695),
             'eye': (-9294.2207, 1180.0, -11692.3945)
         },
+    },
+    {
+        'name': 'blind snowboarding',
+        'description': 'Snowboard down the mountain with the fog',
+        'filename': 'blind_snowboarding',
+        'setflags': SetFlags.POS,
+        'pos': (-14476.7305, 1814.04504, -9606.24609),
+        'angle': 36106,
     },
     {
         'name': 'snowpeak',
@@ -242,16 +273,20 @@ ANY_PERCENT_SAVES = [
         'filename': 'ag',
     },
     {
-        'name': 'poe 1 skip',
-        'description': 'The pillar jump in Arbiter\'s Grounds',
-        'filename': 'poe_1_skip',
-        'setflags': SetFlags.POS | SetFlags.CAM,
-        'pos': (-2046.97168, 0.0, -587.304871),
-        'angle': 49030,
-        'cam': {
-            'center': (-1779.00293, 213.707397, -584.686768),
-            'eye': (-2047.97168, 130.16568, -587.317139)
-        },
+        'name': 'poe gate clip',
+        'description': 'Clip through Arbiter\'s Poe Gate',
+        'filename': 'poe_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (10.0035, -19.5500, -600.5942),
+        'angle': 32768,
+    },
+    {
+        'name': 'stalfos skip',
+        'description': 'Triple Stalfos Skip before Death Sword',
+        'filename': 'ag_tss',
+        'setflags': SetFlags.POS,
+        'pos': (-4673.3042, -1700, -2881.75537),
+        'angle': 15916,
     },
     {
         'name': 'death sword',
@@ -259,9 +294,41 @@ ANY_PERCENT_SAVES = [
         'filename': 'death_sword_skip',
     },
     {
+        'name': 'epic spinner room',
+        'description': 'Big spinner room going to Stallord',
+        'filename': 'epic_spinner',
+        'setflags': SetFlags.POS,
+        'pos': (-4813.71777, -1700, -2830.35278),
+        'angle': 49152,
+    },
+    {
         'name': 'stallord',
         'description': 'Arbiter\'s Grounds boss',
         'filename': 'stallord',
+    },
+    {
+        'name': 'stallord cad',
+        'description': 'Clawshot Actor Displacement part of Stallord Skip',
+        'filename': 'stallord',
+        'setflags': SetFlags.POS,
+        'pos': (327.221771, 1800.0, -4990.98975),
+        'angle': 60562,
+    },
+    {
+        'name': 'stallord wall clip',
+        'description': 'Wall Clip part of Stallord Skip',
+        'filename': 'stallord',
+        'setflags': SetFlags.POS,
+        'pos': (356.972076, 1775.0, -4439.97656),
+        'angle': 32741,
+    },
+    {
+        'name': 'stallord bomb boost',
+        'description': 'Bomb Boost part of Stallord Skip',
+        'filename': 'stallord',
+        'setflags': SetFlags.POS,
+        'pos': (623.792603, 1800.0, -4914.61377),
+        'angle': 32097,
     },
     {
         'name': 'stallord 2',
@@ -284,6 +351,14 @@ ANY_PERCENT_SAVES = [
             'center': (1027.53259, -108.096123, 5605.23047),
             'eye': (1313.54285, -234.203003, 5545.16846)
         },
+    },
+    {
+        'name': 'city gate clip',
+        'description': 'Clip through gate before Aeralfos',
+        'filename': 'city_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (16516.6094, 0, -12722.480),
+        'angle': 16384,
     },
     {
         'name': 'aeralfos skip',
@@ -311,9 +386,27 @@ ANY_PERCENT_SAVES = [
         'filename': 'palace_1',
     },
     {
+        'name': 'phantom zant 1',
+        'description': 'The 1st Phantom Zant fight',
+        'filename': 'pz1',
+    },
+    {
+        'name': 'phantom zant 2',
+        'description': 'The 2nd Phantom Zant fight',
+        'filename': 'pz2',
+    },
+    {
         'name': 'palace 2',
-        'description': 'The 2nd Palace of Twilight segment',
+        'description': 'Palace of Twilight segment after Light Sword',
         'filename': 'palace_2',
+        'setflags': SetFlags.POS,
+        'pos': (251.83, 1400.0, 584.0),
+        'angle': 32731,
+    },
+    {
+        'name': 'palace bk room',
+        'description': 'Palace of Twilight Boss Key room',
+        'filename': 'pot_bk',
     },
     {
         'name': 'early platform',
@@ -324,6 +417,19 @@ ANY_PERCENT_SAVES = [
         'name': 'zant',
         'description': 'Palace of Twilight boss',
         'filename': 'zant',
+    },
+    {
+        'name': 'zant dangoro',
+        'description': 'Zant fight Goron Mines phase',
+        'filename': 'zant_dangoro',
+        'setflags': SetFlags.POS,
+        'pos': (0.0, -500.0, 0.0),
+        'angle': 0,
+    },
+    {
+        'name': 'zant final',
+        'description': 'Zant fight final phase',
+        'filename': 'zant_final',
     },
     {
         'name': 'hyrule castle',

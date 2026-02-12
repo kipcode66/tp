@@ -68,6 +68,8 @@ def main():
         saves = GLITCHLESS_SAVES
         
     save_count = len(saves)
+    print(f"number of saves: {save_count}")
+
     for e in saves:
         add_entry(e)
 

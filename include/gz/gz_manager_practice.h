@@ -74,6 +74,7 @@ public:
     void wait() { mLoadPhase = PHASE_WAIT_e; }
 
     bool isSaveInject() { return mSaveInjectReady; }
+    void doSaveInject();
 
     void setSaveCallbacks(saveCallback i_stageInitCb, saveCallback i_playerInitCb) {
         mSaveCallbacks.stageInitCb = i_stageInitCb;
