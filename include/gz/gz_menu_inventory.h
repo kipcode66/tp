@@ -77,11 +77,27 @@ private:
     inline bool inPoeEditMode() { return isPoeSlotSelected() && gzInfo_isMenuOption(); }
     inline bool isHeartPieceSlotSelected() { return (mPauseCursorCol == 2 && mPauseCursorRow <= 1); }
     inline bool inHeartPieceEditMode() { return isHeartPieceSlotSelected() && gzInfo_isMenuOption(); }
+    inline bool isSkillSlotSelected() { return (mPauseCursorRow == 3 && mPauseCursorCol == 3); }
+    inline bool inSkillSubMenu() { return mSkillSubMenuActive; }
+    inline bool isBugSlotSelected() { return (mPauseCursorRow == 3 && mPauseCursorCol == 2); }
+    inline bool inBugSubMenu() { return mBugSubMenuActive; }
+    inline bool isLetterSlotSelected() { return (mPauseCursorRow == 4 && mPauseCursorCol == 3); }
+    inline bool inLetterSubMenu() { return mLetterSubMenuActive; }
+    inline bool isFishSlotSelected() { return (mPauseCursorRow == 4 && mPauseCursorCol == 2); }
+    inline bool inFishSubMenu() { return mFishSubMenuActive; }
+    inline bool inFishEditMode() { return mFishSubMenuActive && gzInfo_isMenuOption(); }
+    inline bool inFishAdjusting();
 
 private:
     void initPauseMenu();
     void executePauseMenu();
     void drawPauseMenuContent();
+    void drawSkillSubMenu();
+    void drawBugSubMenu();
+    void drawLetterSubMenu();
+    void drawFishSubMenu();
+    void loadBugIcons();
+    void freeBugIcons();
     void freePauseTextures(bool freeArchiveCache = true);
     void freePauseItemTextures();
     void loadPauseItemTexture(int row, int col, u8 itemId);
@@ -151,6 +167,46 @@ private:
     static const int HUD_HEART_TEX_COUNT = 2;
     J2DPicture* mpHudHeartPanes[HUD_HEART_TEX_COUNT];
     ResTIMG* mpHudHeartBufs[HUD_HEART_TEX_COUNT];
+
+    bool mSkillSubMenuActive;
+    int mSkillSubMenuIndex;
+
+    static const int BUG_COUNT = 24;
+    static const int BUG_GRID_COLS = 6;
+    static const int BUG_GRID_ROWS = 4;
+    bool mBugSubMenuActive;
+    int mBugSubMenuRow;
+    int mBugSubMenuCol;
+    J2DPicture* mpBugIconPanes[BUG_COUNT];
+    ResTIMG* mpBugIconBufs[BUG_COUNT];
+
+    static const int LETTER_COUNT = 16;
+    static const int LETTER_GRID_COLS = 4;
+    static const int LETTER_GRID_ROWS = 4;
+    bool mLetterSubMenuActive;
+    int mLetterSubMenuRow;
+    int mLetterSubMenuCol;
+    J2DPicture* mpLetterIconPane;
+    ResTIMG* mpLetterIconBuf;
+
+    static const int FISH_COUNT = 6;
+    static const int FISH_GRID_COLS = 2;
+    static const int FISH_GRID_ROWS = 3;
+    bool mFishSubMenuActive;
+    int mFishSubMenuRow;
+    int mFishSubMenuCol;
+    int mFishEditField;
+    bool mFishAdjusting;
+    f32 mFishSizeTextW;
+    f32 mFishCountTextW;
+
+    static const int SKILL_ICON_BTI_SIZE = 544;
+    J2DPicture* mpCheckIconPane;
+    void* mpCheckIconBuf;
+    J2DPicture* mpXMarkIconPane;
+    void* mpXMarkIconBuf;
 };
+
+inline bool gzInventoryMenu_c::inFishAdjusting() { return inFishEditMode() && mFishAdjusting; }
 
 #endif // GZ_MENU_INVENTORY_H

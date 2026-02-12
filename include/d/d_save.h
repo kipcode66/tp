@@ -447,6 +447,7 @@ class dSv_letter_info_c {
 public:
     void init();
     void onLetterGetFlag(int i_no);
+    void offLetterGetFlag(int i_no);
     BOOL isLetterGetFlag(int i_no) const;
     void onLetterReadFlag(int i_no);
     int isLetterReadFlag(int i_no) const;
@@ -463,6 +464,7 @@ class dSv_fishing_info_c {
 public:
     void init();
     void addFishCount(u8 i_fishIndex);
+    void setFishCount(u8 i_fishIndex, u16 i_count) { mFishCount[i_fishIndex] = i_count; }
     u16 getFishCount(u8 i_fishIndex) const { return mFishCount[i_fishIndex]; }
     u8 getMaxSize(int i_sizeIndex) const { return mMaxSize[i_sizeIndex]; }
     void setMaxSize(int i_sizeIndex, u8 i_size) { mMaxSize[i_sizeIndex] = i_size; }

@@ -14,6 +14,7 @@
 #include "JSystem/JKernel/JKRArchive.h"
 #include "JSystem/JMath/JMath.h"
 #include "JSystem/J2DGraph/J2DScreen.h"
+#include <cstdio>
 
 static const u8 sRingItemList[] = {
     fpcNm_ITEM_NOENTRY_19,
@@ -136,6 +137,31 @@ gzInventoryMenu_c::gzInventoryMenu_c() {
         mpHudHeartPanes[i] = NULL;
         mpHudHeartBufs[i] = NULL;
     }
+    mSkillSubMenuActive = false;
+    mSkillSubMenuIndex = 0;
+    mBugSubMenuActive = false;
+    mBugSubMenuRow = 0;
+    mBugSubMenuCol = 0;
+    mLetterSubMenuActive = false;
+    mLetterSubMenuRow = 0;
+    mLetterSubMenuCol = 0;
+    mpLetterIconPane = NULL;
+    mpLetterIconBuf = NULL;
+    mFishSubMenuActive = false;
+    mFishSubMenuRow = 0;
+    mFishSubMenuCol = 0;
+    mFishEditField = 0;
+    mFishAdjusting = false;
+    mFishSizeTextW = 0.0f;
+    mFishCountTextW = 0.0f;
+    for (int i = 0; i < BUG_COUNT; i++) {
+        mpBugIconPanes[i] = NULL;
+        mpBugIconBufs[i] = NULL;
+    }
+    mpCheckIconPane = NULL;
+    mpCheckIconBuf = NULL;
+    mpXMarkIconPane = NULL;
+    mpXMarkIconBuf = NULL;
     for (int row = 0; row < PAUSE_MAX_ROWS; row++) {
         for (int col = 0; col < PAUSE_MAX_COLS; col++) {
             mPauseSlotState[row][col] = 0;
@@ -837,6 +863,28 @@ void gzInventoryMenu_c::freePauseTextures(bool freeArchiveCache) {
         }
     }
 
+    freeBugIcons();
+
+    delete mpLetterIconPane;
+    mpLetterIconPane = NULL;
+    if (mpLetterIconBuf != NULL) {
+        heap->free(mpLetterIconBuf);
+        mpLetterIconBuf = NULL;
+    }
+
+    delete mpCheckIconPane;
+    mpCheckIconPane = NULL;
+    if (mpCheckIconBuf != NULL) {
+        heap->free(mpCheckIconBuf);
+        mpCheckIconBuf = NULL;
+    }
+    delete mpXMarkIconPane;
+    mpXMarkIconPane = NULL;
+    if (mpXMarkIconBuf != NULL) {
+        heap->free(mpXMarkIconBuf);
+        mpXMarkIconBuf = NULL;
+    }
+
     mPauseMenuInitialized = false;
 }
 
@@ -1064,6 +1112,47 @@ void gzInventoryMenu_c::loadPauseItemTexture(int row, int col, u8 itemId) {
     oldHeap->becomeCurrentHeap();
 }
 
+void gzInventoryMenu_c::loadBugIcons() {
+    static const u8 sBugItemIds[BUG_COUNT] = {
+        fpcNm_ITEM_M_ANT, fpcNm_ITEM_F_ANT, fpcNm_ITEM_M_MAYFLY, fpcNm_ITEM_F_MAYFLY,
+        fpcNm_ITEM_M_BEETLE, fpcNm_ITEM_F_BEETLE, fpcNm_ITEM_M_MANTIS, fpcNm_ITEM_F_MANTIS,
+        fpcNm_ITEM_M_STAG_BEETLE, fpcNm_ITEM_F_STAG_BEETLE, fpcNm_ITEM_M_DANGOMUSHI,
+        fpcNm_ITEM_F_DANGOMUSHI, fpcNm_ITEM_M_BUTTERFLY, fpcNm_ITEM_F_BUTTERFLY,
+        fpcNm_ITEM_M_LADYBUG, fpcNm_ITEM_F_LADYBUG, fpcNm_ITEM_M_SNAIL, fpcNm_ITEM_F_SNAIL,
+        fpcNm_ITEM_M_NANAFUSHI, fpcNm_ITEM_F_NANAFUSHI, fpcNm_ITEM_M_GRASSHOPPER,
+        fpcNm_ITEM_F_GRASSHOPPER, fpcNm_ITEM_M_DRAGONFLY, fpcNm_ITEM_F_DRAGONFLY,
+    };
+    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+    JKRHeap* oldHeap = heap->becomeCurrentHeap();
+    for (int i = 0; i < BUG_COUNT; i++) {
+        if (mpBugIconPanes[i] != NULL) continue;
+        if (mpBugIconBufs[i] == NULL) {
+            mpBugIconBufs[i] = (ResTIMG*)new (heap, 0x20) u8[0xC00];
+        }
+        if (mpBugIconBufs[i] != NULL) {
+            int texNum = dMeter2Info_readItemTexture(
+                sBugItemIds[i], mpBugIconBufs[i], NULL, NULL, NULL,
+                NULL, NULL, NULL, NULL, -1);
+            if (texNum > 0) {
+                mpBugIconPanes[i] = new (heap, 4) J2DPicture(mpBugIconBufs[i]);
+            }
+        }
+    }
+    oldHeap->becomeCurrentHeap();
+}
+
+void gzInventoryMenu_c::freeBugIcons() {
+    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+    for (int i = 0; i < BUG_COUNT; i++) {
+        delete mpBugIconPanes[i];
+        mpBugIconPanes[i] = NULL;
+        if (mpBugIconBufs[i] != NULL) {
+            heap->free(mpBugIconBufs[i]);
+            mpBugIconBufs[i] = NULL;
+        }
+    }
+}
+
 void gzInventoryMenu_c::initPauseMenu() {
     JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
 
@@ -1288,6 +1377,47 @@ void gzInventoryMenu_c::initPauseMenu() {
         }
     }
 
+    loadBugIcons();
+
+    if (mpLetterIconPane == NULL) {
+        if (mpLetterIconBuf == NULL) {
+            mpLetterIconBuf = (ResTIMG*)new (heap, 0x20) u8[0xC00];
+        }
+        if (mpLetterIconBuf != NULL) {
+            JKRHeap* oldHeap = heap->becomeCurrentHeap();
+            int texNum = dMeter2Info_readItemTexture(
+                fpcNm_ITEM_LETTER, mpLetterIconBuf, NULL, NULL, NULL,
+                NULL, NULL, NULL, NULL, -1);
+            if (texNum > 0) {
+                mpLetterIconPane = new (heap, 4) J2DPicture(mpLetterIconBuf);
+            }
+            oldHeap->becomeCurrentHeap();
+        }
+    }
+
+    if (mpCheckIconPane == NULL) {
+        mpCheckIconBuf = JKRHeap::alloc(SKILL_ICON_BTI_SIZE, 32, heap);
+        if (mpCheckIconBuf != NULL) {
+            gzDVDLoadFile("/gz/check.bti", mpCheckIconBuf, SKILL_ICON_BTI_SIZE, 0);
+            mpCheckIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpCheckIconBuf);
+            if (mpCheckIconPane != NULL) {
+                mpCheckIconPane->setBlackWhite(
+                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(76, 175, 80, 255));
+            }
+        }
+    }
+    if (mpXMarkIconPane == NULL) {
+        mpXMarkIconBuf = JKRHeap::alloc(SKILL_ICON_BTI_SIZE, 32, heap);
+        if (mpXMarkIconBuf != NULL) {
+            gzDVDLoadFile("/gz/x_mark.bti", mpXMarkIconBuf, SKILL_ICON_BTI_SIZE, 0);
+            mpXMarkIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpXMarkIconBuf);
+            if (mpXMarkIconPane != NULL) {
+                mpXMarkIconPane->setBlackWhite(
+                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(244, 67, 54, 255));
+            }
+        }
+    }
+
     mPauseMenuInitialized = true;
 }
 
@@ -1438,7 +1568,203 @@ void gzInventoryMenu_c::executePauseMenu() {
     int maxCols = getMaxColsForRow(mPauseCursorRow);
 
 
-    if (inPoeEditMode()) {
+    if (inSkillSubMenu()) {
+        if (gzPad::getTrigDown()) {
+            mSkillSubMenuIndex = (mSkillSubMenuIndex + 1) % 7;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigUp()) {
+            mSkillSubMenuIndex = (mSkillSubMenuIndex - 1 + 7) % 7;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigA()) {
+            static const u16 sSkillFlags[] = {
+                dSv_event_flag_c::F_0339, dSv_event_flag_c::F_0338,
+                dSv_event_flag_c::F_0340, dSv_event_flag_c::F_0341,
+                dSv_event_flag_c::F_0342, dSv_event_flag_c::F_0343,
+                dSv_event_flag_c::F_0344,
+            };
+            u16 flag = sSkillFlags[mSkillSubMenuIndex];
+            if (dComIfGs_isEventBit(flag)) {
+                dComIfGs_offEventBit(flag);
+            } else {
+                dComIfGs_onEventBit(flag);
+            }
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        }
+        if (gzPad::getTrigB()) {
+            mSkillSubMenuActive = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inBugSubMenu()) {
+        if (gzPad::getTrigDown()) {
+            mBugSubMenuRow = (mBugSubMenuRow + 1) % BUG_GRID_ROWS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigUp()) {
+            mBugSubMenuRow = (mBugSubMenuRow - 1 + BUG_GRID_ROWS) % BUG_GRID_ROWS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigRight()) {
+            mBugSubMenuCol = (mBugSubMenuCol + 1) % BUG_GRID_COLS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigLeft()) {
+            mBugSubMenuCol = (mBugSubMenuCol - 1 + BUG_GRID_COLS) % BUG_GRID_COLS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigA()) {
+            static const u8 sBugItemIds[BUG_COUNT] = {
+                fpcNm_ITEM_M_ANT, fpcNm_ITEM_F_ANT,
+                fpcNm_ITEM_M_MAYFLY, fpcNm_ITEM_F_MAYFLY,
+                fpcNm_ITEM_M_BEETLE, fpcNm_ITEM_F_BEETLE,
+                fpcNm_ITEM_M_MANTIS, fpcNm_ITEM_F_MANTIS,
+                fpcNm_ITEM_M_STAG_BEETLE, fpcNm_ITEM_F_STAG_BEETLE,
+                fpcNm_ITEM_M_DANGOMUSHI, fpcNm_ITEM_F_DANGOMUSHI,
+                fpcNm_ITEM_M_BUTTERFLY, fpcNm_ITEM_F_BUTTERFLY,
+                fpcNm_ITEM_M_LADYBUG, fpcNm_ITEM_F_LADYBUG,
+                fpcNm_ITEM_M_SNAIL, fpcNm_ITEM_F_SNAIL,
+                fpcNm_ITEM_M_NANAFUSHI, fpcNm_ITEM_F_NANAFUSHI,
+                fpcNm_ITEM_M_GRASSHOPPER, fpcNm_ITEM_F_GRASSHOPPER,
+                fpcNm_ITEM_M_DRAGONFLY, fpcNm_ITEM_F_DRAGONFLY,
+            };
+            int idx = mBugSubMenuRow * BUG_GRID_COLS + mBugSubMenuCol;
+            u8 itemId = sBugItemIds[idx];
+            if (dComIfGs_isItemFirstBit(itemId)) {
+                dComIfGs_offItemFirstBit(itemId);
+            } else {
+                dComIfGs_onItemFirstBit(itemId);
+            }
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        }
+        if (gzPad::getTrigB()) {
+            mBugSubMenuActive = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inLetterSubMenu()) {
+        if (gzPad::getTrigDown()) {
+            mLetterSubMenuRow = (mLetterSubMenuRow + 1) % LETTER_GRID_ROWS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigUp()) {
+            mLetterSubMenuRow = (mLetterSubMenuRow - 1 + LETTER_GRID_ROWS) % LETTER_GRID_ROWS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigRight()) {
+            mLetterSubMenuCol = (mLetterSubMenuCol + 1) % LETTER_GRID_COLS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigLeft()) {
+            mLetterSubMenuCol = (mLetterSubMenuCol - 1 + LETTER_GRID_COLS) % LETTER_GRID_COLS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigA()) {
+            int idx = mLetterSubMenuRow * LETTER_GRID_COLS + mLetterSubMenuCol;
+            if (dComIfGs_isLetterGetFlag(idx)) {
+                dComIfGs_offLetterGetFlag(idx);
+                for (int j = 0; j < 64; j++) {
+                    if (dComIfGs_getGetNumber(j) == idx + 1) {
+                        for (int k = j; k < 63; k++) {
+                            dComIfGs_setGetNumber(k, dComIfGs_getGetNumber(k + 1));
+                        }
+                        dComIfGs_setGetNumber(63, 0);
+                        break;
+                    }
+                }
+            } else {
+                dComIfGs_onLetterGetFlag(idx);
+                u8 letterNum = dMeter2Info_getRecieveLetterNum() - 1;
+                dComIfGs_setGetNumber(letterNum, idx + 1);
+            }
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        }
+        if (gzPad::getTrigB()) {
+            mLetterSubMenuActive = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inFishAdjusting()) {
+        static const u8 sFishGridIdx2[FISH_COUNT] = { 3, 5, 4, 0, 2, 1 };
+        int gridIdx = mFishSubMenuRow * FISH_GRID_COLS + mFishSubMenuCol;
+        u8 fishIdx = sFishGridIdx2[gridIdx];
+
+        if (mFishEditField == 0) {
+            u16 count = dComIfGs_getFishNum(fishIdx);
+            if (gzPad::getTrigRight()) {
+                dComIfGs_setFishNum(fishIdx, count >= 999 ? 0 : count + 1);
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
+            if (gzPad::getTrigLeft()) {
+                dComIfGs_setFishNum(fishIdx, count == 0 ? 999 : count - 1);
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
+        } else {
+            u8 size = dComIfGs_getFishSize(fishIdx);
+            if (gzPad::getTrigRight()) {
+                dComIfGs_setFishSize(fishIdx, size >= 255 ? 0 : size + 1);
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
+            if (gzPad::getTrigLeft()) {
+                dComIfGs_setFishSize(fishIdx, size == 0 ? 255 : size - 1);
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
+        }
+
+        mpHaihai->_execute(0);
+
+        if (gzPad::getTrigA() || gzPad::getTrigB()) {
+            mFishAdjusting = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inFishEditMode()) {
+        if (gzPad::getTrigUp() || gzPad::getTrigDown()) {
+            mFishEditField ^= 1;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+
+        if (gzPad::getTrigA()) {
+            mFishAdjusting = true;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        }
+
+        if (gzPad::getTrigB()) {
+            gzInfo_offMenuOption();
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inFishSubMenu()) {
+        static const u8 sFishGridIdx[FISH_COUNT] = { 3, 5, 4, 0, 2, 1 };
+        if (gzPad::getTrigDown()) {
+            mFishSubMenuRow = (mFishSubMenuRow + 1) % FISH_GRID_ROWS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigUp()) {
+            mFishSubMenuRow = (mFishSubMenuRow - 1 + FISH_GRID_ROWS) % FISH_GRID_ROWS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigRight()) {
+            mFishSubMenuCol = (mFishSubMenuCol + 1) % FISH_GRID_COLS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigLeft()) {
+            mFishSubMenuCol = (mFishSubMenuCol - 1 + FISH_GRID_COLS) % FISH_GRID_COLS;
+            gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+        }
+        if (gzPad::getTrigA()) {
+            mFishEditField = 0;
+            mFishAdjusting = false;
+            gzInfo_onMenuOption();
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        }
+        if (gzPad::getTrigB()) {
+            mFishSubMenuActive = false;
+            gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+            return;
+        }
+    } else if (inPoeEditMode()) {
         u8 poeCount = dComIfGs_getPohSpiritNum();
 
         if (gzPad::getTrigRight()) {
@@ -1482,7 +1808,11 @@ void gzInventoryMenu_c::executePauseMenu() {
         }
     } else {
         if (gzPad::getTrigDown()) {
-            mPauseCursorRow = (mPauseCursorRow + 1) % PAUSE_MAX_ROWS;
+            if (isHeartPieceSlotSelected()) {
+                mPauseCursorRow = 2;
+            } else {
+                mPauseCursorRow = (mPauseCursorRow + 1) % PAUSE_MAX_ROWS;
+            }
             int newMaxCols = getMaxColsForRow(mPauseCursorRow);
             if (mPauseCursorCol >= newMaxCols) {
                 mPauseCursorCol = newMaxCols - 1;
@@ -1490,7 +1820,11 @@ void gzInventoryMenu_c::executePauseMenu() {
             gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
         }
         if (gzPad::getTrigUp()) {
-            mPauseCursorRow = (mPauseCursorRow - 1 + PAUSE_MAX_ROWS) % PAUSE_MAX_ROWS;
+            if (isHeartPieceSlotSelected()) {
+                mPauseCursorRow = PAUSE_MAX_ROWS - 1;
+            } else {
+                mPauseCursorRow = (mPauseCursorRow - 1 + PAUSE_MAX_ROWS) % PAUSE_MAX_ROWS;
+            }
             int newMaxCols = getMaxColsForRow(mPauseCursorRow);
             if (mPauseCursorCol >= newMaxCols) {
                 mPauseCursorCol = newMaxCols - 1;
@@ -1507,13 +1841,34 @@ void gzInventoryMenu_c::executePauseMenu() {
         }
     }
 
-    if (gzPad::getTrigZ() && !isPoeSlotSelected() && !isHeartPieceSlotSelected()) {
+    if (gzPad::getTrigZ() && !isPoeSlotSelected() && !isHeartPieceSlotSelected() &&
+        !isSkillSlotSelected() && !isBugSlotSelected() && !isLetterSlotSelected() &&
+        !isFishSlotSelected()) {
         cyclePauseSlot(mPauseCursorRow, mPauseCursorCol);
         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
     }
 
     if (gzPad::getTrigA()) {
-        if (isPoeSlotSelected() || isHeartPieceSlotSelected()) {
+        if (isBugSlotSelected() && !inBugSubMenu()) {
+            mBugSubMenuActive = true;
+            mBugSubMenuRow = 0;
+            mBugSubMenuCol = 0;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        } else if (isSkillSlotSelected() && !inSkillSubMenu()) {
+            mSkillSubMenuActive = true;
+            mSkillSubMenuIndex = 0;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        } else if (isLetterSlotSelected() && !inLetterSubMenu()) {
+            mLetterSubMenuActive = true;
+            mLetterSubMenuRow = 0;
+            mLetterSubMenuCol = 0;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        } else if (isFishSlotSelected() && !inFishSubMenu()) {
+            mFishSubMenuActive = true;
+            mFishSubMenuRow = 0;
+            mFishSubMenuCol = 0;
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
+        } else if (isPoeSlotSelected() || isHeartPieceSlotSelected()) {
             if (gzInfo_isMenuOption()) {
                 gzInfo_offMenuOption();
             } else {
@@ -1535,15 +1890,55 @@ void gzInventoryMenu_c::executePauseMenu() {
     if (mPauseCursorCol == 2 && mPauseCursorRow <= 1) {
         itemName = "Heart Pieces";
     } else if (mPauseCursorRow == 3 && mPauseCursorCol == 2) {
-        itemName = "Golden Bugs";
+        static const char* sBugNames[] = {
+            "Male Ant", "Female Ant", "Male Dayfly", "Female Dayfly",
+            "Male Beetle", "Female Beetle", "Male Mantis", "Female Mantis",
+            "Male Stag Beetle", "Female Stag Beetle", "Male Pill Bug", "Female Pill Bug",
+            "Male Butterfly", "Female Butterfly", "Male Ladybug", "Female Ladybug",
+            "Male Snail", "Female Snail", "Male Phasmid", "Female Phasmid",
+            "Male Grasshopper", "Female Grasshopper", "Male Dragonfly", "Female Dragonfly",
+        };
+        if (inBugSubMenu()) {
+            itemName = sBugNames[mBugSubMenuRow * BUG_GRID_COLS + mBugSubMenuCol];
+        } else {
+            itemName = "Golden Bugs";
+        }
     } else if (mPauseCursorRow == 3 && mPauseCursorCol == 3) {
-        itemName = "Hidden Skills";
+        static const char* sSkillNames[] = {
+            "Ending Blow", "Shield Attack", "Back Slice", "Helm Splitter",
+            "Mortal Draw", "Jump Strike", "Great Spin",
+        };
+        if (inSkillSubMenu()) {
+            itemName = sSkillNames[mSkillSubMenuIndex];
+        } else {
+            itemName = "Hidden Skills";
+        }
     } else if (mPauseCursorRow == 4 && mPauseCursorCol == 1) {
         itemName = "Poe Souls";
     } else if (mPauseCursorRow == 4 && mPauseCursorCol == 2) {
-        itemName = "Fish Journal";
+        static const char* sFishNames[] = {
+            "Ordon Catfish", "Greengill", "Reekfish",
+            "Hyrule Bass", "Hylian Pike", "Hylian Loach",
+        };
+        if (inFishEditMode() || inFishSubMenu()) {
+            int idx = mFishSubMenuRow * FISH_GRID_COLS + mFishSubMenuCol;
+            itemName = sFishNames[idx];
+        } else {
+            itemName = "Fish Journal";
+        }
     } else if (mPauseCursorRow == 4 && mPauseCursorCol == 3) {
-        itemName = "Letters";
+        static const char* sLetterSenders[] = {
+            "Renado", "Ooccoo (1)", "Ooccoo (2)", "The Postman",
+            "Kakariko Goods", "Barnes (1)", "Barnes (2)", "Barnes Bombs",
+            "Malo Mart", "Telma", "Purlo", "From Jr.",
+            "Princess Agitha", "Lanayru Tourism", "Shad", "Yeta",
+        };
+        if (inLetterSubMenu()) {
+            int idx = mLetterSubMenuRow * LETTER_GRID_COLS + mLetterSubMenuCol;
+            itemName = sLetterSenders[idx];
+        } else {
+            itemName = "Letters";
+        }
     }
     gzInfo_getMenuDescription()->setString(itemName);
 }
@@ -1632,6 +2027,12 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                     f32 heartX = cellX + 48.0f - heartW / 2.0f;
                     f32 heartY = cellY + 48.0f - heartH / 2.0f;
 
+                    if (heartSelected && gzInfo_isCursorTypeClassic()) {
+                        GXColor outlineColor = gzGetThemedBorderColor(gzInfo_getTextColor(), 255);
+                        gzDrawRectOutline(heartX - 3.0f, heartY - 3.0f,
+                                          heartW + 6.0f, heartH + 6.0f, 2.0f, outlineColor);
+                    }
+
                     gzSetup2DContext();
                     mpHeartPiecePanes[0]->setAlpha(255);
                     mpHeartPiecePanes[0]->draw(heartX, heartY, heartW, heartH,
@@ -1652,7 +2053,7 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                 if (isSelected && mIsEntered && gzInfo_isCursorTypeTP() &&
                     gzInfo_getTPCursor() != NULL) {
                     gzInfo_getTPCursor()->setPos(cellX + 49.0f, cellY + 49.0f);
-                    gzInfo_getTPCursor()->setParam(1.0f, 1.0f, 0.1f, 0.6f, 0.5f);
+                    gzInfo_getTPCursor()->setParam(1.5f, 1.5f, 0.1f, 0.6f, 0.5f);
                     gzInfo_getTPCursor()->draw();
                 }
                 continue;
@@ -1690,6 +2091,16 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                 f32 itemSize = (mIsEntered && isSelected) ? 56.0f : 48.0f;
                 if (row == 4 && col == 1) {
                     iconAlpha = dComIfGs_getPohSpiritNum() > 0 ? 255 : 80;
+                }
+                if (row == 4 && col == 2) {
+                    bool anyFish = false;
+                    for (int f = 0; f < FISH_COUNT; f++) {
+                        if (dComIfGs_getFishNum(f) > 0) { anyFish = true; break; }
+                    }
+                    iconAlpha = anyFish ? 255 : 80;
+                }
+                if (row == 4 && col == 3) {
+                    iconAlpha = dMeter2Info_getRecieveLetterNum() > 0 ? 255 : 80;
                 }
                 staticIcon->setAlpha(iconAlpha);
                 f32 sizeOff = (itemSize - 48.0f) / 2.0f;
@@ -1743,7 +2154,8 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                 }
             }
 
-            if (isSelected && mIsEntered && gzInfo_isCursorTypeTP() && gzInfo_getTPCursor() != NULL) {
+            if (isSelected && mIsEntered && !inSkillSubMenu() && !inBugSubMenu() &&
+                !inLetterSubMenu() && !inFishSubMenu() && gzInfo_isCursorTypeTP() && gzInfo_getTPCursor() != NULL) {
                 if (mpPauseFramePane != NULL) {
                     mpPauseFramePane->mBounds.f.x = 48.0f;
                     mpPauseFramePane->mBounds.f.y = 48.0f;
@@ -1755,6 +2167,452 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                 gzInfo_getTPCursor()->draw();
             }
         }
+    }
+
+    if (isSkillSlotSelected() || inSkillSubMenu()) {
+        drawSkillSubMenu();
+    }
+    if (isBugSlotSelected() || inBugSubMenu()) {
+        drawBugSubMenu();
+    }
+    if (isLetterSlotSelected() || inLetterSubMenu()) {
+        drawLetterSubMenu();
+    }
+    if (isFishSlotSelected() || inFishSubMenu()) {
+        drawFishSubMenu();
+    }
+}
+
+void gzInventoryMenu_c::drawSkillSubMenu() {
+    static const char* sSkillNames[] = {
+        "Ending Blow", "Shield Attack", "Back Slice", "Helm Splitter",
+        "Mortal Draw", "Jump Strike", "Great Spin",
+    };
+    static const char* sSkillNumbers[] = {
+        "Skill One", "Skill Two", "Skill Three", "Skill Four",
+        "Skill Five", "Skill Six", "Skill Seven",
+    };
+    static const u16 sSkillFlags[] = {
+        dSv_event_flag_c::F_0339, dSv_event_flag_c::F_0338,
+        dSv_event_flag_c::F_0340, dSv_event_flag_c::F_0341,
+        dSv_event_flag_c::F_0342, dSv_event_flag_c::F_0343,
+        dSv_event_flag_c::F_0344,
+    };
+
+    static const f32 GRID_START_X = -15.0f;
+    static const f32 GRID_START_Y = 70.0f;
+    static const f32 CELL_SIZE = 52.0f;
+    static const f32 LINE_H = 20.0f;
+    static const f32 SCROLL_ICON_H = 16.0f;
+    static const f32 SCROLL_ICON_W = SCROLL_ICON_H * 32.0f / 80.0f;
+    static const f32 STATUS_ICON_SIZE = 14.0f;
+    static const f32 ICON_PAD_X = 8.0f;
+
+    static const f32 ROW_SPACING = 56.0f;
+
+    f32 baseX = mXPos + GRID_START_X;
+    f32 baseY = g_gzInfo.mBackgroundYPos + GRID_START_Y;
+    f32 panelX = baseX + PAUSE_MAX_COLS * CELL_SIZE + 26.0f;
+    f32 bgRight = g_gzInfo.mBackgroundXPos + g_gzInfo.mBackgroundWidth;
+    f32 bgBottom = g_gzInfo.mBackgroundYPos + g_gzInfo.mBackgroundHeight;
+    f32 panelW = bgRight - panelX - 10.0f;
+    f32 panelY = g_gzInfo.mBackgroundYPos + 42.0f;
+    f32 panelH = bgBottom - panelY - 10.0f;
+
+    u32 themeColor = gzInfo_getTextColor();
+    GXColor borderColor = gzGetThemedBorderColor(themeColor, 255);
+    gzDrawVerticalLine(panelX, panelY, panelY + panelH, 1.0f, borderColor);
+
+    for (int i = 0; i < 7; i++) {
+        f32 lineY = panelY + 8.0f + i * LINE_H;
+        bool enabled = dComIfGs_isEventBit(sSkillFlags[i]);
+
+        u32 textColor;
+        if (inSkillSubMenu() && mSkillSubMenuIndex == i) {
+            textColor = themeColor;
+        } else if (enabled) {
+            textColor = COLOR_WHITE;
+        } else {
+            textColor = 0x808080FFu;
+        }
+
+        if (mpSkillsIconPane != NULL) {
+            gzSetup2DContext();
+            u8 iconAlpha = enabled ? 255 : 80;
+            mpSkillsIconPane->setAlpha(iconAlpha);
+            mpSkillsIconPane->rotate(0.0f, 0.0f, ROTATE_Z, 0.0f);
+            f32 iconX = panelX + ICON_PAD_X;
+            f32 iconY = lineY + (LINE_H - SCROLL_ICON_H) / 2.0f;
+            mpSkillsIconPane->draw(iconX, iconY, SCROLL_ICON_W, SCROLL_ICON_H,
+                                   false, false, false);
+        }
+
+        gzSetup2DContext();
+        gzTextBox* numText = gzTextBox_allocate();
+        numText->setFontSize(14.0f, 14.0f);
+        numText->setString(sSkillNumbers[i]);
+        f32 textX = panelX + ICON_PAD_X + SCROLL_ICON_W + 4.0f;
+        numText->draw(textX, lineY + 16.0f, textColor);
+        gzTextBox_free(numText);
+
+        f32 statusRightEdge = panelX + panelW - ICON_PAD_X;
+        f32 statusX = statusRightEdge - STATUS_ICON_SIZE;
+
+        gzSetup2DContext();
+        gzTextBox* nameText = gzTextBox_allocate();
+        nameText->setFontSize(12.0f, 12.0f);
+        nameText->setString(sSkillNames[i]);
+        f32 nameRightEdge = statusX - 4.0f;
+        f32 nameDrawX = nameRightEdge - 608.0f;
+        nameText->draw(nameDrawX, lineY + 16.0f, textColor, HBIND_RIGHT);
+        gzTextBox_free(nameText);
+
+        J2DPicture* statusIcon = enabled ? mpCheckIconPane : mpXMarkIconPane;
+        if (statusIcon != NULL) {
+            gzSetup2DContext();
+            statusIcon->setAlpha(255);
+            f32 statusY = lineY + (LINE_H - STATUS_ICON_SIZE) / 2.0f;
+            statusIcon->draw(statusX, statusY, STATUS_ICON_SIZE, STATUS_ICON_SIZE,
+                             false, false, false);
+        }
+    }
+
+    if (inSkillSubMenu() && mIsEntered && gzInfo_isCursorTypeTP() &&
+        gzInfo_getTPCursor() != NULL) {
+        f32 cursorY = panelY + 8.0f + mSkillSubMenuIndex * LINE_H + LINE_H / 2.0f;
+        f32 cursorX = panelX + panelW / 2.0f;
+        gzInfo_getTPCursor()->setPos(cursorX, cursorY);
+        gzInfo_getTPCursor()->setParam(7.0f, 0.4f, 0.03f, 0.6f, 0.5f);
+        gzInfo_getTPCursor()->draw();
+    }
+}
+
+void gzInventoryMenu_c::drawBugSubMenu() {
+    static const u8 sBugItemIds[BUG_COUNT] = {
+        fpcNm_ITEM_M_ANT, fpcNm_ITEM_F_ANT, fpcNm_ITEM_M_MAYFLY, fpcNm_ITEM_F_MAYFLY,
+        fpcNm_ITEM_M_BEETLE, fpcNm_ITEM_F_BEETLE, fpcNm_ITEM_M_MANTIS, fpcNm_ITEM_F_MANTIS,
+        fpcNm_ITEM_M_STAG_BEETLE, fpcNm_ITEM_F_STAG_BEETLE, fpcNm_ITEM_M_DANGOMUSHI,
+        fpcNm_ITEM_F_DANGOMUSHI, fpcNm_ITEM_M_BUTTERFLY, fpcNm_ITEM_F_BUTTERFLY,
+        fpcNm_ITEM_M_LADYBUG, fpcNm_ITEM_F_LADYBUG, fpcNm_ITEM_M_SNAIL, fpcNm_ITEM_F_SNAIL,
+        fpcNm_ITEM_M_NANAFUSHI, fpcNm_ITEM_F_NANAFUSHI, fpcNm_ITEM_M_GRASSHOPPER,
+        fpcNm_ITEM_F_GRASSHOPPER, fpcNm_ITEM_M_DRAGONFLY, fpcNm_ITEM_F_DRAGONFLY,
+    };
+    static const char* sSpeciesNames[] = {
+        "Ant", "Dayfly", "Beetle", "Mantis", "Stag Beetle", "Pill Bug",
+        "Butterfly", "Ladybug", "Snail", "Phasmid", "Grasshopper", "Dragonfly",
+    };
+
+    static const f32 GRID_START_X = -15.0f;
+    static const f32 CELL_SIZE = 52.0f;
+    static const f32 BUG_ICON_SIZE = 28.0f;
+    static const f32 STATUS_ICON_SIZE = 10.0f;
+
+    f32 baseX = mXPos + GRID_START_X;
+    f32 panelX = baseX + PAUSE_MAX_COLS * CELL_SIZE + 26.0f;
+    f32 bgRight = g_gzInfo.mBackgroundXPos + g_gzInfo.mBackgroundWidth;
+    f32 bgBottom = g_gzInfo.mBackgroundYPos + g_gzInfo.mBackgroundHeight;
+    f32 panelW = bgRight - panelX - 10.0f;
+    f32 panelY = g_gzInfo.mBackgroundYPos + 42.0f;
+    f32 panelH = bgBottom - panelY - 10.0f;
+
+    u32 themeColor = gzInfo_getTextColor();
+    GXColor borderColor = gzGetThemedBorderColor(themeColor, 255);
+    gzDrawVerticalLine(panelX, panelY, panelY + panelH, 1.0f, borderColor);
+
+    f32 cellW = panelW / (f32)BUG_GRID_COLS;
+    f32 cellH = panelH / (f32)BUG_GRID_ROWS;
+
+    for (int row = 0; row < BUG_GRID_ROWS; row++) {
+        for (int col = 0; col < BUG_GRID_COLS; col++) {
+            int idx = row * BUG_GRID_COLS + col;
+            f32 cellX = panelX + col * cellW;
+            f32 cellY = panelY + row * cellH;
+            bool collected = dComIfGs_isItemFirstBit(sBugItemIds[idx]) != 0;
+            bool isSelected = inBugSubMenu() && mBugSubMenuRow == row && mBugSubMenuCol == col;
+
+            f32 iconX = cellX + (cellW - BUG_ICON_SIZE) / 2.0f;
+            f32 iconY = cellY + 4.0f;
+
+            if (mpBugIconPanes[idx] != NULL) {
+                gzSetup2DContext();
+                mpBugIconPanes[idx]->setAlpha(collected ? 255 : 80);
+                mpBugIconPanes[idx]->draw(iconX, iconY, BUG_ICON_SIZE, BUG_ICON_SIZE,
+                                          false, false, false);
+            }
+
+            J2DPicture* statusIcon = collected ? mpCheckIconPane : mpXMarkIconPane;
+            if (statusIcon != NULL) {
+                gzSetup2DContext();
+                statusIcon->setAlpha(200);
+                f32 statusX = iconX + BUG_ICON_SIZE - STATUS_ICON_SIZE + 2.0f;
+                f32 statusY = iconY + BUG_ICON_SIZE - STATUS_ICON_SIZE + 2.0f;
+                statusIcon->draw(statusX, statusY, STATUS_ICON_SIZE, STATUS_ICON_SIZE,
+                                 false, false, false);
+            }
+
+        }
+
+        gzSetup2DContext();
+        int speciesIdx = row * (BUG_GRID_COLS / 2);
+        for (int pair = 0; pair < BUG_GRID_COLS / 2; pair++) {
+            gzTextBox* nameText = gzTextBox_allocate();
+            nameText->setFontSize(9.0f, 9.0f);
+            nameText->setString(sSpeciesNames[speciesIdx + pair]);
+            f32 pairCenterX = panelX + (pair * 2) * cellW + cellW;
+            f32 nameY = panelY + row * cellH + 4.0f + BUG_ICON_SIZE + 16.0f;
+            nameText->draw(pairCenterX - 305.0f, nameY, 0xA0A0A0FFu, HBIND_CENTER);
+            gzTextBox_free(nameText);
+        }
+    }
+
+    if (inBugSubMenu() && mIsEntered && gzInfo_isCursorTypeTP() &&
+        gzInfo_getTPCursor() != NULL) {
+        f32 cellX = panelX + mBugSubMenuCol * cellW;
+        f32 cellY = panelY + mBugSubMenuRow * cellH;
+        f32 cursorX = cellX + cellW / 2.0f;
+        f32 cursorY = cellY + 4.0f + (BUG_ICON_SIZE + 4.0f) / 2.0f;
+        gzInfo_getTPCursor()->setPos(cursorX, cursorY);
+        gzInfo_getTPCursor()->setParam(0.7f, 0.55f, 0.03f, 0.6f, 0.5f);
+        gzInfo_getTPCursor()->draw();
+    }
+}
+
+void gzInventoryMenu_c::drawLetterSubMenu() {
+    static const char* sLetterSenders[] = {
+        "Renado", "Ooccoo (1)", "Ooccoo (2)", "Postman",
+        "Kakariko", "Barnes (1)", "Barnes (2)", "Barnes B.",
+        "Malo Mart", "Telma", "Purlo", "From Jr.",
+        "Agitha", "Lanayru", "Shad", "Yeta",
+    };
+
+    static const f32 GRID_START_X = -15.0f;
+    static const f32 CELL_SIZE = 52.0f;
+    static const f32 LETTER_ICON_SIZE = 28.0f;
+    static const f32 STATUS_ICON_SIZE = 10.0f;
+
+    f32 baseX = mXPos + GRID_START_X;
+    f32 panelX = baseX + PAUSE_MAX_COLS * CELL_SIZE + 26.0f;
+    f32 bgRight = g_gzInfo.mBackgroundXPos + g_gzInfo.mBackgroundWidth;
+    f32 bgBottom = g_gzInfo.mBackgroundYPos + g_gzInfo.mBackgroundHeight;
+    f32 panelW = bgRight - panelX - 10.0f;
+    f32 panelY = g_gzInfo.mBackgroundYPos + 42.0f;
+    f32 panelH = bgBottom - panelY - 10.0f;
+
+    u32 themeColor = gzInfo_getTextColor();
+    GXColor borderColor = gzGetThemedBorderColor(themeColor, 255);
+    gzDrawVerticalLine(panelX, panelY, panelY + panelH, 1.0f, borderColor);
+
+    f32 cellW = panelW / (f32)LETTER_GRID_COLS;
+    f32 cellH = panelH / (f32)LETTER_GRID_ROWS;
+
+    for (int row = 0; row < LETTER_GRID_ROWS; row++) {
+        for (int col = 0; col < LETTER_GRID_COLS; col++) {
+            int idx = row * LETTER_GRID_COLS + col;
+            f32 cellX = panelX + col * cellW;
+            f32 cellY = panelY + row * cellH;
+            bool received = dComIfGs_isLetterGetFlag(idx) != 0;
+            bool isSelected = inLetterSubMenu() && mLetterSubMenuRow == row &&
+                              mLetterSubMenuCol == col;
+
+            f32 iconX = cellX + (cellW - LETTER_ICON_SIZE) / 2.0f;
+            f32 iconY = cellY + 14.0f;
+
+            if (mpLetterIconPane != NULL) {
+                gzSetup2DContext();
+                mpLetterIconPane->setAlpha(received ? 255 : 80);
+                mpLetterIconPane->draw(iconX, iconY, LETTER_ICON_SIZE, LETTER_ICON_SIZE,
+                                       false, false, false);
+            }
+
+            J2DPicture* statusIcon = received ? mpCheckIconPane : mpXMarkIconPane;
+            if (statusIcon != NULL) {
+                gzSetup2DContext();
+                statusIcon->setAlpha(200);
+                f32 statusX = iconX + LETTER_ICON_SIZE - STATUS_ICON_SIZE + 2.0f;
+                f32 statusY = iconY + LETTER_ICON_SIZE - STATUS_ICON_SIZE + 2.0f;
+                statusIcon->draw(statusX, statusY, STATUS_ICON_SIZE, STATUS_ICON_SIZE,
+                                 false, false, false);
+            }
+
+            gzSetup2DContext();
+            gzTextBox* nameText = gzTextBox_allocate();
+            nameText->setFontSize(9.0f, 9.0f);
+            nameText->setString(sLetterSenders[idx]);
+            u32 textColor = isSelected ? themeColor : (received ? COLOR_WHITE : 0x808080FFu);
+            f32 textX = cellX + cellW / 2.0f - 305.0f;
+            f32 textY = iconY + LETTER_ICON_SIZE + 10.0f;
+            nameText->draw(textX, textY, textColor, HBIND_CENTER);
+            gzTextBox_free(nameText);
+        }
+    }
+
+    if (inLetterSubMenu() && mIsEntered && gzInfo_isCursorTypeTP() &&
+        gzInfo_getTPCursor() != NULL) {
+        f32 cellX = panelX + mLetterSubMenuCol * cellW;
+        f32 cellY = panelY + mLetterSubMenuRow * cellH;
+        f32 cursorX = cellX + cellW / 2.0f;
+        f32 cursorY = cellY + 19.0f + (LETTER_ICON_SIZE + 4.0f) / 2.0f;
+        gzInfo_getTPCursor()->setPos(cursorX, cursorY);
+        gzInfo_getTPCursor()->setParam(1.0f, 1.0f, 0.03f, 0.6f, 0.5f);
+        gzInfo_getTPCursor()->draw();
+    }
+}
+
+void gzInventoryMenu_c::drawFishSubMenu() {
+    static const char* sFishNames[] = {
+        "Ordon Catfish", "Greengill", "Reekfish",
+        "Hyrule Bass", "Hylian Pike", "Hylian Loach",
+    };
+    static const u8 sFishGridIdx[FISH_COUNT] = { 3, 5, 4, 0, 2, 1 };
+
+    static const f32 GRID_START_X = -15.0f;
+    static const f32 CELL_SIZE = 52.0f;
+    static const f32 FISH_ICON_SIZE = 28.0f;
+    static const f32 STATUS_ICON_SIZE = 10.0f;
+
+    f32 baseX = mXPos + GRID_START_X;
+    f32 panelX = baseX + PAUSE_MAX_COLS * CELL_SIZE + 26.0f;
+    f32 bgRight = g_gzInfo.mBackgroundXPos + g_gzInfo.mBackgroundWidth;
+    f32 bgBottom = g_gzInfo.mBackgroundYPos + g_gzInfo.mBackgroundHeight;
+    f32 panelW = bgRight - panelX - 10.0f;
+    f32 lineTop = g_gzInfo.mBackgroundYPos + 40.0f;
+    f32 lineBot = bgBottom - 7.0f;
+    f32 panelY = lineTop + 2.0f;
+    f32 panelH = lineBot - panelY - 2.0f;
+
+    u32 themeColor = gzInfo_getTextColor();
+    GXColor borderColor = gzGetThemedBorderColor(themeColor, 255);
+    gzDrawVerticalLine(panelX, lineTop, lineBot, 1.0f, borderColor);
+
+    f32 cellW = panelW / (f32)FISH_GRID_COLS;
+    f32 cellH = panelH / (f32)FISH_GRID_ROWS;
+
+    for (int row = 0; row < FISH_GRID_ROWS; row++) {
+        for (int col = 0; col < FISH_GRID_COLS; col++) {
+            int gridIdx = row * FISH_GRID_COLS + col;
+            u8 fishIdx = sFishGridIdx[gridIdx];
+            f32 cellX = panelX + col * cellW;
+            f32 cellY = panelY + row * cellH;
+            bool caught = dComIfGs_getFishNum(fishIdx) > 0;
+            bool isSelected = inFishSubMenu() && mFishSubMenuRow == row &&
+                              mFishSubMenuCol == col;
+
+            f32 iconX = cellX + 35.0f + (col == 1 ? 20.0f : 0.0f);
+            f32 iconY = cellY + 39.0f;
+
+            if (mpFishIconPane != NULL) {
+                gzSetup2DContext();
+                mpFishIconPane->setAlpha(caught ? 255 : 80);
+                mpFishIconPane->draw(iconX, iconY, FISH_ICON_SIZE, FISH_ICON_SIZE,
+                                      false, false, false);
+            }
+
+            u8 fishSize = dComIfGs_getFishSize(fishIdx);
+            u16 fishCount = dComIfGs_getFishNum(fishIdx);
+            bool isEditing = inFishEditMode() && isSelected;
+
+            static char sSizeBuf[16];
+            static char sCountBuf[16];
+            snprintf(sSizeBuf, sizeof(sSizeBuf), "%d in.", fishSize);
+            snprintf(sCountBuf, sizeof(sCountBuf), "%d fish", fishCount);
+
+            f32 valX = iconX + FISH_ICON_SIZE + 35.0f;
+            f32 valTopY = iconY + 5.0f;
+            f32 nameY = iconY + FISH_ICON_SIZE + 10.0f;
+            f32 valBotY = nameY;
+
+            bool useClassicColors = gzInfo_isCursorTypeClassic();
+            u32 sizeColor, countColor;
+            if (isEditing && useClassicColors) {
+                sizeColor = (mFishEditField == 1) ? themeColor : 0xAAAAAAFFu;
+                countColor = (mFishEditField == 0) ? themeColor : 0xAAAAAAFFu;
+            } else if (isSelected && useClassicColors) {
+                sizeColor = themeColor;
+                countColor = themeColor;
+            } else {
+                sizeColor = caught ? COLOR_WHITE : 0x808080FFu;
+                countColor = sizeColor;
+            }
+
+            gzSetup2DContext();
+            gzTextBox* sizeText = gzTextBox_allocate();
+            sizeText->setFontSize(10.0f, 10.0f);
+            sizeText->setString(sSizeBuf);
+            sizeText->draw(valX, valTopY, sizeColor, HBIND_LEFT);
+            sizeText->updateBounds();
+            if (isSelected) mFishSizeTextW = sizeText->mBounds.f.x;
+
+            if (inFishAdjusting() && isSelected && mFishEditField == 1 && mpHaihai != NULL) {
+                gzSetup2DContext();
+                mpHaihai->setScale(10.0f * gzMenuLayout::HAIHAI_SCALE_FACTOR);
+                f32 haihaiX = valX + (sizeText->mBounds.f.x / 2.0f) + gzMenuLayout::HAIHAI_X_OFFSET;
+                f32 haihaiY = valTopY + gzMenuLayout::HAIHAI_Y_OFFSET + 2.0f;
+                f32 haihaiW = sizeText->mBounds.f.x + 14.0f;
+                u8 arrows = 0;
+                if (fishSize > 0) arrows |= ARROW_LEFT;
+                if (fishSize < 255) arrows |= ARROW_RIGHT;
+                if (arrows) mpHaihai->drawHaihai(arrows, haihaiX, haihaiY, haihaiW, 0.0f);
+            }
+            gzTextBox_free(sizeText);
+
+            gzSetup2DContext();
+            gzTextBox* countText = gzTextBox_allocate();
+            countText->setFontSize(10.0f, 10.0f);
+            countText->setString(sCountBuf);
+            countText->draw(valX, valBotY, countColor, HBIND_LEFT);
+            countText->updateBounds();
+            if (isSelected) mFishCountTextW = countText->mBounds.f.x;
+
+            if (inFishAdjusting() && isSelected && mFishEditField == 0 && mpHaihai != NULL) {
+                gzSetup2DContext();
+                mpHaihai->setScale(10.0f * gzMenuLayout::HAIHAI_SCALE_FACTOR);
+                f32 haihaiX = valX + (countText->mBounds.f.x / 2.0f) + gzMenuLayout::HAIHAI_X_OFFSET;
+                f32 haihaiY = valBotY + gzMenuLayout::HAIHAI_Y_OFFSET + 2.0f;
+                f32 haihaiW = countText->mBounds.f.x + 14.0f;
+                u8 arrows = 0;
+                if (fishCount > 0) arrows |= ARROW_LEFT;
+                if (fishCount < 999) arrows |= ARROW_RIGHT;
+                if (arrows) mpHaihai->drawHaihai(arrows, haihaiX, haihaiY, haihaiW, 0.0f);
+            }
+            gzTextBox_free(countText);
+
+            gzSetup2DContext();
+            gzTextBox* nameText = gzTextBox_allocate();
+            nameText->setFontSize(9.0f, 9.0f);
+            nameText->setString(sFishNames[gridIdx]);
+            u32 textColor = (isSelected && useClassicColors) ? themeColor : (caught ? COLOR_WHITE : 0x808080FFu);
+            f32 textX = iconX + FISH_ICON_SIZE / 2.0f - 304.0f;
+            f32 textY = iconY + FISH_ICON_SIZE + 10.0f;
+            nameText->draw(textX, textY, textColor, HBIND_CENTER);
+            gzTextBox_free(nameText);
+        }
+    }
+
+    if (inFishSubMenu() && mIsEntered && gzInfo_isCursorTypeTP() &&
+        gzInfo_getTPCursor() != NULL) {
+        f32 cellX = panelX + mFishSubMenuCol * cellW;
+        f32 cellY = panelY + mFishSubMenuRow * cellH;
+        f32 iconX = cellX + 35.0f + (mFishSubMenuCol == 1 ? 20.0f : 0.0f);
+        f32 iconY = cellY + 39.0f;
+
+        if (inFishEditMode()) {
+            f32 valX = iconX + FISH_ICON_SIZE + 35.0f;
+            f32 valTopY = iconY + 5.0f;
+            f32 valBotY = iconY + FISH_ICON_SIZE + 10.0f;
+
+            f32 textW = (mFishEditField == 1) ? mFishSizeTextW : mFishCountTextW;
+            f32 targetY = (mFishEditField == 1) ? valTopY : valBotY;
+            f32 cursorX = valX + textW / 2.0f;
+            f32 xScale = (textW + 30.0f) * 0.02f;
+            gzInfo_getTPCursor()->setPos(cursorX, targetY - 4.0f);
+            gzInfo_getTPCursor()->setParam(xScale, 0.2f, 0.03f, 0.6f, 0.5f);
+        } else {
+            f32 cursorX = iconX + FISH_ICON_SIZE / 2.0f + 25.0f;
+            f32 cursorY = cellY + cellH / 2.0f;
+            gzInfo_getTPCursor()->setPos(cursorX, cursorY);
+            gzInfo_getTPCursor()->setParam(2.5f, 2.2f, 0.03f, 0.8f, 0.5f);
+        }
+        gzInfo_getTPCursor()->draw();
     }
 }
 
@@ -1771,14 +2629,14 @@ void gzInventoryMenu_c::drawPauseMenu() {
 void gzInventoryMenu_c::execute() {
     if (checkInputWait()) return;
 
-    if (gzInfo_isMenuOption() && gzPad::getTrigB()) {
+    if (gzInfo_isMenuOption() && gzPad::getTrigB() && !inFishEditMode()) {
         setSlotItem(mCurrentSlot, mOriginalItem);
         gzInfo_offMenuOption();
         gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         return;
     }
 
-    if (handleBackButton(gzMainMenu_c::MENU_INVENTORY)) return;
+    if (!inSkillSubMenu() && !inBugSubMenu() && !inLetterSubMenu() && !inFishSubMenu() && handleBackButton(gzMainMenu_c::MENU_INVENTORY)) return;
 
     gzCursor* l_cursor = gzInfo_getCursor();
 
@@ -1794,7 +2652,7 @@ void gzInventoryMenu_c::execute() {
         mPauseMenuInitialized = false;
     }
 
-    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode() && !inHeartPieceEditMode()) {
+    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode() && !inHeartPieceEditMode() && !inSkillSubMenu() && !inBugSubMenu() && !inLetterSubMenu() && !inFishSubMenu()) {
         mCurrentTab = TAB_RING_MENU;
         l_cursor->y = 0;
         mCurrentSlot = 0;
@@ -1934,7 +2792,7 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
 
         if (!isPoeSlot && !isHeartSlot) {
             hints.hints[hints.count].button = GZ_BTN_Z;
-            hints.hints[hints.count].text = "Toggle";
+            hints.hints[hints.count].text = "Cycle";
             hints.count++;
         }
 

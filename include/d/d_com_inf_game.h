@@ -1673,6 +1673,10 @@ inline void dComIfGs_onLetterGetFlag(int i_no) {
     g_dComIfG_gameInfo.info.getPlayer().getLetterInfo().onLetterGetFlag(i_no);
 }
 
+inline void dComIfGs_offLetterGetFlag(int i_no) {
+    g_dComIfG_gameInfo.info.getPlayer().getLetterInfo().offLetterGetFlag(i_no);
+}
+
 inline BOOL dComIfGs_isLetterGetFlag(int i_no) {
     return g_dComIfG_gameInfo.info.getPlayer().getLetterInfo().isLetterGetFlag(i_no);
 }
@@ -1695,6 +1699,10 @@ inline void dComIfGs_setGetNumber(int i_no, u8 i_value) {
 
 inline void dComIfGs_addFishNum(u8 param_0) {
     g_dComIfG_gameInfo.info.getPlayer().getFishingInfo().addFishCount(param_0);
+}
+
+inline void dComIfGs_setFishNum(u8 param_0, u16 param_1) {
+    g_dComIfG_gameInfo.info.getPlayer().getFishingInfo().setFishCount(param_0, param_1);
 }
 
 inline u16 dComIfGs_getFishNum(u8 param_0) {
