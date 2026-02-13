@@ -53,9 +53,16 @@ public:
         Vec camera_eye;
     } ATTRIBUTE_ALIGN(32);  // important that this is aligned to 32
 
+    typedef void (*saveCallback)();
+    struct saveCallbacks_s {
+        int saveIndex;
+        saveCallback stageInitCb;
+        saveCallback playerInitCb;
+    };
+
     void execute();
 
-    void loadSave(SaveCategory_e i_category, int i_entryNo);
+    void loadSave(SaveCategory_e i_category, int i_entryNo, const saveCallbacks_s i_callbackList[], int i_callbackListSize);
     void getSaveMetadata(SaveCategory_e i_category, int i_entryNo, saveMetadata_s* o_data);
     int getSaveEntryNum(SaveCategory_e i_category);
 
@@ -67,14 +74,23 @@ public:
     void wait() { mLoadPhase = PHASE_WAIT_e; }
 
     bool isSaveInject() { return mSaveInjectReady; }
+    void doSaveInject();
+
+    void setSaveCallbacks(saveCallback i_stageInitCb, saveCallback i_playerInitCb) {
+        mSaveCallbacks.stageInitCb = i_stageInitCb;
+        mSaveCallbacks.playerInitCb = i_playerInitCb;
+    }
     
     void end() {
         mLoadPhase = PHASE_WAIT_e;
         mSaveInjectReady = false;
+        mSaveCallbacks.stageInitCb = NULL;
+        mSaveCallbacks.playerInitCb = NULL;
     }
 
     memfileExData_s mMemfileExData;
     saveMetadata_s mSaveMetadata;
+    saveCallbacks_s mSaveCallbacks;
     Mode_e mMode;
     int mLoadPhase;
     bool mSaveInjectReady;

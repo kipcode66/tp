@@ -15,8 +15,8 @@ HUNDO_SAVES = [
         'description': 'Gate Clip outside Ordon Spring',
         'filename': 'ordon_gate_clip',
         'setflags': SetFlags.POS | SetFlags.CAM,
-        'pos': (827.497559, 329.622986, -4532.90723),
-        'angle': 498,
+        'pos': (400.0, 307.5, -11270.2),
+        'angle': 32768,
         'cam': {
             'center': (833.467468, 477.604675, -4241.97266),
             'eye': (827.497559, 329.622986, -4532.90723)
@@ -332,6 +332,9 @@ HUNDO_SAVES = [
         'name': 'tot early poe',
         'description': 'Early poe 1 in Temple of Time',
         'filename': 'tot_early_poe',
+        'setflags': SetFlags.POS,
+        'pos': (-2462.85, 2750.0, -7.10),
+        'angle': 49299,
     },
     {
         'name': 'tot statue throws',
@@ -342,6 +345,9 @@ HUNDO_SAVES = [
         'name': 'tot early hp',
         'description': 'Boost to heart piece in Temple of Time',
         'filename': 'tot_early_hp',
+        'setflags': SetFlags.POS,
+        'pos': (-6626, 5250, -5587),
+        'angle': 0,
     },
     {
         'name': 'tot darknut',
@@ -404,6 +410,14 @@ HUNDO_SAVES = [
         },
     },
     {
+        'name': 'city gate clip',
+        'description': 'Clip through gate before Aeralfos',
+        'filename': 'city_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (16516.6094, 0, -12722.480),
+        'angle': 16384,
+    },
+    {
         'name': 'aeralfos skip',
         'description': 'the city in the sky miniboss',
         'filename': 'aeralfos_skip',
@@ -417,6 +431,9 @@ HUNDO_SAVES = [
         'name': 'early poe cycle',
         'description': 'City early poe cycle segment',
         'filename': 'cits_poe_cycle',
+        'setflags': SetFlags.POS,
+        'pos': (-13990.0, 3000.0, -16200.0),
+        'angle': 0,
     },
     {
         'name': 'fan tower',

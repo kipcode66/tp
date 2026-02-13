@@ -374,6 +374,7 @@ static int phase_1(dScnPly_c* i_this) {
     dStage_roomControl_c::setProcID(id);
 
     if (g_gzInfo.mSaveLoaderMng.isSaveInject()) {
+        g_gzInfo.mSaveLoaderMng.doSaveInject();  // important that this is injected immediately
         g_gzInfo.mSaveLoaderMng.onStageInit();
     }
 

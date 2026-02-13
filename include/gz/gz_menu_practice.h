@@ -19,9 +19,9 @@ public:
 
     // static const int VISIBLE_TABS = 3;
 
-    static const int ANY_LINE_NUM = 50;  // TODO: dont hardcode these?
+    static const int ANY_LINE_NUM = 66;  // TODO: dont hardcode these?
     static const int ALL_DUNGEONS_LINE_NUM = 43;
-    static const int HUNDO_LINE_NUM = 86;
+    static const int HUNDO_LINE_NUM = 87;
     static const int GLITCHLESS_LINE_NUM = 32;
     static const int NOSQ_LINE_NUM = 30;
 
@@ -80,6 +80,9 @@ public:
         bool mNamesLoaded;  // Defer memcard read until tab is first accessed
     };
 
+    static const gzSaveLoaderMng_c::saveCallbacks_s mAnypSaveCallbacks[];
+    static const gzSaveLoaderMng_c::saveCallbacks_s mHundoSaveCallbacks[];
+
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzSavesTab_c mAnypSavesTab;
     gzSavesTab_c mNoSQSavesTab;
@@ -89,5 +92,8 @@ public:
     gzMemfileTab_c mMemfileTab;
     int mCurrentTab;
 };
+
+const gzSaveLoaderMng_c::saveCallbacks_s* gzGetSaveCallbackList(int i_category);
+const int gzGetSaveCallbackListSize(int category);
 
 #endif // GZ_MENU_PRACTICE_H

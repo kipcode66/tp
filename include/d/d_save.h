@@ -863,7 +863,8 @@ public:
         mLastAngleY = angle;
     }
 
-private:
+    void setLastMode(u32 mode) { mLastMode = mode; }
+
     /* 0x00 */ s8 mRoomNo;
     /* 0x01 */ u8 field_0x01[3];
     /* 0x04 */ s16 mStartPoint;

@@ -15,8 +15,8 @@ NOSQ_SAVES = [
         'description': 'Hangin\' with Hugo',
         'filename': 'hugo',
         'setflags': SetFlags.POS | SetFlags.CAM,
-        'pos': (701.797302, 85.5212784, -5299.6123),
-        'angle': 63622,
+        'pos': (2.9385, 396.9580, -18150.087),
+        'angle': 40166,
         'cam': {
             'center': (735.525391, 524.418701, -11576.4746),
             'eye': (465.674622, 421.052704, -11651.0684)
