@@ -2,6 +2,8 @@
 
 #include "gz/gz_menu_flags.h"
 #include "gz/gz_menu_main.h"
+#include "d/d_select_cursor.h"
+#include "JSystem/J2DGraph/J2DPicture.h"
 
 // General flags
 static gzBoolOption_s generalFlags[] = {
@@ -127,7 +129,9 @@ u32 gzFlagsMenu_c::removeSmallKey() {
     return getDungeonSmallKeys(stageNo);
 }
 
-gzFlagsMenu_c::gzFlagsMenu_c() {
+gzFlagsMenu_c::gzFlagsMenu_c()
+    : mpCheckIconPane(NULL), mpCheckIconBuf(NULL),
+      mpXMarkIconPane(NULL), mpXMarkIconBuf(NULL) {
     OSReport("creating gzFlagsMenu_c\n");
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
@@ -179,6 +183,7 @@ gzFlagsMenu_c::~gzFlagsMenu_c() {
 
 void gzFlagsMenu_c::_delete() {
     OSReport("deleting gzFlagsMenu_c\n");
+    freeIcons();
     for (int i = 0; i < TAB_MAX_e; i++) {
         gzTextBox_free(mpTabHeaders[i]);
         mpTabHeaders[i] = NULL;
@@ -291,7 +296,7 @@ void gzFlagsMenu_c::updateDynamicLines() {
         currentLineNum = G_FLAG_MAX;
         for (int i = 0; i < G_FLAG_MAX; i++) {
             gzTextBox* opt = currentLines[i]->getOptionBox();
-            if (opt) opt->setStringf("%s", generalFlags[i].is() ? "on" : "off");
+            if (opt) opt->setString("");
         }
         break;
     case TAB_DUNGEON:
@@ -303,10 +308,9 @@ void gzFlagsMenu_c::updateDynamicLines() {
             gzTextBox* smallKeyOpt = currentLines[D_FLAG_SMALL_KEY]->getOptionBox();
             if (smallKeyOpt) smallKeyOpt->setStringf("%d", getDungeonSmallKeys(getSelectedDungeonStageNo()));
         }
-        // TODO: these need proper option boxes when converted to gzBoolOptionLine
         for (int i = 0; i < 7; i++) {
             gzTextBox* opt = currentLines[D_FLAG_BOSS_KEY + i]->getOptionBox();
-            if (opt) opt->setStringf("%s", dungeonFlags[i].is(sSelectedDungeon + 16) ? "yes" : "no");
+            if (opt) opt->setString("");
         }
         break;
     case TAB_PORTAL:
@@ -316,11 +320,11 @@ void gzFlagsMenu_c::updateDynamicLines() {
             gzTextBox* regionOpt = currentLines[P_FLAG_SELECT_REGION]->getOptionBox();
             if (regionOpt) regionOpt->setString(regionNames[sSelectedRegion]);
             gzTextBox* regionEnabledOpt = currentLines[P_FLAG_REGION]->getOptionBox();
-            if (regionEnabledOpt) regionEnabledOpt->setStringf("%s", getRegionFlag(sSelectedRegion + 1) ? "on" : "off");
+            if (regionEnabledOpt) regionEnabledOpt->setString("");
         }
         for (int i = 0; i < 15; i++) {
             gzTextBox* opt = currentLines[P_FLAG_SPRING_WARP + i]->getOptionBox();
-            if (opt) opt->setStringf("%s", warpFlags[i].is() ? "on" : "off");
+            if (opt) opt->setString("");
         }
         break;
     case TAB_RUPEE:
@@ -334,13 +338,137 @@ void gzFlagsMenu_c::updateDynamicLines() {
         }
         for (int i = 0; i < 3; i++) {
             gzTextBox* opt = currentLines[R_FLAG_FUNDRAISING_1 + i]->getOptionBox();
-            if (opt) opt->setStringf("%s", rupeeFlags[i].is() ? "on" : "off");
+            if (opt) opt->setString("");
         }
         break;
     default:
         return;
     }
     updateLineBounds((gzLine**)currentLines, currentLineNum);
+}
+
+void gzFlagsMenu_c::loadIcons() {
+    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+
+    if (mpCheckIconPane == NULL) {
+        mpCheckIconBuf = JKRHeap::alloc(FLAG_ICON_BTI_SIZE, 32, heap);
+        if (mpCheckIconBuf != NULL) {
+            gzDVDLoadFile("/gz/icon_flags.bti", mpCheckIconBuf, FLAG_ICON_BTI_SIZE, 0);
+            mpCheckIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpCheckIconBuf);
+            if (mpCheckIconPane != NULL) {
+                mpCheckIconPane->setBlackWhite(
+                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(76, 175, 80, 255));
+            }
+        }
+    }
+
+    if (mpXMarkIconPane == NULL) {
+        mpXMarkIconBuf = JKRHeap::alloc(FLAG_ICON_BTI_SIZE, 32, heap);
+        if (mpXMarkIconBuf != NULL) {
+            gzDVDLoadFile("/gz/icon_flags.bti", mpXMarkIconBuf, FLAG_ICON_BTI_SIZE, 0);
+            mpXMarkIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpXMarkIconBuf);
+            if (mpXMarkIconPane != NULL) {
+                mpXMarkIconPane->setBlackWhite(
+                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(244, 67, 54, 255));
+            }
+        }
+    }
+}
+
+void gzFlagsMenu_c::freeIcons() {
+    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+
+    delete mpCheckIconPane;
+    mpCheckIconPane = NULL;
+    if (mpCheckIconBuf != NULL) {
+        heap->free(mpCheckIconBuf);
+        mpCheckIconBuf = NULL;
+    }
+
+    delete mpXMarkIconPane;
+    mpXMarkIconPane = NULL;
+    if (mpXMarkIconBuf != NULL) {
+        heap->free(mpXMarkIconBuf);
+        mpXMarkIconBuf = NULL;
+    }
+}
+
+void gzFlagsMenu_c::onHighlight() {
+    loadIcons();
+}
+
+void gzFlagsMenu_c::onUnhighlight() {
+    freeIcons();
+}
+
+bool gzFlagsMenu_c::isBoolFlagLine(int idx) {
+    switch (mCurrentTab) {
+    case TAB_GENERAL:
+        return true;
+    case TAB_DUNGEON:
+        return idx >= D_FLAG_BOSS_KEY && idx <= D_FLAG_DEFEAT_MINIBOSS;
+    case TAB_PORTAL:
+        return idx >= P_FLAG_REGION;
+    case TAB_RUPEE:
+        return idx >= R_FLAG_FUNDRAISING_1;
+    default:
+        return false;
+    }
+}
+
+bool gzFlagsMenu_c::getBoolFlagState(int idx) {
+    switch (mCurrentTab) {
+    case TAB_GENERAL:
+        return generalFlags[idx].is();
+    case TAB_DUNGEON:
+        return dungeonFlags[idx - D_FLAG_BOSS_KEY].is(sSelectedDungeon + 16);
+    case TAB_PORTAL:
+        if (idx == P_FLAG_REGION) return getRegionFlag(sSelectedRegion + 1);
+        return warpFlags[idx - P_FLAG_SPRING_WARP].is();
+    case TAB_RUPEE:
+        return rupeeFlags[idx - R_FLAG_FUNDRAISING_1].is();
+    default:
+        return false;
+    }
+}
+
+void gzFlagsMenu_c::toggleBoolFlag(int idx) {
+    switch (mCurrentTab) {
+    case TAB_GENERAL:
+        if (generalFlags[idx].is())
+            generalFlags[idx].off();
+        else
+            generalFlags[idx].on();
+        break;
+    case TAB_DUNGEON: {
+        int bIdx = idx - D_FLAG_BOSS_KEY;
+        int dungeonIdx = sSelectedDungeon + 16;
+        if (dungeonFlags[bIdx].is(dungeonIdx))
+            dungeonFlags[bIdx].off(dungeonIdx);
+        else
+            dungeonFlags[bIdx].on(dungeonIdx);
+        break;
+    }
+    case TAB_PORTAL:
+        if (idx == P_FLAG_REGION) {
+            setRegionFlag(sSelectedRegion + 1);
+        } else {
+            int wIdx = idx - P_FLAG_SPRING_WARP;
+            if (warpFlags[wIdx].is())
+                warpFlags[wIdx].off();
+            else
+                warpFlags[wIdx].on();
+        }
+        break;
+    case TAB_RUPEE: {
+        int rIdx = idx - R_FLAG_FUNDRAISING_1;
+        if (rupeeFlags[rIdx].is())
+            rupeeFlags[rIdx].off();
+        else
+            rupeeFlags[rIdx].on();
+        break;
+    }
+    }
 }
 
 void gzFlagsMenu_c::setRegionFlag(int regionBit) {
@@ -524,9 +652,12 @@ void gzFlagsMenu_c::execute() {
             for (int i = 0; i < 7; i++) {
                 dungeonFlags[i].off(dungeonIdx);
             }
-            
+
             setDungeonSmallKeys(dungeonIdx, 0);
             gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
+        } else if (isBoolFlagLine(l_cursor->y)) {
+            toggleBoolFlag(l_cursor->y);
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
         } else {
             gzInfo_setMenuOption(!gzInfo_isMenuOption());
             if (gzInfo_isMenuOption()) {
@@ -580,9 +711,78 @@ void gzFlagsMenu_c::draw() {
     f32 yHeader = g_gzInfo.mBackgroundYPos + gzMenuLayout::TAB_HEADER_Y_OFFSET;
     drawTabHeaders(mpTabHeaders, tabXPositions, TAB_MAX_e, mCurrentTab, yHeader, gzInfo_getCursorColor());
 
-    // Draw lines with per-line haihai flags
+    static const f32 ICON_SIZE = 14.0f;
+    static const u32 COLOR_DIM = 0x808080FFu;
+
+    gzCursor* l_cursor = gzInfo_getCursor();
+    u32 cursorColor = gzInfo_getCursorColor();
+    f32 lineX = mXPos;
+    f32 optionX = mXPos + getCurrentOptionsXOffset();
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + mLineYStart;
     s32 topLine = gzInfo_getTopLine();
-    drawLinesWithHaihai(currentLines, currentLineNum, topLine, gzMenuLayout::VISIBLE_LINES);
+    s32 endLine = topLine + gzMenuLayout::VISIBLE_LINES;
+    if (endLine > currentLineNum) endLine = currentLineNum;
+
+    if (currentLineNum > 0 && currentLines[0] != NULL) {
+        J2DTextBox::TFontSize font_size;
+        currentLines[0]->mText->getFontSize(font_size);
+        mpHaihai->setScale(font_size.mSizeY * gzMenuLayout::HAIHAI_SCALE_FACTOR);
+    }
+
+    for (s32 i = topLine; i < endLine; i++) {
+        gzLine* line = currentLines[i];
+        if (line == NULL) continue;
+
+        s32 screenIdx = i - topLine;
+        f32 lineY = lineY_start + (screenIdx * gzMenuLayout::LINE_SPACING);
+        bool isSelected = (l_cursor->y == i && gzInfo_isSubMenuVisible());
+        bool isBool = isBoolFlagLine(i);
+        bool isOn = isBool && getBoolFlagState(i);
+        u32 color = isSelected ? cursorColor : (isBool && !isOn ? COLOR_DIM : COLOR_WHITE);
+
+        line->mText->draw(lineX, lineY, color);
+
+        if (isBool) {
+            J2DPicture* icon = isOn ? mpCheckIconPane : mpXMarkIconPane;
+            if (icon != NULL) {
+                f32 iconY = lineY - 17.0f + (gzMenuLayout::LINE_SPACING - ICON_SIZE) / 2.0f;
+                gzSetup2DContext();
+                icon->setAlpha(255);
+                icon->draw(optionX, iconY, ICON_SIZE, ICON_SIZE, false, false, false);
+            }
+        } else {
+            gzTextBox* opt = line->getOptionBox();
+            f32 haihaiX = optionX + gzMenuLayout::HAIHAI_X_OFFSET;
+            if (opt != NULL) {
+                haihaiX = optionX + (opt->mBounds.f.x / 2.0f) + gzMenuLayout::HAIHAI_X_OFFSET;
+                opt->draw(optionX, lineY, color, HBIND_LEFT);
+
+                if (isSelected && gzInfo_isMenuOption()) {
+                    u8 flags = getHaihaiFlags(i);
+                    if (flags != 0) {
+                        f32 haihaiY = lineY + gzMenuLayout::HAIHAI_Y_OFFSET;
+                        f32 haihaiWidth = opt->mBounds.f.x + gzMenuLayout::HAIHAI_EXTRA_SPACING;
+                        gzSetup2DContext();
+                        mpHaihai->drawHaihai(flags, haihaiX, haihaiY, haihaiWidth, 0.0f);
+                    }
+                }
+            }
+        }
+
+        if (isSelected && gzInfo_isCursorTypeTP() && gzInfo_getTPCursor() != NULL) {
+            line->mText->updateBounds();
+            f32 totalWidth = line->mText->getWidth();
+            f32 cursorX = lineX + (totalWidth / 2.0f) + gzMenuLayout::TP_CURSOR_X_OFFSET;
+            f32 cursorY = lineY + (line->mText->getHeight() / 2.0f) + gzMenuLayout::TP_CURSOR_Y_OFFSET;
+            gzInfo_getTPCursor()->setPos(cursorX, cursorY, (J2DPane*)line->mText, false);
+            gzSetup2DContext();
+            gzInfo_getTPCursor()->draw();
+        }
+    }
+
+    if (l_cursor->y < currentLineNum && currentLines[l_cursor->y] != NULL) {
+        drawDescription(currentLines[l_cursor->y]->m_description);
+    }
 }
 
 gzTabInfo_s gzFlagsMenu_c::getTabInfo() {

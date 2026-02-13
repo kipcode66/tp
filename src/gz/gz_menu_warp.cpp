@@ -16,6 +16,7 @@ static const u32 HEADER_SIZE = 8;
 
 gzWarpMenu_c::gzWarpMenu_c() {
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
+    mLineYStart = gzMenuLayout::TAB_HEADER_Y_OFFSET;
     mOptionsXOffset = gzMenuLayout::OPTIONS_X_OFFSET - 30.0f;
 
     mpLines[WARP_TYPE] = new (gzHeap(GZ_GROUP_MENU), 4) gzListOptionLine("type", "stage type category");

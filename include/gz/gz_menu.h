@@ -128,6 +128,7 @@ protected:
 
     f32 mXPos;
     f32 mOptionsXOffset;
+    f32 mLineYStart;
     bool mIsEntered;
     dMeterHaihai_c* mpHaihai;
 };

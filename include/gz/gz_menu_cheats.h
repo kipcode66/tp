@@ -4,6 +4,8 @@
 #include "gz/gz_menu.h"
 #include "gz/gz_textbox.h"
 
+class J2DPicture;
+
 class gzCheatsMenu_c : public gzMenu_c {
 public:
     enum gzCheatsMenu_e {
@@ -28,34 +30,26 @@ public:
 
     gzCheatsMenu_c();
     ~gzCheatsMenu_c();
-    const char* getDisableItemTimerText() { return gzInfo_isDisableItemTimer() ? "on" : "off"; }
-    const char* getDisableWallsText() { return gzInfo_isDisableWalls() ? "on" : "off"; }
-    const char* getInfiniteAirText() { return gzInfo_isInfiniteAir() ? "on" : "off"; }
-    const char* getInfiniteArrowsText() { return gzInfo_isInfiniteArrows() ? "on" : "off"; }
-    const char* getInfiniteBombsText() { return gzInfo_isInfiniteBombs() ? "on" : "off"; }
-    const char* getInfiniteHeartsText() { return gzInfo_isInfiniteHearts() ? "on" : "off"; }
-    const char* getInfiniteOilText() { return gzInfo_isInfiniteOil() ? "on" : "off"; }
-    const char* getInfiniteRupeesText() { return gzInfo_isInfiniteRupees() ? "on" : "off"; }
-    const char* getInfiniteSlingshotText() { return gzInfo_isInfiniteSlingshot() ? "on" : "off"; }
-    const char* getInvincibleEnemiesText() { return gzInfo_isInvincibleEnemies() ? "on" : "off"; }
-    const char* getInvincibleLinkText() { return gzInfo_isInvincibleLink() ? "on" : "off"; }
-    const char* getMoonJumpText() { return gzInfo_isMoonJump() ? "on" : "off"; }
-    const char* getSuperClawshotText() { return gzInfo_isSuperClawshot() ? "on" : "off"; }
-    const char* getTransformAnywhereText() { return gzInfo_isTransformAnywhere() ? "on" : "off"; }
-    const char* getUnrestrictedItemsText() { return gzInfo_isUnrestrictedItems() ? "on" : "off"; }
 
     virtual void _delete();
     virtual void execute();
     virtual void draw();
+    virtual void onHighlight();
+    virtual void onUnhighlight();
 
     static const int LINE_NUM = CHEAT_MAX;
+    static const int ICON_BTI_SIZE = 544;
 
 private:
-    u8 getHaihaiFlags(int idx);
-    void updateDynamicLines();
+    void loadIcons();
+    void freeIcons();
 
 private:
     gzBoolOptionLine* mpLines[LINE_NUM];
+    J2DPicture* mpCheckIconPane;
+    void* mpCheckIconBuf;
+    J2DPicture* mpXMarkIconPane;
+    void* mpXMarkIconBuf;
 };
 
 #endif // GZ_MENU_CHEATS_H

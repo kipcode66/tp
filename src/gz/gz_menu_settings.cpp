@@ -76,6 +76,7 @@ int gzSettingsMenu_c::deleteCardReturnCb(gzConfirm_c* i_confirm, void* i_data) {
 gzSettingsMenu_c::gzSettingsMenu_c() {
     OSReport("creating gzSettingsMenu_c\n");
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
+    mLineYStart = gzMenuLayout::TAB_HEADER_Y_OFFSET;
     mpConfirm = NULL;
 
     // Options (alphabetical)

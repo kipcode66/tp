@@ -2,6 +2,8 @@
 
 #include "gz/gz_menu_tools.h"
 #include "gz/gz_menu_main.h"
+#include "d/d_select_cursor.h"
+#include "JSystem/J2DGraph/J2DPicture.h"
 
 // Checkers tab
 static gzBoolOption_s checkerFlags[] = {
@@ -35,7 +37,9 @@ static gzBoolOption_s linkFlags[] = {
     {"teleport", "store and load link's position", gzInfo_isTeleport, gzInfo_onTeleport, gzInfo_offTeleport},
 };
 
-gzToolsMenu_c::gzToolsMenu_c() {
+gzToolsMenu_c::gzToolsMenu_c()
+    : mpCheckIconPane(NULL), mpCheckIconBuf(NULL),
+      mpXMarkIconPane(NULL), mpXMarkIconBuf(NULL) {
     OSReport("creating gzToolsMenu_c\n");
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
@@ -77,6 +81,7 @@ gzToolsMenu_c::~gzToolsMenu_c() {
 
 void gzToolsMenu_c::_delete() {
     OSReport("deleting gzToolsMenu_c\n");
+    freeIcons();
 
     for (int i = 0; i < TAB_MAX_e; i++) {
         gzTextBox_free(mpTabHeaders[i]);
@@ -96,32 +101,6 @@ void gzToolsMenu_c::_delete() {
     }
 }
 
-u8 gzToolsMenu_c::getHaihaiFlags(int idx) {
-    u8 haihai_flags = ARROW_LEFT | ARROW_RIGHT;
-    gzBoolOption_s* flags = NULL;
-
-    switch (mCurrentTab) {
-    case TAB_CHECKERS_e:
-        flags = checkerFlags;
-        break;
-    case TAB_DISPLAYS_e:
-        flags = displayFlags;
-        break;
-    case TAB_LINK_e:
-        flags = linkFlags;
-        break;
-    default:
-        return 0;
-    }
-
-    if (flags[idx].is()) {
-        haihai_flags &= ~ARROW_RIGHT;
-    } else {
-        haihai_flags &= ~ARROW_LEFT;
-    }
-    return haihai_flags;
-}
-
 int gzToolsMenu_c::getCurrentLineNum() {
     switch (mCurrentTab) {
     case TAB_CHECKERS_e:
@@ -134,36 +113,58 @@ int gzToolsMenu_c::getCurrentLineNum() {
     return 0;
 }
 
-void gzToolsMenu_c::updateDynamicLines() {
-    gzBoolOptionLine** currentLines;
-    gzBoolOption_s* flags;
-    int currentLineNum;
+void gzToolsMenu_c::loadIcons() {
+    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
 
-    switch (mCurrentTab) {
-    case TAB_CHECKERS_e:
-        currentLines = mpLinesCheckers;
-        flags = checkerFlags;
-        currentLineNum = C_MAX;
-        break;
-    case TAB_DISPLAYS_e:
-        currentLines = mpLinesDisplays;
-        flags = displayFlags;
-        currentLineNum = D_MAX;
-        break;
-    case TAB_LINK_e:
-        currentLines = mpLinesLink;
-        flags = linkFlags;
-        currentLineNum = L_MAX;
-        break;
-    default:
-        return;
+    if (mpCheckIconPane == NULL) {
+        mpCheckIconBuf = JKRHeap::alloc(ICON_BTI_SIZE, 32, heap);
+        if (mpCheckIconBuf != NULL) {
+            gzDVDLoadFile("/gz/check.bti", mpCheckIconBuf, ICON_BTI_SIZE, 0);
+            mpCheckIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpCheckIconBuf);
+            if (mpCheckIconPane != NULL) {
+                mpCheckIconPane->setBlackWhite(
+                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(76, 175, 80, 255));
+            }
+        }
     }
 
-    for (int i = 0; i < currentLineNum; i++) {
-        gzTextBox* opt = currentLines[i]->getOptionBox();
-        if (opt) opt->setStringf("%s", flags[i].is() ? "on" : "off");
+    if (mpXMarkIconPane == NULL) {
+        mpXMarkIconBuf = JKRHeap::alloc(ICON_BTI_SIZE, 32, heap);
+        if (mpXMarkIconBuf != NULL) {
+            gzDVDLoadFile("/gz/x_mark.bti", mpXMarkIconBuf, ICON_BTI_SIZE, 0);
+            mpXMarkIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpXMarkIconBuf);
+            if (mpXMarkIconPane != NULL) {
+                mpXMarkIconPane->setBlackWhite(
+                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(244, 67, 54, 255));
+            }
+        }
     }
-    updateLineBounds((gzLine**)currentLines, currentLineNum);
+}
+
+void gzToolsMenu_c::freeIcons() {
+    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
+
+    delete mpCheckIconPane;
+    mpCheckIconPane = NULL;
+    if (mpCheckIconBuf != NULL) {
+        heap->free(mpCheckIconBuf);
+        mpCheckIconBuf = NULL;
+    }
+
+    delete mpXMarkIconPane;
+    mpXMarkIconPane = NULL;
+    if (mpXMarkIconBuf != NULL) {
+        heap->free(mpXMarkIconBuf);
+        mpXMarkIconBuf = NULL;
+    }
+}
+
+void gzToolsMenu_c::onHighlight() {
+    loadIcons();
+}
+
+void gzToolsMenu_c::onUnhighlight() {
+    freeIcons();
 }
 
 void gzToolsMenu_c::execute() {
@@ -189,36 +190,27 @@ void gzToolsMenu_c::execute() {
         break;
     }
 
-    if (!gzInfo_isMenuOption()) {
-        if (gzPad::getTrigRight()) {
-            mCurrentTab = (mCurrentTab + 1) % TAB_MAX_e;
-            l_cursor->y = 0;
-            gzInfo_resetTopLine();
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-        }
-        if (gzPad::getTrigLeft()) {
-            mCurrentTab = (mCurrentTab - 1 + TAB_MAX_e) % TAB_MAX_e;
-            l_cursor->y = 0;
-            gzInfo_resetTopLine();
-            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-        }
-    } else {
-        if (gzPad::getTrigRight()) {
-            if (l_cursor->y < maxIdx && !flags[l_cursor->y].is()) {
-                flags[l_cursor->y].on();
-                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-            }
-        }
-        if (gzPad::getTrigLeft()) {
-            if (l_cursor->y < maxIdx && flags[l_cursor->y].is()) {
-                flags[l_cursor->y].off();
-                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
-            }
-        }
+    if (gzPad::getTrigRight() && !gzInfo_isMenuOption()) {
+        mCurrentTab = (mCurrentTab + 1) % TAB_MAX_e;
+        l_cursor->y = 0;
+        gzInfo_resetTopLine();
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+    if (gzPad::getTrigLeft() && !gzInfo_isMenuOption()) {
+        mCurrentTab = (mCurrentTab - 1 + TAB_MAX_e) % TAB_MAX_e;
+        l_cursor->y = 0;
+        gzInfo_resetTopLine();
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
     }
 
     if (gzPad::getTrigA()) {
-        gzInfo_toggleMenuOption();
+        if (l_cursor->y < maxIdx) {
+            if (flags[l_cursor->y].is())
+                flags[l_cursor->y].off();
+            else
+                flags[l_cursor->y].on();
+            gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        }
     }
 
     handleNavigation(maxIdx);
@@ -226,7 +218,10 @@ void gzToolsMenu_c::execute() {
 }
 
 void gzToolsMenu_c::draw() {
-    // Set up tab header x positions based on text width + padding
+    static const f32 ICON_SIZE = 14.0f;
+    static const u32 COLOR_DIM = 0x808080FFu;
+
+    // Set up tab header x positions
     static const f32 TAB_PADDING = 5.0f;
     f32 tabXPositions[TAB_MAX_e];
     f32 tabBaseX = mXPos;
@@ -236,22 +231,24 @@ void gzToolsMenu_c::draw() {
         tabXPositions[i] = tabXPositions[i - 1] + mpTabHeaders[i - 1]->mBounds.f.x + TAB_PADDING;
     }
 
-    updateDynamicLines();
-
-    // Get current tab's lines
-    gzLine** currentLines;
+    // Get current tab's lines and flags
+    gzBoolOptionLine** currentLines;
+    gzBoolOption_s* flags;
     int currentLineNum;
     switch (mCurrentTab) {
     case TAB_CHECKERS_e:
-        currentLines = (gzLine**)mpLinesCheckers;
+        currentLines = mpLinesCheckers;
+        flags = checkerFlags;
         currentLineNum = C_MAX;
         break;
     case TAB_DISPLAYS_e:
-        currentLines = (gzLine**)mpLinesDisplays;
+        currentLines = mpLinesDisplays;
+        flags = displayFlags;
         currentLineNum = D_MAX;
         break;
     case TAB_LINK_e:
-        currentLines = (gzLine**)mpLinesLink;
+        currentLines = mpLinesLink;
+        flags = linkFlags;
         currentLineNum = L_MAX;
         break;
     }
@@ -260,9 +257,45 @@ void gzToolsMenu_c::draw() {
     f32 yHeader = g_gzInfo.mBackgroundYPos + gzMenuLayout::TAB_HEADER_Y_OFFSET;
     drawTabHeaders(mpTabHeaders, tabXPositions, TAB_MAX_e, mCurrentTab, yHeader, gzInfo_getCursorColor());
 
-    // Draw lines with per-line haihai flags
+    // Draw lines with icons
+    gzCursor* l_cursor = gzInfo_getCursor();
+    u32 cursorColor = gzInfo_getCursorColor();
+    f32 lineX = mXPos;
+    f32 optionX = mXPos + getCurrentOptionsXOffset();
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + mLineYStart;
     s32 topLine = gzInfo_getTopLine();
-    drawLinesWithHaihai(currentLines, currentLineNum, topLine, gzMenuLayout::VISIBLE_LINES);
+    s32 endLine = topLine + gzMenuLayout::VISIBLE_LINES;
+    if (endLine > currentLineNum) endLine = currentLineNum;
+
+    for (s32 i = topLine; i < endLine; i++) {
+        gzBoolOptionLine* line = currentLines[i];
+        s32 screenIdx = i - topLine;
+        f32 lineY = lineY_start + (screenIdx * gzMenuLayout::LINE_SPACING);
+        bool isSelected = (l_cursor->y == i && gzInfo_isSubMenuVisible());
+        bool isOn = flags[i].is();
+        u32 color = isSelected ? cursorColor : (isOn ? COLOR_WHITE : COLOR_DIM);
+
+        line->mText->draw(lineX, lineY, color);
+
+        J2DPicture* icon = isOn ? mpCheckIconPane : mpXMarkIconPane;
+        if (icon != NULL) {
+            f32 iconY = lineY - 17.0f + (gzMenuLayout::LINE_SPACING - ICON_SIZE) / 2.0f;
+            gzSetup2DContext();
+            icon->setAlpha(255);
+            icon->draw(optionX, iconY, ICON_SIZE, ICON_SIZE, false, false, false);
+        }
+
+        if (isSelected && gzInfo_isCursorTypeTP() && gzInfo_getTPCursor() != NULL) {
+            line->mText->updateBounds();
+            f32 cursorX = lineX + (line->mText->getWidth() / 2.0f) + gzMenuLayout::TP_CURSOR_X_OFFSET;
+            f32 cursorY = lineY + (line->mText->getHeight() / 2.0f) + gzMenuLayout::TP_CURSOR_Y_OFFSET;
+            gzInfo_getTPCursor()->setPos(cursorX, cursorY, (J2DPane*)line->mText, false);
+            gzSetup2DContext();
+            gzInfo_getTPCursor()->draw();
+        }
+    }
+
+    drawDescription((l_cursor->y < currentLineNum) ? currentLines[l_cursor->y]->m_description : NULL);
 }
 
 gzTabInfo_s gzToolsMenu_c::getTabInfo() {

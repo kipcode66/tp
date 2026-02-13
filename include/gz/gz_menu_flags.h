@@ -4,6 +4,8 @@
 #include "gz/gz_menu.h"
 #include "gz/gz_textbox.h"
 
+class J2DPicture;
+
 class gzFlagsMenu_c : public gzMenu_c {
 public:
     enum gzFlagsMenu_Tabs_e {
@@ -86,11 +88,15 @@ public:
     gzFlagsMenu_c();
     ~gzFlagsMenu_c();
 
+    static const int FLAG_ICON_BTI_SIZE = 1184;
+
     virtual void _delete();
     virtual void execute();
     virtual void draw();
     virtual u8 getHaihaiFlags(int idx);
     virtual gzTabInfo_s getTabInfo();
+    virtual void onHighlight();
+    virtual void onUnhighlight();
 
     static u32 nextDungeon();
     static u32 prevDungeon();
@@ -105,6 +111,11 @@ private:
     int getCurrentLineNum();
     void setRegionFlag(int);
     bool getRegionFlag(int);
+    void loadIcons();
+    void freeIcons();
+    bool isBoolFlagLine(int idx);
+    bool getBoolFlagState(int idx);
+    void toggleBoolFlag(int idx);
 
 private:
     gzTextBox* mpTabHeaders[TAB_MAX_e];
@@ -114,6 +125,11 @@ private:
     gzLine* mpLinesRupee[R_FLAG_MAX];
 
     int mCurrentTab;
+
+    J2DPicture* mpCheckIconPane;
+    void* mpCheckIconBuf;
+    J2DPicture* mpXMarkIconPane;
+    void* mpXMarkIconBuf;
 
     static int sSelectedDungeon;
     static int sSelectedRegion;

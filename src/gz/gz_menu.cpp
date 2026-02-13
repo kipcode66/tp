@@ -38,7 +38,7 @@ void gzMenu_c::drawLines(gzTextBox** lines, gzTextBox** lineOptions, u8 haihaiFl
     mpHaihai->setScale(font_size.mSizeY * 0.04f);
 
     f32 lineX = mXPos;
-    f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + mLineYStart;
     f32 line_spacing = gzMenuLayout::LINE_SPACING;
 
     f32 optionX = mXPos + getCurrentOptionsXOffset();
@@ -69,7 +69,7 @@ void gzMenu_c::drawLines(gzLine** lines, s32 numLines, u8 haihai_flags, s32 topL
     }
 
     f32 lineX = mXPos;
-    f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + mLineYStart;
     f32 line_spacing = gzMenuLayout::LINE_SPACING;
     f32 optionX = mXPos + getCurrentOptionsXOffset();
     u32 cursorColor = gzInfo_getCursorColor();
@@ -248,7 +248,7 @@ void gzMenu_c::drawLinesWithHaihai(gzLine** lines, s32 numLines, s32 topLine, s3
     }
 
     f32 lineX = mXPos;
-    f32 lineY_start = g_gzInfo.mBackgroundYPos + gzMenuLayout::Y_ALIGNMENT;
+    f32 lineY_start = g_gzInfo.mBackgroundYPos + mLineYStart;
     f32 line_spacing = gzMenuLayout::LINE_SPACING;
     f32 optionX = mXPos + getCurrentOptionsXOffset();
     u32 cursorColor = gzInfo_getCursorColor();
@@ -400,7 +400,7 @@ void gzMenu_c::finishExecute(int maxLines) {
 }
 
 gzMenu_c::gzMenu_c() : mXPos(0.0f), mOptionsXOffset(gzMenuLayout::OPTIONS_X_OFFSET),
-                       mIsEntered(false), mpHaihai(NULL) {
+                       mLineYStart(gzMenuLayout::Y_ALIGNMENT), mIsEntered(false), mpHaihai(NULL) {
     mXPos = g_gzInfo.mBackgroundXPos + 240.0f;
     mpHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
     mpHaihai->setScale(0.04f);

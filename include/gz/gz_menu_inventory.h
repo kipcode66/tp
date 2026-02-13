@@ -2,7 +2,6 @@
 #define GZ_MENU_INVENTORY_H
 
 #include "gz/gz_menu.h"
-#include "gz/gz_textbox.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 
 class CPaneMgr;
@@ -21,6 +20,18 @@ public:
 
     static const int PAUSE_MAX_ROWS = 5;
     static const int PAUSE_MAX_COLS = 4;
+
+    static const int BUG_COUNT = 24;
+    static const int BUG_GRID_COLS = 6;
+    static const int BUG_GRID_ROWS = 4;
+
+    static const int LETTER_COUNT = 16;
+    static const int LETTER_GRID_COLS = 4;
+    static const int LETTER_GRID_ROWS = 4;
+
+    static const int FISH_COUNT = 6;
+    static const int FISH_GRID_COLS = 2;
+    static const int FISH_GRID_ROWS = 3;
 
     enum PauseSlotType_e {
         PAUSE_SLOT_SWORD_WOODEN,
@@ -92,6 +103,15 @@ private:
     void initPauseMenu();
     void executePauseMenu();
     void drawPauseMenuContent();
+    void executeRingMenu();
+    void executeSkillSubMenu();
+    void executeBugSubMenu();
+    void executeLetterSubMenu();
+    void executeFishAdjusting();
+    void executeFishEditMode();
+    void executeFishSubMenu();
+    void executePoeEditMode();
+    void executeHeartPieceEditMode();
     void drawSkillSubMenu();
     void drawBugSubMenu();
     void drawLetterSubMenu();
@@ -171,27 +191,20 @@ private:
     bool mSkillSubMenuActive;
     int mSkillSubMenuIndex;
 
-    static const int BUG_COUNT = 24;
-    static const int BUG_GRID_COLS = 6;
-    static const int BUG_GRID_ROWS = 4;
     bool mBugSubMenuActive;
     int mBugSubMenuRow;
     int mBugSubMenuCol;
     J2DPicture* mpBugIconPanes[BUG_COUNT];
     ResTIMG* mpBugIconBufs[BUG_COUNT];
+    J2DPicture* mpButterflyIconPane;
+    ResTIMG* mpButterflyIconBuf;
 
-    static const int LETTER_COUNT = 16;
-    static const int LETTER_GRID_COLS = 4;
-    static const int LETTER_GRID_ROWS = 4;
     bool mLetterSubMenuActive;
     int mLetterSubMenuRow;
     int mLetterSubMenuCol;
     J2DPicture* mpLetterIconPane;
     ResTIMG* mpLetterIconBuf;
 
-    static const int FISH_COUNT = 6;
-    static const int FISH_GRID_COLS = 2;
-    static const int FISH_GRID_ROWS = 3;
     bool mFishSubMenuActive;
     int mFishSubMenuRow;
     int mFishSubMenuCol;
