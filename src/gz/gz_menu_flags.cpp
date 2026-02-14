@@ -2,8 +2,8 @@
 
 #include "gz/gz_menu_flags.h"
 #include "gz/gz_menu_main.h"
+#include "gz/gz_utility_draw.h"
 #include "d/d_select_cursor.h"
-#include "JSystem/J2DGraph/J2DPicture.h"
 
 // General flags
 static gzBoolOption_s generalFlags[] = {
@@ -692,12 +692,14 @@ void gzFlagsMenu_c::draw() {
         line->mText->draw(lineX, lineY, color);
 
         if (isBool) {
-            J2DPicture* icon = isOn ? gzInfo_getFlagCheckIcon() : gzInfo_getFlagXMarkIcon();
-            if (icon != NULL) {
+            ResTIMG* atlas = gzInfo_getIconAtlas();
+            if (atlas != NULL) {
                 f32 iconY = lineY - 17.0f + (gzMenuLayout::LINE_SPACING - ICON_SIZE) / 2.0f;
-                gzSetup2DContext();
-                icon->setAlpha(255);
-                icon->draw(optionX, iconY, ICON_SIZE, ICON_SIZE, false, false, false);
+                GXColor iconColor = isOn ? (GXColor){76, 175, 80, 255}
+                                         : (GXColor){244, 67, 54, 255};
+                gzDrawAtlasIcon(atlas, gzMainMenu_c::MENU_FLAGS, 24,
+                                gzMainMenu_c::LINE_NUM, optionX, iconY,
+                                ICON_SIZE, ICON_SIZE, iconColor);
             }
         } else {
             gzTextBox* opt = line->getOptionBox();

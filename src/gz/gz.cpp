@@ -135,10 +135,9 @@ void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
 
 void gzInfo_c::startIconPreload() {
     static const char* PATHS[] = {
-        "/gz/check.bti", "/gz/x_mark.bti", "/gz/icon_flags.bti", "/gz/bg.bti",
-        "/gz/icon_atlas.bti"
+        "/gz/check.bti", "/gz/x_mark.bti", "/gz/bg.bti", "/gz/icon_atlas.bti"
     };
-    static const u32 SIZES[] = {544, 544, 1184, 54432, 13856};
+    static const u32 SIZES[] = {544, 544, 54432, 13856};
     JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
     for (int i = 0; i < PRELOAD_COUNT; i++) {
         if (!DVDOpen(PATHS[i], &mPreloadFileInfos[i])) continue;
@@ -184,15 +183,7 @@ void gzInfo_c::pollIconPreload() {
                                    JUtility::TColor(244, 67, 54, 255));
     }
     if (mpPreloadBufs[2] != NULL) {
-        mpFlagCheckIcon = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[2]);
-        mpFlagCheckIcon->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
-                                       JUtility::TColor(76, 175, 80, 255));
-        mpFlagXMarkIcon = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[2]);
-        mpFlagXMarkIcon->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
-                                       JUtility::TColor(244, 67, 54, 255));
-    }
-    if (mpPreloadBufs[3] != NULL) {
-        mpBackground = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[3]);
+        mpBackground = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[2]);
         mpBackground->setWhite(JUtility::TColor(55, 52, 40, 255));
     }
 }
@@ -425,10 +416,6 @@ int gzInfo_c::_delete() {
     mpCheckIcon = NULL;
     delete mpXMarkIcon;
     mpXMarkIcon = NULL;
-    delete mpFlagCheckIcon;
-    mpFlagCheckIcon = NULL;
-    delete mpFlagXMarkIcon;
-    mpFlagXMarkIcon = NULL;
 
     delete mpIcon;
     mpIcon = NULL;
@@ -550,8 +537,6 @@ int gzInfo_c::execute() {
             mPreloadsComplete = false;
             mpCheckIcon = NULL;
             mpXMarkIcon = NULL;
-            mpFlagCheckIcon = NULL;
-            mpFlagXMarkIcon = NULL;
 
             startIconPreload();
             loadDefaultSettings();

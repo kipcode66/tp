@@ -110,23 +110,25 @@ void gzNotification_c::draw() {
 
         f32 y_pos = y_alignment + ((mNumNotifications - 1 - i) * 22.0f) + y_offset;
 
-        f32 bgW = 300.0f;
-        f32 bgH = 22.0f;
-        f32 bgX = (608.0f - bgW) / 2.0f;
-        f32 bgY = y_pos - 17.0f;
-        u8 bgR = 0, bgG = 0, bgB = 0;
-        switch (mTypes[i]) {
-        case NOTIFY_WARNING:
-            bgR = 80; bgG = 60; bgB = 0;
-            break;
-        case NOTIFY_ERROR:
-            bgR = 80; bgG = 0; bgB = 0;
-            break;
-        default:
-            break;
+        if (g_gzInfo.isDisplay()) {
+            f32 bgW = 300.0f;
+            f32 bgH = 22.0f;
+            f32 bgX = (608.0f - bgW) / 2.0f;
+            f32 bgY = y_pos - 17.0f;
+            u8 bgR = 0, bgG = 0, bgB = 0;
+            switch (mTypes[i]) {
+            case NOTIFY_WARNING:
+                bgR = 80; bgG = 60; bgB = 0;
+                break;
+            case NOTIFY_ERROR:
+                bgR = 80; bgG = 0; bgB = 0;
+                break;
+            default:
+                break;
+            }
+            GXColor bgColor = {bgR, bgG, bgB, (u8)(alpha * 3 / 4)};
+            gzDrawFilledRect(bgX, bgY, bgW, bgH, bgColor);
         }
-        GXColor bgColor = {bgR, bgG, bgB, (u8)(alpha * 3 / 4)};
-        gzDrawFilledRect(bgX, bgY, bgW, bgH, bgColor);
 
         mpNotifications[i]->draw(x_alignment, y_pos, color, HBIND_CENTER);
     }

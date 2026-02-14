@@ -209,9 +209,7 @@ public:
     void pollIconPreload();
     J2DPicture* getCheckIcon() { return mpCheckIcon; }
     J2DPicture* getXMarkIcon() { return mpXMarkIcon; }
-    J2DPicture* getFlagCheckIcon() { return mpFlagCheckIcon; }
-    J2DPicture* getFlagXMarkIcon() { return mpFlagXMarkIcon; }
-    ResTIMG* getIconAtlas() { return mPreloadsComplete ? (ResTIMG*)mpPreloadBufs[4] : NULL; }
+    ResTIMG* getIconAtlas() { return mPreloadsComplete ? (ResTIMG*)mpPreloadBufs[3] : NULL; }
 
     void loadDefaultSettings();
     int storeSettingsMemcard();
@@ -483,15 +481,13 @@ public:
 
     u8 mGzGroupID;
 
-    static const int PRELOAD_COUNT = 5;
+    static const int PRELOAD_COUNT = 4;
     DVDFileInfo mPreloadFileInfos[PRELOAD_COUNT];
     void* mpPreloadBufs[PRELOAD_COUNT];
     bool mPreloadAsyncPending[PRELOAD_COUNT];
     bool mPreloadsComplete;
     J2DPicture* mpCheckIcon;
     J2DPicture* mpXMarkIcon;
-    J2DPicture* mpFlagCheckIcon;
-    J2DPicture* mpFlagXMarkIcon;
 };
 
 extern gzInfo_c g_gzInfo;
@@ -499,9 +495,6 @@ extern gzInfo_c g_gzInfo;
 inline ResTIMG* gzInfo_getIconAtlas() { return g_gzInfo.getIconAtlas(); }
 inline J2DPicture* gzInfo_getCheckIcon() { return g_gzInfo.getCheckIcon(); }
 inline J2DPicture* gzInfo_getXMarkIcon() { return g_gzInfo.getXMarkIcon(); }
-inline J2DPicture* gzInfo_getFlagCheckIcon() { return g_gzInfo.getFlagCheckIcon(); }
-inline J2DPicture* gzInfo_getFlagXMarkIcon() { return g_gzInfo.getFlagXMarkIcon(); }
-
 inline gzCursor* gzInfo_getCursor() { return g_gzInfo.getCursor(); }
 inline dSelect_cursor_c* gzInfo_getTPCursor() { return g_gzInfo.getTPCursor(); }
 inline gzTextBox* gzInfo_getMenuDescription() { return g_gzInfo.getMenuDescription(); }

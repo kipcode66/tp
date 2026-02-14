@@ -47,6 +47,7 @@ mod_assets/gz/Menu1.dat
 # intermediary images
 *.png
 *.jpg
+!source_assets/**/*.png
 
 # LLM Agent folders
 .grok/
