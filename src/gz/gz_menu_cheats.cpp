@@ -80,10 +80,14 @@ void gzCheatsMenu_c::draw() {
     f32 lineX = mXPos;
     f32 optionX = mXPos + getCurrentOptionsXOffset();
     f32 lineY_start = g_gzInfo.mBackgroundYPos + mLineYStart;
+    s32 topLine = gzInfo_getTopLine();
+    s32 endLine = topLine + gzMenuLayout::VISIBLE_LINES;
+    if (endLine > LINE_NUM) endLine = LINE_NUM;
 
-    for (int i = 0; i < LINE_NUM; i++) {
+    for (s32 i = topLine; i < endLine; i++) {
         gzBoolOptionLine* line = mpLines[i];
-        f32 lineY = lineY_start + (i * gzMenuLayout::LINE_SPACING);
+        s32 screenIdx = i - topLine;
+        f32 lineY = lineY_start + (screenIdx * gzMenuLayout::LINE_SPACING);
         bool isSelected = (l_cursor->y == i && gzInfo_isSubMenuVisible());
         bool isOn = (line->mIs != NULL && line->mIs());
         u32 color = isSelected ? cursorColor : (isOn ? COLOR_WHITE : COLOR_DIM);

@@ -140,8 +140,7 @@ void gzConfirm_c::draw() {
         f32 selectedX = (l_confirm_cursor.x == 0) ? NO_X : YES_X;
         if (selectedBox != NULL) {
             selectedBox->updateBounds();
-            f32 cursorX = selectedX + (selectedBox->getWidth() / 2.0f) +
-                          gzMenuLayout::TP_CURSOR_X_OFFSET;
+            f32 cursorX = selectedX + 304.0f + gzMenuLayout::TP_CURSOR_X_OFFSET;
             f32 cursorY = LINE_Y + (selectedBox->getHeight() / 2.0f) +
                           gzMenuLayout::TP_CURSOR_Y_OFFSET;
             gzSetup2DContext();
