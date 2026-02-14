@@ -3,11 +3,12 @@
 #include "d/d_com_inf_game.h"
 #include "d/d_event.h"
 #include "d/d_event_manager.h"
-#include "d/d_meter_HIO.h"
-#include "f_op/f_op_camera_mng.h"
 #include "gz/gz.h"
+#include "gz/gz_textbox.h"
 #include "m_Do/m_Do_controller_pad.h"
+#include "gz/gz_utility_world_text.h"
 #include <cmath>
+#include <cstdio>
 
 #define FREECAM_ROTATION_SPEED 0.002
 #define FREECAM_FAST_SPEED 4.0
@@ -62,21 +63,21 @@ void gzToolsMng_c::executeFreeCam() {
     // Lock the camera to allow for its movement
     dComIfGp_getEventManager().setCameraPlay(1);
 
-    if (!mFreeCamInitialized) {
-        mFreeCamSavedState.center = *cam_target;
-        mFreeCamSavedState.eye = *cam_pos;
-        mFreeCamSavedState.fovy = camera->mFovy;
-        mFreeCamSavedState.bank = camera->mBank;
+    if (!mFreeCam.initialized) {
+        mFreeCam.savedState.center = *cam_target;
+        mFreeCam.savedState.eye = *cam_pos;
+        mFreeCam.savedState.fovy = camera->mFovy;
+        mFreeCam.savedState.bank = camera->mBank;
 
         f32 dx = cam_target->x - cam_pos->x;
         f32 dy = cam_target->y - cam_pos->y;
         f32 dz = cam_target->z - cam_pos->z;
 
-        mFreeCamYaw = atan2f(dz, dx);
+        mFreeCam.yaw = atan2f(dz, dx);
         f32 horizontal = sqrtf(dx * dx + dz * dz);
-        mFreeCamPitch = atan2f(dy, horizontal);
+        mFreeCam.pitch = atan2f(dy, horizontal);
 
-        mFreeCamInitialized = true;
+        mFreeCam.initialized = true;
     }
 
     interface_of_controller_pad& pad = mDoCPd_c::getCpadInfo(0);
@@ -97,9 +98,9 @@ void gzToolsMng_c::executeFreeCam() {
         verticalDisp -= trigR;
     }
 
-    f32 moveDy = stickY * sinf(mFreeCamPitch) + verticalDisp;
-    f32 moveDx = stickY * cosf(mFreeCamYaw) * cosf(mFreeCamPitch) - stickX * sinf(mFreeCamYaw);
-    f32 moveDz = stickY * sinf(mFreeCamYaw) * cosf(mFreeCamPitch) + stickX * cosf(mFreeCamYaw);
+    f32 moveDy = stickY * sinf(mFreeCam.pitch) + verticalDisp;
+    f32 moveDx = stickY * cosf(mFreeCam.yaw) * cosf(mFreeCam.pitch) - stickX * sinf(mFreeCam.yaw);
+    f32 moveDz = stickY * sinf(mFreeCam.yaw) * cosf(mFreeCam.pitch) + stickX * cosf(mFreeCam.yaw);
 
     f32 speed = gzPad::getHoldZ() ? FREECAM_FAST_SPEED : FREECAM_SPEED;
 
@@ -107,32 +108,32 @@ void gzToolsMng_c::executeFreeCam() {
     cam_pos->y += speed * moveDy;
     cam_pos->z += speed * moveDz;
 
-    cam_target->x = cam_pos->x + cosf(mFreeCamYaw) * cosf(mFreeCamPitch);
-    cam_target->z = cam_pos->z + sinf(mFreeCamYaw) * cosf(mFreeCamPitch);
-    cam_target->y = cam_pos->y + sinf(mFreeCamPitch);
+    cam_target->x = cam_pos->x + cosf(mFreeCam.yaw) * cosf(mFreeCam.pitch);
+    cam_target->z = cam_pos->z + sinf(mFreeCam.yaw) * cosf(mFreeCam.pitch);
+    cam_target->y = cam_pos->y + sinf(mFreeCam.pitch);
 
     // Call Reset to update viewCache and internal camera state
     camera->Reset(*cam_target, *cam_pos);
 
-    mFreeCamYaw -= cStickX * FREECAM_ROTATION_SPEED;
-    mFreeCamYaw = fmodf(mFreeCamYaw + 2.0f * M_PI, 2.0f * M_PI);
+    mFreeCam.yaw -= cStickX * FREECAM_ROTATION_SPEED;
+    mFreeCam.yaw = fmodf(mFreeCam.yaw + 2.0f * M_PI, 2.0f * M_PI);
 
-    f32 newPitch = mFreeCamPitch + cStickY * FREECAM_ROTATION_SPEED;
+    f32 newPitch = mFreeCam.pitch + cStickY * FREECAM_ROTATION_SPEED;
     f32 maxPitch = M_PI / 2.0f - 0.1f;
     f32 minPitch = -M_PI / 2.0f + 0.1f;
 
     if (newPitch > maxPitch) {
-        mFreeCamPitch = maxPitch;
+        mFreeCam.pitch = maxPitch;
     } else if (newPitch < minPitch) {
-        mFreeCamPitch = minPitch;
+        mFreeCam.pitch = minPitch;
     } else {
-        mFreeCamPitch = newPitch;
+        mFreeCam.pitch = newPitch;
     }
 }
 
 void gzToolsMng_c::executeMoveLink() {
-    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mMoveLink, mMoveLinkComboHeld)) {
-        mMoveLink = !mMoveLink;
+    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mMoveLink, mMoveLink.comboHeld)) {
+        mMoveLink.active = !mMoveLink.active;
     }
 }
 
@@ -147,25 +148,112 @@ void gzToolsMng_c::executeTeleport() {
     daAlink_c* link = daAlink_getAlinkActorClass();
     dCamera_c* camera = dCam_getBody();
 
-    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mTeleportSave, mTeleportSaveComboHeld)) {
+    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mTeleportSave, mTeleport.saveComboHeld)) {
         if (link != NULL && camera != NULL) {
-            mCamera.center = camera->mCenter;
-            mCamera.eye = camera->mEye;
-            mCamera.fovy = camera->mFovy;
-            mCamera.bank = camera->mBank;
-            mLinkPos = link->current.pos;
-            mLinkAngle = link->shape_angle;
+            mTeleport.camera.center = camera->mCenter;
+            mTeleport.camera.eye = camera->mEye;
+            mTeleport.camera.fovy = camera->mFovy;
+            mTeleport.camera.bank = camera->mBank;
+            mTeleport.linkPos = link->current.pos;
+            mTeleport.linkAngle = link->shape_angle;
         }
         gzClearButtonInput();
     }
 
-    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mTeleportLoad, mTeleportLoadComboHeld)) {
+    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mTeleportLoad, mTeleport.loadComboHeld)) {
         if (link != NULL && camera != NULL) {
-            camera->Reset(mCamera.center, mCamera.eye, mCamera.fovy, mCamera.bank.Val());
-            link->current.pos = mLinkPos;
-            link->shape_angle = mLinkAngle;
+            camera->Reset(mTeleport.camera.center, mTeleport.camera.eye,
+                          mTeleport.camera.fovy, mTeleport.camera.bank.Val());
+            link->current.pos = mTeleport.linkPos;
+            link->shape_angle = mTeleport.linkAngle;
         }
         gzClearButtonInput();
+    }
+}
+
+static const u8 ROLL_RESULT_DISPLAY_FRAMES = 60;
+
+void gzToolsMng_c::executeRollChecker() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link == NULL || dComIfGs_getTransformStatus() != TF_STATUS_HUMAN) {
+        mRollChecker.frameDelta = 0;
+        mRollChecker.resultTimer = 0;
+        return;
+    }
+
+    if (dComIfGp_isPauseFlag()) {
+        return;
+    }
+
+    if (mRollChecker.resultTimer > 0) {
+        mRollChecker.resultTimer--;
+    }
+
+    bool rolling = (link->mProcID == daAlink_c::PROC_FRONT_ROLL);
+    bool aPressed = (gzPad::getTrig() & PAD_BUTTON_A) != 0;
+
+    if (rolling) {
+        if (mRollChecker.prevAction == daAlink_c::PROC_DIVE_JUMP) {
+            mRollChecker.endFrame = 15;
+            mRollChecker.earlyFrame = 9;
+            mRollChecker.lateFrame = 20;
+        } else {
+            mRollChecker.endFrame = 20;
+            mRollChecker.earlyFrame = 14;
+            mRollChecker.lateFrame = 25;
+        }
+
+        if (mRollChecker.frameDelta == 0) {
+            mRollChecker.frameDelta = 1;
+        }
+
+        if (aPressed) {
+            if (mRollChecker.frameDelta == mRollChecker.endFrame) {
+                snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "<3");
+                mRollChecker.resultColor = COLOR_GREEN;
+                mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+                mRollChecker.frameDelta = 0;
+            } else if (mRollChecker.frameDelta > mRollChecker.earlyFrame &&
+                       mRollChecker.frameDelta < mRollChecker.endFrame) {
+                snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "-%df",
+                         mRollChecker.endFrame - mRollChecker.frameDelta);
+                mRollChecker.resultColor = COLOR_BLUE;
+                mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+            } else if (mRollChecker.frameDelta > mRollChecker.endFrame &&
+                       mRollChecker.frameDelta <= mRollChecker.lateFrame) {
+                snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "+%df",
+                         mRollChecker.frameDelta - mRollChecker.endFrame);
+                mRollChecker.resultColor = COLOR_RED;
+                mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+                mRollChecker.frameDelta = 0;
+            }
+        }
+
+        if (mRollChecker.frameDelta != 0) {
+            mRollChecker.frameDelta++;
+        }
+    } else {
+        if (aPressed && mRollChecker.frameDelta > mRollChecker.endFrame &&
+            mRollChecker.frameDelta <= mRollChecker.lateFrame) {
+            snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "+%df",
+                     mRollChecker.frameDelta - mRollChecker.endFrame);
+            mRollChecker.resultColor = COLOR_RED;
+            mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+            mRollChecker.frameDelta = 0;
+        }
+
+        if (mRollChecker.frameDelta > mRollChecker.endFrame &&
+            mRollChecker.frameDelta <= mRollChecker.lateFrame) {
+            mRollChecker.frameDelta++;
+        } else {
+            mRollChecker.frameDelta = 0;
+        }
+
+        mRollChecker.prevAction = link->mProcID;
+    }
+
+    if (mRollChecker.resultTimer > 0) {
+        mRollChecker.worldPos = link->current.pos;
     }
 }
 
@@ -199,14 +287,14 @@ void gzToolsMng_c::execute() {
     }
 
     if (gzInfo_isFreeCam()) {
-        if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mFreeCamToggle, mFreeCamComboHeld)) {
-            mFreeCamActive = !mFreeCamActive;
-            if (!mFreeCamActive) {
+        if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mFreeCamToggle, mFreeCam.comboHeld)) {
+            mFreeCam.active = !mFreeCam.active;
+            if (!mFreeCam.active) {
                 dCamera_c* camera = dCam_getBody();
 
                 if (camera != NULL) {
-                    camera->Reset(mFreeCamSavedState.center, mFreeCamSavedState.eye,
-                                  mFreeCamSavedState.fovy, mFreeCamSavedState.bank.Val());
+                    camera->Reset(mFreeCam.savedState.center, mFreeCam.savedState.eye,
+                                  mFreeCam.savedState.fovy, mFreeCam.savedState.bank.Val());
                 }
 
                 dEvt_control_c* event = dComIfGp_getEvent();
@@ -216,19 +304,19 @@ void gzToolsMng_c::execute() {
                 }
 
                 dComIfGp_getEventManager().setCameraPlay(0);
-                mFreeCamInitialized = false;
+                mFreeCam.initialized = false;
             }
         }
 
-        if (mFreeCamActive) {
+        if (mFreeCam.active) {
             executeFreeCam();
         }
-    } else if (mFreeCamActive) {
+    } else if (mFreeCam.active) {
         dCamera_c* camera = dCam_getBody();
 
         if (camera != NULL) {
-            camera->Reset(mFreeCamSavedState.center, mFreeCamSavedState.eye,
-                          mFreeCamSavedState.fovy, mFreeCamSavedState.bank.Val());
+            camera->Reset(mFreeCam.savedState.center, mFreeCam.savedState.eye,
+                          mFreeCam.savedState.fovy, mFreeCam.savedState.bank.Val());
         }
 
         dEvt_control_c* event = dComIfGp_getEvent();
@@ -238,16 +326,33 @@ void gzToolsMng_c::execute() {
         }
 
         dComIfGp_getEventManager().setCameraPlay(0);
-        mFreeCamActive = false;
-        mFreeCamInitialized = false;
+        mFreeCam.active = false;
+        mFreeCam.initialized = false;
     }
 
     if (gzInfo_isMoveLink()) {
         executeMoveLink();
-    } else if (mMoveLink) {
-        mMoveLink = false;
+    } else if (mMoveLink.active) {
+        mMoveLink.active = false;
     }
 
     if (gzInfo_isNoSinkingInSand()) executeNoSinkSand();
+    if (gzInfo_isRollChecker()) executeRollChecker();
     if (gzInfo_isTeleport()) executeTeleport();
+}
+
+void gzToolsMng_c::drawRollChecker() {
+    if (mRollChecker.pText == NULL) {
+        mRollChecker.pText = gzTextBox_allocate();
+    }
+    if (mRollChecker.pText == NULL || mRollChecker.resultTimer == 0 || dComIfGp_isPauseFlag()) {
+        return;
+    }
+
+    gzDrawWorldText(mRollChecker.pText, mRollChecker.worldPos, 15.0f,
+                    mRollChecker.resultText, mRollChecker.resultColor, 1.5f, -0.5f);
+}
+
+void gzToolsMng_c::draw() {
+    if (gzInfo_isRollChecker()) drawRollChecker();
 }

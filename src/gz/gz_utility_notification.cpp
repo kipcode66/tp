@@ -1,5 +1,6 @@
 #include "gz/gz_utility_notification.h"
 #include "gz/gz.h"
+#include "gz/gz_utility_draw.h"
 #include "SSystem/SComponent/c_counter.h"
 
 static const u32 NOTIFICATION_TTL_SECONDS = 5;

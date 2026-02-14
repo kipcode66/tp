@@ -9,7 +9,6 @@
 #include "gz/gz_manager_tools.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
-#include "dolphin/gx/GXStruct.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "m_Do/m_Do_machine.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
@@ -141,7 +140,7 @@ struct gzSettings_s {
     bool mInvincibleEnemies;
     bool mLadderFreezardCancel;
     bool mMoonJump;
-    bool mRolling;
+    bool mRollChecker;
     bool mSuperClawshot;
     bool mTransformAnywhere;
     bool mUniversalMapDelay;
@@ -265,7 +264,7 @@ public:
     bool isMoveLink() { return mSettings.mMoveLink; }
     bool isMoveLinkActive() { return mToolsMng.isMoveLinkActive(); }
     bool isNoSinkingInSand() { return mSettings.mNoSinkingInSand; }
-    bool isRolling() { return mSettings.mRolling; }
+    bool isRollChecker() { return mSettings.mRollChecker; }
     bool isRuslTD() { return dComIfGs_isTmpBit(0x0006);}
     bool isStageInfo() { return mSettings.mStageInfo; }
     bool isSuperClawshot() { return mSettings.mSuperClawshot; }
@@ -325,7 +324,7 @@ public:
     void setMoveLink(bool i_opt) { mSettings.mMoveLink = i_opt; }
     void setNoSinkingInSand(bool i_opt) { mSettings.mNoSinkingInSand = i_opt; }
     void setReloadType(bool i_type) { mSettings.mReloadType = i_type; }
-    void setRolling(bool i_opt) { mSettings.mRolling = i_opt; }
+    void setRollChecker(bool i_opt) { mSettings.mRollChecker = i_opt; }
     void setRuslTD(bool i_opt) { i_opt ? dComIfGs_onTmpBit(0x0006) : dComIfGs_offTmpBit(0x0006); }
     void setStageInfo(bool i_opt) { mSettings.mStageInfo = i_opt; }
     void setSuperClawshot(bool i_opt) { mSettings.mSuperClawshot = i_opt; }
@@ -618,7 +617,7 @@ inline bool gzInfo_isMoveLink() { return g_gzInfo.isMoveLink(); }
 inline bool gzInfo_isMoveLinkActive() { return g_gzInfo.isMoveLinkActive(); }
 inline bool gzInfo_isReloadArea() { return g_gzInfo.getReloadType() == true; }
 inline bool gzInfo_isReloadFile() { return g_gzInfo.getReloadType() == false; }
-inline bool gzInfo_isRolling() { return g_gzInfo.isRolling(); }
+inline bool gzInfo_isRollChecker() { return g_gzInfo.isRollChecker(); }
 inline bool gzInfo_isRuslTD() { return g_gzInfo.isRuslTD(); }
 inline bool gzInfo_isSubMenuVisible() { return g_gzInfo.mCursor.x > 0;}
 inline bool gzInfo_isSuperClawshot() { return g_gzInfo.isSuperClawshot(); }
@@ -727,7 +726,7 @@ inline void gzInfo_offMidnaOnZ() { g_gzInfo.setMidnaOnZ(false); }
 inline void gzInfo_offMoonJump() { g_gzInfo.setMoonJump(false); }
 inline void gzInfo_offMoveLink() { g_gzInfo.setMoveLink(false); }
 inline void gzInfo_offNoSinkingInSand() { g_gzInfo.setNoSinkingInSand(false); }
-inline void gzInfo_offRolling() { g_gzInfo.setRolling(false); }
+inline void gzInfo_offRollChecker() { g_gzInfo.setRollChecker(false); }
 inline void gzInfo_offRuslTD() { g_gzInfo.setRuslTD(false); }
 inline void gzInfo_offStageInfo() { g_gzInfo.setStageInfo(false); }
 inline void gzInfo_offSuperClawshot() { g_gzInfo.setSuperClawshot(false); }
@@ -814,7 +813,7 @@ inline void gzInfo_onMidnaOnZ() { g_gzInfo.setMidnaOnZ(true); }
 inline void gzInfo_onMoonJump() { g_gzInfo.setMoonJump(true); }
 inline void gzInfo_onMoveLink() { g_gzInfo.setMoveLink(true); }
 inline void gzInfo_onNoSinkingInSand() { g_gzInfo.setNoSinkingInSand(true); }
-inline void gzInfo_onRolling() { g_gzInfo.setRolling(true); }
+inline void gzInfo_onRollChecker() { g_gzInfo.setRollChecker(true); }
 inline void gzInfo_onRuslTD() { g_gzInfo.setRuslTD(true); }
 inline void gzInfo_onStageInfo() { g_gzInfo.setStageInfo(true); }
 inline void gzInfo_onSuperClawshot() { g_gzInfo.setSuperClawshot(true); }
@@ -874,16 +873,7 @@ namespace gzPad {
     inline f32 getAnalogL() { return mDoCPd_c::m_gzPadInfo.mTriggerLeft; }
 };
 
-int gzPrint(int x, int y, u32 color, char const* string, ...);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
-void gzDrawRectOutline(f32 x, f32 y, f32 w, f32 h, f32 thickness, GXColor color);
-void gzDrawFilledRect(f32 x, f32 y, f32 w, f32 h, GXColor color);
-void gzDrawFilledRoundedTopRect(f32 x, f32 y, f32 w, f32 h, f32 radius, GXColor color);
-void gzDrawVerticalLine(f32 x, f32 y1, f32 y2, f32 thickness, GXColor color);
-void gzDrawHorizontalLine(f32 x1, f32 x2, f32 y, f32 thickness, GXColor color);
-void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor outlineColor, f32 outlineWidth);
-GXColor gzGetThemedBorderColor(u32 theme, u8 alpha);
-GXColor gzGetThemedHighlightColor(u32 theme, u8 alpha);
 
 inline bool gzCheckComboToggle(u32 combo, bool& wasHeld) {
     u32 rawHold = mDoCPd_c::getHold(0);

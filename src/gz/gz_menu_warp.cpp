@@ -1,6 +1,7 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
 #include "gz/gz_menu_warp.h"
+#include "gz/gz_utility_draw.h"
 #include "gz/gz_menu_main.h"
 #include "d/d_com_inf_game.h"
 #include "dolphin/dvd.h"

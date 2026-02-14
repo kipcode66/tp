@@ -12,7 +12,7 @@ static gzBoolOption_s checkerFlags[] = {
     {"elevator escape", "show frame info when doing elevator escape", gzInfo_isElevatorEscape, gzInfo_onElevatorEscape, gzInfo_offElevatorEscape},
     {"gorge void", "warp to kakariko gorge", gzInfo_isGorgeVoid, gzInfo_onGorgeVoid, gzInfo_offGorgeVoid},
     {"ladder freezard cancel", "ladder freezard cancel checker", gzInfo_isLadderFreezardCancel, gzInfo_onLadderFreezardCancel, gzInfo_offLadderFreezardCancel},
-    {"rolling", "frame counter for chaining rolls", gzInfo_isRolling, gzInfo_onRolling, gzInfo_offRolling},
+    {"rolls", "frame checker for chaining rolls", gzInfo_isRollChecker, gzInfo_onRollChecker, gzInfo_offRollChecker},
     {"universal map delay", "practice snowpeak universal map delay timing", gzInfo_isUniversalMapDelay, gzInfo_onUniversalMapDelay, gzInfo_offUniversalMapDelay},
 };
 

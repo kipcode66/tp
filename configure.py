@@ -2981,6 +2981,8 @@ config.libs = [
             Object(Custom, "gz/gz_manager_practice.cpp"),
             Object(Custom, "gz/gz_manager_cheats.cpp"),
             Object(Custom, "gz/gz_manager_tools.cpp"),
+            Object(Custom, "gz/gz_utility_world_text.cpp"),
+            Object(Custom, "gz/gz_utility_draw.cpp"),
         ],
     },
 ]
@@ -3080,6 +3082,8 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
                 "gz/gz_manager_practice.cpp",
                 "gz/gz_manager_cheats.cpp",
                 "gz/gz_manager_tools.cpp",
+                "gz/gz_utility_world_text.cpp",
+                "gz/gz_utility_draw.cpp",
             ]
     return objects
 
