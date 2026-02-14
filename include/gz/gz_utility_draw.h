@@ -1,8 +1,7 @@
 #ifndef GZ_UTILITY_DRAW_H
 #define GZ_UTILITY_DRAW_H
 
-#include "dolphin/gx/GXStruct.h"
-#include "dolphin/types.h"
+#include <dolphin/gx.h>
 
 struct ResTIMG;
 
@@ -18,5 +17,6 @@ GXColor gzGetThemedHighlightColor(u32 theme, u8 alpha);
 GXColor gzGetThemedSeparatorColor(u32 theme, u8 alpha);
 void gzDrawAtlasIcon(ResTIMG* atlas, int iconIndex, int iconSize, int iconCount,
                      f32 x, f32 y, f32 w, f32 h, GXColor color);
+int gzPrint(int x, int y, u32 color, char const* string, ...);
 
 #endif // GZ_UTILITY_DRAW_H

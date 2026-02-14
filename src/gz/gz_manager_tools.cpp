@@ -3,11 +3,14 @@
 #include "d/d_com_inf_game.h"
 #include "d/d_event.h"
 #include "d/d_event_manager.h"
+#include "m_Do/m_Do_controller_pad.h"
+
 #include "gz/gz.h"
 #include "gz/gz_textbox.h"
 #include "gz/gz_utility_notification.h"
-#include "m_Do/m_Do_controller_pad.h"
 #include "gz/gz_utility_world_text.h"
+#include "gz/gz_utility_draw.h"
+
 #include <cmath>
 #include <cstdio>
 
@@ -445,6 +448,30 @@ void gzToolsMng_c::drawRollChecker() {
                     mRollChecker.resultText, mRollChecker.resultColor, 1.5f, -0.5f);
 }
 
+void gzToolsMng_c::drawLinkInfo() {
+    daAlink_c* player = daAlink_getAlinkActorClass();
+    if (player == NULL)
+        return;
+
+    const int BASE_X = 400;
+    const int BASE_Y = 200;
+    const int LINE_HEIGHT = 20;
+
+    // TODO: do we like prints or textboxes here more?
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 0), COLOR_WHITE, "time: %02d:%02d", dKy_getdaytime_hour(), dKy_getdaytime_minute());
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 1), COLOR_WHITE, "action: %d", player->mProcID);
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 2), COLOR_WHITE, "pos x: %.4f", player->current.pos.x);
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 3), COLOR_WHITE, "pos y: %.4f", player->current.pos.y);
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 4), COLOR_WHITE, "pos z: %.4f", player->current.pos.z);
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 5), COLOR_WHITE, "angle: %d", (u16)player->shape_angle.y);
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 6), COLOR_WHITE, "v-angle: %d", player->mBodyAngle.x);
+    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 7), COLOR_WHITE, "speed: %.4f", player->speedF);
+}
+
 void gzToolsMng_c::draw() {
     if (gzInfo_isTool_RollChecker()) drawRollChecker();
+
+    if (gzInfo_isTool_LinkDebugInfo()) {
+        drawLinkInfo();
+    }
 }

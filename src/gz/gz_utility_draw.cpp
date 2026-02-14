@@ -1,14 +1,9 @@
 #include "gz/gz_utility_draw.h"
 #include "JSystem/JUtility/JUTTexture.h"
-#include "dolphin/gx/GXCull.h"
-#include "dolphin/gx/GXGeometry.h"
-#include "dolphin/gx/GXLighting.h"
-#include "dolphin/gx/GXPixel.h"
-#include "dolphin/gx/GXTev.h"
-#include "dolphin/gx/GXTexture.h"
-#include "dolphin/gx/GXTransform.h"
-#include "dolphin/gx/GXVert.h"
+#include "JSystem/JUtility/JUTDbPrint.h"
+#include "JSystem/JUtility/JUTReport.h"
 #include "m_Do/m_Do_mtx.h"
+
 #include <cmath>
 
 static void gzSetupGXPrimitive() {
@@ -331,4 +326,28 @@ GXColor gzGetThemedSeparatorColor(u32 theme, u8 alpha) {
     c.b = (u8)(b * 0.85f);
     c.a = alpha;
     return c;
+}
+
+int gzPrint(int x, int y, u32 color, char const* string, ...) {
+    JUTDbPrint::getManager()->setVisible(true);
+    char buffer[256];
+
+    va_list list;
+    va_start(list, string);
+    vsnprintf(buffer, sizeof(buffer), string, list);
+    va_end(list);
+
+    JUTDbPrint::getManager()->flush();
+
+    static JUtility::TColor ShadowDarkColor(0, 0, 0, 0x80);
+    JUTDbPrint::getManager()->setCharColor(ShadowDarkColor);
+
+    JUTReport(x + 2, y + 2, buffer);
+    JUTDbPrint::getManager()->flush();
+
+    JUTDbPrint::getManager()->setCharColor(color);
+    JUTReport(x, y, buffer);
+
+    JUTDbPrint::getManager()->flush();
+    return 1;
 }

@@ -76,7 +76,9 @@ public:
     void executeEBMB();
     void executeRollChecker();
     void executeTeleport();
+
     void drawRollChecker();
+    void drawLinkInfo();
 
     bool isMoveLinkActive() const { return mMoveLink.active; }
 
