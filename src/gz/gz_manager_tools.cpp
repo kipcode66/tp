@@ -348,7 +348,7 @@ void gzToolsMng_c::executeRollChecker() {
 }
 
 void gzToolsMng_c::execute() {
-    if (gzInfo_isFastBonkRecovery()) {
+    if (gzInfo_isTool_FastBonkRecovery()) {
         executeFastBonkRecovery();
     } else if (mFastBonkRecovery) {
         daAlinkHIO_frontRoll_c0::m.mCrashAnm.mStartFrame = 3.0f;
@@ -356,7 +356,7 @@ void gzToolsMng_c::execute() {
         mFastBonkRecovery = false;
     }
 
-    if (gzInfo_isFastMovement()) {
+    if (gzInfo_isTool_FastMovement()) {
         executeFastMovement();
     } else if (mFastMovement) {
         daAlinkHIO_frontRoll_c0::m.mSpeedRate = 1.3f;
@@ -376,7 +376,7 @@ void gzToolsMng_c::execute() {
         mFastMovement = false;
     }
 
-    if (gzInfo_isFreeCam()) {
+    if (gzInfo_isTool_FreeCam()) {
         if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mFreeCamToggle, mFreeCam.comboHeld)) {
             mFreeCam.active = !mFreeCam.active;
             if (!mFreeCam.active) {
@@ -420,17 +420,17 @@ void gzToolsMng_c::execute() {
         mFreeCam.initialized = false;
     }
 
-    if (gzInfo_isMoveLink()) {
+    if (gzInfo_isTool_MoveLink()) {
         executeMoveLink();
     } else if (mMoveLink.active) {
         mMoveLink.active = false;
     }
 
-    if (gzInfo_isCoroTD()) executeCoroTD();
-    if (gzInfo_isEndingBlowMoonBoots()) executeEBMB();
-    if (gzInfo_isNoSinkingInSand()) executeNoSinkSand();
-    if (gzInfo_isRollChecker()) executeRollChecker();
-    if (gzInfo_isTeleport()) executeTeleport();
+    if (gzInfo_isTool_CoroTD()) executeCoroTD();
+    if (gzInfo_isTool_EndingBlowMoonBoots()) executeEBMB();
+    if (gzInfo_isTool_NoSinkingInSand()) executeNoSinkSand();
+    if (gzInfo_isTool_RollChecker()) executeRollChecker();
+    if (gzInfo_isTool_Teleport()) executeTeleport();
 }
 
 void gzToolsMng_c::drawRollChecker() {
@@ -446,5 +446,5 @@ void gzToolsMng_c::drawRollChecker() {
 }
 
 void gzToolsMng_c::draw() {
-    if (gzInfo_isRollChecker()) drawRollChecker();
+    if (gzInfo_isTool_RollChecker()) drawRollChecker();
 }

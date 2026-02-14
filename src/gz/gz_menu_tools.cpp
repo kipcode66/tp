@@ -7,34 +7,34 @@
 
 // Checkers tab
 static gzBoolOption_s checkerFlags[] = {
-    {"coro td", "show frame info when doing coro td", gzInfo_isCoroTD, gzInfo_onCoroTD, gzInfo_offCoroTD},
-    {"ebmb", "show frame info for ending blow moon boots", gzInfo_isEndingBlowMoonBoots, gzInfo_onEndingBlowMoonBoots, gzInfo_offEndingBlowMoonBoots},
-    {"elevator escape", "show frame info when doing elevator escape", gzInfo_isElevatorEscape, gzInfo_onElevatorEscape, gzInfo_offElevatorEscape},
-    {"gorge void", "warp to kakariko gorge", gzInfo_isGorgeVoid, gzInfo_onGorgeVoid, gzInfo_offGorgeVoid},
-    {"ladder freezard cancel", "ladder freezard cancel checker", gzInfo_isLadderFreezardCancel, gzInfo_onLadderFreezardCancel, gzInfo_offLadderFreezardCancel},
-    {"rolls", "frame checker for chaining rolls", gzInfo_isRollChecker, gzInfo_onRollChecker, gzInfo_offRollChecker},
-    {"universal map delay", "practice snowpeak universal map delay timing", gzInfo_isUniversalMapDelay, gzInfo_onUniversalMapDelay, gzInfo_offUniversalMapDelay},
+    {"coro td", "show frame info when doing coro td", gzInfo_isTool_CoroTD, gzInfo_onTool_CoroTD, gzInfo_offTool_CoroTD},
+    {"ebmb", "show frame info for ending blow moon boots", gzInfo_isTool_EndingBlowMoonBoots, gzInfo_onTool_EndingBlowMoonBoots, gzInfo_offTool_EndingBlowMoonBoots},
+    {"elevator escape", "show frame info when doing elevator escape", gzInfo_isTool_ElevatorEscape, gzInfo_onTool_ElevatorEscape, gzInfo_offTool_ElevatorEscape},
+    {"gorge void", "warp to kakariko gorge", gzInfo_isTool_GorgeVoid, gzInfo_onTool_GorgeVoid, gzInfo_offTool_GorgeVoid},
+    {"ladder freezard cancel", "ladder freezard cancel checker", gzInfo_isTool_LadderFreezardCancel, gzInfo_onTool_LadderFreezardCancel, gzInfo_offTool_LadderFreezardCancel},
+    {"rolls", "frame checker for chaining rolls", gzInfo_isTool_RollChecker, gzInfo_onTool_RollChecker, gzInfo_offTool_RollChecker},
+    {"universal map delay", "practice snowpeak universal map delay timing", gzInfo_isTool_UniversalMapDelay, gzInfo_onTool_UniversalMapDelay, gzInfo_offTool_UniversalMapDelay},
 };
 
 // Displays tab
 static gzBoolOption_s displayFlags[] = {
-    {"a/b mash rate", "display a/b button mashing speeds", gzInfo_isAbMashRate, gzInfo_onAbMashRate, gzInfo_offAbMashRate},
-    {"in-game timer", "in-game time timer", gzInfo_isInGameTimer, gzInfo_onInGameTimer, gzInfo_offInGameTimer},
-    {"input viewer", "show current inputs", gzInfo_isInputViewer, gzInfo_onInputViewer, gzInfo_offInputViewer},
-    {"link debug info", "show link's position, angle, and speed", gzInfo_isLinkDebugInfo, gzInfo_onLinkDebugInfo, gzInfo_offLinkDebugInfo},
-    {"load timer", "loading zone timer", gzInfo_isLoadTimer, gzInfo_onLoadTimer, gzInfo_offLoadTimer},
-    {"stage info", "show link's current stage info", gzInfo_isStageInfo, gzInfo_onStageInfo, gzInfo_offStageInfo},
-    {"timer", "frame timer", gzInfo_isTimer, gzInfo_onTimer, gzInfo_offTimer},
+    {"a/b mash rate", "display a/b button mashing speeds", gzInfo_isTool_AbMashRate, gzInfo_onTool_AbMashRate, gzInfo_offTool_AbMashRate},
+    {"in-game timer", "in-game time timer", gzInfo_isTool_InGameTimer, gzInfo_onTool_InGameTimer, gzInfo_offTool_InGameTimer},
+    {"input viewer", "show current inputs", gzInfo_isTool_InputViewer, gzInfo_onTool_InputViewer, gzInfo_offTool_InputViewer},
+    {"link debug info", "show link's position, angle, and speed", gzInfo_isTool_LinkDebugInfo, gzInfo_onTool_LinkDebugInfo, gzInfo_offTool_LinkDebugInfo},
+    {"load timer", "loading zone timer", gzInfo_isTool_LoadTimer, gzInfo_onTool_LoadTimer, gzInfo_offTool_LoadTimer},
+    {"stage info", "show link's current stage info", gzInfo_isTool_StageInfo, gzInfo_onTool_StageInfo, gzInfo_offTool_StageInfo},
+    {"timer", "frame timer", gzInfo_isTool_Timer, gzInfo_onTool_Timer, gzInfo_offTool_Timer},
 };
 
 // Link tab
 static gzBoolOption_s linkFlags[] = {
-    {"fast bonk recovery", "reduces bonk animation significantly", gzInfo_isFastBonkRecovery, gzInfo_onFastBonkRecovery, gzInfo_offFastBonkRecovery},
-    {"fast movement", "link's movement is much faster", gzInfo_isFastMovement, gzInfo_onFastMovement, gzInfo_offFastMovement},
-    {"free cam", "move camera freely (Z+B+A to toggle)", gzInfo_isFreeCam, gzInfo_onFreeCam, gzInfo_offFreeCam},
-    {"move link", "move link around freely", gzInfo_isMoveLink, gzInfo_onMoveLink, gzInfo_offMoveLink},
-    {"no sinking in sand", "link won't sink in sand", gzInfo_isNoSinkingInSand, gzInfo_onNoSinkingInSand, gzInfo_offNoSinkingInSand},
-    {"teleport", "store and load link's position", gzInfo_isTeleport, gzInfo_onTeleport, gzInfo_offTeleport},
+    {"fast bonk recovery", "reduces bonk animation significantly", gzInfo_isTool_FastBonkRecovery, gzInfo_onTool_FastBonkRecovery, gzInfo_offTool_FastBonkRecovery},
+    {"fast movement", "link's movement is much faster", gzInfo_isTool_FastMovement, gzInfo_onTool_FastMovement, gzInfo_offTool_FastMovement},
+    {"free cam", "move camera freely (Z+B+A to toggle)", gzInfo_isTool_FreeCam, gzInfo_onTool_FreeCam, gzInfo_offTool_FreeCam},
+    {"move link", "move link around freely", gzInfo_isTool_MoveLink, gzInfo_onTool_MoveLink, gzInfo_offTool_MoveLink},
+    {"no sinking in sand", "link won't sink in sand", gzInfo_isTool_NoSinkingInSand, gzInfo_onTool_NoSinkingInSand, gzInfo_offTool_NoSinkingInSand},
+    {"teleport", "store and load link's position", gzInfo_isTool_Teleport, gzInfo_onTool_Teleport, gzInfo_offTool_Teleport},
 };
 
 gzToolsMenu_c::gzToolsMenu_c() {

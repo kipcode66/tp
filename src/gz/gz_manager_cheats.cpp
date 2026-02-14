@@ -101,29 +101,29 @@ void gzCheatsMng_c::executeSuperClawshot() {
 }
 
 void gzCheatsMng_c::execute() {
-    if (gzInfo_isDisableItemTimer()) {
+    if (gzInfo_isCheat_DisableItemTimer()) {
         executeDisableItemTimer();
     } else if (mDisableItemTimer) {
         executeEnableItemTimer();
     }
 
-    if (gzInfo_isDisableWalls()) {
+    if (gzInfo_isCheat_DisableWalls()) {
         executeDisableWalls();
     } else if (mDisableWalls) {
         executeEnableWalls();
     }
 
-    if (gzInfo_isInfiniteAir()) executeInfiniteAir();
-    if (gzInfo_isInfiniteArrows()) executeInfiniteArrows();
-    if (gzInfo_isInfiniteBombs()) executeInfiniteBombs();
-    if (gzInfo_isInfiniteHearts()) executeInfiniteHearts();
-    if (gzInfo_isInvincibleLink()) executeInvincibleLink();
-    if (gzInfo_isMoonJump()) executeMoonJump();
-    if (gzInfo_isInfiniteOil()) executeInfiniteOil();
-    if (gzInfo_isInfiniteRupees()) executeInfiniteRupees();
-    if (gzInfo_isInfiniteSlingshot()) executeInfiniteSlingshot();
+    if (gzInfo_isCheat_InfiniteAir()) executeInfiniteAir();
+    if (gzInfo_isCheat_InfiniteArrows()) executeInfiniteArrows();
+    if (gzInfo_isCheat_InfiniteBombs()) executeInfiniteBombs();
+    if (gzInfo_isCheat_InfiniteHearts()) executeInfiniteHearts();
+    if (gzInfo_isCheat_InvincibleLink()) executeInvincibleLink();
+    if (gzInfo_isCheat_MoonJump()) executeMoonJump();
+    if (gzInfo_isCheat_InfiniteOil()) executeInfiniteOil();
+    if (gzInfo_isCheat_InfiniteRupees()) executeInfiniteRupees();
+    if (gzInfo_isCheat_InfiniteSlingshot()) executeInfiniteSlingshot();
 
-    if (gzInfo_isSuperClawshot()) {
+    if (gzInfo_isCheat_SuperClawshot()) {
         executeSuperClawshot();
     } else if (mSuperClawshot) {
         daAlinkHIO_hookshot_c0::m.mShootSpeed = CLAWSHOT_DEFAULT_SHOOT_SPEED;

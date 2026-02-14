@@ -1503,7 +1503,7 @@ u16 dMsgFlow_c::query041(mesg_flow_node_branch* i_flowNode_p, fopAc_ac_c* i_spea
 }
 
 u16 dMsgFlow_c::query042(mesg_flow_node_branch* i_flowNode_p, fopAc_ac_c* i_speaker_p, int param_2) {
-    if (gzInfo_isTransformAnywhere()) return 0;
+    if (gzInfo_isCheat_TransformAnywhere()) return 0;
     daMidna_c* midna_p = daPy_py_c::getMidnaActor();
 
     u8 ret = 0;

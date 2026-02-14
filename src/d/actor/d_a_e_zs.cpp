@@ -371,7 +371,7 @@ void daE_ZS_c::executeDrive() {
 }
 
 void daE_ZS_c::action() {
-    if (!gzInfo_isInvincibleEnemies()) damage_check();
+    if (!gzInfo_isCheat_InvincibleEnemies()) damage_check();
     
     switch (mAction) {
         case ACT_APPEAR:
@@ -381,7 +381,7 @@ void daE_ZS_c::action() {
             executeWait();
             break;
         case ACT_DAMAGE:
-            if (!gzInfo_isInvincibleEnemies()) {
+            if (!gzInfo_isCheat_InvincibleEnemies()) {
                 executeDamage();
             } else {
                 mAction = ACT_WAIT;

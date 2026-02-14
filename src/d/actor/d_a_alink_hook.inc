@@ -279,7 +279,7 @@ bool daAlink_c::checkLv7BossRoom() {
 }
 
 BOOL daAlink_c::checkHookshotStickBG(cBgS_PolyInfo& i_polyinfo) {
-    if (gzInfo_isSuperClawshot()) return true;
+    if (gzInfo_isCheat_SuperClawshot()) return true;
 
     #if DEBUG
     if (mpHIO->mItem.mHookshot.m.mForceStick) {

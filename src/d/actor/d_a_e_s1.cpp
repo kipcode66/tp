@@ -1402,7 +1402,7 @@ static void action(e_s1_class* i_this) {
         e_s1_bibiri(i_this);
         break;
     case ACT_DAMAGE:
-        if (!gzInfo_isInvincibleEnemies()) {
+        if (!gzInfo_isCheat_InvincibleEnemies()) {
             e_s1_damage(i_this);
         } else {
             i_this->mAction = ACT_WAIT;
@@ -1415,7 +1415,7 @@ static void action(e_s1_class* i_this) {
         e_s1_wolfbite(i_this);
         break;
     case ACT_FAIL_WAIT:
-        if (!gzInfo_isInvincibleEnemies()) {
+        if (!gzInfo_isCheat_InvincibleEnemies()) {
             e_s1_failwait(i_this);
         } else {
             i_this->mAction = ACT_WAIT;
@@ -1425,7 +1425,7 @@ static void action(e_s1_class* i_this) {
         fail_pos_correct = true;
         break;
     case ACT_SHOUT:
-        if (!gzInfo_isInvincibleEnemies()) {
+        if (!gzInfo_isCheat_InvincibleEnemies()) {
             e_s1_shout(i_this);
         } else {
             i_this->mAction = ACT_WAIT;

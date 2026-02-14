@@ -427,7 +427,7 @@ fopAc_ac_c* cc_at_check(fopAc_ac_c* i_enemy, dCcU_AtInfo* i_AtInfo) {
             }
         }
 
-        if (i_AtInfo->mAttackPower != 0 && !gzInfo_isInvincibleEnemies()) {
+        if (i_AtInfo->mAttackPower != 0 && !gzInfo_isCheat_InvincibleEnemies()) {
             i_enemy->health -= i_AtInfo->mAttackPower;
         }
 

@@ -14321,7 +14321,7 @@ bool daAlink_c::checkNotAutoJumpStage() {
 }
 
 bool daAlink_c::checkCastleTownUseItem(u16 i_itemNo) {
-    if (gzInfo_isUnrestrictedItems()) return true;
+    if (gzInfo_isCheat_UnrestrictedItems()) return true;
 
     if (checkNotBattleStage()) {
         if (i_itemNo == fpcNm_ITEM_KANTERA
@@ -17948,7 +17948,7 @@ int daAlink_c::execute() {
 
     BOOL isTrigDebugMoveInput = FALSE;
 
-    if (gzInfo_isMoveLinkActive() && daPy_getPlayerActorClass() == this) {
+    if (gzInfo_isTool_MoveLinkActive() && daPy_getPlayerActorClass() == this) {
         isTrigDebugMoveInput = TRUE;
         if (checkModeFlg(0x400) && !checkBoardRide() && !checkSpinnerRide()) {
             if (checkCanoeRide()) {
@@ -18452,7 +18452,7 @@ int daAlink_c::execute() {
 
             if (checkDeadHP()) {
                 eventInfo.offCondition(fopAcCnd_NOEXEC_e);
-            } else if (!gzInfo_isMoveLinkActive()) {
+            } else if (!gzInfo_isTool_MoveLinkActive()) {
                 if (!checkMagneBootsOn()) {
                     f32 gnd_nrm_y;
                     if (mLinkAcch.ChkGroundHit()) {
