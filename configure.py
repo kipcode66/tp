@@ -589,7 +589,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_printf.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_audio.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_controller_pad.cpp"),
-            Object(NonMatching, "m_Do/m_Re_controller_pad.cpp"),
+            Object(NonMatching, "m_Re/m_Re_controller_pad.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_graphic.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_machine.cpp"),
             Object(MatchingFor(ALL_GCN), "m_Do/m_Do_mtx.cpp"),
@@ -1768,6 +1768,30 @@ config.libs = [
         ],
     ),
     RevolutionLib(
+        "ax",
+        [
+            Object(Matching, "revolution/ax/AXAux.c"),
+            Object(Matching, "revolution/ax/AXCL.c"),
+        ],
+    ),
+    RevolutionLib(
+        "axfx",
+        [
+            Object(Matching, "revolution/axfx/AXFXHooks.c"),
+            Object(Matching, "revolution/axfx/AXFXReverbHi.c"),
+            Object(Matching, "revolution/axfx/AXFXReverbHiExp.c"),
+        ],
+    ),
+    RevolutionLib(
+        "axfx",
+        [
+            Object(Matching, "revolution/mem/mem_heapCommon.c"),
+            Object(Matching, "revolution/mem/mem_expHeap.c"),
+            Object(Matching, "revolution/mem/mem_allocator.c"),
+            Object(Matching, "revolution/mem/mem_list.c"),
+        ],
+    ),
+    RevolutionLib(
         "dsp",
         [
             Object(NonMatching, "revolution/dsp/dsp.c"),
@@ -1826,6 +1850,12 @@ config.libs = [
         ],
     ),
     RevolutionLib(
+        "arc",
+        [
+            Object(Matching, "revolution/arc/arc.c"),
+        ],
+    ),
+    RevolutionLib(
         "esp",
         [
             Object(NonMatching, "revolution/esp/esp.c"),
@@ -1834,10 +1864,10 @@ config.libs = [
     RevolutionLib(
         "ipc",
         [
-            Object(NonMatching, "revolution/ipc/ipcMain.c"),
-            Object(NonMatching, "revolution/ipc/ipcclt.c"),
-            Object(NonMatching, "revolution/ipc/memory.c"),
-            Object(NonMatching, "revolution/ipc/ipcProfile.c"),
+            Object(Matching, "revolution/ipc/ipcMain.c"),
+            Object(MatchingFor(ALL_WII, ALL_DEMO, "Shield"), "revolution/ipc/ipcclt.c"), # strnlen issue in ShieldD
+            Object(Matching, "revolution/ipc/memory.c"),
+            Object(Matching, "revolution/ipc/ipcProfile.c"),
         ],
     ),
     RevolutionLib(
@@ -1849,8 +1879,8 @@ config.libs = [
     RevolutionLib(
         "pad",
         [
-            Object(NonMatching, "revolution/pad/Padclamp.c"),
-            Object(NonMatching, "revolution/pad/Pad.c"),
+            Object(MatchingFor("ShieldD"), "revolution/pad/Padclamp.c"), # sqrtf issue on retail versions
+            Object(Matching, "revolution/pad/Pad.c"),
         ],
     ),
     RevolutionLib(
@@ -1887,6 +1917,12 @@ config.libs = [
         "usb",
         [
             Object(Matching, "revolution/usb/usb.c"),
+        ],
+    ),
+    RevolutionLib(
+        "tpl",
+        [
+            Object(Matching, "revolution/tpl/TPL.c"),
         ],
     ),
     RevolutionLib(
@@ -1931,7 +1967,7 @@ config.libs = [
             Object(NonMatching, "revolution/homebuttonLib/nw4hbm/ut/ut_ResFont.cpp"),
             Object(NonMatching, "revolution/homebuttonLib/nw4hbm/ut/ut_ResFontBase.cpp"),
             Object(NonMatching, "revolution/homebuttonLib/nw4hbm/ut/ut_TagProcessorBase.cpp"),
-            Object(NonMatching, "revolution/homebuttonLib/nw4hbm/ut/ut_TextWriterBase.cpp"),
+            Object(MatchingFor("RZDE01_02", "RZDP01", "RZDJ01"), "revolution/homebuttonLib/nw4hbm/ut/ut_TextWriterBase.cpp"), # RZDE01_00 func order
 
             Object(NonMatching, "revolution/homebuttonLib/HBMBase.cpp"),
             Object(NonMatching, "revolution/homebuttonLib/HBMAnmController.cpp"),
@@ -2067,7 +2103,7 @@ config.libs = [
             Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/targimpl.c"),
             Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Export/targsupp.s"),
             Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/mpc_7xx_603e.c"),
-            Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/exception.s"),
+            Object(MatchingFor(ALL_GCN, ALL_WII, ALL_DEMO), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Processor/ppc/Generic/exception.s"), # Shield has different symbol name for TRKInterruptHandler
             Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk.c"),
             Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Portable/main_TRK.c"),
             Object(MatchingFor(ALL_GCN), "TRK_MINNOW_DOLPHIN/debugger/embedded/MetroTRK/Os/dolphin/dolphin_trk_glue.c"),

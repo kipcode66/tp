@@ -3,9 +3,12 @@
 
 #include "JSystem/J3DGraphAnimator/J3DJoint.h"
 #include "JSystem/J3DGraphAnimator/J3DModelData.h"
-#include "JSystem/JUtility/JUTAssert.h"
+#include "JSystem/J3DAssert.h"
 #include "JSystem/JUtility/JUTNameTab.h"
+#include <dolphin/mtx.h>
 #include "global.h"
+
+class J3DTransformInfo;
 
 struct JUTDataBlockHeader {
     /* 0x0 */ u32 mType;

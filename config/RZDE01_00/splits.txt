@@ -46,19 +46,19 @@ m_Do/m_Do_audio.cpp:
 	.data       start:0x803F5BE0 end:0x803F5E58
 	.bss        start:0x8044A6A0 end:0x8044BA50
 	.sdata      start:0x805375C0 end:0x8053762C
-	.sbss       start:0x8053A780 end:0x8053A7D4
+	.sbss       start:0x8053A780 end:0x8053A7D0
 
 m_Do/m_Do_controller_pad.cpp:
 	.text       start:0x80009F54 end:0x8000A364
 	.bss        start:0x8044BA50 end:0x8044BB60
 	.sdata2     start:0x8053BA28 end:0x8053BA40
 
-m_Do/m_Re_controller_pad.cpp:
+m_Re/m_Re_controller_pad.cpp:
 	.text       start:0x8000A364 end:0x8000DD80
 	.rodata     start:0x803CE400 end:0x803CE450
 	.data       start:0x803F5E58 end:0x803F5E70
 	.bss        start:0x8044BB60 end:0x80453410
-	.sbss       start:0x8053A7D4 end:0x8053A7E0
+	.sbss       start:0x8053A7D0 end:0x8053A7E0
 	.sdata2     start:0x8053BA40 end:0x8053BAE8
 
 m_Do/m_Do_graphic.cpp:
@@ -434,14 +434,15 @@ d/d_save_init.cpp:
 
 d/d_jnt_col.cpp:
 	.text       start:0x8003A150 end:0x8003AF5C
-	.data       start:0x803FE490 end:0x803FE5A8
-	.sdata      start:0x80537B38 end:0x80537B68
+	.data       start:0x803FE490 end:0x803FE4D8
+	.sdata      start:0x80537B38 end:0x80537B50
 	.sdata2     start:0x8053BE28 end:0x8053BE48
 
 d/d_a_obj.cpp:
 	.text       start:0x8003AF5C end:0x8003B800
 	.rodata     start:0x803D04F0 end:0x803D0500
 	.bss        start:0x804B0D60 end:0x804B0DC0
+	.sdata      start:0x80537B50 end:0x80537B58
 	.sbss       start:0x8053AA38 end:0x8053AA40
 	.sdata2     start:0x8053BE48 end:0x8053BE60
 
@@ -455,6 +456,8 @@ d/d_a_item_static.cpp:
 d/d_a_shop_item_static.cpp:
 	.text       start:0x8003B98C end:0x8003B9F4
 	.rodata     start:0x803D0538 end:0x803D0988
+	.data       start:0x803FE4D8 end:0x803FE5A8
+	.sdata      start:0x80537B58 end:0x80537B68
 
 d/d_a_horse_static.cpp:
 	.text       start:0x8003B9F4 end:0x8003BB4C
@@ -3441,16 +3444,16 @@ revolution/ax/AXCL.c:
 	.text       start:0x80369114 end:0x80369144
 	.sbss       start:0x8053B7B0 end:0x8053B7B8
 
-revolution/ax/AXFXReverbHi.c:
+revolution/axfx/AXFXReverbHi.c:
 	.text       start:0x80369144 end:0x803691D0
 	.sdata2     start:0x80540560 end:0x80540568
 
-revolution/ax/AXFXReverbHiExp.c:
+revolution/axfx/AXFXReverbHiExp.c:
 	.text       start:0x803691D0 end:0x80369FA8
 	.data       start:0x8043FD60 end:0x8043FF00
 	.sdata2     start:0x80540568 end:0x805405A8
 
-revolution/ax/AXFXHooks.c:
+revolution/axfx/AXFXHooks.c:
 	.text       start:0x80369FA8 end:0x80369FE0
 	.sdata      start:0x8053A418 end:0x8053A420
 
@@ -3561,7 +3564,7 @@ revolution/sc/scsystem.c:
 	.data       start:0x804404C0 end:0x80440640
 	.bss        start:0x804F1B40 end:0x804F9CE0
 	.sdata      start:0x8053A480 end:0x8053A558
-	.sbss       start:0x8053B7F4 end:0x8053B80C
+	.sbss       start:0x8053B7F4 end:0x8053B808
 
 revolution/sc/scapi.c:
 	.text       start:0x80375134 end:0x80375514
@@ -3583,7 +3586,7 @@ revolution/arc/arc.c:
 
 revolution/ipc/ipcMain.c:
 	.text       start:0x80375EE8 end:0x80375F6C
-	.sbss       start:0x8053B80C end:0x8053B820
+	.sbss       start:0x8053B808 end:0x8053B820
 
 revolution/ipc/ipcclt.c:
 	.text       start:0x80375F6C end:0x8037766C
