@@ -12,25 +12,8 @@
 #include "gz/gz_menu_settings.h"
 #include "gz/gz_menu_tools.h"
 #include "gz/gz_menu_warp.h"
+#include "gz/gz_utility_draw.h"
 #include "SSystem/SComponent/c_counter.h"
-#include "JSystem/JKernel/JKRHeap.h"
-
-static const char* ICON_PATHS[gzMainMenu_c::LINE_NUM] = {
-    "/gz/icon_default.bti",    // MENU_ACTORS
-    "/gz/icon_cheats.bti",     // MENU_CHEATS
-    "/gz/icon_flags.bti",      // MENU_FLAGS
-    "/gz/icon_framework.bti",  // MENU_FRAMEWORK
-    "/gz/icon_default.bti",    // MENU_HEAPS
-    "/gz/icon_inventory.bti",  // MENU_INVENTORY
-    "/gz/icon_memory.bti",     // MENU_MEMORY
-    "/gz/icon_practice.bti",   // MENU_PRACTICE
-    "/gz/icon_scene.bti",      // MENU_SCENE
-    "/gz/icon_settings.bti",   // MENU_SETTINGS
-    "/gz/icon_tools.bti",      // MENU_TOOLS
-    "/gz/icon_warping.bti",    // MENU_WARPING
-};
-
-static const int ICON_BTI_SIZE = 1184;
 static const f32 MAIN_LINE_SPACING = 30.0f;
 static const f32 MAIN_X_OFFSET = 8.0f;
 static const f32 MAIN_Y_OFFSET = 10.0f;
@@ -94,8 +77,6 @@ gzMainMenu_c::gzMainMenu_c() {
     mpLines[MENU_TOOLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("tools", "use various tools for practice and testing");
     mpLines[MENU_WARPING] = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("warping", "warp to any area");
 
-    loadIcons();
-
     mpMeterHaihai = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dMeterHaihai_c(3);
 
     mpTransitioningMenu = NULL;
@@ -123,25 +104,6 @@ void gzMainMenu_c::_delete() {
 
         delete mpMenus[i];
         mpMenus[i] = NULL;
-
-        delete mpIcons[i];
-        mpIcons[i] = NULL;
-
-        JKRHeap::free(mpIconBuffers[i], gzHeap(GZ_GROUP_GRAPHICS));
-        mpIconBuffers[i] = NULL;
-    }
-}
-
-void gzMainMenu_c::loadIcons() {
-    for (int i = 0; i < LINE_NUM; i++) {
-        mpIconBuffers[i] = JKRHeap::alloc(ICON_BTI_SIZE, 32, gzHeap(GZ_GROUP_GRAPHICS));
-
-        if (mpIconBuffers[i] != NULL) {
-            gzDVDLoadFile(ICON_PATHS[i], mpIconBuffers[i], ICON_BTI_SIZE, 0);
-            mpIcons[i] = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture((ResTIMG*)mpIconBuffers[i]);
-        } else {
-            mpIcons[i] = NULL;
-        }
     }
 }
 
@@ -210,41 +172,36 @@ void gzMainMenu_c::draw() {
         }
 
         f32 x_offset = mXPos + MAIN_X_OFFSET;
-        u32 theme = gzInfo_getTextColor();
-        JUtility::TColor themeColor((theme >> 24) & 0xFF, (theme >> 16) & 0xFF, (theme >> 8) & 0xFF, 0xFF);
-        JUtility::TColor whiteColor(0xFF, 0xFF, 0xFF, 0xFF);
+        ResTIMG* atlas = gzInfo_getIconAtlas();
         for (int i = 0; i < LINE_NUM; i++) {
             if (mpLines[i] != NULL && mXPos >= g_gzInfo.mBackgroundXPos) {
                 f32 y_pos = y_alignment + ((i - 1) * MAIN_LINE_SPACING);
                 bool isSelected = (l_cursor->y == i && gzInfo_isMainMenuVisible());
                 u32 color = (isSelected && gzInfo_isCursorTypeClassic()) ? gzInfo_getTextColor() : COLOR_WHITE;
-                if (mpIcons[i] != NULL) {
-                    mpIcons[i]->setWhite((isSelected && gzInfo_isCursorTypeClassic()) ? themeColor : whiteColor);
-                    mpIcons[i]->draw(x_offset, y_pos - 17.0f, (f32)ICON_SIZE, (f32)ICON_SIZE, false, false, false);
+                if (atlas != NULL) {
+                    GXColor iconColor = {(u8)((color >> 24) & 0xFF), (u8)((color >> 16) & 0xFF),
+                                         (u8)((color >> 8) & 0xFF), 0xFF};
+                    gzDrawAtlasIcon(atlas, i, 24, LINE_NUM, x_offset, y_pos - 17.0f,
+                                    (f32)ICON_SIZE, (f32)ICON_SIZE, iconColor);
                 }
                 mpLines[i]->draw(x_offset + ICON_SIZE + ICON_PADDING, y_pos, color);
             }
         }
     } else {
         f32 x_offset = mXPos + MAIN_X_OFFSET;
-        u32 theme = gzInfo_getTextColor();
-        JUtility::TColor themeColor((theme >> 24) & 0xFF, (theme >> 16) & 0xFF, (theme >> 8) & 0xFF, 0xFF);
-        JUtility::TColor whiteColor(0xFF, 0xFF, 0xFF, 0xFF);
+        ResTIMG* atlas = gzInfo_getIconAtlas();
         for (int i = 0; i < LINE_NUM; i++) {
             if (mpLines[i] != NULL) {
                 f32 y_pos = y_alignment + ((i - 1) * MAIN_LINE_SPACING);
                 bool isSelected = (l_cursor->y == i && gzInfo_isMainMenuVisible());
-
-                if (mpIcons[i] != NULL) {
-                    mpIcons[i]->setWhite((isSelected && gzInfo_isCursorTypeClassic()) ? themeColor : whiteColor);
-                    mpIcons[i]->draw(x_offset, y_pos - 17.0f, (f32)ICON_SIZE, (f32)ICON_SIZE, false, false, false);
+                u32 color = (isSelected && gzInfo_isCursorTypeClassic()) ? gzInfo_getTextColor() : COLOR_WHITE;
+                if (atlas != NULL) {
+                    GXColor iconColor = {(u8)((color >> 24) & 0xFF), (u8)((color >> 16) & 0xFF),
+                                         (u8)((color >> 8) & 0xFF), 0xFF};
+                    gzDrawAtlasIcon(atlas, i, 24, LINE_NUM, x_offset, y_pos - 17.0f,
+                                    (f32)ICON_SIZE, (f32)ICON_SIZE, iconColor);
                 }
-                f32 text_x = x_offset + ICON_SIZE + ICON_PADDING;
-                if (isSelected && gzInfo_isCursorTypeClassic()) {
-                    mpLines[i]->draw(text_x, y_pos, gzInfo_getTextColor());
-                } else {
-                    mpLines[i]->draw(text_x, y_pos, COLOR_WHITE);
-                }
+                mpLines[i]->draw(x_offset + ICON_SIZE + ICON_PADDING, y_pos, color);
             }
         }
     }

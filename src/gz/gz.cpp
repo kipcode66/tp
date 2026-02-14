@@ -135,9 +135,10 @@ void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
 
 void gzInfo_c::startIconPreload() {
     static const char* PATHS[] = {
-        "/gz/check.bti", "/gz/x_mark.bti", "/gz/icon_flags.bti", "/gz/bg.bti"
+        "/gz/check.bti", "/gz/x_mark.bti", "/gz/icon_flags.bti", "/gz/bg.bti",
+        "/gz/icon_atlas.bti"
     };
-    static const u32 SIZES[] = {544, 544, 1184, 54432};
+    static const u32 SIZES[] = {544, 544, 1184, 54432, 13856};
     JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
     for (int i = 0; i < PRELOAD_COUNT; i++) {
         if (!DVDOpen(PATHS[i], &mPreloadFileInfos[i])) continue;

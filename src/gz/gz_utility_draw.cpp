@@ -1,9 +1,11 @@
 #include "gz/gz_utility_draw.h"
+#include "JSystem/JUtility/JUTTexture.h"
 #include "dolphin/gx/GXCull.h"
 #include "dolphin/gx/GXGeometry.h"
 #include "dolphin/gx/GXLighting.h"
 #include "dolphin/gx/GXPixel.h"
 #include "dolphin/gx/GXTev.h"
+#include "dolphin/gx/GXTexture.h"
 #include "dolphin/gx/GXTransform.h"
 #include "dolphin/gx/GXVert.h"
 #include "m_Do/m_Do_mtx.h"
@@ -226,6 +228,59 @@ void gzDrawFilledCircle(f32 cx, f32 cy, f32 radius, GXColor fillColor, GXColor o
         GXPosition2f32(x, y);
         GXColor4u8(fillColor.r, fillColor.g, fillColor.b, fillColor.a);
     }
+    GXEnd();
+}
+
+void gzDrawAtlasIcon(ResTIMG* atlas, int iconIndex, int iconSize, int iconCount,
+                     f32 x, f32 y, f32 w, f32 h, GXColor color) {
+    GXTexObj tex;
+    void* imageData = (void*)((u8*)atlas + atlas->imageOffset);
+    u16 atlasWidth = (u16)(iconSize * iconCount);
+    GXInitTexObj(&tex, imageData, atlasWidth, (u16)iconSize,
+                 (GXTexFmt)atlas->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+    GXInitTexObjLOD(&tex, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE,
+                    GX_ANISO_1);
+    GXLoadTexObj(&tex, GX_TEXMAP0);
+
+    GXSetNumChans(1);
+    GXSetChanCtrl(GX_COLOR0A0, GX_FALSE, GX_SRC_REG, GX_SRC_REG, 0, GX_DF_NONE, GX_AF_NONE);
+    GXSetChanMatColor(GX_COLOR0A0, color);
+
+    GXSetNumTexGens(1);
+    GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 60, GX_FALSE, 125);
+    GXSetNumTevStages(1);
+    GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+    GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_TEXC, GX_CC_RASC, GX_CC_ZERO);
+    GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+    GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_TEXA, GX_CA_RASA, GX_CA_ZERO);
+    GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
+
+    GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
+    GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
+    GXSetCullMode(GX_CULL_NONE);
+
+    GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
+    GXSetCurrentMtx(0);
+
+    GXClearVtxDesc();
+    GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XY, GX_F32, 0);
+    GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+
+    f32 u0 = (f32)(iconIndex * iconSize) / (f32)atlasWidth;
+    f32 u1 = (f32)((iconIndex + 1) * iconSize) / (f32)atlasWidth;
+
+    GXBegin(GX_QUADS, GX_VTXFMT0, 4);
+    GXPosition2f32(x, y);
+    GXTexCoord2f32(u0, 0.0f);
+    GXPosition2f32(x + w, y);
+    GXTexCoord2f32(u1, 0.0f);
+    GXPosition2f32(x + w, y + h);
+    GXTexCoord2f32(u1, 1.0f);
+    GXPosition2f32(x, y + h);
+    GXTexCoord2f32(u0, 1.0f);
     GXEnd();
 }
 

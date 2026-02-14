@@ -4,7 +4,6 @@
 #include "gz/gz_menu.h"
 #include "gz/gz_textbox.h"
 #include "JSystem/J2DGraph/J2DAnimation.h"
-#include "JSystem/J2DGraph/J2DPicture.h"
 
 class gzMainMenu_c : public gzMenu_c {
 public:
@@ -35,8 +34,6 @@ public:
     void startForwardTransition();
     void startReverseTransition();
     void setDefaultMenuXPos();
-    void loadIcons();
-
     virtual void _delete();
     virtual void execute();
     virtual void draw();
@@ -53,8 +50,6 @@ public:
 
 private:
     gzLine* mpLines[LINE_NUM];
-    J2DPicture* mpIcons[LINE_NUM];
-    void* mpIconBuffers[LINE_NUM];
     gzMenu_c* mpMenus[LINE_NUM];
     dMeterHaihai_c* mpMeterHaihai;
     gzMenu_c* mpTransitioningMenu;
