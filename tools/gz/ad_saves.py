@@ -122,17 +122,27 @@ ALL_DUNGEONS_SAVES = [
         'filename': 'spr',
     },
     {
-        'name': 'ice boost',
-        'description': 'Ice boost to SPR 2nd floor',
-        'filename': 'ice_boost',
-        'setflags': SetFlags.POS,
-        'pos': (2019.5192, 200.00, -2865.9890),
-        'angle': 16384,
+        'name': 'spr bk room',
+        'description': 'Snowpeak Boss Key room',
+        'filename': 'spr_bk_room',
     },
     {
         'name': 'blizzeta',
         'description': 'Snowpeak Ruins boss',
         'filename': 'blizzeta',
+    },
+    {
+        'name': 'rusl td',
+        'description': 'Text Displacement with Rusl',
+        'filename': 'rusl_td',
+    },
+    {
+        'name': 'early ele',
+        'description': 'OoB LJA to Death Mountain Elevator',
+        'filename': 'early_elavator',
+        'setflags': SetFlags.POS,
+        'pos': (1197.00, -355.55, -5468.84),
+        'angle': 45137,
     },
     {
         'name': 'goron mines',
@@ -180,16 +190,12 @@ ALL_DUNGEONS_SAVES = [
         'filename': 'ag',
     },
     {
-        'name': 'poe 1 skip',
-        'description': 'The pillar jump in Arbiter\'s Grounds',
-        'filename': 'poe_skip',
-        'setflags': SetFlags.POS | SetFlags.CAM,
-        'pos': (-2046.97168, 0.0, -587.304871),
-        'angle': 49030,
-        'cam': {
-            'center': (-1779.00293, 213.707397, -584.686768),
-            'eye': (-2047.97168, 130.16568, -587.317139)
-        },
+        'name': 'poe gate clip',
+        'description': 'Clip through Arbiter\'s Poe Gate',
+        'filename': 'poe_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (10.0035, -19.5500, -600.5942),
+        'angle': 32768,
     },
     {
         'name': 'death sword',
@@ -232,6 +238,14 @@ ALL_DUNGEONS_SAVES = [
         'name': 'city 1',
         'description': 'The 1st City in the Sky segment',
         'filename': 'city1',
+    },
+    {
+        'name': 'city gate clip',
+        'description': 'Clip through gate before Aeralfos',
+        'filename': 'city_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (16516.6094, 0, -12722.480),
+        'angle': 16384,
     },
     {
         'name': 'aeralfos skip',
