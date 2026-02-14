@@ -242,205 +242,169 @@ void gzInfo_c::loadDefaultSettings() {
 }
 
 
-int gzInfo_c::_create() {
-    OSReport("creating gzInfo_c\n");
+void gzInfo_c::startInit() {
+    mInitPhase = INIT_PHASE_SETUP_RESOURCES;
+}
 
-    // Create dedicated GZ heap
-    gzCreateHeap();
-
-    // Initialize async preloader state
-    for (int i = 0; i < PRELOAD_COUNT; i++) {
-        mpPreloadBufs[i] = NULL;
-        mPreloadAsyncPending[i] = false;
+void gzInfo_c::loadMenuResources() {
+    while (!mMenuResourcesLoaded) {
+        loadMenuResourcesBatch();
     }
-    mPreloadsComplete = false;
-    mpCheckIcon = NULL;
-    mpXMarkIcon = NULL;
-    mpFlagCheckIcon = NULL;
-    mpFlagXMarkIcon = NULL;
+}
 
-    startIconPreload();
-
-    // load default settings. config from mem card will overwrite if it exists
-    loadDefaultSettings();
+void gzInfo_c::loadMenuResourcesBatch() {
+    if (mMenuResourcesLoaded) return;
 
     JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
 
-    ResTIMG* icon;
-    {
-        JKRHeapOverrideScope scope(gfxHeap);
-        icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
-    }
-    mpIcon = new (gfxHeap, 4) J2DPicture(icon);
-
-    mpBackground = NULL;
-
-    JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
-    mpBannerBg = NULL;
-    mpSwirl = NULL;
-    if (msgArc != NULL) {
-        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
-        JKRHeapOverrideScope scope(gfxHeap);
-
-        ResTIMG* bgSrc = (ResTIMG*)msgArc->getResource('TIMG', "i4_gra.bti");
-        if (bgSrc != NULL) {
-            u32 bgImgSize = GXGetTexBufferSize(bgSrc->width, bgSrc->height, bgSrc->format,
-                                                bgSrc->mipmapEnabled, bgSrc->mipmapCount);
-            u32 bgSize = bgSrc->imageOffset + bgImgSize;
-            void* bgBuf = gfxHeap->alloc(bgSize, 32);
-            memcpy(bgBuf, bgSrc, bgSize);
-            mpBannerBg = new (gfxHeap, 4) J2DPicture((ResTIMG*)bgBuf);
+    switch (mMenuLoadStep) {
+    case 0: {
+        ResTIMG* icon;
+        {
+            JKRHeapOverrideScope scope(gfxHeap);
+            icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
         }
+        mpIcon = new (gfxHeap, 4) J2DPicture(icon);
 
-        ResTIMG* swirlSrc = (ResTIMG*)msgArc->getResource('TIMG', "tt_gold_uzu_long2.bti");
-        if (swirlSrc != NULL) {
-            u32 imgSize = GXGetTexBufferSize(swirlSrc->width, swirlSrc->height,
-                                              swirlSrc->format, swirlSrc->mipmapEnabled,
-                                              swirlSrc->mipmapCount);
-            u32 totalSize = swirlSrc->imageOffset + imgSize;
-            void* buf = gfxHeap->alloc(totalSize, 32);
-            memcpy(buf, swirlSrc, totalSize);
-            mpSwirl = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+        JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
+        if (msgArc != NULL) {
+            JKRHeapOverrideScope scope(gfxHeap);
+
+            ResTIMG* bgSrc = (ResTIMG*)msgArc->getResource('TIMG', "i4_gra.bti");
+            if (bgSrc != NULL) {
+                u32 bgImgSize = GXGetTexBufferSize(bgSrc->width, bgSrc->height, bgSrc->format,
+                                                    bgSrc->mipmapEnabled, bgSrc->mipmapCount);
+                u32 bgSize = bgSrc->imageOffset + bgImgSize;
+                void* bgBuf = gfxHeap->alloc(bgSize, 32);
+                memcpy(bgBuf, bgSrc, bgSize);
+                mpBannerBg = new (gfxHeap, 4) J2DPicture((ResTIMG*)bgBuf);
+            }
+
+            ResTIMG* swirlSrc = (ResTIMG*)msgArc->getResource('TIMG', "tt_gold_uzu_long2.bti");
+            if (swirlSrc != NULL) {
+                u32 imgSize = GXGetTexBufferSize(swirlSrc->width, swirlSrc->height,
+                                                  swirlSrc->format, swirlSrc->mipmapEnabled,
+                                                  swirlSrc->mipmapCount);
+                u32 totalSize = swirlSrc->imageOffset + imgSize;
+                void* buf = gfxHeap->alloc(totalSize, 32);
+                memcpy(buf, swirlSrc, totalSize);
+                mpSwirl = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+            }
         }
+        break;
     }
+    case 1: {
+        JKRArchive* main2dArc = dComIfGp_getMain2DArchive();
+        if (main2dArc != NULL) {
+            const char* btnNames[] = {
+                "tt_zelda_button_ab_maru.bti",
+                "tt_zelda_button_a_text.bti",
+                "tt_zelda_button_b_text.bti",
+                "tt_zelda_button_x_base.bti",
+                "tt_zelda_button_x_text.bti",
+                "tt_zelda_button_y_base.bti",
+                "tt_zelda_button_y_text.bti",
+                "im_zelda_button_z_base.bti",
+                "im_zelda_button_z_text.bti"
+            };
+            J2DPicture** btnPtrs[] = {
+                &mpBtnABBase, &mpBtnAText, &mpBtnBText,
+                &mpBtnXBase, &mpBtnXText, &mpBtnYBase, &mpBtnYText,
+                &mpBtnZBase, &mpBtnZText
+            };
+            JKRHeapOverrideScope main2dScope(gfxHeap);
+            for (int i = 0; i < 9; i++) {
+                ResTIMG* src = (ResTIMG*)main2dArc->getResource('TIMG', btnNames[i]);
+                if (src != NULL) {
+                    u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                                      src->mipmapEnabled, src->mipmapCount);
+                    u32 totalSize = src->imageOffset + imgSize;
+                    void* buf = JKRHeap::alloc(totalSize, 32, gfxHeap);
+                    memcpy(buf, src, totalSize);
+                    *btnPtrs[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+                }
+            }
+        }
+        break;
+    }
+    case 2: {
+        JKRArchive* buttonArc = dComIfGp_getMeterButtonArchive();
+        if (buttonArc != NULL) {
+            JKRHeapOverrideScope btnScope(gfxHeap);
 
-    JKRArchive* main2dArc = dComIfGp_getMain2DArchive();
-    mpBtnABBase = NULL;
-    mpBtnAText = NULL;
-    mpBtnBText = NULL;
-    mpBtnXBase = NULL;
-    mpBtnXText = NULL;
-    mpBtnYBase = NULL;
-    mpBtnYText = NULL;
-    mpBtnZBase = NULL;
-    mpBtnZText = NULL;
-    if (main2dArc != NULL) {
-        const char* btnNames[] = {
-            "tt_zelda_button_ab_maru.bti",
-            "tt_zelda_button_a_text.bti",
-            "tt_zelda_button_b_text.bti",
-            "tt_zelda_button_x_base.bti",
-            "tt_zelda_button_x_text.bti",
-            "tt_zelda_button_y_base.bti",
-            "tt_zelda_button_y_text.bti",
-            "im_zelda_button_z_base.bti",
-            "im_zelda_button_z_text.bti"
-        };
-        J2DPicture** btnPtrs[] = {
-            &mpBtnABBase, &mpBtnAText, &mpBtnBText,
-            &mpBtnXBase, &mpBtnXText, &mpBtnYBase, &mpBtnYText,
-            &mpBtnZBase, &mpBtnZText
-        };
-        JKRHeapOverrideScope main2dScope(gfxHeap);
-        for (int i = 0; i < 9; i++) {
-            ResTIMG* src = (ResTIMG*)main2dArc->getResource('TIMG', btnNames[i]);
+            ResTIMG* src = (ResTIMG*)buttonArc->getResource('TIMG', "tt_zelda_button_l_base.bti");
             if (src != NULL) {
                 u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
                                                   src->mipmapEnabled, src->mipmapCount);
                 u32 totalSize = src->imageOffset + imgSize;
-                void* buf = JKRHeap::alloc(totalSize, 32, gfxHeap);
-                memcpy(buf, src, totalSize);
-                *btnPtrs[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-            }
-        }
-    }
-
-    mpBtnLRBase = NULL;
-    mpBtnLText = NULL;
-    mpBtnRText = NULL;
-    JKRArchive* buttonArc = dComIfGp_getMeterButtonArchive();
-    if (buttonArc != NULL) {
-        JKRHeapOverrideScope btnScope(gfxHeap);
-
-        ResTIMG* src = (ResTIMG*)buttonArc->getResource('TIMG', "tt_zelda_button_l_base.bti");
-        if (src != NULL) {
-            u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                              src->mipmapEnabled, src->mipmapCount);
-            u32 totalSize = src->imageOffset + imgSize;
-            void* buf = gfxHeap->alloc(totalSize, 32);
-            if (buf != NULL) {
-                memcpy(buf, src, totalSize);
-                mpBtnLRBase = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-            }
-        }
-    }
-
-    JKRArchive* ringArc = dComIfGp_getRingResArchive();
-    if (ringArc != NULL) {
-        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
-
-        ResTIMG* src;
-        JKRHeapOverrideScope scope(gfxHeap);
-        src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_l_text.bti");
-
-        if (src != NULL) {
-            u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                              src->mipmapEnabled, src->mipmapCount);
-            u32 totalSize = src->imageOffset + imgSize;
-            void* buf = gfxHeap->alloc(totalSize, 32);
-            if (buf != NULL) {
-                memcpy(buf, src, totalSize);
-                mpBtnLText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+                void* buf = gfxHeap->alloc(totalSize, 32);
+                if (buf != NULL) {
+                    memcpy(buf, src, totalSize);
+                    mpBtnLRBase = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+                }
             }
         }
 
-        src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_r_text.bti");
+        JKRArchive* ringArc = dComIfGp_getRingResArchive();
+        if (ringArc != NULL) {
+            ResTIMG* src;
+            JKRHeapOverrideScope scope(gfxHeap);
+            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_l_text.bti");
 
-        if (src != NULL) {
-            u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                              src->mipmapEnabled, src->mipmapCount);
-            u32 totalSize = src->imageOffset + imgSize;
-            void* buf = gfxHeap->alloc(totalSize, 32);
-            if (buf != NULL) {
-                memcpy(buf, src, totalSize);
-                mpBtnRText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+            if (src != NULL) {
+                u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                                  src->mipmapEnabled, src->mipmapCount);
+                u32 totalSize = src->imageOffset + imgSize;
+                void* buf = gfxHeap->alloc(totalSize, 32);
+                if (buf != NULL) {
+                    memcpy(buf, src, totalSize);
+                    mpBtnLText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+                }
+            }
+
+            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_r_text.bti");
+
+            if (src != NULL) {
+                u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
+                                                  src->mipmapEnabled, src->mipmapCount);
+                u32 totalSize = src->imageOffset + imgSize;
+                void* buf = gfxHeap->alloc(totalSize, 32);
+                if (buf != NULL) {
+                    memcpy(buf, src, totalSize);
+                    mpBtnRText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
+                }
             }
         }
+        break;
     }
+    case 3: {
+        mpHeader = gzTextBox_allocate();
+        mpHeader->setString("tpgz v2.0.0");
 
-    mpHeader = gzTextBox_allocate();
-    mpHeader->setString("tpgz v2.0.0");
+        mpMainMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzMainMenu_c();
 
-    mpMainMenu = new (gzHeap(GZ_GROUP_MENU), 4) gzMainMenu_c();
-    if (mpMainMenu == NULL) {
-        return 0;
+        mpNotification = new (gzHeap(GZ_GROUP_UI), 4) gzNotification_c();
+
+        mpTPCursor = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dSelect_cursor_c(2, 1.0f, NULL);
+        mpTPCursor->setParam(0.96f, 0.84f, 0.03f, 0.5f, 0.5f);
+        mpTPCursor->setAlphaRate(1.0f);
+
+        mpMenuDescription = gzTextBox_allocate();
+        mMenuOption = false;
+        mTopLine = 0;
+        mVisibleLines = 15;
+
+        mpButtonHintText = gzTextBox_allocate();
+
+        mInputWaitTimer = 2;
+
+        gzChangeMenu(mpMainMenu->getMenu(0));
+
+        mMenuResourcesLoaded = true;
+        break;
     }
-
-    mpNotification = new (gzHeap(GZ_GROUP_UI), 4) gzNotification_c();
-
-    mpTPCursor = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dSelect_cursor_c(2, 1.0f, NULL);
-    mpTPCursor->setParam(0.96f, 0.84f, 0.03f, 0.5f, 0.5f);
-    mpTPCursor->setAlphaRate(1.0f);
-
-    mpMenuDescription = gzTextBox_allocate();
-    mMenuOption = false;
-    mTopLine = 0;
-    mVisibleLines = 15;
-
-    mpButtonHintText = gzTextBox_allocate();
-
-    mInputWaitTimer = 2;
-    mGZInitialized = true;
-
-    // Dump automation state address for Python scripts
-    OSReport("tpgz auto: 0x%08X\n", (u32)&g_gzAutoState);
-
-    loadSettingsMemcard();
-
-    // If boot to menu is enabled, show the menu immediately
-    if (mSettings.mBootToMenu) {
-        mDisplay = true;
     }
-
-    // initialize oxygen now instead of waiting to go to the file select screen
-    dComIfGp_setOxygen(OXYGEN_MAX);
-    dComIfGp_setNowOxygen(OXYGEN_MAX);
-    dComIfGp_setMaxOxygen(OXYGEN_MAX);
-
-    // load the default menu
-    gzChangeMenu(mpMainMenu->getMenu(0));
-
-    return 1;
+    mMenuLoadStep++;
 }
 
 int gzInfo_c::_delete() {
@@ -571,7 +535,74 @@ void gzInfo_c::updateStickTriggers() {
 }
 
 int gzInfo_c::execute() {
-    if (!mGZInitialized) return 0;
+    if (!mGZInitialized) {
+        switch (mInitPhase) {
+        case INIT_PHASE_IDLE:
+            return 0;
+        case INIT_PHASE_SETUP_RESOURCES: {
+            OSReport("creating gzInfo_c\n");
+            gzCreateHeap();
+
+            for (int i = 0; i < PRELOAD_COUNT; i++) {
+                mpPreloadBufs[i] = NULL;
+                mPreloadAsyncPending[i] = false;
+            }
+            mPreloadsComplete = false;
+            mpCheckIcon = NULL;
+            mpXMarkIcon = NULL;
+            mpFlagCheckIcon = NULL;
+            mpFlagXMarkIcon = NULL;
+
+            startIconPreload();
+            loadDefaultSettings();
+
+            mpIcon = NULL;
+            mpBackground = NULL;
+            mpBannerBg = NULL;
+            mpSwirl = NULL;
+            mpBtnABBase = NULL;
+            mpBtnAText = NULL;
+            mpBtnBText = NULL;
+            mpBtnXBase = NULL;
+            mpBtnXText = NULL;
+            mpBtnYBase = NULL;
+            mpBtnYText = NULL;
+            mpBtnZBase = NULL;
+            mpBtnZText = NULL;
+            mpBtnLRBase = NULL;
+            mpBtnLText = NULL;
+            mpBtnRText = NULL;
+            mpHeader = NULL;
+            mpMainMenu = NULL;
+            mpNotification = NULL;
+            mpTPCursor = NULL;
+            mpMenuDescription = NULL;
+            mpButtonHintText = NULL;
+            mpCurrentMenu = NULL;
+
+            mMenuResourcesLoaded = false;
+            mMenuLoadStep = 0;
+
+            OSReport("tpgz auto: 0x%08X\n", (u32)&g_gzAutoState);
+
+            loadSettingsMemcard();
+
+            dComIfGp_setOxygen(OXYGEN_MAX);
+            dComIfGp_setNowOxygen(OXYGEN_MAX);
+            dComIfGp_setMaxOxygen(OXYGEN_MAX);
+
+            mGZInitialized = true;
+            mInitPhase = INIT_PHASE_DONE;
+
+            if (mSettings.mBootToMenu) {
+                loadMenuResources();
+                mDisplay = true;
+            }
+            return 0;
+        }
+        }
+        return 0;
+    }
 
     pollIconPreload();
 
@@ -580,6 +611,9 @@ int gzInfo_c::execute() {
     updateStickTriggers();
 
     if (gzPad::getHoldL() && gzPad::getHoldR() && (gzPad::getTrig() & PAD_BUTTON_DOWN)) {
+        if (!mMenuResourcesLoaded) {
+            loadMenuResources();
+        }
         mDisplay = !mDisplay;
         gzClearControllerInput();
 
@@ -656,7 +690,20 @@ int gzInfo_c::execute() {
 static const u32 SCISSOR_PADDING = 8;
 
 int gzInfo_c::draw() {
-    if (!mGZInitialized) return 0;
+    if (!mGZInitialized) {
+        if (mpFont != NULL) {
+            gzSetup2DContext();
+            J2DTextBox loadingText;
+            loadingText.setFont(mpFont);
+            loadingText.setFontSize(24.0f, 24.0f);
+            loadingText.setString("tpgz loading...");
+            JUtility::TColor white(255, 255, 255, 255);
+            loadingText.setCharColor(white);
+            loadingText.setGradColor(white);
+            loadingText.draw(0.0f, 210.0f, 608.0f, HBIND_CENTER);
+        }
+        return 0;
+    }
 
     // Draw capture directly (dims the background game)
     if (mpCapture != NULL && mpCapture->isCapturing()) {

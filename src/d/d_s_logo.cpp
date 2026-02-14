@@ -80,6 +80,11 @@ int dScnLogo_c::draw() {
 }
 
 void dScnLogo_c::dvdWaitDraw() {
+    if (g_gzInfo.mpFont == NULL && mpFontResCommand->sync()) {
+        dComIfGp_setFontArchive(mpFontResCommand->getArchive());
+        g_gzInfo.setFont(mDoExt_getMesgFont());
+    }
+
     if (!dComIfG_syncAllObjectRes()) {
         if (mpField0Command->sync() && mpAlAnmCommand->sync() && mpFmapResCommand->sync() &&
             mpDmapResCommand->sync() && mpCollectResCommand->sync() && mpItemIconCommand->sync() &&
@@ -92,6 +97,8 @@ void dScnLogo_c::dvdWaitDraw() {
             mpMain2DCommand->sync() && mpRubyResCommand->sync() && mParticleCommand->sync() &&
             mItemTableCommand->sync() && mEnemyItemCommand->sync() && preLoad_dyl())
         {
+            setupGameResources();
+            g_gzInfo.startInit();
             mDoRst::setLogoScnFlag(0);
             mDoRst::setProgChgFlag(0);
             mExecCommand = EXEC_SCENE_CHANGE;
@@ -286,6 +293,18 @@ void dScnLogo_c::dvdDataLoad() {
 
     dComIfG_setObjectRes("Alink", (u8)0, NULL);
 
+    // Mount font archive first so gz can show "tpgz loading..." text early
+#if VERSION == VERSION_GCN_JPN
+    mpFontResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fontjp/fontres.arc", 1,
+                                                         JKRArchive::MOUNT_MEM, NULL);
+#elif VERSION == VERSION_GCN_PAL
+    mpFontResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fonteu/fontres.arc", 0,
+                                                         JKRArchive::MOUNT_MEM, NULL);
+#else
+    mpFontResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fontus/fontres.arc", 0,
+                                                         JKRArchive::MOUNT_MEM, NULL);
+#endif
+
     mpField0Command = mDoDvdThd_mountXArchive_c::create(
         "/res/FieldMap/Field0.arc", 0, JKRArchive::MOUNT_ARAM, mDoExt_getJ2dHeap());
     mpAlAnmCommand =
@@ -357,18 +376,12 @@ void dScnLogo_c::dvdDataLoad() {
         mDoDvdThd_mountXArchive_c::create("/res/Layout/main2D.arc", 0, JKRArchive::MOUNT_MEM, NULL);
 
 #if VERSION == VERSION_GCN_JPN
-    mpFontResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fontjp/fontres.arc", 1,
-                                                         JKRArchive::MOUNT_MEM, NULL);
     mpRubyResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fontjp/rubyres.arc", 0,
                                                          JKRArchive::MOUNT_MEM, NULL);
 #elif VERSION == VERSION_GCN_PAL
-    mpFontResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fonteu/fontres.arc", 0,
-                                                         JKRArchive::MOUNT_MEM, NULL);
     mpRubyResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fonteu/rubyres.arc", 0,
                                                          JKRArchive::MOUNT_MEM, NULL);
 #else
-    mpFontResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fontus/fontres.arc", 0,
-                                                         JKRArchive::MOUNT_MEM, NULL);
     mpRubyResCommand = mDoDvdThd_mountXArchive_c::create("/res/Fontus/rubyres.arc", 0,
                                                          JKRArchive::MOUNT_MEM, NULL);
 #endif
@@ -398,9 +411,6 @@ static int dScnLogo_Draw(dScnLogo_c* i_this) {
 }
 
 static int dScnLogo_Delete(dScnLogo_c* i_this) {
-    i_this->setupGameResources();
-    // initialize GZ after most game resources are setup
-    g_gzInfo._create();
     i_this->~dScnLogo_c();
     return 1;
 }

@@ -177,7 +177,18 @@ class gzInfo_c {
 public:
     static const int GZ_SAVE_VERSION = 1;
 
-    gzInfo_c() { mGZInitialized = false; };
+    gzInfo_c() {
+        mGZInitialized = false;
+        mInitPhase = INIT_PHASE_IDLE;
+        mMenuResourcesLoaded = false;
+        mMenuLoadStep = 0;
+    }
+
+    enum InitPhase_e {
+        INIT_PHASE_IDLE,
+        INIT_PHASE_SETUP_RESOURCES,
+        INIT_PHASE_DONE
+    };
 
     enum gzInfoMenu_CursorType_e {
         CURSOR_CLASSIC = 1,
@@ -185,12 +196,14 @@ public:
         CURSOR_BOTH,
     };
 
-    int _create();
+    void startInit();
     int _delete();
     int execute();
     int draw();
     void loadMenuTextures();
     void updateStickTriggers();
+    void loadMenuResourcesBatch();
+    void loadMenuResources();
 
     void startIconPreload();
     void pollIconPreload();
@@ -433,6 +446,9 @@ public:
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
+    int mInitPhase;
+    bool mMenuResourcesLoaded;
+    int mMenuLoadStep;
     bool mMenuTexturesLoaded;
     bool mWasPausedOnOpen;
 
