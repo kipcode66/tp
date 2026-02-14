@@ -63,10 +63,18 @@ struct RollCheckerState {
     gzTextBox* pText;
 };
 
+struct ElevatorEscapeState {
+    u16 prevAction;
+    s32 metamorphoseStartFrame;
+    s32 lateRollFrame;
+    s32 targetFrame;
+};
+
 class gzToolsMng_c {
 public:
     void execute();
     void draw();
+    void executeElevatorEscape();
     void executeFreeCam();
     void executeMoveLink();
     void executeCoroTD();
@@ -80,6 +88,7 @@ public:
     bool isMoveLinkActive() const { return mMoveLink.active; }
 
 private:
+    ElevatorEscapeState mElevatorEscape;
     TeleportState mTeleport;
     MoveLinkState mMoveLink;
     FreeCamState mFreeCam;

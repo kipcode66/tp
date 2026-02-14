@@ -4,6 +4,7 @@
 #include "d/d_event.h"
 #include "d/d_event_manager.h"
 #include "m_Do/m_Do_controller_pad.h"
+#include "SSystem/SComponent/c_counter.h"
 
 #include "gz/gz.h"
 #include "gz/gz_textbox.h"
@@ -18,6 +19,61 @@
 #define FREECAM_FAST_SPEED 4.0
 #define FREECAM_SPEED 0.5
 #define FREECAM_TRIGGER_DEADZONE 20
+
+static const u8 METAMORPHOSE_ANM_LENGTH = 56;
+
+void gzToolsMng_c::executeElevatorEscape() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link == NULL) return;
+    if (!daAlink_c::checkStageName("R_SP110")) return;
+    if (link->current.pos.x > -1400.0f || link->current.pos.x < -1600.0f) return;
+    if (link->current.pos.z < 4000.0f || link->current.pos.z > 4400.0f) return;
+
+    char buf[20];
+
+    switch (link->mProcID) {
+    case daAlink_c::PROC_TALK:
+        mElevatorEscape.prevAction = daAlink_c::PROC_TALK;
+        break;
+    case daAlink_c::PROC_METAMORPHOSE:
+        if (mElevatorEscape.prevAction == daAlink_c::PROC_TALK) {
+            mElevatorEscape.metamorphoseStartFrame = cCt_getFrameCount();
+        }
+        if ((gzPad::getTrig() & PAD_BUTTON_A)) {
+            s32 elapsed = cCt_getFrameCount() - mElevatorEscape.metamorphoseStartFrame;
+            snprintf(buf, sizeof(buf), "early by %df", METAMORPHOSE_ANM_LENGTH - elapsed);
+            gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
+        }
+        mElevatorEscape.prevAction = daAlink_c::PROC_METAMORPHOSE;
+        break;
+    case daAlink_c::PROC_WAIT:
+        mElevatorEscape.lateRollFrame = 0;
+        mElevatorEscape.targetFrame = cCt_getFrameCount();
+        break;
+    case daAlink_c::PROC_MOVE:
+    case daAlink_c::PROC_WAIT_TURN:
+    case daAlink_c::PROC_MOVE_TURN:
+        if ((gzPad::getTrig() & PAD_BUTTON_A)) {
+            mElevatorEscape.lateRollFrame = cCt_getFrameCount();
+        }
+        break;
+    case daAlink_c::PROC_FRONT_ROLL:
+        if (mElevatorEscape.prevAction != daAlink_c::PROC_FRONT_ROLL) {
+            if (mElevatorEscape.lateRollFrame == 0) {
+                gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
+            } else {
+                snprintf(buf, sizeof(buf), "late by %df",
+                         mElevatorEscape.lateRollFrame - mElevatorEscape.targetFrame);
+                gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
+            }
+        }
+        mElevatorEscape.prevAction = daAlink_c::PROC_FRONT_ROLL;
+        break;
+    default:
+        mElevatorEscape.lateRollFrame = 0;
+        break;
+    }
+}
 
 void gzToolsMng_c::executeFreeCam() {
     dCamera_c* camera = dCam_getBody();
@@ -364,6 +420,7 @@ void gzToolsMng_c::execute() {
     }
 
     if (gzInfo_isTool_CoroTD()) executeCoroTD();
+    if (gzInfo_isTool_ElevatorEscape()) executeElevatorEscape();
     if (gzInfo_isTool_EndingBlowMoonBoots()) executeEBMB();
     if (gzInfo_isTool_RollChecker()) executeRollChecker();
     if (gzInfo_isTool_Teleport()) executeTeleport();
