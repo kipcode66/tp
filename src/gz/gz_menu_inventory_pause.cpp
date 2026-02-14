@@ -714,6 +714,7 @@ void gzInventoryMenu_c::executePauseMenu() {
     if (inFishSubMenu()) { executeFishSubMenu(); return; }
     if (inPoeEditMode()) { executePoeEditMode(); return; }
     if (inHeartPieceEditMode()) { executeHeartPieceEditMode(); return; }
+    if (inRupeeEditMode()) { executeRupeeEditMode(); return; }
 
     int maxCols = getMaxColsForRow(mPauseCursorRow);
 
@@ -777,7 +778,8 @@ void gzInventoryMenu_c::executePauseMenu() {
             mFishSubMenuRow = 0;
             mFishSubMenuCol = 0;
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR_OK);
-        } else if (isPoeSlotSelected() || isHeartPieceSlotSelected()) {
+        } else if (isPoeSlotSelected() || isHeartPieceSlotSelected() ||
+                   isWalletSlotSelected()) {
             if (gzInfo_isMenuOption()) {
                 gzInfo_offMenuOption();
             } else {
@@ -798,6 +800,8 @@ void gzInventoryMenu_c::executePauseMenu() {
     const char* itemName = getItemName(currentItem);
     if (mPauseCursorCol == 2 && mPauseCursorRow <= 1) {
         itemName = "Heart Pieces";
+    } else if (mPauseCursorRow == 3 && mPauseCursorCol == 0) {
+        itemName = "Wallet";
     } else if (mPauseCursorRow == 3 && mPauseCursorCol == 2) {
         itemName = "Golden Bugs";
     } else if (mPauseCursorRow == 3 && mPauseCursorCol == 3) {
@@ -1013,6 +1017,35 @@ void gzInventoryMenu_c::drawPauseMenuContent() {
                         mpPauseItemTex[row][col][k]->draw(cellX + 24.0f - sizeOff,
                                                           cellY + 24.0f - sizeOff,
                                                           itemSize, itemSize, false, false, false);
+                    }
+                }
+
+                if (row == 3 && col == 0) {
+                    u16 rupees = dComIfGs_getRupee();
+                    char numStr[8];
+                    sprintf(numStr, "%d", rupees);
+
+                    f32 fontSize = (mIsEntered && isSelected) ? 16.0f : 14.0f;
+                    f32 textCenter = cellX + 48.0f;
+                    f32 textX = textCenter - 305.0f;
+                    f32 textY = cellY + 76.0f;
+
+                    gzSetup2DContext();
+                    gzTextBox* rupeeText = gzTextBox_allocate();
+                    rupeeText->setFontSize(fontSize, fontSize);
+                    rupeeText->setString(numStr);
+                    rupeeText->draw(textX, textY, COLOR_WHITE, HBIND_CENTER);
+                    gzTextBox_free(rupeeText);
+
+                    if (inRupeeEditMode() && mpHaihai != NULL) {
+                        mpHaihai->_execute(0);
+                        mpHaihai->setScale(0.5f);
+                        u8 arrowFlags = ARROW_LEFT | ARROW_RIGHT;
+                        u16 maxRupee = dComIfGs_getRupeeMax();
+                        if (rupees == 0) arrowFlags &= ~ARROW_LEFT;
+                        if (rupees >= maxRupee) arrowFlags &= ~ARROW_RIGHT;
+                        mpHaihai->drawHaihai(arrowFlags, textCenter, textY - 5.0f,
+                                             40.0f, 0.0f);
                     }
                 }
             }

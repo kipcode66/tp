@@ -206,6 +206,9 @@ void gzInfo_c::loadDefaultSettings() {
     mStickTriggers = 0;
     mRepeatDirection = 0;
     mRepeatCounter = 0;
+    mButtonRepeatTriggers = 0;
+    mButtonRepeatState = 0;
+    mButtonRepeatCounter = 0;
 
     mDisplay = false;
     mWasPausedOnOpen = false;
@@ -517,6 +520,27 @@ void gzInfo_c::updateStickTriggers() {
             mStickTriggers = currentDir;
         } else if (mRepeatCounter > REPEAT_DELAY && (mRepeatCounter - REPEAT_DELAY) % REPEAT_RATE == 0) {
             mStickTriggers = currentDir;
+        }
+    }
+
+    static const u32 BUTTON_REPEAT_MASK = PAD_BUTTON_X | PAD_BUTTON_Y;
+    u32 currentButtons = mDoCPd_c::m_gzPadInfo.mButtonFlags & BUTTON_REPEAT_MASK;
+
+    mButtonRepeatTriggers = 0;
+
+    if (currentButtons == 0) {
+        mButtonRepeatState = 0;
+        mButtonRepeatCounter = 0;
+    } else if (currentButtons != mButtonRepeatState) {
+        mButtonRepeatTriggers = currentButtons;
+        mButtonRepeatState = currentButtons;
+        mButtonRepeatCounter = 0;
+    } else {
+        mButtonRepeatCounter++;
+        if (mButtonRepeatCounter == REPEAT_DELAY) {
+            mButtonRepeatTriggers = currentButtons;
+        } else if (mButtonRepeatCounter > REPEAT_DELAY && (mButtonRepeatCounter - REPEAT_DELAY) % REPEAT_RATE == 0) {
+            mButtonRepeatTriggers = currentButtons;
         }
     }
 }

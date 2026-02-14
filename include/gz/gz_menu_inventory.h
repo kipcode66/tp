@@ -88,6 +88,8 @@ private:
     inline bool inPoeEditMode() { return isPoeSlotSelected() && gzInfo_isMenuOption(); }
     inline bool isHeartPieceSlotSelected() { return (mPauseCursorCol == 2 && mPauseCursorRow <= 1); }
     inline bool inHeartPieceEditMode() { return isHeartPieceSlotSelected() && gzInfo_isMenuOption(); }
+    inline bool isWalletSlotSelected() { return (mPauseCursorRow == 3 && mPauseCursorCol == 0); }
+    inline bool inRupeeEditMode() { return isWalletSlotSelected() && gzInfo_isMenuOption(); }
     inline bool isSkillSlotSelected() { return (mPauseCursorRow == 3 && mPauseCursorCol == 3); }
     inline bool inSkillSubMenu() { return mSkillSubMenuActive; }
     inline bool isBugSlotSelected() { return (mPauseCursorRow == 3 && mPauseCursorCol == 2); }
@@ -112,6 +114,7 @@ private:
     void executeFishSubMenu();
     void executePoeEditMode();
     void executeHeartPieceEditMode();
+    void executeRupeeEditMode();
     void drawSkillSubMenu();
     void drawBugSubMenu();
     void drawLetterSubMenu();

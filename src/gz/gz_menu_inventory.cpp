@@ -11,6 +11,21 @@
 #include "JSystem/JKernel/JKRArchive.h"
 #include "JSystem/J2DGraph/J2DScreen.h"
 
+static bool isAmmoItem(u8 item) {
+    switch (item) {
+    case fpcNm_ITEM_BOW:
+    case fpcNm_ITEM_LIGHT_ARROW:
+    case fpcNm_ITEM_BOMB_ARROW:
+    case fpcNm_ITEM_HAWK_ARROW:
+    case fpcNm_ITEM_NORMAL_BOMB:
+    case fpcNm_ITEM_WATER_BOMB:
+    case fpcNm_ITEM_POKE_BOMB:
+        return true;
+    default:
+        return false;
+    }
+}
+
 gzInventoryMenu_c::gzInventoryMenu_c() {
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
@@ -303,7 +318,7 @@ void gzInventoryMenu_c::execute() {
         mPauseMenuInitialized = false;
     }
 
-    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode() && !inHeartPieceEditMode() && !inSkillSubMenu() && !inBugSubMenu() && !inLetterSubMenu() && !inFishSubMenu()) {
+    if ((lrTrig & PAD_TRIGGER_L) && mCurrentTab == TAB_PAUSE_MENU && !inPoeEditMode() && !inHeartPieceEditMode() && !inRupeeEditMode() && !inSkillSubMenu() && !inBugSubMenu() && !inLetterSubMenu() && !inFishSubMenu()) {
         mCurrentTab = TAB_RING_MENU;
         l_cursor->y = 0;
         mCurrentSlot = 0;
@@ -350,10 +365,11 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
     if (mCurrentTab == TAB_PAUSE_MENU) {
         bool isPoeSlot = isPoeSlotSelected();
         bool isHeartSlot = isHeartPieceSlotSelected();
+        bool isWallet = isWalletSlotSelected();
         bool hasItem = mPauseSlotState[mPauseCursorRow][mPauseCursorCol] > 0;
         bool alreadyEquipped = isSlotEquipped(mPauseCursorRow, mPauseCursorCol);
 
-        if (isPoeSlot || isHeartSlot) {
+        if (isPoeSlot || isHeartSlot || isWallet) {
             hints.hints[hints.count].button = GZ_BTN_A;
             hints.hints[hints.count].text = gzInfo_isMenuOption() ? "Done" : "Edit";
             hints.count++;
@@ -371,11 +387,20 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
             hints.count++;
         }
 
+        if (inPoeEditMode() || inRupeeEditMode()) {
+            hints.hints[hints.count].button = GZ_BTN_X;
+            hints.hints[hints.count].text = "+10";
+            hints.count++;
+            hints.hints[hints.count].button = GZ_BTN_Y;
+            hints.hints[hints.count].text = "-10";
+            hints.count++;
+        }
+
         hints.hints[hints.count].button = GZ_BTN_B;
         hints.hints[hints.count].text = "Back";
         hints.count++;
 
-        if (!inPoeEditMode() && !inHeartPieceEditMode()) {
+        if (!inPoeEditMode() && !inHeartPieceEditMode() && !inRupeeEditMode()) {
             hints.hints[hints.count].button = GZ_BTN_L;
             hints.hints[hints.count].text = "Ring";
             hints.count++;
@@ -394,7 +419,18 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
     hints.hints[hints.count].text = "Back";
     hints.count++;
 
-    if (!gzInfo_isMenuOption()) {
+    if (gzInfo_isMenuOption() && mItemsTotal > 0) {
+        u8 slotNo = mItemSlots[mCurrentSlot];
+        u8 curItem = dComIfGs_getItem(slotNo, false);
+        if (isAmmoItem(curItem)) {
+            hints.hints[hints.count].button = GZ_BTN_X;
+            hints.hints[hints.count].text = "Ammo +";
+            hints.count++;
+            hints.hints[hints.count].button = GZ_BTN_Y;
+            hints.hints[hints.count].text = "Ammo -";
+            hints.count++;
+        }
+    } else {
         if (mItemsTotal < MAX_ITEM_SLOTS) {
             hints.hints[hints.count].button = GZ_BTN_Y;
             hints.hints[hints.count].text = "Add";
@@ -406,9 +442,7 @@ gzButtonHints_s gzInventoryMenu_c::getButtonHints() {
             hints.hints[hints.count].text = "Delete";
             hints.count++;
         }
-    }
 
-    if (!gzInfo_isMenuOption()) {
         hints.hints[hints.count].button = GZ_BTN_R;
         hints.hints[hints.count].text = "Pause";
         hints.count++;

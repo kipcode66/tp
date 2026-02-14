@@ -6,6 +6,7 @@
 #include "d/d_meter2_info.h"
 #include "d/d_select_cursor.h"
 #include "JSystem/JMath/JMath.h"
+#include <cstdio>
 
 static const u8 sRingItemList[] = {
     fpcNm_ITEM_NOENTRY_19,
@@ -488,6 +489,24 @@ void gzInventoryMenu_c::drawItemPicker(f32 centerX, f32 centerY) {
     gzTextBox_free(nameText);
 }
 
+static bool getItemAmmoCount(u8 item, u8 slotNo, char* outBuf, int bufSize) {
+    switch (item) {
+    case fpcNm_ITEM_BOW:
+    case fpcNm_ITEM_LIGHT_ARROW:
+    case fpcNm_ITEM_BOMB_ARROW:
+    case fpcNm_ITEM_HAWK_ARROW:
+        snprintf(outBuf, bufSize, "%d", dComIfGs_getArrowNum());
+        return true;
+    case fpcNm_ITEM_NORMAL_BOMB:
+    case fpcNm_ITEM_WATER_BOMB:
+    case fpcNm_ITEM_POKE_BOMB:
+        snprintf(outBuf, bufSize, "%d", dComIfGs_getBombNum(slotNo - SLOT_15));
+        return true;
+    default:
+        return false;
+    }
+}
+
 void gzInventoryMenu_c::drawRingMenu() {
     f32 centerX = mXPos + 250.0f;
     f32 centerY = g_gzInfo.mBackgroundYPos + 230.0f;
@@ -533,6 +552,25 @@ void gzInventoryMenu_c::drawRingMenu() {
         bool isSelected = (i == mCurrentSlot);
         f32 scale = isSelected ? 1.2f : 1.0f;
         drawItemOnRing(i, mItemSlotPosX[i] + centerX + itemOffset, mItemSlotPosY[i] + centerY, scale, isSelected);
+    }
+
+    for (int i = 0; i < mItemsTotal; i++) {
+        u8 slotNo = mItemSlots[i];
+        u8 slotItem = dComIfGs_getItem(slotNo, false);
+        char ammoBuf[8];
+        if (getItemAmmoCount(slotItem, slotNo, ammoBuf, sizeof(ammoBuf))) {
+            bool isSelected = (i == mCurrentSlot);
+            f32 scale = isSelected ? 1.2f : 1.0f;
+            gzSetup2DContext();
+            gzTextBox* ammoText = gzTextBox_allocate();
+            f32 fontSize = isSelected ? 12.0f : 10.0f;
+            ammoText->setFontSize(fontSize, fontSize);
+            ammoText->setString(ammoBuf);
+            f32 ammoX = mItemSlotPosX[i] + centerX + itemOffset - 305.0f;
+            f32 ammoY = mItemSlotPosY[i] + centerY + 24.0f * scale + 2.0f;
+            ammoText->draw(ammoX, ammoY, COLOR_WHITE, HBIND_CENTER);
+            gzTextBox_free(ammoText);
+        }
     }
 
     if (mItemsTotal > 0 && mCurrentSlot < mItemsTotal) {
@@ -607,6 +645,45 @@ void gzInventoryMenu_c::executeRingMenu() {
             listIdx = (listIdx - 1 + sRingItemCount) % sRingItemCount;
             setSlotItem(mCurrentSlot, sRingItemList[listIdx]);
             gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+        }
+
+        s32 ammoDelta = 0;
+        if (gzPad::getRepeatX()) ammoDelta = 1;
+        if (gzPad::getRepeatY()) ammoDelta = -1;
+
+        if (ammoDelta != 0) {
+            bool adjusted = false;
+            switch (currentItem) {
+            case fpcNm_ITEM_BOW:
+            case fpcNm_ITEM_LIGHT_ARROW:
+            case fpcNm_ITEM_BOMB_ARROW:
+            case fpcNm_ITEM_HAWK_ARROW: {
+                u8 cur = dComIfGs_getArrowNum();
+                u8 max = dComIfGs_getArrowMax();
+                s32 val = (s32)cur + ammoDelta;
+                if (val < 0) val = max;
+                if (val > max) val = 0;
+                dComIfGs_setArrowNum((u8)val);
+                adjusted = true;
+                break;
+            }
+            case fpcNm_ITEM_NORMAL_BOMB:
+            case fpcNm_ITEM_WATER_BOMB:
+            case fpcNm_ITEM_POKE_BOMB: {
+                u8 bagIdx = slotNo - SLOT_15;
+                u8 cur = dComIfGs_getBombNum(bagIdx);
+                u8 max = dComIfGs_getBombMax(currentItem);
+                s32 val = (s32)cur + ammoDelta;
+                if (val < 0) val = max;
+                if (val > max) val = 0;
+                dComIfGs_setBombNum(bagIdx, (u8)val);
+                adjusted = true;
+                break;
+            }
+            }
+            if (adjusted) {
+                gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+            }
         }
     }
 

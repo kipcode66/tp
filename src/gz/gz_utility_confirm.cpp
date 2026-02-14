@@ -1,7 +1,9 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
 #include "gz/gz_utility_confirm.h"
+#include "gz/gz_menu.h"
 #include "gz/gz_textbox.h"
+#include "d/d_select_cursor.h"
 
 static gzCursor l_confirm_cursor = {0, 0};
 
@@ -131,5 +133,21 @@ void gzConfirm_c::draw() {
     if (mpYesBox != NULL) {
         u32 yes_color = (l_confirm_cursor.x == 1) ? cursor_color : COLOR_WHITE;
         mpYesBox->draw(YES_X, LINE_Y, yes_color, HBIND_CENTER);
+    }
+
+    if (gzInfo_isCursorTypeTP() && gzInfo_getTPCursor() != NULL) {
+        gzTextBox* selectedBox = (l_confirm_cursor.x == 0) ? mpNoBox : mpYesBox;
+        f32 selectedX = (l_confirm_cursor.x == 0) ? NO_X : YES_X;
+        if (selectedBox != NULL) {
+            selectedBox->updateBounds();
+            f32 cursorX = selectedX + (selectedBox->getWidth() / 2.0f) +
+                          gzMenuLayout::TP_CURSOR_X_OFFSET;
+            f32 cursorY = LINE_Y + (selectedBox->getHeight() / 2.0f) +
+                          gzMenuLayout::TP_CURSOR_Y_OFFSET;
+            gzSetup2DContext();
+            gzInfo_getTPCursor()->setPos(cursorX, cursorY,
+                                         (J2DPane*)selectedBox, false);
+            gzInfo_getTPCursor()->draw();
+        }
     }
 }

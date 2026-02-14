@@ -318,14 +318,67 @@ void gzInventoryMenu_c::executePoeEditMode() {
         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
     }
 
+    if (gzPad::getRepeatX()) {
+        s32 val = (s32)poeCount + 10;
+        poeCount = (val > 60) ? 60 : (u8)val;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    if (gzPad::getRepeatY()) {
+        s32 val = (s32)poeCount - 10;
+        poeCount = (val < 0) ? 0 : (u8)val;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
     dComIfGs_setPohSpiritNum(poeCount);
 
-    if (gzPad::getTrigB()) {
+    if (gzPad::getTrigA() || gzPad::getTrigB()) {
         gzInfo_offMenuOption();
         gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
         return;
     }
     gzInfo_getMenuDescription()->setString("Poe Souls");
+}
+
+void gzInventoryMenu_c::executeRupeeEditMode() {
+    u16 rupees = dComIfGs_getRupee();
+    u16 maxRupee = dComIfGs_getRupeeMax();
+
+    if (gzPad::getTrigRight()) {
+        rupees = (rupees >= maxRupee) ? 0 : rupees + 1;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    if (gzPad::getTrigLeft()) {
+        rupees = (rupees == 0) ? maxRupee : rupees - 1;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    if (gzPad::getRepeatX()) {
+        s32 val = (s32)rupees + 10;
+        rupees = (val > maxRupee) ? maxRupee : (u16)val;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    if (gzPad::getRepeatY()) {
+        s32 val = (s32)rupees - 10;
+        rupees = (val < 0) ? 0 : (u16)val;
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    dComIfGs_setRupee(rupees);
+
+    if (gzPad::getTrigZ()) {
+        cyclePauseSlot(3, 0);
+        gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
+    }
+
+    if (gzPad::getTrigA() || gzPad::getTrigB()) {
+        gzInfo_offMenuOption();
+        gzInfo_seStart(Z2SE_SY_CURSOR_CANCEL);
+        return;
+    }
+    gzInfo_getMenuDescription()->setString("Wallet");
 }
 
 void gzInventoryMenu_c::executeHeartPieceEditMode() {

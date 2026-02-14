@@ -479,6 +479,9 @@ public:
     u32 mStickTriggers;
     u32 mRepeatDirection;
     s16 mRepeatCounter;
+    u32 mButtonRepeatTriggers;
+    u32 mButtonRepeatState;
+    s16 mButtonRepeatCounter;
     gzSettings_s mSettings;
     gzCursor mCursor;
     gzSaveLoaderMng_c mSaveLoaderMng;
@@ -915,6 +918,8 @@ namespace gzPad {
     inline u32 getTrigZ() { return getTrig() & PAD_TRIGGER_Z; }
     inline u32 getTrigY() { return getTrig() & PAD_BUTTON_Y; }
     inline u32 getTrigX() { return getTrig() & PAD_BUTTON_X; }
+    inline u32 getRepeatX() { return g_gzInfo.mButtonRepeatTriggers & PAD_BUTTON_X; }
+    inline u32 getRepeatY() { return g_gzInfo.mButtonRepeatTriggers & PAD_BUTTON_Y; }
     inline u32 getTrigStart() { return getTrig() & PAD_BUTTON_START; }
     inline u32 getHold() { return mDoCPd_c::m_gzPadInfo.mButtonFlags; }
     inline u32 getHoldLockL() { return mDoCPd_c::m_gzPadInfo.mHoldLockL; }
