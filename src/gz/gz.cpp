@@ -133,6 +133,69 @@ void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
     }
 }
 
+void gzInfo_c::startIconPreload() {
+    static const char* PATHS[] = {
+        "/gz/check.bti", "/gz/x_mark.bti", "/gz/icon_flags.bti", "/gz/bg.bti"
+    };
+    static const u32 SIZES[] = {544, 544, 1184, 54432};
+    JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+    for (int i = 0; i < PRELOAD_COUNT; i++) {
+        if (!DVDOpen(PATHS[i], &mPreloadFileInfos[i])) continue;
+        mpPreloadBufs[i] = heap->alloc(SIZES[i], 32);
+        if (mpPreloadBufs[i] == NULL) {
+            DVDClose(&mPreloadFileInfos[i]);
+            continue;
+        }
+        mPreloadAsyncPending[i] = true;
+        DVDReadAsync(&mPreloadFileInfos[i], mpPreloadBufs[i], SIZES[i], 0, NULL);
+    }
+}
+
+void gzInfo_c::pollIconPreload() {
+    if (mPreloadsComplete) return;
+    bool allDone = true;
+    for (int i = 0; i < PRELOAD_COUNT; i++) {
+        if (mPreloadAsyncPending[i]) {
+            s32 status = DVDGetFileInfoStatus(&mPreloadFileInfos[i]);
+            if (status == DVD_STATE_END || status == DVD_STATE_FATAL_ERROR) {
+                DVDClose(&mPreloadFileInfos[i]);
+                mPreloadAsyncPending[i] = false;
+                if (status == DVD_STATE_FATAL_ERROR && mpPreloadBufs[i] != NULL) {
+                    gzHeap(GZ_GROUP_GRAPHICS)->free(mpPreloadBufs[i]);
+                    mpPreloadBufs[i] = NULL;
+                }
+            } else {
+                allDone = false;
+            }
+        }
+    }
+    if (!allDone) return;
+    mPreloadsComplete = true;
+    JKRHeap* heap = gzHeap(GZ_GROUP_GRAPHICS);
+    if (mpPreloadBufs[0] != NULL) {
+        mpCheckIcon = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[0]);
+        mpCheckIcon->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
+                                   JUtility::TColor(76, 175, 80, 255));
+    }
+    if (mpPreloadBufs[1] != NULL) {
+        mpXMarkIcon = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[1]);
+        mpXMarkIcon->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
+                                   JUtility::TColor(244, 67, 54, 255));
+    }
+    if (mpPreloadBufs[2] != NULL) {
+        mpFlagCheckIcon = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[2]);
+        mpFlagCheckIcon->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
+                                       JUtility::TColor(76, 175, 80, 255));
+        mpFlagXMarkIcon = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[2]);
+        mpFlagXMarkIcon->setBlackWhite(JUtility::TColor(0, 0, 0, 0),
+                                       JUtility::TColor(244, 67, 54, 255));
+    }
+    if (mpPreloadBufs[3] != NULL) {
+        mpBackground = new (heap, 4) J2DPicture((ResTIMG*)mpPreloadBufs[3]);
+        mpBackground->setWhite(JUtility::TColor(55, 52, 40, 255));
+    }
+}
+
 void gzInfo_c::loadDefaultSettings() {
     mSettings.mTextColor = COLOR_GOLD_DROP;
     mSettings.mCommandCombos.mMoveLink = (PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y);
@@ -184,6 +247,19 @@ int gzInfo_c::_create() {
     // Create dedicated GZ heap
     gzCreateHeap();
 
+    // Initialize async preloader state
+    for (int i = 0; i < PRELOAD_COUNT; i++) {
+        mpPreloadBufs[i] = NULL;
+        mPreloadAsyncPending[i] = false;
+    }
+    mPreloadsComplete = false;
+    mpCheckIcon = NULL;
+    mpXMarkIcon = NULL;
+    mpFlagCheckIcon = NULL;
+    mpFlagXMarkIcon = NULL;
+
+    startIconPreload();
+
     // load default settings. config from mem card will overwrite if it exists
     loadDefaultSettings();
 
@@ -196,11 +272,7 @@ int gzInfo_c::_create() {
     }
     mpIcon = new (gfxHeap, 4) J2DPicture(icon);
 
-    void* buf = JKRHeap::alloc(54432, 32, gzHeap(GZ_GROUP_GRAPHICS));
-    gzDVDLoadFile("/gz/bg.bti", buf, 54432, 0);
-    ResTIMG* bg = (ResTIMG*)buf;
-    mpBackground = new (gzHeap(GZ_GROUP_GRAPHICS), 4) J2DPicture(bg);
-    mpBackground->setWhite(JUtility::TColor(55, 52, 40, 255));
+    mpBackground = NULL;
 
     JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
     mpBannerBg = NULL;
@@ -373,6 +445,26 @@ int gzInfo_c::_create() {
 int gzInfo_c::_delete() {
     OSReport("deleting gzInfo_c\n");
 
+    for (int i = 0; i < PRELOAD_COUNT; i++) {
+        if (mPreloadAsyncPending[i]) {
+            DVDCancel(&mPreloadFileInfos[i].cb);
+            DVDClose(&mPreloadFileInfos[i]);
+            mPreloadAsyncPending[i] = false;
+        }
+        if (mpPreloadBufs[i] != NULL) {
+            gzHeap(GZ_GROUP_GRAPHICS)->free(mpPreloadBufs[i]);
+            mpPreloadBufs[i] = NULL;
+        }
+    }
+    delete mpCheckIcon;
+    mpCheckIcon = NULL;
+    delete mpXMarkIcon;
+    mpXMarkIcon = NULL;
+    delete mpFlagCheckIcon;
+    mpFlagCheckIcon = NULL;
+    delete mpFlagXMarkIcon;
+    mpFlagXMarkIcon = NULL;
+
     delete mpIcon;
     mpIcon = NULL;
 
@@ -479,6 +571,8 @@ void gzInfo_c::updateStickTriggers() {
 
 int gzInfo_c::execute() {
     if (!mGZInitialized) return 0;
+
+    pollIconPreload();
 
     bool wasDisplayed = mDisplay;
 

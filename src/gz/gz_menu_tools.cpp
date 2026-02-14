@@ -37,9 +37,7 @@ static gzBoolOption_s linkFlags[] = {
     {"teleport", "store and load link's position", gzInfo_isTeleport, gzInfo_onTeleport, gzInfo_offTeleport},
 };
 
-gzToolsMenu_c::gzToolsMenu_c()
-    : mpCheckIconPane(NULL), mpCheckIconBuf(NULL),
-      mpXMarkIconPane(NULL), mpXMarkIconBuf(NULL) {
+gzToolsMenu_c::gzToolsMenu_c() {
     OSReport("creating gzToolsMenu_c\n");
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
@@ -81,7 +79,6 @@ gzToolsMenu_c::~gzToolsMenu_c() {
 
 void gzToolsMenu_c::_delete() {
     OSReport("deleting gzToolsMenu_c\n");
-    freeIcons();
 
     for (int i = 0; i < TAB_MAX_e; i++) {
         gzTextBox_free(mpTabHeaders[i]);
@@ -113,58 +110,10 @@ int gzToolsMenu_c::getCurrentLineNum() {
     return 0;
 }
 
-void gzToolsMenu_c::loadIcons() {
-    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
-
-    if (mpCheckIconPane == NULL) {
-        mpCheckIconBuf = JKRHeap::alloc(ICON_BTI_SIZE, 32, heap);
-        if (mpCheckIconBuf != NULL) {
-            gzDVDLoadFile("/gz/check.bti", mpCheckIconBuf, ICON_BTI_SIZE, 0);
-            mpCheckIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpCheckIconBuf);
-            if (mpCheckIconPane != NULL) {
-                mpCheckIconPane->setBlackWhite(
-                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(76, 175, 80, 255));
-            }
-        }
-    }
-
-    if (mpXMarkIconPane == NULL) {
-        mpXMarkIconBuf = JKRHeap::alloc(ICON_BTI_SIZE, 32, heap);
-        if (mpXMarkIconBuf != NULL) {
-            gzDVDLoadFile("/gz/x_mark.bti", mpXMarkIconBuf, ICON_BTI_SIZE, 0);
-            mpXMarkIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpXMarkIconBuf);
-            if (mpXMarkIconPane != NULL) {
-                mpXMarkIconPane->setBlackWhite(
-                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(244, 67, 54, 255));
-            }
-        }
-    }
-}
-
-void gzToolsMenu_c::freeIcons() {
-    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
-
-    delete mpCheckIconPane;
-    mpCheckIconPane = NULL;
-    if (mpCheckIconBuf != NULL) {
-        heap->free(mpCheckIconBuf);
-        mpCheckIconBuf = NULL;
-    }
-
-    delete mpXMarkIconPane;
-    mpXMarkIconPane = NULL;
-    if (mpXMarkIconBuf != NULL) {
-        heap->free(mpXMarkIconBuf);
-        mpXMarkIconBuf = NULL;
-    }
-}
-
 void gzToolsMenu_c::onHighlight() {
-    loadIcons();
 }
 
 void gzToolsMenu_c::onUnhighlight() {
-    freeIcons();
 }
 
 void gzToolsMenu_c::execute() {
@@ -277,7 +226,7 @@ void gzToolsMenu_c::draw() {
 
         line->mText->draw(lineX, lineY, color);
 
-        J2DPicture* icon = isOn ? mpCheckIconPane : mpXMarkIconPane;
+        J2DPicture* icon = isOn ? gzInfo_getCheckIcon() : gzInfo_getXMarkIcon();
         if (icon != NULL) {
             f32 iconY = lineY - 17.0f + (gzMenuLayout::LINE_SPACING - ICON_SIZE) / 2.0f;
             gzSetup2DContext();

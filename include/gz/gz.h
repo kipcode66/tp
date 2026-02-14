@@ -12,6 +12,7 @@
 #include "m_Do/m_Do_controller_pad.h"
 #include "m_Do/m_Do_machine.h"
 #include "SSystem/SComponent/c_API_controller_pad.h"
+#include "dolphin/dvd.h"
 
 class gzMenu_c;
 class gzTextBox;
@@ -190,6 +191,13 @@ public:
     int draw();
     void loadMenuTextures();
     void updateStickTriggers();
+
+    void startIconPreload();
+    void pollIconPreload();
+    J2DPicture* getCheckIcon() { return mpCheckIcon; }
+    J2DPicture* getXMarkIcon() { return mpXMarkIcon; }
+    J2DPicture* getFlagCheckIcon() { return mpFlagCheckIcon; }
+    J2DPicture* getFlagXMarkIcon() { return mpFlagXMarkIcon; }
 
     void loadDefaultSettings();
     int storeSettingsMemcard();
@@ -457,9 +465,24 @@ public:
     f32 mSeparatorHiddenX;
 
     u8 mGzGroupID;
+
+    static const int PRELOAD_COUNT = 4;
+    DVDFileInfo mPreloadFileInfos[PRELOAD_COUNT];
+    void* mpPreloadBufs[PRELOAD_COUNT];
+    bool mPreloadAsyncPending[PRELOAD_COUNT];
+    bool mPreloadsComplete;
+    J2DPicture* mpCheckIcon;
+    J2DPicture* mpXMarkIcon;
+    J2DPicture* mpFlagCheckIcon;
+    J2DPicture* mpFlagXMarkIcon;
 };
 
 extern gzInfo_c g_gzInfo;
+
+inline J2DPicture* gzInfo_getCheckIcon() { return g_gzInfo.getCheckIcon(); }
+inline J2DPicture* gzInfo_getXMarkIcon() { return g_gzInfo.getXMarkIcon(); }
+inline J2DPicture* gzInfo_getFlagCheckIcon() { return g_gzInfo.getFlagCheckIcon(); }
+inline J2DPicture* gzInfo_getFlagXMarkIcon() { return g_gzInfo.getFlagXMarkIcon(); }
 
 inline gzCursor* gzInfo_getCursor() { return g_gzInfo.getCursor(); }
 inline dSelect_cursor_c* gzInfo_getTPCursor() { return g_gzInfo.getTPCursor(); }

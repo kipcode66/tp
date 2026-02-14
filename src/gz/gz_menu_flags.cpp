@@ -129,9 +129,7 @@ u32 gzFlagsMenu_c::removeSmallKey() {
     return getDungeonSmallKeys(stageNo);
 }
 
-gzFlagsMenu_c::gzFlagsMenu_c()
-    : mpCheckIconPane(NULL), mpCheckIconBuf(NULL),
-      mpXMarkIconPane(NULL), mpXMarkIconBuf(NULL) {
+gzFlagsMenu_c::gzFlagsMenu_c() {
     OSReport("creating gzFlagsMenu_c\n");
     mXPos = g_gzInfo.mBackgroundXPos + 170.0f;
 
@@ -183,7 +181,6 @@ gzFlagsMenu_c::~gzFlagsMenu_c() {
 
 void gzFlagsMenu_c::_delete() {
     OSReport("deleting gzFlagsMenu_c\n");
-    freeIcons();
     for (int i = 0; i < TAB_MAX_e; i++) {
         gzTextBox_free(mpTabHeaders[i]);
         mpTabHeaders[i] = NULL;
@@ -347,58 +344,10 @@ void gzFlagsMenu_c::updateDynamicLines() {
     updateLineBounds((gzLine**)currentLines, currentLineNum);
 }
 
-void gzFlagsMenu_c::loadIcons() {
-    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
-
-    if (mpCheckIconPane == NULL) {
-        mpCheckIconBuf = JKRHeap::alloc(FLAG_ICON_BTI_SIZE, 32, heap);
-        if (mpCheckIconBuf != NULL) {
-            gzDVDLoadFile("/gz/icon_flags.bti", mpCheckIconBuf, FLAG_ICON_BTI_SIZE, 0);
-            mpCheckIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpCheckIconBuf);
-            if (mpCheckIconPane != NULL) {
-                mpCheckIconPane->setBlackWhite(
-                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(76, 175, 80, 255));
-            }
-        }
-    }
-
-    if (mpXMarkIconPane == NULL) {
-        mpXMarkIconBuf = JKRHeap::alloc(FLAG_ICON_BTI_SIZE, 32, heap);
-        if (mpXMarkIconBuf != NULL) {
-            gzDVDLoadFile("/gz/icon_flags.bti", mpXMarkIconBuf, FLAG_ICON_BTI_SIZE, 0);
-            mpXMarkIconPane = new (heap, 4) J2DPicture((ResTIMG*)mpXMarkIconBuf);
-            if (mpXMarkIconPane != NULL) {
-                mpXMarkIconPane->setBlackWhite(
-                    JUtility::TColor(0, 0, 0, 0), JUtility::TColor(244, 67, 54, 255));
-            }
-        }
-    }
-}
-
-void gzFlagsMenu_c::freeIcons() {
-    JKRHeap* heap = gzHeap(GZ_GROUP_MENU);
-
-    delete mpCheckIconPane;
-    mpCheckIconPane = NULL;
-    if (mpCheckIconBuf != NULL) {
-        heap->free(mpCheckIconBuf);
-        mpCheckIconBuf = NULL;
-    }
-
-    delete mpXMarkIconPane;
-    mpXMarkIconPane = NULL;
-    if (mpXMarkIconBuf != NULL) {
-        heap->free(mpXMarkIconBuf);
-        mpXMarkIconBuf = NULL;
-    }
-}
-
 void gzFlagsMenu_c::onHighlight() {
-    loadIcons();
 }
 
 void gzFlagsMenu_c::onUnhighlight() {
-    freeIcons();
 }
 
 bool gzFlagsMenu_c::isBoolFlagLine(int idx) {
@@ -743,7 +692,7 @@ void gzFlagsMenu_c::draw() {
         line->mText->draw(lineX, lineY, color);
 
         if (isBool) {
-            J2DPicture* icon = isOn ? mpCheckIconPane : mpXMarkIconPane;
+            J2DPicture* icon = isOn ? gzInfo_getFlagCheckIcon() : gzInfo_getFlagXMarkIcon();
             if (icon != NULL) {
                 f32 iconY = lineY - 17.0f + (gzMenuLayout::LINE_SPACING - ICON_SIZE) / 2.0f;
                 gzSetup2DContext();

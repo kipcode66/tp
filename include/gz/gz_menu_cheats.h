@@ -4,8 +4,6 @@
 #include "gz/gz_menu.h"
 #include "gz/gz_textbox.h"
 
-class J2DPicture;
-
 class gzCheatsMenu_c : public gzMenu_c {
 public:
     enum gzCheatsMenu_e {
@@ -38,18 +36,9 @@ public:
     virtual void onUnhighlight();
 
     static const int LINE_NUM = CHEAT_MAX;
-    static const int ICON_BTI_SIZE = 544;
-
-private:
-    void loadIcons();
-    void freeIcons();
 
 private:
     gzBoolOptionLine* mpLines[LINE_NUM];
-    J2DPicture* mpCheckIconPane;
-    void* mpCheckIconBuf;
-    J2DPicture* mpXMarkIconPane;
-    void* mpXMarkIconBuf;
 };
 
 #endif // GZ_MENU_CHEATS_H
