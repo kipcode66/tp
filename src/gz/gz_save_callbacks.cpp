@@ -243,6 +243,17 @@ const gzSaveLoaderMng_c::saveCallbacks_s gzPracticeMenu_c::mAnypSaveCallbacks[] 
     {64, SaveCb_BeastGanon, NULL},
 };
 
+const gzSaveLoaderMng_c::saveCallbacks_s gzPracticeMenu_c::mADSaveCallbacks[] = {
+    {3, NULL, SaveCb_SetupHugo},
+    {11, SaveCb_SetEarlyBossFlag, NULL},
+    {12, SaveCb_SetEarlyBossFlag, NULL},
+    {13, SaveCb_SetEarlyBossFlag, NULL},
+    {24, NULL, SaveCb_Morpheel},
+    {30, SaveCb_StallordInit, NULL},
+    {39, SaveCb_Argorok, NULL},
+    {40, SaveCb_Palace1, NULL},
+};
+
 const gzSaveLoaderMng_c::saveCallbacks_s gzPracticeMenu_c::mHundoSaveCallbacks[] = {
     {0, SaveCb_Goats1, NULL},
     {13, SaveCb_SetEarlyBossFlag, NULL},
@@ -275,6 +286,9 @@ const gzSaveLoaderMng_c::saveCallbacks_s* gzGetSaveCallbackList(int i_category) 
     case gzSaveLoaderMng_c::CATEGORY_ANYP_e:
         return gzPracticeMenu_c::mAnypSaveCallbacks;
         break;
+    case gzSaveLoaderMng_c::CATEGORY_ALLDUNGEONS_e:
+        return gzPracticeMenu_c::mADSaveCallbacks;
+        break;
     case gzSaveLoaderMng_c::CATEGORY_HUNDO_e:
         return gzPracticeMenu_c::mHundoSaveCallbacks;
         break;
@@ -287,6 +301,9 @@ const int gzGetSaveCallbackListSize(int i_category) {
     switch (i_category) {
     case gzSaveLoaderMng_c::CATEGORY_ANYP_e:
         return ARRAY_SIZE(gzPracticeMenu_c::mAnypSaveCallbacks);
+        break;
+    case gzSaveLoaderMng_c::CATEGORY_ALLDUNGEONS_e:
+        return ARRAY_SIZE(gzPracticeMenu_c::mADSaveCallbacks);
         break;
     case gzSaveLoaderMng_c::CATEGORY_HUNDO_e:
         return ARRAY_SIZE(gzPracticeMenu_c::mHundoSaveCallbacks);
