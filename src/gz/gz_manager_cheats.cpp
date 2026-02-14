@@ -21,6 +21,36 @@ void gzCheatsMng_c::executeEnableItemTimer() {
 }
 
 
+void gzCheatsMng_c::executeFastBonkRecovery() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link != NULL) {
+        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mStartFrame = 50.0f;
+        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mSpeed = 0.0f;
+        mFastBonkRecovery = true;
+    }
+}
+
+void gzCheatsMng_c::executeFastMovement() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link != NULL) {
+        daAlinkHIO_frontRoll_c0::m.mSpeedRate = 3.0f;
+        daAlinkHIO_swim_c0::m.mUnderwaterMaxSpeed = 50;
+        daAlinkHIO_swim_c0::m.mBackwardMaxSpeed = 50;
+        daAlinkHIO_swim_c0::m.mStrafeMaxSpeed = 50;
+        daAlinkHIO_swim_c0::m.mDashMaxSpeed = 50;
+        daAlinkHIO_swim_c0::m.mForwardMaxSpeed = 50;
+        daAlinkHIO_swim_c0::m.mUnderwaterFallMaxSpeed = 50;
+        daAlinkHIO_swim_c0::m.mBootsMaxFallSpeed = -50;
+        daAlinkHIO_swim_c0::m.mBootsGravity = -50;
+        daAlinkHIO_wlMove_c0::m.mADashInitSpeed = 100;
+        daAlinkHIO_wlMove_c0::m.mADashMaxSpeed = 100;
+        daAlinkHIO_wlMove_c0::m.mADashInitSpeedSlow = 70;
+        daAlinkHIO_wlMove_c0::m.mADashMaxSpeedSlow = 70;
+        daAlinkHIO_wlMove_c0::m.mMaxSpeed = 50;
+        mFastMovement = true;
+    }
+}
+
 void gzCheatsMng_c::executeEnableWalls() {
     daAlink_c* link = daAlink_getAlinkActorClass();
     if (link != NULL) {
@@ -89,6 +119,13 @@ void gzCheatsMng_c::executeMoonJump() {
     }
 }
 
+void gzCheatsMng_c::executeNoSinkSand() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link != NULL) {
+        link->mSinkShapeOffset = 0.0f;
+    }
+}
+
 void gzCheatsMng_c::executeSuperClawshot() {
     daAlink_c* link = daAlink_getAlinkActorClass();
     if (link != NULL) {
@@ -101,6 +138,34 @@ void gzCheatsMng_c::executeSuperClawshot() {
 }
 
 void gzCheatsMng_c::execute() {
+    if (gzInfo_isCheat_FastBonkRecovery()) {
+        executeFastBonkRecovery();
+    } else if (mFastBonkRecovery) {
+        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mStartFrame = 3.0f;
+        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mSpeed = 0.8f;
+        mFastBonkRecovery = false;
+    }
+
+    if (gzInfo_isCheat_FastMovement()) {
+        executeFastMovement();
+    } else if (mFastMovement) {
+        daAlinkHIO_frontRoll_c0::m.mSpeedRate = 1.3f;
+        daAlinkHIO_swim_c0::m.mUnderwaterMaxSpeed = 12;
+        daAlinkHIO_swim_c0::m.mForwardMaxSpeed = 8;
+        daAlinkHIO_swim_c0::m.mBackwardMaxSpeed = 6;
+        daAlinkHIO_swim_c0::m.mStrafeMaxSpeed = 8;
+        daAlinkHIO_swim_c0::m.mDashMaxSpeed = 13;
+        daAlinkHIO_swim_c0::m.mUnderwaterFallMaxSpeed = 8;
+        daAlinkHIO_swim_c0::m.mBootsMaxFallSpeed = -20;
+        daAlinkHIO_swim_c0::m.mBootsGravity = -0.699999988f;
+        daAlinkHIO_wlMove_c0::m.mADashInitSpeed = 65;
+        daAlinkHIO_wlMove_c0::m.mADashMaxSpeed = 45;
+        daAlinkHIO_wlMove_c0::m.mADashInitSpeedSlow = 35;
+        daAlinkHIO_wlMove_c0::m.mADashMaxSpeedSlow = 33;
+        daAlinkHIO_wlMove_c0::m.mMaxSpeed = 20;
+        mFastMovement = false;
+    }
+
     if (gzInfo_isCheat_DisableItemTimer()) {
         executeDisableItemTimer();
     } else if (mDisableItemTimer) {
@@ -121,6 +186,7 @@ void gzCheatsMng_c::execute() {
     if (gzInfo_isCheat_MoonJump()) executeMoonJump();
     if (gzInfo_isCheat_InfiniteOil()) executeInfiniteOil();
     if (gzInfo_isCheat_InfiniteRupees()) executeInfiniteRupees();
+    if (gzInfo_isCheat_NoSinkingInSand()) executeNoSinkSand();
     if (gzInfo_isCheat_InfiniteSlingshot()) executeInfiniteSlingshot();
 
     if (gzInfo_isCheat_SuperClawshot()) {

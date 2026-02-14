@@ -19,37 +19,6 @@
 #define FREECAM_SPEED 0.5
 #define FREECAM_TRIGGER_DEADZONE 20
 
-void gzToolsMng_c::executeFastBonkRecovery() {
-    daAlink_c* link = daAlink_getAlinkActorClass();
-    if (link != NULL) {
-        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mStartFrame = 50.0f;
-        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mSpeed = 0.0f;
-        mFastBonkRecovery = true;
-    }
-}
-
-void gzToolsMng_c::executeFastMovement() {
-    daAlink_c* link = daAlink_getAlinkActorClass();
-    if (link != NULL) {
-        daAlinkHIO_frontRoll_c0::m.mSpeedRate = 3.0f;
-        daAlinkHIO_swim_c0::m.mUnderwaterMaxSpeed = 50;
-        daAlinkHIO_swim_c0::m.mBackwardMaxSpeed = 50;
-        daAlinkHIO_swim_c0::m.mStrafeMaxSpeed = 50;
-        daAlinkHIO_swim_c0::m.mDashMaxSpeed = 50;
-        daAlinkHIO_swim_c0::m.mForwardMaxSpeed = 50;
-        daAlinkHIO_swim_c0::m.mUnderwaterFallMaxSpeed = 50;
-        daAlinkHIO_swim_c0::m.mBootsMaxFallSpeed = -50;
-        daAlinkHIO_swim_c0::m.mBootsGravity = -50;
-        daAlinkHIO_wlMove_c0::m.mADashInitSpeed = 100;
-        daAlinkHIO_wlMove_c0::m.mADashMaxSpeed = 100;
-        daAlinkHIO_wlMove_c0::m.mADashInitSpeedSlow = 70;
-        daAlinkHIO_wlMove_c0::m.mADashMaxSpeedSlow = 70;
-        daAlinkHIO_wlMove_c0::m.mMaxSpeed = 50;
-        // daAlinkHIO_wlMove_c0::m.mAMaxSpeedWeak = 50;
-        mFastMovement = true;
-    }
-}
-
 void gzToolsMng_c::executeFreeCam() {
     dCamera_c* camera = dCam_getBody();
     dEvt_control_c* event = dComIfGp_getEvent();
@@ -138,13 +107,6 @@ void gzToolsMng_c::executeFreeCam() {
 void gzToolsMng_c::executeMoveLink() {
     if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mMoveLink, mMoveLink.comboHeld)) {
         mMoveLink.active = !mMoveLink.active;
-    }
-}
-
-void gzToolsMng_c::executeNoSinkSand() {
-    daAlink_c* link = daAlink_getAlinkActorClass();
-    if (link != NULL) {
-        link->mSinkShapeOffset = 0.0f;
     }
 }
 
@@ -351,34 +313,6 @@ void gzToolsMng_c::executeRollChecker() {
 }
 
 void gzToolsMng_c::execute() {
-    if (gzInfo_isTool_FastBonkRecovery()) {
-        executeFastBonkRecovery();
-    } else if (mFastBonkRecovery) {
-        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mStartFrame = 3.0f;
-        daAlinkHIO_frontRoll_c0::m.mCrashAnm.mSpeed = 0.8f;
-        mFastBonkRecovery = false;
-    }
-
-    if (gzInfo_isTool_FastMovement()) {
-        executeFastMovement();
-    } else if (mFastMovement) {
-        daAlinkHIO_frontRoll_c0::m.mSpeedRate = 1.3f;
-        daAlinkHIO_swim_c0::m.mUnderwaterMaxSpeed = 12;
-        daAlinkHIO_swim_c0::m.mForwardMaxSpeed = 8;
-        daAlinkHIO_swim_c0::m.mBackwardMaxSpeed = 6;
-        daAlinkHIO_swim_c0::m.mStrafeMaxSpeed = 8;
-        daAlinkHIO_swim_c0::m.mDashMaxSpeed = 13;
-        daAlinkHIO_swim_c0::m.mUnderwaterFallMaxSpeed = 8;
-        daAlinkHIO_swim_c0::m.mBootsMaxFallSpeed = -20;
-        daAlinkHIO_swim_c0::m.mBootsGravity = -0.699999988f;
-        daAlinkHIO_wlMove_c0::m.mADashInitSpeed = 65;
-        daAlinkHIO_wlMove_c0::m.mADashMaxSpeed = 45;
-        daAlinkHIO_wlMove_c0::m.mADashInitSpeedSlow = 35;
-        daAlinkHIO_wlMove_c0::m.mADashMaxSpeedSlow = 33;
-        daAlinkHIO_wlMove_c0::m.mMaxSpeed = 20;
-        mFastMovement = false;
-    }
-
     if (gzInfo_isTool_FreeCam()) {
         if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mFreeCamToggle, mFreeCam.comboHeld)) {
             mFreeCam.active = !mFreeCam.active;
@@ -431,7 +365,6 @@ void gzToolsMng_c::execute() {
 
     if (gzInfo_isTool_CoroTD()) executeCoroTD();
     if (gzInfo_isTool_EndingBlowMoonBoots()) executeEBMB();
-    if (gzInfo_isTool_NoSinkingInSand()) executeNoSinkSand();
     if (gzInfo_isTool_RollChecker()) executeRollChecker();
     if (gzInfo_isTool_Teleport()) executeTeleport();
 }

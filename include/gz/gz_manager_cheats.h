@@ -26,6 +26,8 @@ public:
     void executeDisableWalls();
     void executeEnableItemTimer();
     void executeEnableWalls();
+    void executeFastBonkRecovery();
+    void executeFastMovement();
     void executeInfiniteAir();
     void executeInfiniteArrows();
     void executeInfiniteBombs();
@@ -36,6 +38,7 @@ public:
     void executeInvincibleLink();
     void executeInvincibleEnemies();
     void executeMoonJump();
+    void executeNoSinkSand();
     void executeSuperClawshot();
     void executeUnrestrictedItems();
 
@@ -43,6 +46,8 @@ private:
     // for "run once" reenable checks
     bool mDisableWalls;
     bool mDisableItemTimer;
+    bool mFastBonkRecovery;
+    bool mFastMovement;
     bool mSuperClawshot;
 };
 

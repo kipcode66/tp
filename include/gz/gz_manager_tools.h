@@ -67,11 +67,8 @@ class gzToolsMng_c {
 public:
     void execute();
     void draw();
-    void executeFastBonkRecovery();
-    void executeFastMovement();
     void executeFreeCam();
     void executeMoveLink();
-    void executeNoSinkSand();
     void executeCoroTD();
     void executeEBMB();
     void executeRollChecker();
@@ -83,8 +80,6 @@ public:
     bool isMoveLinkActive() const { return mMoveLink.active; }
 
 private:
-    bool mFastBonkRecovery;
-    bool mFastMovement;
     TeleportState mTeleport;
     MoveLinkState mMoveLink;
     FreeCamState mFreeCam;

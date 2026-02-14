@@ -12,6 +12,8 @@ gzCheatsMenu_c::gzCheatsMenu_c() {
 
     mpLines[CHEAT_DISABLE_ITEM_TIMER] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("disable item timer", "disables item delete timer", gzInfo_isCheat_DisableItemTimer, gzInfo_onCheat_DisableItemTimer, gzInfo_offCheat_DisableItemTimer);
     mpLines[CHEAT_DISABLE_WALLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("disable walls", "disables most wall collision", gzInfo_isCheat_DisableWalls, gzInfo_onCheat_DisableWalls, gzInfo_offCheat_DisableWalls);
+    mpLines[CHEAT_FAST_BONK_RECOVERY] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("fast bonk recovery", "reduces bonk animation significantly", gzInfo_isCheat_FastBonkRecovery, gzInfo_onCheat_FastBonkRecovery, gzInfo_offCheat_FastBonkRecovery);
+    mpLines[CHEAT_FAST_MOVEMENT] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("fast movement", "link's movement is much faster", gzInfo_isCheat_FastMovement, gzInfo_onCheat_FastMovement, gzInfo_offCheat_FastMovement);
     mpLines[CHEAT_INF_AIR] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("infinite air", "gives infinite air underwater", gzInfo_isCheat_InfiniteAir, gzInfo_onCheat_InfiniteAir, gzInfo_offCheat_InfiniteAir);
     mpLines[CHEAT_INF_ARROWS] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("infinite arrows", "always have 99 arrows", gzInfo_isCheat_InfiniteArrows, gzInfo_onCheat_InfiniteArrows, gzInfo_offCheat_InfiniteArrows);
     mpLines[CHEAT_INF_BOMBS] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("infinite bombs", "always have 99 bombs", gzInfo_isCheat_InfiniteBombs, gzInfo_onCheat_InfiniteBombs, gzInfo_offCheat_InfiniteBombs);
@@ -22,6 +24,7 @@ gzCheatsMenu_c::gzCheatsMenu_c() {
     mpLines[CHEAT_INVINCIBLE_LINK] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("invincible link", "disables link's hurtbox", gzInfo_isCheat_InvincibleLink, gzInfo_onCheat_InvincibleLink, gzInfo_offCheat_InvincibleLink);
     mpLines[CHEAT_INVINCIBLE_ENEMIES] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("invincible enemies", "make some enemies invincible", gzInfo_isCheat_InvincibleEnemies, gzInfo_onCheat_InvincibleEnemies, gzInfo_offCheat_InvincibleEnemies);
     mpLines[CHEAT_MOON_JUMP] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("moon jump", "hold R+A to moon jump", gzInfo_isCheat_MoonJump, gzInfo_onCheat_MoonJump, gzInfo_offCheat_MoonJump);
+    mpLines[CHEAT_NO_SINKING_IN_SAND] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("no sinking in sand", "link won't sink in sand", gzInfo_isCheat_NoSinkingInSand, gzInfo_onCheat_NoSinkingInSand, gzInfo_offCheat_NoSinkingInSand);
     mpLines[CHEAT_SUPER_CLAWSHOT] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("super clawshot", "super fast / long clawshot", gzInfo_isCheat_SuperClawshot, gzInfo_onCheat_SuperClawshot, gzInfo_offCheat_SuperClawshot);
     mpLines[CHEAT_TRANSFORM_ANYWHERE] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("transform anywhere", "transform at any location", gzInfo_isCheat_TransformAnywhere, gzInfo_onCheat_TransformAnywhere, gzInfo_offCheat_TransformAnywhere);
     mpLines[CHEAT_UNRESTRICTED_ITEMS] = new (gzHeap(GZ_GROUP_MENU), 4) gzBoolOptionLine("unrestricted items", "disable item restrictions", gzInfo_isCheat_UnrestrictedItems, gzInfo_onCheat_UnrestrictedItems, gzInfo_offCheat_UnrestrictedItems);

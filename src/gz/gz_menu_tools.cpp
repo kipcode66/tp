@@ -29,11 +29,8 @@ static gzBoolOption_s displayFlags[] = {
 
 // Link tab
 static gzBoolOption_s linkFlags[] = {
-    {"fast bonk recovery", "reduces bonk animation significantly", gzInfo_isTool_FastBonkRecovery, gzInfo_onTool_FastBonkRecovery, gzInfo_offTool_FastBonkRecovery},
-    {"fast movement", "link's movement is much faster", gzInfo_isTool_FastMovement, gzInfo_onTool_FastMovement, gzInfo_offTool_FastMovement},
     {"free cam", "move camera freely (Z+B+A to toggle)", gzInfo_isTool_FreeCam, gzInfo_onTool_FreeCam, gzInfo_offTool_FreeCam},
     {"move link", "move link around freely", gzInfo_isTool_MoveLink, gzInfo_onTool_MoveLink, gzInfo_offTool_MoveLink},
-    {"no sinking in sand", "link won't sink in sand", gzInfo_isTool_NoSinkingInSand, gzInfo_onTool_NoSinkingInSand, gzInfo_offTool_NoSinkingInSand},
     {"teleport", "store and load link's position", gzInfo_isTool_Teleport, gzInfo_onTool_Teleport, gzInfo_offTool_Teleport},
 };
 

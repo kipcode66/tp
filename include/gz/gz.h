@@ -122,9 +122,6 @@ struct gzToolsSettings_s {
     bool mRollChecker;
     bool mUniversalMapDelay;
     bool mAbMashRate;
-    bool mFastBonkRecovery;
-    bool mFastMovement;
-    bool mNoSinkingInSand;
     bool mInGameTimer;
     bool mInputViewer;
     bool mLinkDebugInfo;
@@ -138,6 +135,8 @@ struct gzToolsSettings_s {
 struct gzCheatsSettings_s {
     bool mDisableItemTimer;
     bool mDisableWalls;
+    bool mFastBonkRecovery;
+    bool mFastMovement;
     bool mInfiniteAir;
     bool mInfiniteArrows;
     bool mInfiniteBombs;
@@ -148,6 +147,7 @@ struct gzCheatsSettings_s {
     bool mInvincibleLink;
     bool mInvincibleEnemies;
     bool mMoonJump;
+    bool mNoSinkingInSand;
     bool mSuperClawshot;
     bool mTransformAnywhere;
     bool mUnrestrictedItems;
@@ -343,8 +343,8 @@ public:
     }
     bool isTool_ElevatorEscape() { return mSettings.mTools.mElevatorEscape; }
     bool isTool_EndingBlowMoonBoots() { return mSettings.mTools.mEndingBlowMoonBoots; }
-    bool isTool_FastBonkRecovery() { return mSettings.mTools.mFastBonkRecovery; }
-    bool isTool_FastMovement() { return mSettings.mTools.mFastMovement; }
+    bool isCheat_FastBonkRecovery() { return mSettings.mCheats.mFastBonkRecovery; }
+    bool isCheat_FastMovement() { return mSettings.mCheats.mFastMovement; }
     bool isTool_GorgeVoid() { return mSettings.mTools.mGorgeVoid; }
     bool isTool_InGameTimer() { return mSettings.mTools.mInGameTimer; }
     bool isTool_InputViewer() { return mSettings.mTools.mInputViewer; }
@@ -352,7 +352,7 @@ public:
     bool isTool_LinkDebugInfo() { return mSettings.mTools.mLinkDebugInfo; }
     bool isTool_LoadTimer() { return mSettings.mTools.mLoadTimer; }
     bool isTool_MoveLink() { return mSettings.mTools.mMoveLink; }
-    bool isTool_NoSinkingInSand() { return mSettings.mTools.mNoSinkingInSand; }
+    bool isCheat_NoSinkingInSand() { return mSettings.mCheats.mNoSinkingInSand; }
     bool isTool_RollChecker() { return mSettings.mTools.mRollChecker; }
     bool isTool_StageInfo() { return mSettings.mTools.mStageInfo; }
     bool isTool_Teleport() { return mSettings.mTools.mTeleport; }
@@ -368,8 +368,8 @@ public:
     }
     void setTool_ElevatorEscape(bool i_opt) { mSettings.mTools.mElevatorEscape = i_opt; }
     void setTool_EndingBlowMoonBoots(bool i_opt) { mSettings.mTools.mEndingBlowMoonBoots = i_opt; }
-    void setTool_FastBonkRecovery(bool i_opt) { mSettings.mTools.mFastBonkRecovery = i_opt; }
-    void setTool_FastMovement(bool i_opt) { mSettings.mTools.mFastMovement = i_opt; }
+    void setCheat_FastBonkRecovery(bool i_opt) { mSettings.mCheats.mFastBonkRecovery = i_opt; }
+    void setCheat_FastMovement(bool i_opt) { mSettings.mCheats.mFastMovement = i_opt; }
     void setTool_GorgeVoid(bool i_opt) { mSettings.mTools.mGorgeVoid = i_opt; }
     void setTool_InGameTimer(bool i_opt) { mSettings.mTools.mInGameTimer = i_opt; }
     void setTool_InputViewer(bool i_opt) { mSettings.mTools.mInputViewer = i_opt; }
@@ -377,7 +377,7 @@ public:
     void setTool_LinkDebugInfo(bool i_opt) { mSettings.mTools.mLinkDebugInfo = i_opt; }
     void setTool_LoadTimer(bool i_opt) { mSettings.mTools.mLoadTimer = i_opt; }
     void setTool_MoveLink(bool i_opt) { mSettings.mTools.mMoveLink = i_opt; }
-    void setTool_NoSinkingInSand(bool i_opt) { mSettings.mTools.mNoSinkingInSand = i_opt; }
+    void setCheat_NoSinkingInSand(bool i_opt) { mSettings.mCheats.mNoSinkingInSand = i_opt; }
     void setTool_RollChecker(bool i_opt) { mSettings.mTools.mRollChecker = i_opt; }
     void setTool_StageInfo(bool i_opt) { mSettings.mTools.mStageInfo = i_opt; }
     void setTool_Teleport(bool i_opt) { mSettings.mTools.mTeleport = i_opt; }
@@ -696,14 +696,19 @@ inline bool gzInfo_isCheat_InfiniteSlingshot() { return g_gzInfo.isCheat_Infinit
 inline bool gzInfo_isCheat_InvincibleEnemies() { return g_gzInfo.isCheat_InvincibleEnemies(); }
 inline bool gzInfo_isCheat_InvincibleLink() { return g_gzInfo.isCheat_InvincibleLink(); }
 inline bool gzInfo_isCheat_MoonJump() { return g_gzInfo.isCheat_MoonJump(); }
+inline bool gzInfo_isCheat_NoSinkingInSand() { return g_gzInfo.isCheat_NoSinkingInSand(); }
 inline bool gzInfo_isCheat_SuperClawshot() { return g_gzInfo.isCheat_SuperClawshot(); }
 inline bool gzInfo_isCheat_TransformAnywhere() { return g_gzInfo.isCheat_TransformAnywhere(); }
 inline bool gzInfo_isCheat_UnrestrictedItems() { return g_gzInfo.isCheat_UnrestrictedItems(); }
 inline bool gzInfo_isCheat_DisableItemTimer() { return g_gzInfo.isCheat_DisableItemTimer(); }
 inline bool gzInfo_isCheat_DisableWalls() { return g_gzInfo.isCheat_DisableWalls(); }
+inline bool gzInfo_isCheat_FastBonkRecovery() { return g_gzInfo.isCheat_FastBonkRecovery(); }
+inline bool gzInfo_isCheat_FastMovement() { return g_gzInfo.isCheat_FastMovement(); }
 
 inline void gzInfo_onCheat_DisableItemTimer() { g_gzInfo.setCheat_DisableItemTimer(true); }
 inline void gzInfo_onCheat_DisableWalls() { g_gzInfo.setCheat_DisableWalls(true); }
+inline void gzInfo_onCheat_FastBonkRecovery() { g_gzInfo.setCheat_FastBonkRecovery(true); }
+inline void gzInfo_onCheat_FastMovement() { g_gzInfo.setCheat_FastMovement(true); }
 inline void gzInfo_onCheat_InfiniteAir() { g_gzInfo.setCheat_InfiniteAir(true); }
 inline void gzInfo_onCheat_InfiniteArrows() { g_gzInfo.setCheat_InfiniteArrows(true); }
 inline void gzInfo_onCheat_InfiniteBombs() { g_gzInfo.setCheat_InfiniteBombs(true); }
@@ -714,12 +719,15 @@ inline void gzInfo_onCheat_InfiniteSlingshot() { g_gzInfo.setCheat_InfiniteSling
 inline void gzInfo_onCheat_InvincibleEnemies() { g_gzInfo.setCheat_InvincibleEnemies(true); }
 inline void gzInfo_onCheat_InvincibleLink() { g_gzInfo.setCheat_InvincibleLink(true); }
 inline void gzInfo_onCheat_MoonJump() { g_gzInfo.setCheat_MoonJump(true); }
+inline void gzInfo_onCheat_NoSinkingInSand() { g_gzInfo.setCheat_NoSinkingInSand(true); }
 inline void gzInfo_onCheat_SuperClawshot() { g_gzInfo.setCheat_SuperClawshot(true); }
 inline void gzInfo_onCheat_TransformAnywhere() { g_gzInfo.setCheat_TransformAnywhere(true); }
 inline void gzInfo_onCheat_UnrestrictedItems() { g_gzInfo.setCheat_UnrestrictedItems(true); }
 
 inline void gzInfo_offCheat_DisableItemTimer() { g_gzInfo.setCheat_DisableItemTimer(false); }
 inline void gzInfo_offCheat_DisableWalls() { g_gzInfo.setCheat_DisableWalls(false); }
+inline void gzInfo_offCheat_FastBonkRecovery() { g_gzInfo.setCheat_FastBonkRecovery(false); }
+inline void gzInfo_offCheat_FastMovement() { g_gzInfo.setCheat_FastMovement(false); }
 inline void gzInfo_offCheat_InfiniteAir() { g_gzInfo.setCheat_InfiniteAir(false); }
 inline void gzInfo_offCheat_InfiniteArrows() { g_gzInfo.setCheat_InfiniteArrows(false); }
 inline void gzInfo_offCheat_InfiniteBombs() { g_gzInfo.setCheat_InfiniteBombs(false); }
@@ -730,6 +738,7 @@ inline void gzInfo_offCheat_InfiniteSlingshot() { g_gzInfo.setCheat_InfiniteSlin
 inline void gzInfo_offCheat_InvincibleEnemies() { g_gzInfo.setCheat_InvincibleEnemies(false); }
 inline void gzInfo_offCheat_InvincibleLink() { g_gzInfo.setCheat_InvincibleLink(false); }
 inline void gzInfo_offCheat_MoonJump() { g_gzInfo.setCheat_MoonJump(false); }
+inline void gzInfo_offCheat_NoSinkingInSand() { g_gzInfo.setCheat_NoSinkingInSand(false); }
 inline void gzInfo_offCheat_SuperClawshot() { g_gzInfo.setCheat_SuperClawshot(false); }
 inline void gzInfo_offCheat_TransformAnywhere() { g_gzInfo.setCheat_TransformAnywhere(false); }
 inline void gzInfo_offCheat_UnrestrictedItems() { g_gzInfo.setCheat_UnrestrictedItems(false); }
@@ -751,9 +760,6 @@ inline bool gzInfo_isTool_InputViewer() { return g_gzInfo.isTool_InputViewer(); 
 inline bool gzInfo_isTool_LoadTimer() { return g_gzInfo.isTool_LoadTimer(); }
 inline bool gzInfo_isTool_StageInfo() { return g_gzInfo.isTool_StageInfo(); }
 inline bool gzInfo_isTool_Timer() { return g_gzInfo.isTool_Timer(); }
-inline bool gzInfo_isTool_FastBonkRecovery() { return g_gzInfo.isTool_FastBonkRecovery(); }
-inline bool gzInfo_isTool_FastMovement() { return g_gzInfo.isTool_FastMovement(); }
-inline bool gzInfo_isTool_NoSinkingInSand() { return g_gzInfo.isTool_NoSinkingInSand(); }
 inline bool gzInfo_isTool_Teleport() { return g_gzInfo.isTool_Teleport(); }
 inline bool gzInfo_isTool_FreeCam() { return g_gzInfo.isTool_FreeCam(); }
 
@@ -763,8 +769,6 @@ inline void gzInfo_onTool_AbMashRate() { g_gzInfo.setTool_AbMashRate(true); }
 inline void gzInfo_onTool_CoroTD() { g_gzInfo.setTool_CoroTD(true); }
 inline void gzInfo_onTool_ElevatorEscape() { g_gzInfo.setTool_ElevatorEscape(true); }
 inline void gzInfo_onTool_EndingBlowMoonBoots() { g_gzInfo.setTool_EndingBlowMoonBoots(true); }
-inline void gzInfo_onTool_FastBonkRecovery() { g_gzInfo.setTool_FastBonkRecovery(true); }
-inline void gzInfo_onTool_FastMovement() { g_gzInfo.setTool_FastMovement(true); }
 inline void gzInfo_onTool_GorgeVoid() { g_gzInfo.setTool_GorgeVoid(true); }
 inline void gzInfo_onTool_InGameTimer() { g_gzInfo.setTool_InGameTimer(true); }
 inline void gzInfo_onTool_InputViewer() { g_gzInfo.setTool_InputViewer(true); }
@@ -772,7 +776,6 @@ inline void gzInfo_onTool_LadderFreezardCancel() { g_gzInfo.setTool_LadderFreeza
 inline void gzInfo_onTool_LinkDebugInfo() { g_gzInfo.setTool_LinkDebugInfo(true); }
 inline void gzInfo_onTool_LoadTimer() { g_gzInfo.setTool_LoadTimer(true); }
 inline void gzInfo_onTool_MoveLink() { g_gzInfo.setTool_MoveLink(true); }
-inline void gzInfo_onTool_NoSinkingInSand() { g_gzInfo.setTool_NoSinkingInSand(true); }
 inline void gzInfo_onTool_RollChecker() { g_gzInfo.setTool_RollChecker(true); }
 inline void gzInfo_onTool_Teleport() { g_gzInfo.setTool_Teleport(true); }
 inline void gzInfo_onTool_Timer() { g_gzInfo.setTool_Timer(true); }
@@ -784,8 +787,6 @@ inline void gzInfo_offTool_AbMashRate() { g_gzInfo.setTool_AbMashRate(false); }
 inline void gzInfo_offTool_ElevatorEscape() { g_gzInfo.setTool_ElevatorEscape(false); }
 inline void gzInfo_offTool_EndingBlowMoonBoots() { g_gzInfo.setTool_EndingBlowMoonBoots(false); }
 inline void gzInfo_offTool_CoroTD() { g_gzInfo.setTool_CoroTD(false); }
-inline void gzInfo_offTool_FastBonkRecovery() { g_gzInfo.setTool_FastBonkRecovery(false); }
-inline void gzInfo_offTool_FastMovement() { g_gzInfo.setTool_FastMovement(false); }
 inline void gzInfo_offTool_GorgeVoid() { g_gzInfo.setTool_GorgeVoid(false); }
 inline void gzInfo_offTool_InGameTimer() { g_gzInfo.setTool_InGameTimer(false); }
 inline void gzInfo_offTool_InputViewer() { g_gzInfo.setTool_InputViewer(false); }
@@ -793,7 +794,6 @@ inline void gzInfo_offTool_LadderFreezardCancel() { g_gzInfo.setTool_LadderFreez
 inline void gzInfo_offTool_LinkDebugInfo() { g_gzInfo.setTool_LinkDebugInfo(false); }
 inline void gzInfo_offTool_LoadTimer() { g_gzInfo.setTool_LoadTimer(false); }
 inline void gzInfo_offTool_MoveLink() { g_gzInfo.setTool_MoveLink(false); }
-inline void gzInfo_offTool_NoSinkingInSand() { g_gzInfo.setTool_NoSinkingInSand(false); }
 inline void gzInfo_offTool_RollChecker() { g_gzInfo.setTool_RollChecker(false); }
 inline void gzInfo_offTool_StageInfo() { g_gzInfo.setTool_StageInfo(false); }
 inline void gzInfo_offTool_Teleport() { g_gzInfo.setTool_Teleport(false); }
