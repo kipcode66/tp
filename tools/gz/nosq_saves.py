@@ -122,6 +122,11 @@ NOSQ_SAVES = [
         'filename': 'lakebed',
     },
     {
+        'name': 'wormhole',
+        'description': 'OoB swim to Lakebed east wing',
+        'filename': 'wormhole',
+    },
+    {
         'name': 'lakebed bk skip',
         'description': 'Boss Key skip in Lakebed Temple',
         'filename': 'lakebed_bk_skip',
@@ -163,6 +168,14 @@ NOSQ_SAVES = [
         'filename': 'ag',
     },
     {
+        'name': 'poe gate clip',
+        'description': 'Clip through Arbiter\'s Poe Gate',
+        'filename': 'poe_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (10.0035, -19.5500, -600.5942),
+        'angle': 32768,
+    },
+    {
         'name': 'death sword',
         'description': 'Arbiter\'s Grounds miniboss',
         'filename': 'death_sword',
@@ -183,6 +196,14 @@ NOSQ_SAVES = [
             'center': (1027.53259, -108.096123, 5605.23047),
             'eye': (1313.54285, -234.203003, 5545.16846)
         },
+    },
+    {
+        'name': 'city gate clip',
+        'description': 'Clip through gate before Aeralfos',
+        'filename': 'city_gate_clip',
+        'setflags': SetFlags.POS,
+        'pos': (16516.6094, 0, -12722.480),
+        'angle': 16384,
     },
     {
         'name': 'aeralfos skip',

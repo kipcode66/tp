@@ -23,7 +23,7 @@ public:
     static const int ALL_DUNGEONS_LINE_NUM = 46;
     static const int HUNDO_LINE_NUM = 87;
     static const int GLITCHLESS_LINE_NUM = 32;
-    static const int NOSQ_LINE_NUM = 30;
+    static const int NOSQ_LINE_NUM = 33;
 
     static const int MEMFILE_MAX_NUM = 20;  // TODO: should this be variable or capped?
 
@@ -83,6 +83,7 @@ public:
     static const gzSaveLoaderMng_c::saveCallbacks_s mAnypSaveCallbacks[];
     static const gzSaveLoaderMng_c::saveCallbacks_s mADSaveCallbacks[];
     static const gzSaveLoaderMng_c::saveCallbacks_s mHundoSaveCallbacks[];
+    static const gzSaveLoaderMng_c::saveCallbacks_s mNoSQSaveCallbacks[];
 
     gzTextBox* mpTabHeaders[TAB_MAX];
     gzSavesTab_c mAnypSavesTab;
