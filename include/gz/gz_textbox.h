@@ -42,7 +42,7 @@ public:
         char buffer[256];
 
         va_list list;
-        va_start(list, string);
+        va_start(list, fmt);
         vsnprintf(buffer, sizeof(buffer), fmt, list);
         va_end(list);
 

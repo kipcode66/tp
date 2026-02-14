@@ -27,11 +27,6 @@ public:
         SETTING_MAX
     };
 
-    enum gzSettingsMenu_Haihai_e {
-        ARROW_RIGHT = 4,
-        ARROW_LEFT = 1
-    };
-
     gzSettingsMenu_c();
     ~gzSettingsMenu_c();
     void updateDynamicLines();

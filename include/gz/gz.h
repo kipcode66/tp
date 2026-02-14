@@ -549,9 +549,6 @@ inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
 inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }
 inline u32 gzInfo_prevTextColor() { return g_gzInfo.prevTextColor(); }
-//implementation tbd
-inline u32 gzInfo_nextFont() { return 0; }
-inline u32 gzInfo_prevFont() { return 0; }
 
 
 inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }

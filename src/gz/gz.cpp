@@ -258,7 +258,9 @@ void gzInfo_c::loadMenuResourcesBatch() {
             JKRHeapOverrideScope scope(gfxHeap);
             icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "midona64.bti");
         }
-        mpIcon = new (gfxHeap, 4) J2DPicture(icon);
+        if (icon != NULL) {
+            mpIcon = new (gfxHeap, 4) J2DPicture(icon);
+        }
 
         JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
         if (msgArc != NULL) {
