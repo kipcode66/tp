@@ -38,6 +38,18 @@ struct FreeCamState {
     SavedCameraState savedState;
 };
 
+struct CoroTDState {
+    bool timerStarted;
+    bool goalHit;
+    u8 frameCount;
+};
+
+struct EBMBState {
+    u16 prevAction;
+    s32 frameDelta;
+    bool ibOnLastFrame;
+};
+
 struct RollCheckerState {
     u16 prevAction;
     u8 frameDelta;
@@ -60,6 +72,8 @@ public:
     void executeFreeCam();
     void executeMoveLink();
     void executeNoSinkSand();
+    void executeCoroTD();
+    void executeEBMB();
     void executeRollChecker();
     void executeTeleport();
     void drawRollChecker();
@@ -72,6 +86,8 @@ private:
     TeleportState mTeleport;
     MoveLinkState mMoveLink;
     FreeCamState mFreeCam;
+    CoroTDState mCoroTD;
+    EBMBState mEBMB;
     RollCheckerState mRollChecker;
 };
 

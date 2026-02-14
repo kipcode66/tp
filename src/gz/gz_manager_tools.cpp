@@ -5,6 +5,7 @@
 #include "d/d_event_manager.h"
 #include "gz/gz.h"
 #include "gz/gz_textbox.h"
+#include "gz/gz_utility_notification.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "gz/gz_utility_world_text.h"
 #include <cmath>
@@ -171,7 +172,96 @@ void gzToolsMng_c::executeTeleport() {
     }
 }
 
-static const u8 ROLL_RESULT_DISPLAY_FRAMES = 60;
+static const s32 EBMB_PERFECT_FRAME = 4;
+static const s32 EBMB_LATE_LIMIT = 10;
+static const u8 RESULT_DISPLAY_FRAMES = 60;
+static const u8 COROTD_GOAL_FRAME = 10;
+static const u8 COROTD_WINDOW_FRAMES = 20;
+
+void gzToolsMng_c::executeCoroTD() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link == NULL) {
+        mCoroTD.frameCount = 0;
+        mCoroTD.goalHit = false;
+        mCoroTD.timerStarted = false;
+        return;
+    }
+
+    if (dComIfGp_isPauseFlag()) {
+        return;
+    }
+
+    if (!mCoroTD.timerStarted && (gzPad::getTrig() & PAD_BUTTON_A) &&
+        daAlink_c::checkStageName("F_SP108")) {
+        mCoroTD.timerStarted = true;
+        mCoroTD.frameCount = 0;
+        mCoroTD.goalHit = false;
+    }
+
+    if (mCoroTD.timerStarted) {
+        mCoroTD.frameCount++;
+
+        bool itemPressed = (gzPad::getTrig() & (PAD_BUTTON_Y | PAD_BUTTON_X)) != 0;
+
+        if (mCoroTD.frameCount < COROTD_WINDOW_FRAMES) {
+            if (!mCoroTD.goalHit && itemPressed) {
+                char buf[20];
+                if (mCoroTD.frameCount < COROTD_GOAL_FRAME) {
+                    snprintf(buf, sizeof(buf), "-%df",
+                             COROTD_GOAL_FRAME - mCoroTD.frameCount);
+                    gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
+                } else if (mCoroTD.frameCount == COROTD_GOAL_FRAME) {
+                    gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
+                } else {
+                    snprintf(buf, sizeof(buf), "+%df",
+                             mCoroTD.frameCount - COROTD_GOAL_FRAME);
+                    gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
+                }
+                mCoroTD.goalHit = true;
+            }
+        } else {
+            mCoroTD.frameCount = 0;
+            mCoroTD.goalHit = false;
+            mCoroTD.timerStarted = false;
+        }
+    }
+}
+
+void gzToolsMng_c::executeEBMB() {
+    daAlink_c* link = daAlink_getAlinkActorClass();
+    if (link == NULL) {
+        return;
+    }
+
+    if (link->mProcID == daAlink_c::PROC_CUT_DOWN) {
+        if (mEBMB.prevAction == daAlink_c::PROC_ATN_ACTOR_WAIT) {
+            mEBMB.frameDelta = 0;
+        }
+
+        bool ibOn = link->checkEquipHeavyBoots() != 0;
+
+        if (!dComIfGp_isPauseFlag()) {
+            mEBMB.frameDelta++;
+
+            if (!ibOn && mEBMB.ibOnLastFrame) {
+                if (mEBMB.frameDelta == EBMB_PERFECT_FRAME) {
+                    gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
+                } else if (mEBMB.frameDelta > EBMB_PERFECT_FRAME &&
+                           mEBMB.frameDelta <= EBMB_LATE_LIMIT) {
+                    char buf[20];
+                    snprintf(buf, sizeof(buf), "+%df", mEBMB.frameDelta - EBMB_PERFECT_FRAME);
+                    gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
+                }
+            } else if (!ibOn && mEBMB.frameDelta == 3) {
+                gzInfo_sendNotification("equip iron boots", gzNotification_c::NOTIFY_WARNING);
+            }
+
+            mEBMB.ibOnLastFrame = ibOn;
+        }
+    }
+
+    mEBMB.prevAction = link->mProcID;
+}
 
 void gzToolsMng_c::executeRollChecker() {
     daAlink_c* link = daAlink_getAlinkActorClass();
@@ -211,20 +301,20 @@ void gzToolsMng_c::executeRollChecker() {
             if (mRollChecker.frameDelta == mRollChecker.endFrame) {
                 snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "<3");
                 mRollChecker.resultColor = COLOR_GREEN;
-                mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+                mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
                 mRollChecker.frameDelta = 0;
             } else if (mRollChecker.frameDelta > mRollChecker.earlyFrame &&
                        mRollChecker.frameDelta < mRollChecker.endFrame) {
                 snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "-%df",
                          mRollChecker.endFrame - mRollChecker.frameDelta);
                 mRollChecker.resultColor = COLOR_BLUE;
-                mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+                mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
             } else if (mRollChecker.frameDelta > mRollChecker.endFrame &&
                        mRollChecker.frameDelta <= mRollChecker.lateFrame) {
                 snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "+%df",
                          mRollChecker.frameDelta - mRollChecker.endFrame);
                 mRollChecker.resultColor = COLOR_RED;
-                mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+                mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
                 mRollChecker.frameDelta = 0;
             }
         }
@@ -238,7 +328,7 @@ void gzToolsMng_c::executeRollChecker() {
             snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "+%df",
                      mRollChecker.frameDelta - mRollChecker.endFrame);
             mRollChecker.resultColor = COLOR_RED;
-            mRollChecker.resultTimer = ROLL_RESULT_DISPLAY_FRAMES;
+            mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
             mRollChecker.frameDelta = 0;
         }
 
@@ -336,6 +426,8 @@ void gzToolsMng_c::execute() {
         mMoveLink.active = false;
     }
 
+    if (gzInfo_isCoroTD()) executeCoroTD();
+    if (gzInfo_isEndingBlowMoonBoots()) executeEBMB();
     if (gzInfo_isNoSinkingInSand()) executeNoSinkSand();
     if (gzInfo_isRollChecker()) executeRollChecker();
     if (gzInfo_isTeleport()) executeTeleport();
