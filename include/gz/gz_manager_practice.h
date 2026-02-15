@@ -75,6 +75,7 @@ public:
 
     bool isSaveInject() { return mSaveInjectReady; }
     void doSaveInject();
+    void doSceneReadyCallbacks();
 
     void setSaveCallbacks(saveCallback i_stageInitCb, saveCallback i_playerInitCb) {
         mSaveCallbacks.stageInitCb = i_stageInitCb;
