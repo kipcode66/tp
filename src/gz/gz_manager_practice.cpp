@@ -76,15 +76,13 @@ void gzSaveLoaderMng_c::execute() {
                 if (mSaveMetadata.flags & SETFLAG_CAM_e) {
                     // TODO
                 }
+            }
 
+            if (cLib_calcTimer(&mTimer) == 0) {
                 if (mSaveCallbacks.playerInitCb != NULL) {
                     OSReport("running playerInit callback\n");
                     mSaveCallbacks.playerInitCb();
                 }
-            }
-
-            // TODO: would prefer not to do this, but until we can safely modify d_a_alink processes this is the simplest solution
-            if (cLib_calcTimer(&mTimer) == 0) {
                 end();
             }
         }

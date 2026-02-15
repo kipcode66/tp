@@ -86,6 +86,7 @@ static const u32 GZ_TEXT_COLORS[] = {
 static const int GZ_NUM_TEXT_COLORS = ARRAY_SIZE(GZ_TEXT_COLORS);
 
 struct gzCommandCombos_s {
+    u32 mGorgeVoid;
     u32 mMoveLink;
     u32 mMoonJump;
     u32 mTeleportSave;

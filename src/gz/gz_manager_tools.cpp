@@ -7,6 +7,7 @@
 #include "SSystem/SComponent/c_counter.h"
 
 #include "gz/gz.h"
+#include "gz/gz_menu_practice.h"
 #include "gz/gz_textbox.h"
 #include "gz/gz_utility_notification.h"
 #include "gz/gz_utility_world_text.h"
@@ -20,7 +21,91 @@
 #define FREECAM_SPEED 0.5
 #define FREECAM_TRIGGER_DEADZONE 20
 
-static const u8 METAMORPHOSE_ANM_LENGTH = 56;
+void gzToolsMng_c::executeGorgeVoid() {
+    // Warp command
+    if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mGorgeVoid, mGorgeVoid.comboHeld)) {
+        mGorgeVoid.active = true;
+        mGorgeVoid.gotIt = false;
+        mGorgeVoid.prevHalt = false;
+        mGorgeVoid.freeFrame = -1;
+        mGorgeVoid.lastEnd = -1;
+        mGorgeVoid.pressCount = 0;
+        mGorgeVoid.processedCount = 0;
+        g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_ANYP_e, 9,
+        gzGetSaveCallbackList(gzSaveLoaderMng_c::CATEGORY_ANYP_e),
+    gzGetSaveCallbackListSize(gzSaveLoaderMng_c::CATEGORY_ANYP_e));
+        return;
+    }
+
+    if (!mGorgeVoid.active || !daAlink_c::checkStageName("F_SP121")) return;
+
+    dEvt_control_c* event = dComIfGp_getEvent();
+    if (event == NULL) return;
+
+    bool halt = (event->mEventStatus == 1);
+    s32 frame = (s32)cCt_getFrameCount();
+
+    // Detect cutscene end (1->0)
+    if (!halt && mGorgeVoid.prevHalt) {
+        mGorgeVoid.lastEnd = frame;
+        OSReport("[GV] f%d: cutscene end\n", frame);
+    }
+
+    // Detect cutscene start (0->1): check for 1-frame gap
+    if (halt && !mGorgeVoid.prevHalt && mGorgeVoid.freeFrame < 0 && mGorgeVoid.lastEnd >= 0) {
+        if (frame - mGorgeVoid.lastEnd <= 2) {
+            mGorgeVoid.freeFrame = mGorgeVoid.lastEnd;
+            OSReport("[GV] f%d: free frame = %d (gap=%d)\n",
+                     frame, mGorgeVoid.freeFrame, frame - mGorgeVoid.lastEnd);
+        }
+    }
+
+    mGorgeVoid.prevHalt = halt;
+
+    if (mGorgeVoid.gotIt) return;
+
+    // Buffer A presses (ring buffer)
+    if (gzPad::getTrig() & PAD_BUTTON_A) {
+        s32 idx = mGorgeVoid.pressCount % GorgeVoidState::BUF_SIZE;
+        mGorgeVoid.presses[idx] = frame;
+        mGorgeVoid.pressCount++;
+        OSReport("[GV] f%d: A press #%d\n", frame, mGorgeVoid.pressCount);
+    }
+
+    if (mGorgeVoid.freeFrame < 0) return;
+
+    // Skip overwritten entries
+    if (mGorgeVoid.pressCount - mGorgeVoid.processedCount > GorgeVoidState::BUF_SIZE) {
+        mGorgeVoid.processedCount = mGorgeVoid.pressCount - GorgeVoidState::BUF_SIZE;
+    }
+
+    // Process buffered + new presses
+    while (mGorgeVoid.processedCount < mGorgeVoid.pressCount && !mGorgeVoid.gotIt) {
+        s32 idx = mGorgeVoid.processedCount % GorgeVoidState::BUF_SIZE;
+        s32 delta = mGorgeVoid.presses[idx] - mGorgeVoid.freeFrame;
+        mGorgeVoid.processedCount++;
+
+        if (delta < -GorgeVoidState::WINDOW || delta > GorgeVoidState::WINDOW) continue;
+
+        char buf[20];
+        if (delta == 0) {
+            gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
+            mGorgeVoid.gotIt = true;
+        } else if (delta < 0) {
+            snprintf(buf, sizeof(buf), "%df early", -delta);
+            gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
+        } else {
+            snprintf(buf, sizeof(buf), "%df late", delta);
+            gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
+        }
+    }
+
+    // Done after window expires
+    if (frame - mGorgeVoid.freeFrame > GorgeVoidState::WINDOW) {
+        OSReport("[GV] f%d: window closed, done\n", frame);
+        mGorgeVoid.active = false;
+    }
+}
 
 void gzToolsMng_c::executeElevatorEscape() {
     daAlink_c* link = daAlink_getAlinkActorClass();
@@ -41,7 +126,7 @@ void gzToolsMng_c::executeElevatorEscape() {
         }
         if ((gzPad::getTrig() & PAD_BUTTON_A)) {
             s32 elapsed = cCt_getFrameCount() - mElevatorEscape.metamorphoseStartFrame;
-            snprintf(buf, sizeof(buf), "early by %df", METAMORPHOSE_ANM_LENGTH - elapsed);
+            snprintf(buf, sizeof(buf), "early by %df", mElevatorEscape.METAMORPHOSE_ANM_LENGTH - elapsed);
             gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
         }
         mElevatorEscape.prevAction = daAlink_c::PROC_METAMORPHOSE;
@@ -193,12 +278,6 @@ void gzToolsMng_c::executeTeleport() {
     }
 }
 
-static const s32 EBMB_PERFECT_FRAME = 4;
-static const s32 EBMB_LATE_LIMIT = 10;
-static const u8 RESULT_DISPLAY_FRAMES = 60;
-static const u8 COROTD_GOAL_FRAME = 10;
-static const u8 COROTD_WINDOW_FRAMES = 20;
-
 void gzToolsMng_c::executeCoroTD() {
     daAlink_c* link = daAlink_getAlinkActorClass();
     if (link == NULL) {
@@ -224,18 +303,18 @@ void gzToolsMng_c::executeCoroTD() {
 
         bool itemPressed = (gzPad::getTrig() & (PAD_BUTTON_Y | PAD_BUTTON_X)) != 0;
 
-        if (mCoroTD.frameCount < COROTD_WINDOW_FRAMES) {
+        if (mCoroTD.frameCount < mCoroTD.WINDOW_FRAMES) {
             if (!mCoroTD.goalHit && itemPressed) {
                 char buf[20];
-                if (mCoroTD.frameCount < COROTD_GOAL_FRAME) {
+                if (mCoroTD.frameCount < mCoroTD.GOAL_FRAME) {
                     snprintf(buf, sizeof(buf), "-%df",
-                             COROTD_GOAL_FRAME - mCoroTD.frameCount);
+                             mCoroTD.GOAL_FRAME - mCoroTD.frameCount);
                     gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
-                } else if (mCoroTD.frameCount == COROTD_GOAL_FRAME) {
+                } else if (mCoroTD.frameCount == mCoroTD.GOAL_FRAME) {
                     gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
                 } else {
                     snprintf(buf, sizeof(buf), "+%df",
-                             mCoroTD.frameCount - COROTD_GOAL_FRAME);
+                             mCoroTD.frameCount - mCoroTD.GOAL_FRAME);
                     gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
                 }
                 mCoroTD.goalHit = true;
@@ -265,12 +344,12 @@ void gzToolsMng_c::executeEBMB() {
             mEBMB.frameDelta++;
 
             if (!ibOn && mEBMB.ibOnLastFrame) {
-                if (mEBMB.frameDelta == EBMB_PERFECT_FRAME) {
+                if (mEBMB.frameDelta == mEBMB.PERFECT_FRAME) {
                     gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
-                } else if (mEBMB.frameDelta > EBMB_PERFECT_FRAME &&
-                           mEBMB.frameDelta <= EBMB_LATE_LIMIT) {
+                } else if (mEBMB.frameDelta > mEBMB.PERFECT_FRAME &&
+                           mEBMB.frameDelta <= mEBMB.LATE_LIMIT) {
                     char buf[20];
-                    snprintf(buf, sizeof(buf), "+%df", mEBMB.frameDelta - EBMB_PERFECT_FRAME);
+                    snprintf(buf, sizeof(buf), "+%df", mEBMB.frameDelta - mEBMB.PERFECT_FRAME);
                     gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
                 }
             } else if (!ibOn && mEBMB.frameDelta == 3) {
@@ -322,20 +401,20 @@ void gzToolsMng_c::executeRollChecker() {
             if (mRollChecker.frameDelta == mRollChecker.endFrame) {
                 snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "<3");
                 mRollChecker.resultColor = COLOR_GREEN;
-                mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
+                mRollChecker.resultTimer = mRollChecker.RESULT_DISPLAY_FRAMES;
                 mRollChecker.frameDelta = 0;
             } else if (mRollChecker.frameDelta > mRollChecker.earlyFrame &&
                        mRollChecker.frameDelta < mRollChecker.endFrame) {
                 snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "-%df",
                          mRollChecker.endFrame - mRollChecker.frameDelta);
                 mRollChecker.resultColor = COLOR_BLUE;
-                mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
+                mRollChecker.resultTimer = mRollChecker.RESULT_DISPLAY_FRAMES;
             } else if (mRollChecker.frameDelta > mRollChecker.endFrame &&
                        mRollChecker.frameDelta <= mRollChecker.lateFrame) {
                 snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "+%df",
                          mRollChecker.frameDelta - mRollChecker.endFrame);
                 mRollChecker.resultColor = COLOR_RED;
-                mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
+                mRollChecker.resultTimer = mRollChecker.RESULT_DISPLAY_FRAMES;
                 mRollChecker.frameDelta = 0;
             }
         }
@@ -349,7 +428,7 @@ void gzToolsMng_c::executeRollChecker() {
             snprintf(mRollChecker.resultText, sizeof(mRollChecker.resultText), "+%df",
                      mRollChecker.frameDelta - mRollChecker.endFrame);
             mRollChecker.resultColor = COLOR_RED;
-            mRollChecker.resultTimer = RESULT_DISPLAY_FRAMES;
+            mRollChecker.resultTimer = mRollChecker.RESULT_DISPLAY_FRAMES;
             mRollChecker.frameDelta = 0;
         }
 
@@ -422,6 +501,7 @@ void gzToolsMng_c::execute() {
     if (gzInfo_isTool_CoroTD()) executeCoroTD();
     if (gzInfo_isTool_ElevatorEscape()) executeElevatorEscape();
     if (gzInfo_isTool_EndingBlowMoonBoots()) executeEBMB();
+    if (gzInfo_isTool_GorgeVoid()) executeGorgeVoid();
     if (gzInfo_isTool_RollChecker()) executeRollChecker();
     if (gzInfo_isTool_Teleport()) executeTeleport();
 }

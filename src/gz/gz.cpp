@@ -190,6 +190,7 @@ void gzInfo_c::pollIconPreload() {
 
 void gzInfo_c::loadDefaultSettings() {
     mSettings.mTextColor = COLOR_GOLD_DROP;
+    mSettings.mCommandCombos.mGorgeVoid = (PAD_TRIGGER_L | PAD_TRIGGER_Z);
     mSettings.mCommandCombos.mMoveLink = (PAD_TRIGGER_L | PAD_TRIGGER_R | PAD_BUTTON_Y);
     mSettings.mCommandCombos.mMoonJump = (PAD_TRIGGER_R | PAD_BUTTON_A);
     mSettings.mCommandCombos.mTeleportSave = (PAD_TRIGGER_R | PAD_BUTTON_UP);

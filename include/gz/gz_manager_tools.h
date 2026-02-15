@@ -39,18 +39,23 @@ struct FreeCamState {
 };
 
 struct CoroTDState {
+    static const u8 GOAL_FRAME = 10;
+    static const u8 WINDOW_FRAMES = 20;
     bool timerStarted;
     bool goalHit;
     u8 frameCount;
 };
 
 struct EBMBState {
+    static const s32 PERFECT_FRAME = 4;
+    static const s32 LATE_LIMIT = 10;
     u16 prevAction;
     s32 frameDelta;
     bool ibOnLastFrame;
 };
 
 struct RollCheckerState {
+    static const u8 RESULT_DISPLAY_FRAMES = 60;
     u16 prevAction;
     u8 frameDelta;
     u8 endFrame;
@@ -63,7 +68,22 @@ struct RollCheckerState {
     gzTextBox* pText;
 };
 
+struct GorgeVoidState {
+    static const int BUF_SIZE = 16;
+    static const s32 WINDOW = 10;
+    bool comboHeld;
+    bool active;
+    bool gotIt;
+    bool prevHalt;
+    s32 freeFrame;
+    s32 lastEnd;
+    s32 presses[BUF_SIZE];
+    s32 pressCount;
+    s32 processedCount;
+};
+
 struct ElevatorEscapeState {
+    static const u8 METAMORPHOSE_ANM_LENGTH = 56;
     u16 prevAction;
     s32 metamorphoseStartFrame;
     s32 lateRollFrame;
@@ -76,6 +96,7 @@ public:
     void draw();
     void executeElevatorEscape();
     void executeFreeCam();
+    void executeGorgeVoid();
     void executeMoveLink();
     void executeCoroTD();
     void executeEBMB();
@@ -89,6 +110,7 @@ public:
 
 private:
     ElevatorEscapeState mElevatorEscape;
+    GorgeVoidState mGorgeVoid;
     TeleportState mTeleport;
     MoveLinkState mMoveLink;
     FreeCamState mFreeCam;
