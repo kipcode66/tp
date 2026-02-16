@@ -147,6 +147,15 @@ int gzInfo_c::deleteSettingsSD() {
     return 0;
 }
 
+void gzInfo_c::returnToLoader() {
+    if (!mIsNintendont) {
+        gzInfo_sendNotification("exit requires nintendont");
+        return;
+    }
+    // Call DoGameExit in PADReadGC binary
+    ((void(*)(void))0x93000008)();
+}
+
 #endif // !__REVOLUTION_SDK__
 
 int gzInfo_c::storeSettings() {

@@ -23,6 +23,7 @@ public:
         SETTING_SAVE,
         SETTING_LOAD,
         SETTING_DELETE,
+        SETTING_RETURN_TO_LOADER,
 
         SETTING_MAX
     };
@@ -64,6 +65,8 @@ public:
 
     static int deleteConfirmCb(gzConfirm_c* i_confirm, void* i_data);
     static int deleteReturnCb(gzConfirm_c* i_confirm, void* i_data);
+    static int returnToLoaderConfirmCb(gzConfirm_c* i_confirm, void* i_data);
+    static int returnToLoaderReturnCb(gzConfirm_c* i_confirm, void* i_data);
 
     gzConfirm_c* mpConfirm;
 
@@ -84,6 +87,8 @@ private:
     gzLine* mpSave;
     gzLine* mpLoad;
     gzLine* mpDelete;
+    gzLine* mpReturnToLoader;
+    int mLineCount;
     gzLine* mpLines[LINE_NUM];
 };
 

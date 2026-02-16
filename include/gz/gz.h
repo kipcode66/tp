@@ -275,6 +275,7 @@ public:
     int storeSettingsSD();
     int loadSettingsSD();
     int deleteSettingsSD();
+    void returnToLoader();
 #endif
     int storeSettings();
     int loadSettings();
@@ -621,6 +622,7 @@ inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(
 inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
 inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
 inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
+inline void gzInfo_returnToLoader() { g_gzInfo.returnToLoader(); }
 inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
 inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }

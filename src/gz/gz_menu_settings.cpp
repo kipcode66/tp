@@ -60,7 +60,7 @@ void gzSettingsMenu_c::updateDynamicLines() {
     mpReloadType->getOptionBox()->setStringf("%s", getReloadTypeText());
     mpSwapEquips->getOptionBox()->setStringf("%s", getSwapEquipsText());
     mpTheme->getOptionBox()->setStringf("%s", getThemeText());
-    updateLineBounds(mpLines, LINE_NUM);
+    updateLineBounds(mpLines, mLineCount);
 }
 
 int gzSettingsMenu_c::deleteConfirmCb(gzConfirm_c* i_confirm, void* i_data) {
@@ -69,6 +69,15 @@ int gzSettingsMenu_c::deleteConfirmCb(gzConfirm_c* i_confirm, void* i_data) {
 }
 
 int gzSettingsMenu_c::deleteReturnCb(gzConfirm_c* i_confirm, void* i_data) {
+    return 1;
+}
+
+int gzSettingsMenu_c::returnToLoaderConfirmCb(gzConfirm_c* i_confirm, void* i_data) {
+    gzInfo_returnToLoader();
+    return 1;
+}
+
+int gzSettingsMenu_c::returnToLoaderReturnCb(gzConfirm_c* i_confirm, void* i_data) {
     return 1;
 }
 
@@ -94,6 +103,7 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpSave = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("save settings", "saves tpgz settings");
     mpLoad = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("load settings", "loads tpgz settings");
     mpDelete = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("delete settings", "deletes tpgz settings");
+    mpReturnToLoader = NULL;
 
     mpLines[SETTING_BOOT_TO_MENU] = mpBootToMenu;
     mpLines[SETTING_CURSOR_TYPE] = mpCursorType;
@@ -109,6 +119,14 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpLines[SETTING_SAVE] = mpSave;
     mpLines[SETTING_LOAD] = mpLoad;
     mpLines[SETTING_DELETE] = mpDelete;
+
+    if (g_gzInfo.mIsNintendont) {
+        mpReturnToLoader = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("return to loader", "exit game and return to homebrew channel");
+        mpLines[SETTING_RETURN_TO_LOADER] = mpReturnToLoader;
+        mLineCount = LINE_NUM;
+    } else {
+        mLineCount = LINE_NUM - 1;
+    }
 }
 
 gzSettingsMenu_c::~gzSettingsMenu_c() {
@@ -161,6 +179,9 @@ void gzSettingsMenu_c::_delete() {
 
     delete mpDelete;
     mpDelete = NULL;
+
+    delete mpReturnToLoader;
+    mpReturnToLoader = NULL;
 
     for (int i = 0; i < LINE_NUM; i++) {
         delete mpLines[i];
@@ -215,6 +236,10 @@ void gzSettingsMenu_c::execute() {
             gzInfo_sendNotification("test!", 2);
             gzInfo_sendNotification("test2!");
             break;
+        case SETTING_RETURN_TO_LOADER:
+            mpConfirm = new (gzHeap(GZ_GROUP_UI), 4) gzConfirm_c(returnToLoaderConfirmCb, returnToLoaderReturnCb, this, "return to loader?");
+            gzInfo_seStart(Z2SE_SY_CURSOR_OK);
+            return;
         }
     }
 
@@ -333,8 +358,8 @@ void gzSettingsMenu_c::execute() {
         }
     }
 
-    handleNavigation(LINE_NUM);
-    finishExecute(LINE_NUM);
+    handleNavigation(mLineCount);
+    finishExecute(mLineCount);
 }
 
 void gzSettingsMenu_c::draw() {
@@ -347,10 +372,10 @@ void gzSettingsMenu_c::draw() {
     updateDynamicLines();
     u8 haihai_flags = 0;
 
-    for (int i = 0; i < LINE_NUM; i++) {
+    for (int i = 0; i < mLineCount; i++) {
         if (l_cursor->y == i)
             haihai_flags = getHaihaiFlags(i);
     }
 
-    drawLines(mpLines, LINE_NUM, haihai_flags, 0, LINE_NUM);
+    drawLines(mpLines, mLineCount, haihai_flags, 0, mLineCount);
 }
