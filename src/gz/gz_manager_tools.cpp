@@ -5,6 +5,7 @@
 #include "d/d_event_manager.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "SSystem/SComponent/c_counter.h"
+#include "JSystem/JKernel/JKRAramArchive.h"
 
 #include "gz/gz.h"
 #include "gz/gz_menu_practice.h"
@@ -512,10 +513,156 @@ void gzToolsMng_c::drawLinkInfo() {
     gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 7), COLOR_WHITE, "speed: %.4f", player->speedF);
 }
 
+void gzInputViewer_s::drawButton(J2DPicture* pic, u32 button, u32 color, f32 x, f32 y, f32 sx, f32 sy) {
+    if (pic != NULL) {
+        const u8 UNPRESSED_ALPHA = 80;
+        const u8 PRESSED_ALPHA = 255;
+
+        #define RGB_A(rgb, a) \
+            (rgb << 8 | a)
+
+        if (mDoCPd_c::getHold(PAD_1) & button) {
+            pic->setBlackWhite(0, RGB_A(color, PRESSED_ALPHA));
+        } else {
+            pic->setBlackWhite(0, RGB_A(color, UNPRESSED_ALPHA));
+        }
+
+        pic->scale(sx, sy);
+        pic->draw(x, y, false, false, false);
+    }
+}
+
+void gzToolsMng_c::drawInputViewer() {
+    if (!mInputViewer.isInitialized) {
+        JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
+        ResTIMG* icon;
+        {
+            JKRHeapOverrideScope scope(gfxHeap);
+            icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_zelda_button_ab_maru.bti");
+            if (icon != NULL) {
+                mInputViewer.pAbtn = new (gfxHeap, 4) J2DPicture(icon);
+                mInputViewer.pBbtn = new (gfxHeap, 4) J2DPicture(icon);
+                mInputViewer.pSbtn = new (gfxHeap, 4) J2DPicture(icon);
+            }
+
+            icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_zelda_button_x_base.bti");
+            if (icon != NULL) {
+                mInputViewer.pXbtn = new (gfxHeap, 4) J2DPicture(icon);
+            }
+
+            icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "tt_zelda_button_y_base.bti");
+            if (icon != NULL) {
+                mInputViewer.pYbtn = new (gfxHeap, 4) J2DPicture(icon);
+            }
+
+            icon = (ResTIMG*)dComIfGp_getMain2DArchive()->getResource('TIMG', "im_zelda_button_z_base.bti");
+            if (icon != NULL) {
+                mInputViewer.pZbtn = new (gfxHeap, 4) J2DPicture(icon);
+            }
+
+            DVDFileInfo file;
+            void* buffer = gfxHeap->alloc(0x1560, 32);
+            if (DVDOpen("/gz/buttons/stick-outline-64.bti", &file)) {
+                
+                DVDReadPrio(&file, buffer, 0x1560, 0, 2);
+
+                mInputViewer.pStick = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+                mInputViewer.pSubstick = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+
+                DVDClose(&file);
+            }
+
+            if (DVDOpen("/gz/buttons/dpad-key.bti", &file)) {
+                buffer = gfxHeap->alloc(0x900, 32);
+                DVDReadPrio(&file, buffer, 0x900, 0, 2);
+
+                for (int i = 0; i < 4; i++) {
+                    mInputViewer.pDPad[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+                }
+
+                DVDClose(&file);
+            }
+
+            if (DVDOpen("/gz/buttons/lr_outline.bti", &file)) {
+                buffer = gfxHeap->alloc(0xB80, 32);
+                DVDReadPrio(&file, buffer, 0xB80, 0, 2);
+
+                mInputViewer.pTrigL = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+                mInputViewer.pTrigR = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+
+                DVDClose(&file);
+            }
+
+            gfxHeap->free(buffer);
+        }
+
+        mInputViewer.isInitialized = true;
+    }
+
+    const u32 ABTN_COLOR = 0x00E1FF;
+    const u32 BBTN_COLOR = 0xE60000;
+    const u32 XYBTN_COLOR = 0xFFFFFF;
+    const u32 ZBTN_COLOR = 0xA54BA5;
+    const u32 SBTN_COLOR = 0xFFFFFF;
+
+    const f32 BASE_X = 300.0f;
+    const f32 BASE_Y = 390.0f;
+
+    mInputViewer.drawButton(mInputViewer.pAbtn, PAD_BUTTON_A, ABTN_COLOR, BASE_X + 60.0f, BASE_Y, 1.0f, 1.0f);
+    mInputViewer.drawButton(mInputViewer.pBbtn, PAD_BUTTON_B, BBTN_COLOR, BASE_X + 37.0f, BASE_Y + 22.0f, 0.6f, 0.6f);
+    mInputViewer.drawButton(mInputViewer.pXbtn, PAD_BUTTON_X, XYBTN_COLOR, BASE_X + 95.0f, BASE_Y - 3.0f, 0.7f, 0.7f);
+    mInputViewer.drawButton(mInputViewer.pYbtn, PAD_BUTTON_Y, XYBTN_COLOR, BASE_X + 55.0f, BASE_Y - 18.0f, 0.7f, 0.7);
+    mInputViewer.drawButton(mInputViewer.pZbtn, PAD_TRIGGER_Z, ZBTN_COLOR, BASE_X + 90.0f, BASE_Y - 30.0f, 0.5f, 0.5f);
+    mInputViewer.drawButton(mInputViewer.pSbtn, PAD_BUTTON_START, SBTN_COLOR, BASE_X + 10.0f, BASE_Y - 20.0f, 0.3f, 0.3f);
+
+    mInputViewer.drawButton(mInputViewer.pDPad[0], PAD_BUTTON_UP, SBTN_COLOR, BASE_X + 10.0f, BASE_Y + 10.0f, 0.3f, 0.3f);
+
+    mInputViewer.pDPad[1]->rotate(90.0f);
+    mInputViewer.drawButton(mInputViewer.pDPad[1], PAD_BUTTON_LEFT, SBTN_COLOR, BASE_X + 2.0f, BASE_Y + 30.0f, 0.3f, 0.3f);
+
+    mInputViewer.pDPad[2]->rotate(180.0f);
+    mInputViewer.drawButton(mInputViewer.pDPad[2], PAD_BUTTON_DOWN, SBTN_COLOR, BASE_X + 22.0f, BASE_Y + 38.0f, 0.3f, 0.3f);
+
+    mInputViewer.pDPad[3]->rotate(-90.0f);
+    mInputViewer.drawButton(mInputViewer.pDPad[3], PAD_BUTTON_RIGHT, SBTN_COLOR, BASE_X + 30.0f, BASE_Y + 18.0f, 0.3f, 0.3f);
+
+
+    GXColor trig_color = {255, 255, 255, 255};
+    GXColor trig_lock_color = {0, 255, 0, 255};
+
+    mInputViewer.pTrigL->scale(0.5f, 0.5f);
+    gzDrawFilledRect(BASE_X - 114, BASE_Y - 32, mDoCPd_c::getAnalogL(PAD_1) * 48.0f, 5.0f, mDoCPd_c::getHoldL(PAD_1) ? trig_lock_color : trig_color);
+    mInputViewer.pTrigL->draw(BASE_X - 117.0f, BASE_Y - 35.0f, false, false, false);
+
+    mInputViewer.pTrigR->scale(0.5f, 0.5f);
+    gzDrawFilledRect(BASE_X - 9, BASE_Y - 32, (-mDoCPd_c::getAnalogR(PAD_1)) * 48.0f, 5.0f, mDoCPd_c::getHoldR(PAD_1) ? trig_lock_color : trig_color);
+    mInputViewer.pTrigR->draw(BASE_X - 60.0f, BASE_Y - 35.0f, false, false, false);
+
+
+    mInputViewer.pStick->scale(0.8f, 0.8f);
+    mInputViewer.pStick->draw(BASE_X - 115.0f, BASE_Y - 18.0f, false, false, false);
+    GXColor stick_color = {255, 255, 255, 255};
+    gzDrawFilledCircle((mDoCPd_c::getStickX(PAD_1) * 10) + (BASE_X - 89.0f),
+                       -(mDoCPd_c::getStickY(PAD_1) * 10) + (BASE_Y + 8.0f),
+                       15.0f, stick_color, stick_color, 2.0f);
+
+    mInputViewer.pSubstick->setBlackWhite(0, 0xFFDB6DFF);
+    mInputViewer.pSubstick->scale(0.7f, 0.7f);
+    mInputViewer.pSubstick->draw(BASE_X - 55.0f, BASE_Y - 10.0f, false, false, false);
+    GXColor substick_color = {0xFF, 0xDB, 0x6D, 0xFF};
+    gzDrawFilledCircle((mDoCPd_c::getSubStickX(PAD_1) * 10) + (BASE_X - 32.0f),
+                       -(mDoCPd_c::getSubStickY(PAD_1) * 10) + (BASE_Y + 13.0f),
+                       10.0f, substick_color, substick_color, 2.0f);
+}
+
 void gzToolsMng_c::draw() {
     if (gzInfo_isTool_RollChecker()) drawRollChecker();
 
     if (gzInfo_isTool_LinkDebugInfo()) {
         drawLinkInfo();
+    }
+
+    if (gzInfo_isTool_InputViewer()) {
+        drawInputViewer();
     }
 }
