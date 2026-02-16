@@ -674,6 +674,7 @@ int gzInfo_c::execute() {
     } else {
         mCheatsMng.execute();
         mToolsMng.execute();
+        mSceneMng.execute();
         mSaveLoaderMng.execute();
     }
 

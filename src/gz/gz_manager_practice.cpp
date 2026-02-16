@@ -48,12 +48,38 @@ void gzSaveLoaderMng_c::doSaveInject() {
     }
 }
 
+void gzSaveLoaderMng_c::doSceneReadyCallbacks() {
+    fopAc_ac_c* player = dComIfGp_getPlayer(0);
+    // make sure this only runs once, since the scene done function runs multiple times
+    if (player != NULL && mLoadPhase == PHASE_PLAYER_INIT_e) {
+        if (mMode == MODE_MEMFILE_e) {
+            player->current.pos = mMemfileExData.player_pos;
+        } else {
+            if (mSaveMetadata.flags & SETFLAG_POS_e) {
+                OS_REPORT("attempting to set position (%f, %f, %f) %d\n", mSaveMetadata.player_pos.x, mSaveMetadata.player_pos.y, mSaveMetadata.player_pos.z, mSaveMetadata.angle);
+                player->current.pos = mSaveMetadata.player_pos;
+                player->current.angle.y = mSaveMetadata.angle;
+            }
+
+            if (mSaveMetadata.flags & SETFLAG_CAM_e) {
+                // TODO
+            }
+
+            if (mSaveCallbacks.playerInitCb != NULL) {
+                OSReport("running playerInit callback\n");
+                mSaveCallbacks.playerInitCb();
+            }
+        }
+
+        end();
+    }
+}
+
 void gzSaveLoaderMng_c::execute() {
     switch (mLoadPhase) {
     case PHASE_WAIT_e:
         return;
     case PHASE_INIT_e:
-        mTimer = 10;
         mSaveInjectReady = true;
         wait();
         break;
@@ -61,31 +87,6 @@ void gzSaveLoaderMng_c::execute() {
         mLoadPhase = PHASE_PLAYER_INIT_e;
         break;
     case PHASE_PLAYER_INIT_e:
-        // waits for player to not be null before running any processes here
-        fopAc_ac_c* player = dComIfGp_getPlayer(0);
-        if (player != NULL) {
-            if (mMode == MODE_MEMFILE_e) {
-                player->current.pos = mMemfileExData.player_pos;
-            } else {
-                if (mSaveMetadata.flags & SETFLAG_POS_e) {
-                    OS_REPORT("attempting to set position (%f, %f, %f) %d\n", mSaveMetadata.player_pos.x, mSaveMetadata.player_pos.y, mSaveMetadata.player_pos.z, mSaveMetadata.angle);
-                    player->current.pos = mSaveMetadata.player_pos;
-                    player->current.angle.y = mSaveMetadata.angle;
-                }
-
-                if (mSaveMetadata.flags & SETFLAG_CAM_e) {
-                    // TODO
-                }
-            }
-
-            if (cLib_calcTimer(&mTimer) == 0) {
-                if (mSaveCallbacks.playerInitCb != NULL) {
-                    OSReport("running playerInit callback\n");
-                    mSaveCallbacks.playerInitCb();
-                }
-                end();
-            }
-        }
         break;
     }
 }

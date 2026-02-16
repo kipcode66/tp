@@ -7,6 +7,7 @@
 #include "d/actor/d_a_obj_lv4RailWall.h"
 #include "d/actor/d_a_e_zs.h"
 #include "d/actor/d_a_b_zant.h"
+#include "d/actor/d_a_b_ds.h"
 
 static void SaveCb_SetEarlyBossFlag() {
     cDmr_SkipInfo = 1;
@@ -120,8 +121,17 @@ static void SaveCb_StallordSkipJoseph() {
 }
 
 static void SaveCb_StallordPhase2() {
-    fopAc_ac_c* stallord = fopAcM_SearchByName(PROC_B_DS);
+    // TODO: temp solution. realistically, the best option would be to modify the actor code
+    // to handle custom situations rather than trying to hook onto the actor.
+    // Probably want something similar to the debug "Register" system that can be used to
+    // trigger special actions when the variable is set by a callback in the stageInit phase
+    daB_DS_c* stallord = (daB_DS_c*)fopAcM_SearchByName(PROC_B_DS);
     if (stallord != NULL) {
+        stallord->mAction =  daB_DS_c::ACT_DAMAGE;
+        stallord->mMode = 100;
+    }
+
+    /* if (stallord != NULL) {
         // create the phase 2 version of stallord
         fopAcM_create(PROC_B_DS, fopAcM_GetParam(stallord) | 2, &stallord->current.pos,
                       fopAcM_GetRoomNo(stallord), NULL, NULL, -1);
@@ -137,7 +147,7 @@ static void SaveCb_StallordPhase2() {
     if (rwall != NULL) {
         rwall->mRotCounter = 101;  // set spinner switch speed counter to threshold
         rwall->mHeight = 3370.0f;  // set arena height to max
-    }
+    } */
 }
 
 static void SaveCb_CityFanTower() {

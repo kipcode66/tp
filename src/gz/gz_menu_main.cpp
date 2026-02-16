@@ -9,11 +9,13 @@
 #include "gz/gz_menu_inventory.h"
 #include "gz/gz_menu_memory.h"
 #include "gz/gz_menu_practice.h"
+#include "gz/gz_menu_scene.h"
 #include "gz/gz_menu_settings.h"
 #include "gz/gz_menu_tools.h"
 #include "gz/gz_menu_warp.h"
 #include "gz/gz_utility_draw.h"
 #include "SSystem/SComponent/c_counter.h"
+
 static const f32 MAIN_LINE_SPACING = 30.0f;
 static const f32 MAIN_X_OFFSET = 8.0f;
 static const f32 MAIN_Y_OFFSET = 10.0f;
@@ -59,7 +61,7 @@ gzMainMenu_c::gzMainMenu_c() {
     // mpMenus[MENU_INVENTORY] = NULL;
     mpMenus[MENU_MEMORY] = new (gzHeap(GZ_GROUP_MENU), 4) gzMemoryMenu_c();
     mpMenus[MENU_PRACTICE] = new (gzHeap(GZ_GROUP_MENU), 4) gzPracticeMenu_c();
-    mpMenus[MENU_SCENE] = NULL;
+    mpMenus[MENU_SCENE] = new (gzHeap(GZ_GROUP_MENU), 4) gzSceneMenu_c();
     mpMenus[MENU_SETTINGS] = new (gzHeap(GZ_GROUP_MENU), 4) gzSettingsMenu_c();
     mpMenus[MENU_TOOLS] = new (gzHeap(GZ_GROUP_MENU), 4) gzToolsMenu_c();
     mpMenus[MENU_WARPING] = new (gzHeap(GZ_GROUP_MENU), 4) gzWarpMenu_c();

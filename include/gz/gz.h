@@ -7,6 +7,7 @@
 #include "gz/gz_manager_cheats.h"
 #include "gz/gz_manager_practice.h"
 #include "gz/gz_manager_tools.h"
+#include "gz/gz_manager_scene.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
 #include "m_Do/m_Do_controller_pad.h"
@@ -154,6 +155,14 @@ struct gzCheatsSettings_s {
     bool mUnrestrictedItems;
 };
 
+struct gzSceneSettings_s {
+    bool mFreezeTime;
+    bool mFreezeActors;
+    bool mFreezeCamera;
+    bool mMuteBGM;
+    bool mMuteSFX;
+};
+
 struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
     bool mDropShadows;
@@ -167,6 +176,7 @@ struct gzSettings_s {
     
     gzCheatsSettings_s mCheats;
     gzToolsSettings_s mTools;
+    gzSceneSettings_s mScene;
     gzCommandCombos_s mCommandCombos;
 };
 
@@ -396,6 +406,20 @@ public:
     void setTool_FreeCam(bool i_opt) { mSettings.mTools.mFreeCam = i_opt; }
     void setTool_UniversalMapDelay(bool i_opt) { mSettings.mTools.mUniversalMapDelay = i_opt; }    
 
+    // Scene
+    bool isScene_FreezeTime() { return mSettings.mScene.mFreezeTime; }
+    bool isScene_FreezeActors() { return mSettings.mScene.mFreezeActors; }
+    bool isScene_FreezeCamera() { return mSettings.mScene.mFreezeCamera; }
+    bool isScene_MuteBGM() { return mSettings.mScene.mMuteBGM; }
+    bool isScene_MuteSFX() { return mSettings.mScene.mMuteSFX; }
+
+    void setScene_FreezeTime(bool i_opt) { mSettings.mScene.mFreezeTime = i_opt; }
+    void setScene_FreezeActors(bool i_opt) { mSettings.mScene.mFreezeActors = i_opt; }
+    void setScene_FreezeCamera(bool i_opt) { mSettings.mScene.mFreezeCamera = i_opt; }
+    void setScene_MuteBGM(bool i_opt) { mSettings.mScene.mMuteBGM = i_opt; }
+    void setScene_MuteSFX(bool i_opt) { mSettings.mScene.mMuteSFX = i_opt; }
+
+
     void seStart(u32 i_sfxID) {
         if (mSettings.mMenuSfx) mDoAud_seStart(i_sfxID, NULL, 0, 0);
     }
@@ -499,6 +523,7 @@ public:
     gzSaveLoaderMng_c mSaveLoaderMng;
     gzCheatsMng_c mCheatsMng;
     gzToolsMng_c mToolsMng;
+    gzSceneMng_c mSceneMng;
 
     f32 mIconXPos;
     f32 mIconYPos;
@@ -814,6 +839,27 @@ inline void gzInfo_offTool_Teleport() { g_gzInfo.setTool_Teleport(false); }
 inline void gzInfo_offTool_Timer() { g_gzInfo.setTool_Timer(false); }
 inline void gzInfo_offTool_FreeCam() { g_gzInfo.setTool_FreeCam(false); }
 inline void gzInfo_offTool_UniversalMapDelay() { g_gzInfo.setTool_UniversalMapDelay(false); }
+
+// Scene
+inline bool gzInfo_isScene_FreezeTime() { return g_gzInfo.isScene_FreezeTime(); }
+inline void gzInfo_onScene_FreezeTime() { g_gzInfo.setScene_FreezeTime(true); }
+inline void gzInfo_offScene_FreezeTime() { g_gzInfo.setScene_FreezeTime(false); }
+
+inline bool gzInfo_isScene_FreezeActors() { return g_gzInfo.isScene_FreezeActors(); }
+inline void gzInfo_onScene_FreezeActors() { g_gzInfo.setScene_FreezeActors(true); }
+inline void gzInfo_offScene_FreezeActors() { g_gzInfo.setScene_FreezeActors(false); }
+
+inline bool gzInfo_isScene_FreezeCamera() { return g_gzInfo.isScene_FreezeCamera(); }
+inline void gzInfo_onScene_FreezeCamera() { g_gzInfo.setScene_FreezeCamera(true); }
+inline void gzInfo_offScene_FreezeCamera() { g_gzInfo.setScene_FreezeCamera(false); }
+
+inline bool gzInfo_isScene_MuteBGM() { return g_gzInfo.isScene_MuteBGM(); }
+inline void gzInfo_onScene_MuteBGM() { g_gzInfo.setScene_MuteBGM(true); }
+inline void gzInfo_offScene_MuteBGM() { g_gzInfo.setScene_MuteBGM(false); }
+
+inline bool gzInfo_isScene_MuteSFX() { return g_gzInfo.isScene_MuteSFX(); }
+inline void gzInfo_onScene_MuteSFX() { g_gzInfo.setScene_MuteSFX(true); }
+inline void gzInfo_offScene_MuteSFX() { g_gzInfo.setScene_MuteSFX(false); }
 
 
 inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}
