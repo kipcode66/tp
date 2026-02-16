@@ -22,6 +22,7 @@ class gzNotification_c;
 class gzToolsMng_c;
 class dSelect_cursor_c;
 class gzCapture_c;
+class gzSetupWizard_c;
 class JKRArchive;
 class JKRHeap;
 
@@ -85,6 +86,39 @@ static const u32 GZ_TEXT_COLORS[] = {
     COLOR_WILD_STRAWBERRY, COLOR_ZESTY_CHARTREUSE
 };
 static const int GZ_NUM_TEXT_COLORS = ARRAY_SIZE(GZ_TEXT_COLORS);
+
+inline const char* gzGetThemeColorName(u32 color) {
+    switch (color) {
+    case COLOR_AMETHYST: return "amethyst";
+    case COLOR_AQUAMARINE: return "aquamarine";
+    case COLOR_BANANA_MANIA: return "banana mania";
+    case COLOR_BOLD_CRIMSON: return "bold crimson";
+    case COLOR_BUBBLEGUM_PINK: return "bubblegum pink";
+    case COLOR_CERULEAN: return "cerulean";
+    case COLOR_COSMIC_COBALT: return "cosmic cobalt";
+    case COLOR_ELECTRIC_BLUE: return "electric blue";
+    case COLOR_FIERY_ORANGE: return "fiery orange";
+    case COLOR_FLAMINGO_FEATHER: return "flamingo feather";
+    case COLOR_GOLD_DROP: return "gold drop";
+    case COLOR_LEMON_YELLOW: return "lemon yellow";
+    case COLOR_LIME_GREEN: return "lime green";
+    case COLOR_MAGENTA_MAGIC: return "magenta magic";
+    case COLOR_MIDNIGHT_BLUE: return "midnight blue";
+    case COLOR_MYSTICAL_PURPLE: return "mystical purple";
+    case COLOR_NEON_CARROT: return "neon carrot";
+    case COLOR_PERIWINKLE: return "periwinkle";
+    case COLOR_SAPPHIRE_SPARKLE: return "sapphire sparkle";
+    case COLOR_SHAMROCK_GREEN: return "shamrock green";
+    case COLOR_SUNNY_YELLOW: return "sunny yellow";
+    case COLOR_TANGERINE_TWIST: return "tangerine twist";
+    case COLOR_TROPICAL_TURQUOISE: return "tropical turquoise";
+    case COLOR_VIVID_VIOLET: return "vivid violet";
+    case COLOR_WHITE: return "white";
+    case COLOR_WILD_STRAWBERRY: return "wild strawberry";
+    case COLOR_ZESTY_CHARTREUSE: return "zesty chartreuse";
+    default: return "unknown";
+    }
+}
 
 struct gzCommandCombos_s {
     u32 mGorgeVoid;
@@ -496,6 +530,7 @@ public:
     gzNotification_c* mpNotification;
     dSelect_cursor_c* mpTPCursor;
     gzCapture_c* mpCapture;
+    gzSetupWizard_c* mpSetupWizard;
     gzTextBox* mpMenuDescription;
     bool mMenuOption;
     s32 mTopLine;
