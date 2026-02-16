@@ -65,43 +65,23 @@ void gzSetupWizard_c::applySettings() {
 void gzSetupWizard_c::execute() {
     if (mStep == STEP_DONE) return;
 
-    if (gzPad::getTrigLeft()) {
+    if (gzPad::getTrigLeft() || gzPad::getTrigRight()) {
+        bool isLeft = gzPad::getTrigLeft();
         switch (mStep) {
         case STEP_WELCOME:
         case STEP_BOOT_TARGET:
         case STEP_MENU_PAUSES:
         case STEP_DISPLAY_MODE:
         case STEP_MENU_SFX:
-            mSelection = mSelection == 0 ? 1 : 0;
+            mSelection ^= 1;
             break;
         case STEP_CURSOR_TYPE:
-            mSelection = mSelection == 0 ? 2 : mSelection - 1;
+            mSelection = isLeft ? (mSelection == 0 ? 2 : mSelection - 1)
+                                : (mSelection == 2 ? 0 : mSelection + 1);
             break;
         case STEP_THEME:
-            mThemeIndex = (mThemeIndex - 1 + GZ_NUM_TEXT_COLORS) % GZ_NUM_TEXT_COLORS;
-            g_gzInfo.setTextColor(GZ_TEXT_COLORS[mThemeIndex]);
-            break;
-        default:
-            break;
-        }
-        if (mStep == STEP_MENU_SFX) g_gzInfo.setMenuSfx(mSelection == 0);
-        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
-    }
-
-    if (gzPad::getTrigRight()) {
-        switch (mStep) {
-        case STEP_WELCOME:
-        case STEP_BOOT_TARGET:
-        case STEP_MENU_PAUSES:
-        case STEP_DISPLAY_MODE:
-        case STEP_MENU_SFX:
-            mSelection = mSelection == 1 ? 0 : 1;
-            break;
-        case STEP_CURSOR_TYPE:
-            mSelection = mSelection == 2 ? 0 : mSelection + 1;
-            break;
-        case STEP_THEME:
-            mThemeIndex = (mThemeIndex + 1) % GZ_NUM_TEXT_COLORS;
+            mThemeIndex = isLeft ? (mThemeIndex - 1 + GZ_NUM_TEXT_COLORS) % GZ_NUM_TEXT_COLORS
+                                 : (mThemeIndex + 1) % GZ_NUM_TEXT_COLORS;
             g_gzInfo.setTextColor(GZ_TEXT_COLORS[mThemeIndex]);
             break;
         default:
@@ -120,7 +100,6 @@ void gzSetupWizard_c::execute() {
         case STEP_THEME:
             mStep = STEP_CURSOR_TYPE;
             mSelection = mCursorType - 1;
-            g_gzInfo.setCursorType(mCursorType);
             break;
         case STEP_BOOT_TARGET:
             mStep = STEP_THEME;
@@ -154,7 +133,6 @@ void gzSetupWizard_c::execute() {
             } else {
                 mStep = STEP_CURSOR_TYPE;
                 mSelection = 0;
-                g_gzInfo.setCursorType(gzInfo_c::CURSOR_CLASSIC);
             }
             break;
         case STEP_CURSOR_TYPE:
@@ -271,110 +249,33 @@ void gzSetupWizard_c::draw() {
     f32 tpCursorX = 0.0f;
 
     switch (mStep) {
-    case STEP_WELCOME: {
-        static const f32 W_OPT0_X = -40.0f;
-        static const f32 W_OPT1_X = 40.0f;
-        u32 col0 = (mSelection == 0) ? cursorColor : COLOR_WHITE;
-        u32 col1 = (mSelection == 1) ? cursorColor : COLOR_WHITE;
-        if (mpOption0 != NULL) {
-            mpOption0->setFontSize(18.0f, 18.0f);
-            mpOption0->setString("no");
-            mpOption0->draw(W_OPT0_X, optionY, col0, HBIND_CENTER);
-        }
-        if (mpOption1 != NULL) {
-            mpOption1->setFontSize(18.0f, 18.0f);
-            mpOption1->setString("yes");
-            mpOption1->draw(W_OPT1_X, optionY, col1, HBIND_CENTER);
-        }
-        if (showTP && mpTPCursor != NULL) {
-            tpCursorTarget = (mSelection == 0) ? mpOption0 : mpOption1;
-            tpCursorX = (mSelection == 0) ? W_OPT0_X : W_OPT1_X;
-        }
+    case STEP_WELCOME:
+        drawBinaryOptions("no", "yes", 40.0f, optionY, cursorColor, showTP,
+                          tpCursorTarget, tpCursorX);
         break;
-    }
-    case STEP_BOOT_TARGET: {
-        static const f32 B_OPT0_X = -60.0f;
-        static const f32 B_OPT1_X = 60.0f;
-        u32 col0 = (mSelection == 0) ? cursorColor : COLOR_WHITE;
-        u32 col1 = (mSelection == 1) ? cursorColor : COLOR_WHITE;
-        if (mpOption0 != NULL) {
-            mpOption0->setFontSize(18.0f, 18.0f);
-            mpOption0->setString("title screen");
-            mpOption0->draw(B_OPT0_X, optionY, col0, HBIND_CENTER);
-        }
-        if (mpOption1 != NULL) {
-            mpOption1->setFontSize(18.0f, 18.0f);
-            mpOption1->setString("tpgz menu");
-            mpOption1->draw(B_OPT1_X, optionY, col1, HBIND_CENTER);
-        }
-        if (showTP && mpTPCursor != NULL) {
-            tpCursorTarget = (mSelection == 0) ? mpOption0 : mpOption1;
-            tpCursorX = (mSelection == 0) ? B_OPT0_X : B_OPT1_X;
-        }
+    case STEP_BOOT_TARGET:
+        drawBinaryOptions("title screen", "tpgz menu", 60.0f, optionY, cursorColor, showTP,
+                          tpCursorTarget, tpCursorX);
         break;
-    }
-    case STEP_MENU_PAUSES: {
-        static const f32 M_OPT0_X = -40.0f;
-        static const f32 M_OPT1_X = 40.0f;
-        u32 col0 = (mSelection == 0) ? cursorColor : COLOR_WHITE;
-        u32 col1 = (mSelection == 1) ? cursorColor : COLOR_WHITE;
-        if (mpOption0 != NULL) {
-            mpOption0->setFontSize(18.0f, 18.0f);
-            mpOption0->setString("yes");
-            mpOption0->draw(M_OPT0_X, optionY, col0, HBIND_CENTER);
-        }
-        if (mpOption1 != NULL) {
-            mpOption1->setFontSize(18.0f, 18.0f);
-            mpOption1->setString("no");
-            mpOption1->draw(M_OPT1_X, optionY, col1, HBIND_CENTER);
-        }
-        if (showTP && mpTPCursor != NULL) {
-            tpCursorTarget = (mSelection == 0) ? mpOption0 : mpOption1;
-            tpCursorX = (mSelection == 0) ? M_OPT0_X : M_OPT1_X;
-        }
+    case STEP_MENU_PAUSES:
+        drawBinaryOptions("yes", "no", 40.0f, optionY, cursorColor, showTP,
+                          tpCursorTarget, tpCursorX);
         break;
-    }
     case STEP_CURSOR_TYPE: {
-        u32 col0 = (mSelection == 0) ? cursorColor : COLOR_WHITE;
-        u32 col1 = (mSelection == 1) ? cursorColor : COLOR_WHITE;
-        u32 col2 = (mSelection == 2) ? cursorColor : COLOR_WHITE;
-
-        static const f32 OPT0_X = -80.0f;
-        static const f32 OPT1_X = 0.0f;
-        static const f32 OPT2_X = 80.0f;
-
-        if (mpOption0 != NULL) {
-            mpOption0->setFontSize(18.0f, 18.0f);
-            mpOption0->setString("classic");
-            mpOption0->draw(OPT0_X, optionY, col0, HBIND_CENTER);
-        }
-        if (mpOption1 != NULL) {
-            mpOption1->setFontSize(18.0f, 18.0f);
-            mpOption1->setString("tp");
-            mpOption1->draw(OPT1_X, optionY, col1, HBIND_CENTER);
-        }
-        if (mpOption2 != NULL) {
-            mpOption2->setFontSize(18.0f, 18.0f);
-            mpOption2->setString("both");
-            mpOption2->draw(OPT2_X, optionY, col2, HBIND_CENTER);
-        }
-
-        // Set up TP cursor target for selected option
-        if (showTP && mpTPCursor != NULL) {
-            switch (mSelection) {
-            case 0:
-                tpCursorTarget = mpOption0;
-                tpCursorX = OPT0_X;
-                break;
-            case 1:
-                tpCursorTarget = mpOption1;
-                tpCursorX = OPT1_X;
-                break;
-            case 2:
-                tpCursorTarget = mpOption2;
-                tpCursorX = OPT2_X;
-                break;
+        static const f32 optXs[] = {-80.0f, 0.0f, 80.0f};
+        static const char* const optLabels[] = {"classic", "tp", "both"};
+        gzTextBox* opts[] = {mpOption0, mpOption1, mpOption2};
+        for (int i = 0; i < 3; i++) {
+            if (opts[i] != NULL) {
+                opts[i]->setFontSize(18.0f, 18.0f);
+                opts[i]->setString(optLabels[i]);
+                opts[i]->draw(optXs[i], optionY,
+                              (mSelection == i) ? cursorColor : COLOR_WHITE, HBIND_CENTER);
             }
+        }
+        if (showTP && mpTPCursor != NULL) {
+            tpCursorTarget = opts[mSelection];
+            tpCursorX = optXs[mSelection];
         }
         break;
     }
@@ -390,48 +291,14 @@ void gzSetupWizard_c::draw() {
         }
         break;
     }
-    case STEP_DISPLAY_MODE: {
-        static const f32 DM_OPT0_X = -60.0f;
-        static const f32 DM_OPT1_X = 60.0f;
-        u32 col0 = (mSelection == 0) ? cursorColor : COLOR_WHITE;
-        u32 col1 = (mSelection == 1) ? cursorColor : COLOR_WHITE;
-        if (mpOption0 != NULL) {
-            mpOption0->setFontSize(18.0f, 18.0f);
-            mpOption0->setString("interlaced");
-            mpOption0->draw(DM_OPT0_X, optionY, col0, HBIND_CENTER);
-        }
-        if (mpOption1 != NULL) {
-            mpOption1->setFontSize(18.0f, 18.0f);
-            mpOption1->setString("progressive");
-            mpOption1->draw(DM_OPT1_X, optionY, col1, HBIND_CENTER);
-        }
-        if (showTP && mpTPCursor != NULL) {
-            tpCursorTarget = (mSelection == 0) ? mpOption0 : mpOption1;
-            tpCursorX = (mSelection == 0) ? DM_OPT0_X : DM_OPT1_X;
-        }
+    case STEP_DISPLAY_MODE:
+        drawBinaryOptions("interlaced", "progressive", 60.0f, optionY, cursorColor, showTP,
+                          tpCursorTarget, tpCursorX);
         break;
-    }
-    case STEP_MENU_SFX: {
-        static const f32 S_OPT0_X = -40.0f;
-        static const f32 S_OPT1_X = 40.0f;
-        u32 col0 = (mSelection == 0) ? cursorColor : COLOR_WHITE;
-        u32 col1 = (mSelection == 1) ? cursorColor : COLOR_WHITE;
-        if (mpOption0 != NULL) {
-            mpOption0->setFontSize(18.0f, 18.0f);
-            mpOption0->setString("yes");
-            mpOption0->draw(S_OPT0_X, optionY, col0, HBIND_CENTER);
-        }
-        if (mpOption1 != NULL) {
-            mpOption1->setFontSize(18.0f, 18.0f);
-            mpOption1->setString("no");
-            mpOption1->draw(S_OPT1_X, optionY, col1, HBIND_CENTER);
-        }
-        if (showTP && mpTPCursor != NULL) {
-            tpCursorTarget = (mSelection == 0) ? mpOption0 : mpOption1;
-            tpCursorX = (mSelection == 0) ? S_OPT0_X : S_OPT1_X;
-        }
+    case STEP_MENU_SFX:
+        drawBinaryOptions("yes", "no", 40.0f, optionY, cursorColor, showTP,
+                          tpCursorTarget, tpCursorX);
         break;
-    }
     case STEP_COMPLETE: {
         if (mpOption0 != NULL) {
             mpOption0->setFontSize(18.0f, 18.0f);
@@ -467,5 +334,26 @@ void gzSetupWizard_c::draw() {
                       gzMenuLayout::TP_CURSOR_Y_OFFSET;
         mpTPCursor->setPos(cursorX, cursorY, (J2DPane*)tpCursorTarget, false);
         mpTPCursor->draw();
+    }
+}
+
+void gzSetupWizard_c::drawBinaryOptions(const char* text0, const char* text1, f32 spread,
+                                         f32 y, u32 selColor, bool showTP,
+                                         gzTextBox*& outTarget, f32& outX) {
+    u32 col0 = (mSelection == 0) ? selColor : COLOR_WHITE;
+    u32 col1 = (mSelection == 1) ? selColor : COLOR_WHITE;
+    if (mpOption0 != NULL) {
+        mpOption0->setFontSize(18.0f, 18.0f);
+        mpOption0->setString(text0);
+        mpOption0->draw(-spread, y, col0, HBIND_CENTER);
+    }
+    if (mpOption1 != NULL) {
+        mpOption1->setFontSize(18.0f, 18.0f);
+        mpOption1->setString(text1);
+        mpOption1->draw(spread, y, col1, HBIND_CENTER);
+    }
+    if (showTP && mpTPCursor != NULL) {
+        outTarget = (mSelection == 0) ? mpOption0 : mpOption1;
+        outX = (mSelection == 0) ? -spread : spread;
     }
 }

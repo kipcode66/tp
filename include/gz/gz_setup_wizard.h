@@ -36,6 +36,9 @@ public:
 
 private:
     void applySettings();
+    void drawBinaryOptions(const char* text0, const char* text1, f32 spread,
+                           f32 y, u32 selColor, bool showTP,
+                           gzTextBox*& outTarget, f32& outX);
 
     WizardStep_e mStep;
     int mSelection;
