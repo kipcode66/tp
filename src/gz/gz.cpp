@@ -597,7 +597,11 @@ int gzInfo_c::execute() {
 
             OSReport("tpgz auto: 0x%08X\n", (u32)&g_gzAutoState);
 
-            loadSettingsMemcard();
+#ifndef __REVOLUTION_SDK__
+            mIsNintendont = detectNintendont();
+            OSReport("tpgz: nintendont detected = %d\n", mIsNintendont);
+#endif
+            loadSettings();
 
             dComIfGp_setOxygen(OXYGEN_MAX);
             dComIfGp_setNowOxygen(OXYGEN_MAX);
@@ -1044,7 +1048,7 @@ int gzInfo_c::storeSettingsMemcard() {
             ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
             if (ret == CARD_RESULT_READY) {
                 OSReport("stored tpgz settings to memcard!\n");
-                gzInfo_sendNotification("settings saved!");
+                gzInfo_sendNotification("settings saved to memcard!");
             }
 
             CARDClose(&file);
@@ -1068,7 +1072,7 @@ int gzInfo_c::loadSettingsMemcard() {
         ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
         if (ret == CARD_RESULT_READY) {
             OSReport("loaded tpgz settings from memcard!\n");
-            gzInfo_sendNotification("settings loaded!");
+            gzInfo_sendNotification("settings loaded from memcard!");
 
             gzConfigHeader_s cfg;
             memcpy(&cfg, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzConfigHeader_s));
@@ -1083,7 +1087,7 @@ int gzInfo_c::loadSettingsMemcard() {
 
         CARDClose(&file);
     } else {
-        gzInfo_sendNotification("no stored settings found!");
+        gzInfo_sendNotification("no memcard settings found!");
     }
 
     return ret;
@@ -1101,7 +1105,7 @@ int gzInfo_c::deleteSettingsMemcard() {
     ret = CARDDelete(0, "tpgzcfg");
     if (ret == CARD_RESULT_READY) {
         OSReport("deleted tpgz settings from memcard!\n");
-        gzInfo_sendNotification("settings deleted!");
+        gzInfo_sendNotification("memcard settings deleted!");
     } else {
         OSReport_Error("failed to delete tpgz settings from memcard!\n");
     }

@@ -69,17 +69,13 @@ struct RollCheckerState {
 };
 
 struct GorgeVoidState {
-    static const int BUF_SIZE = 16;
-    static const s32 WINDOW = 10;
+    static const s32 WARP_CS_FRAMES = 160;
     bool comboHeld;
-    bool active;
+    bool timerStarted;
     bool gotIt;
-    bool prevHalt;
-    s32 freeFrame;
-    s32 lastEnd;
-    s32 presses[BUF_SIZE];
-    s32 pressCount;
-    s32 processedCount;
+    s32 previousFrame;
+    s32 counterDifference;
+    s32 afterCsVal;
 };
 
 struct ElevatorEscapeState {

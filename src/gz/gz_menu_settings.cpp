@@ -39,11 +39,11 @@ u8 gzSettingsMenu_c::getHaihaiFlags(int i) {
 }
 
 static void storeSettingsCallbackWrapper(void*) {
-    gzInfo_storeSettingsMemcard();
+    gzInfo_storeSettings();
 }
 
 static void deleteSettingsCallbackWrapper(void*) {
-    gzInfo_deleteSettingsMemcard();
+    gzInfo_deleteSettings();
 }
 
 static void returnToSettings() {
@@ -63,13 +63,12 @@ void gzSettingsMenu_c::updateDynamicLines() {
     updateLineBounds(mpLines, LINE_NUM);
 }
 
-int gzSettingsMenu_c::deleteCardConfirmCb(gzConfirm_c* i_confirm, void* i_data) {
-    gzInfo_deleteSettingsMemcard();
-    gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
+int gzSettingsMenu_c::deleteConfirmCb(gzConfirm_c* i_confirm, void* i_data) {
+    gzInfo_deleteSettings();
     return 1;
 }
 
-int gzSettingsMenu_c::deleteCardReturnCb(gzConfirm_c* i_confirm, void* i_data) {
+int gzSettingsMenu_c::deleteReturnCb(gzConfirm_c* i_confirm, void* i_data) {
     return 1;
 }
 
@@ -92,9 +91,9 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     // Actions
     mpCommandCombos = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("command combos", "change default command combos");
     mpMenuPositions = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("menu positions", "set positions of overlay menus");
-    mpSaveCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("save card", "saves tpgz settings to memory card");
-    mpLoadCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("load card", "loads tpgz settings from memory card");
-    mpDeleteCard = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("delete card", "deletes tpgz settings from memory card");
+    mpSave = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("save settings", "saves tpgz settings");
+    mpLoad = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("load settings", "loads tpgz settings");
+    mpDelete = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("delete settings", "deletes tpgz settings");
 
     mpLines[SETTING_BOOT_TO_MENU] = mpBootToMenu;
     mpLines[SETTING_CURSOR_TYPE] = mpCursorType;
@@ -107,9 +106,9 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpLines[SETTING_THEME] = mpTheme;
     mpLines[SETTING_COMMAND_COMBOS] = mpCommandCombos;
     mpLines[SETTING_MENU_POSITIONS] = mpMenuPositions;
-    mpLines[SETTING_SAVE_CARD] = mpSaveCard;
-    mpLines[SETTING_LOAD_CARD] = mpLoadCard;
-    mpLines[SETTING_DELETE_CARD] = mpDeleteCard;
+    mpLines[SETTING_SAVE] = mpSave;
+    mpLines[SETTING_LOAD] = mpLoad;
+    mpLines[SETTING_DELETE] = mpDelete;
 }
 
 gzSettingsMenu_c::~gzSettingsMenu_c() {
@@ -154,14 +153,14 @@ void gzSettingsMenu_c::_delete() {
     delete mpMenuPositions;
     mpMenuPositions = NULL;
 
-    delete mpSaveCard;
-    mpSaveCard = NULL;
+    delete mpSave;
+    mpSave = NULL;
 
-    delete mpLoadCard;
-    mpLoadCard = NULL;
+    delete mpLoad;
+    mpLoad = NULL;
 
-    delete mpDeleteCard;
-    mpDeleteCard = NULL;
+    delete mpDelete;
+    mpDelete = NULL;
 
     for (int i = 0; i < LINE_NUM; i++) {
         delete mpLines[i];
@@ -199,16 +198,16 @@ void gzSettingsMenu_c::execute() {
             gzInfo_setMenuOption(!gzInfo_isMenuOption());
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             break;
-        case SETTING_SAVE_CARD:
-            g_gzInfo.storeSettingsMemcard();
+        case SETTING_SAVE:
+            gzInfo_storeSettings();
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             return;
-        case SETTING_LOAD_CARD:
-            gzInfo_loadSettingsMemcard();
+        case SETTING_LOAD:
+            gzInfo_loadSettings();
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             break;
-        case SETTING_DELETE_CARD:
-            mpConfirm = new (gzHeap(GZ_GROUP_UI), 4) gzConfirm_c(deleteCardConfirmCb, deleteCardReturnCb, this, "delete settings?");
+        case SETTING_DELETE:
+            mpConfirm = new (gzHeap(GZ_GROUP_UI), 4) gzConfirm_c(deleteConfirmCb, deleteReturnCb, this, "delete settings?");
             gzInfo_seStart(Z2SE_SY_CURSOR_OK);
             return;
         case SETTING_MENU_POSITIONS:

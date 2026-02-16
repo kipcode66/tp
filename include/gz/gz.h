@@ -189,6 +189,7 @@ public:
 
     gzInfo_c() {
         mGZInitialized = false;
+        mIsNintendont = false;
         mInitPhase = INIT_PHASE_IDLE;
         mMenuResourcesLoaded = false;
         mMenuLoadStep = 0;
@@ -225,6 +226,15 @@ public:
     int storeSettingsMemcard();
     int loadSettingsMemcard();
     int deleteSettingsMemcard();
+#ifndef __REVOLUTION_SDK__
+    bool detectNintendont();
+    int storeSettingsSD();
+    int loadSettingsSD();
+    int deleteSettingsSD();
+#endif
+    int storeSettings();
+    int loadSettings();
+    int deleteSettings();
     void showHeapUsage();
     void sendNotification(const char* msg);
     void sendNotification(const char* msg, int i_notificationType);
@@ -471,6 +481,7 @@ public:
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
+    bool mIsNintendont;
     int mInitPhase;
     bool mMenuResourcesLoaded;
     int mMenuLoadStep;
@@ -546,16 +557,18 @@ inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 
 inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcard(); }
 inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
+inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
+inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
+inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
+inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
 inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
 inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }
 inline u32 gzInfo_prevTextColor() { return g_gzInfo.prevTextColor(); }
 
-
 inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
-inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
 
 inline bool gzInfo_isInDungeon(int i_stageNo) {
     // Check if we're in the dungeon, and return true

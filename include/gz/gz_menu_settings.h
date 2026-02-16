@@ -20,9 +20,9 @@ public:
         // Actions
         SETTING_COMMAND_COMBOS,
         SETTING_MENU_POSITIONS,
-        SETTING_SAVE_CARD,
-        SETTING_LOAD_CARD,
-        SETTING_DELETE_CARD,
+        SETTING_SAVE,
+        SETTING_LOAD,
+        SETTING_DELETE,
 
         SETTING_MAX
     };
@@ -93,8 +93,8 @@ public:
 
     u8 getHaihaiFlags(int i);
 
-    static int deleteCardConfirmCb(gzConfirm_c* i_confirm, void* i_data);
-    static int deleteCardReturnCb(gzConfirm_c* i_confirm, void* i_data);
+    static int deleteConfirmCb(gzConfirm_c* i_confirm, void* i_data);
+    static int deleteReturnCb(gzConfirm_c* i_confirm, void* i_data);
 
     gzConfirm_c* mpConfirm;
 
@@ -112,9 +112,9 @@ private:
     // Actions
     gzLine* mpCommandCombos;
     gzLine* mpMenuPositions;
-    gzLine* mpSaveCard;
-    gzLine* mpLoadCard;
-    gzLine* mpDeleteCard;
+    gzLine* mpSave;
+    gzLine* mpLoad;
+    gzLine* mpDelete;
     gzLine* mpLines[LINE_NUM];
 };
 

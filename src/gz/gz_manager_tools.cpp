@@ -24,20 +24,20 @@
 void gzToolsMng_c::executeGorgeVoid() {
     // Warp command
     if (gzCheckComboToggle(g_gzInfo.mSettings.mCommandCombos.mGorgeVoid, mGorgeVoid.comboHeld)) {
-        mGorgeVoid.active = true;
-        mGorgeVoid.gotIt = false;
-        mGorgeVoid.prevHalt = false;
-        mGorgeVoid.freeFrame = -1;
-        mGorgeVoid.lastEnd = -1;
-        mGorgeVoid.pressCount = 0;
-        mGorgeVoid.processedCount = 0;
         g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_ANYP_e, 9,
-        gzGetSaveCallbackList(gzSaveLoaderMng_c::CATEGORY_ANYP_e),
-    gzGetSaveCallbackListSize(gzSaveLoaderMng_c::CATEGORY_ANYP_e));
+            gzGetSaveCallbackList(gzSaveLoaderMng_c::CATEGORY_ANYP_e),
+            gzGetSaveCallbackListSize(gzSaveLoaderMng_c::CATEGORY_ANYP_e));
+        mGorgeVoid.timerStarted = false;
         return;
     }
 
-    if (!mGorgeVoid.active || !daAlink_c::checkStageName("F_SP121")) return;
+    if (!daAlink_c::checkStageName("F_SP121")) {
+        mGorgeVoid.timerStarted = false;
+        mGorgeVoid.counterDifference = 0;
+        mGorgeVoid.afterCsVal = 0;
+        mGorgeVoid.gotIt = false;
+        return;
+    }
 
     dEvt_control_c* event = dComIfGp_getEvent();
     if (event == NULL) return;
@@ -45,65 +45,41 @@ void gzToolsMng_c::executeGorgeVoid() {
     bool halt = (event->mEventStatus == 1);
     s32 frame = (s32)cCt_getFrameCount();
 
-    // Detect cutscene end (1->0)
-    if (!halt && mGorgeVoid.prevHalt) {
-        mGorgeVoid.lastEnd = frame;
-        OSReport("[GV] f%d: cutscene end\n", frame);
+    // Start timer when cutscene halt begins
+    if (!mGorgeVoid.timerStarted && halt) {
+        mGorgeVoid.timerStarted = true;
+        mGorgeVoid.previousFrame = frame;
+        mGorgeVoid.counterDifference = 0;
+        mGorgeVoid.afterCsVal = 0;
+        mGorgeVoid.gotIt = false;
     }
 
-    // Detect cutscene start (0->1): check for 1-frame gap
-    if (halt && !mGorgeVoid.prevHalt && mGorgeVoid.freeFrame < 0 && mGorgeVoid.lastEnd >= 0) {
-        if (frame - mGorgeVoid.lastEnd <= 2) {
-            mGorgeVoid.freeFrame = mGorgeVoid.lastEnd;
-            OSReport("[GV] f%d: free frame = %d (gap=%d)\n",
-                     frame, mGorgeVoid.freeFrame, frame - mGorgeVoid.lastEnd);
-        }
+    if (!mGorgeVoid.timerStarted) return;
+
+    mGorgeVoid.counterDifference += frame - mGorgeVoid.previousFrame;
+    mGorgeVoid.previousFrame = frame;
+
+    if (mGorgeVoid.counterDifference > GorgeVoidState::WARP_CS_FRAMES) {
+        mGorgeVoid.afterCsVal = mGorgeVoid.counterDifference - GorgeVoidState::WARP_CS_FRAMES;
     }
 
-    mGorgeVoid.prevHalt = halt;
+    // Only check in relevant window
+    if (mGorgeVoid.counterDifference <= 123 || mGorgeVoid.afterCsVal >= 10) return;
 
-    if (mGorgeVoid.gotIt) return;
+    bool inputDetected = (gzPad::getHold() & PAD_TRIGGER_L) && (gzPad::getTrig() & PAD_BUTTON_A);
+    if (mGorgeVoid.gotIt || !inputDetected) return;
 
-    // Buffer A presses (ring buffer)
-    if (gzPad::getTrig() & PAD_BUTTON_A) {
-        s32 idx = mGorgeVoid.pressCount % GorgeVoidState::BUF_SIZE;
-        mGorgeVoid.presses[idx] = frame;
-        mGorgeVoid.pressCount++;
-        OSReport("[GV] f%d: A press #%d\n", frame, mGorgeVoid.pressCount);
-    }
-
-    if (mGorgeVoid.freeFrame < 0) return;
-
-    // Skip overwritten entries
-    if (mGorgeVoid.pressCount - mGorgeVoid.processedCount > GorgeVoidState::BUF_SIZE) {
-        mGorgeVoid.processedCount = mGorgeVoid.pressCount - GorgeVoidState::BUF_SIZE;
-    }
-
-    // Process buffered + new presses
-    while (mGorgeVoid.processedCount < mGorgeVoid.pressCount && !mGorgeVoid.gotIt) {
-        s32 idx = mGorgeVoid.processedCount % GorgeVoidState::BUF_SIZE;
-        s32 delta = mGorgeVoid.presses[idx] - mGorgeVoid.freeFrame;
-        mGorgeVoid.processedCount++;
-
-        if (delta < -GorgeVoidState::WINDOW || delta > GorgeVoidState::WINDOW) continue;
-
-        char buf[20];
-        if (delta == 0) {
-            gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
-            mGorgeVoid.gotIt = true;
-        } else if (delta < 0) {
-            snprintf(buf, sizeof(buf), "%df early", -delta);
-            gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
-        } else {
-            snprintf(buf, sizeof(buf), "%df late", delta);
-            gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
-        }
-    }
-
-    // Done after window expires
-    if (frame - mGorgeVoid.freeFrame > GorgeVoidState::WINDOW) {
-        OSReport("[GV] f%d: window closed, done\n", frame);
-        mGorgeVoid.active = false;
+    char buf[20];
+    if (mGorgeVoid.counterDifference < GorgeVoidState::WARP_CS_FRAMES) {
+        snprintf(buf, sizeof(buf), "-%df",
+                 GorgeVoidState::WARP_CS_FRAMES - mGorgeVoid.counterDifference);
+        gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_WARNING);
+    } else if (mGorgeVoid.counterDifference == GorgeVoidState::WARP_CS_FRAMES) {
+        gzInfo_sendNotification("got it", gzNotification_c::NOTIFY_INFO);
+        mGorgeVoid.gotIt = true;
+    } else {
+        snprintf(buf, sizeof(buf), "+%df", mGorgeVoid.afterCsVal);
+        gzInfo_sendNotification(buf, gzNotification_c::NOTIFY_ERROR);
     }
 }
 
