@@ -27,11 +27,10 @@ void gzToolsMng_c::executeGorgeVoid() {
         g_gzInfo.mSaveLoaderMng.loadSave(gzSaveLoaderMng_c::CATEGORY_ANYP_e, 9,
             gzGetSaveCallbackList(gzSaveLoaderMng_c::CATEGORY_ANYP_e),
             gzGetSaveCallbackListSize(gzSaveLoaderMng_c::CATEGORY_ANYP_e));
-        mGorgeVoid.timerStarted = false;
         return;
     }
 
-    if (!daAlink_c::checkStageName("F_SP121")) {
+    if (!daAlink_c::checkStageName("F_SP121") || g_gzInfo.mSaveLoaderMng.mLoadPhase != gzSaveLoaderMng_c::PHASE_WAIT_e) {
         mGorgeVoid.timerStarted = false;
         mGorgeVoid.counterDifference = 0;
         mGorgeVoid.afterCsVal = 0;
@@ -45,8 +44,7 @@ void gzToolsMng_c::executeGorgeVoid() {
     bool halt = (event->mEventStatus == 1);
     s32 frame = (s32)cCt_getFrameCount();
 
-    // Start timer when cutscene halt begins
-    if (!mGorgeVoid.timerStarted && halt) {
+    if (!mGorgeVoid.timerStarted && halt && event->mEventId == 262) {
         mGorgeVoid.timerStarted = true;
         mGorgeVoid.previousFrame = frame;
         mGorgeVoid.counterDifference = 0;
