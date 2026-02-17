@@ -10,7 +10,7 @@
 #include "dolphin/gx/GXTexture.h"
 
 static JKRExpHeap* s_gzHeap = NULL;
-static const u32 GZ_HEAP_SIZE = 0x100000;  // 1MB
+static const u32 GZ_HEAP_SIZE = 0xC0000;  // 768KB
 
 J2DPicture* gzCopyArchiveTexture(JKRArchive* arc, const char* name, JKRHeap* heap) {
     ResTIMG* src = (ResTIMG*)arc->getResource('TIMG', name);
@@ -45,8 +45,6 @@ void gzCreateHeap() {
 
     JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
     s_gzHeap = JKRExpHeap::create(GZ_HEAP_SIZE, archiveHeap, true);
-
-    JKRAllocFromAram(0xC0000, JKRAramHeap::HEAD);  // 768KB test fill
 }
 
 void gzSetGzHeap(JKRHeap* heap) {
