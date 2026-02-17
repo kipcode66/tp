@@ -102,6 +102,8 @@ struct gzInputViewer_s {
     J2DPicture* pDPad[4];
     J2DPicture* pTrigL;
     J2DPicture* pTrigR;
+    gzTextBox* pStickValueText;
+    gzTextBox* pSubstickValueText;
 };
 
 class gzToolsMng_c {

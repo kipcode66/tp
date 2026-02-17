@@ -596,6 +596,9 @@ void gzToolsMng_c::drawInputViewer() {
             gfxHeap->free(buffer);
         }
 
+        mInputViewer.pStickValueText = gzTextBox_allocate();
+        mInputViewer.pSubstickValueText = gzTextBox_allocate();
+
         mInputViewer.isInitialized = true;
     }
 
@@ -646,6 +649,12 @@ void gzToolsMng_c::drawInputViewer() {
                        -(mDoCPd_c::getStickY(PAD_1) * 10) + (BASE_Y + 8.0f),
                        15.0f, stick_color, stick_color, 2.0f);
 
+    if (mInputViewer.pStickValueText != NULL) {
+        mInputViewer.pStickValueText->setStringf("%d  %d", mDoCPd_c::getGamePad(PAD_1)->mMainStick.mRawX, mDoCPd_c::getGamePad(PAD_1)->mMainStick.mRawY);
+        mInputViewer.pStickValueText->setFontSize(12.0f, 12.0f);
+        mInputViewer.pStickValueText->draw(BASE_X - 115.0f, BASE_Y + 50.0f, 0xFFFFFFFF);
+    }
+
     mInputViewer.pSubstick->setBlackWhite(0, 0xFFDB6DFF);
     mInputViewer.pSubstick->scale(0.7f, 0.7f);
     mInputViewer.pSubstick->draw(BASE_X - 55.0f, BASE_Y - 10.0f, false, false, false);
@@ -653,6 +662,12 @@ void gzToolsMng_c::drawInputViewer() {
     gzDrawFilledCircle((mDoCPd_c::getSubStickX(PAD_1) * 10) + (BASE_X - 32.0f),
                        -(mDoCPd_c::getSubStickY(PAD_1) * 10) + (BASE_Y + 13.0f),
                        10.0f, substick_color, substick_color, 2.0f);
+
+    if (mInputViewer.pSubstickValueText != NULL) {
+        mInputViewer.pSubstickValueText->setStringf("%d  %d", mDoCPd_c::getGamePad(PAD_1)->mSubStick.mRawX, mDoCPd_c::getGamePad(PAD_1)->mSubStick.mRawY);
+        mInputViewer.pSubstickValueText->setFontSize(12.0f, 12.0f);
+        mInputViewer.pSubstickValueText->draw(BASE_X - 55.0f, BASE_Y + 50.0f, 0xFFDB6DFF);
+    }
 }
 
 void gzToolsMng_c::draw() {
