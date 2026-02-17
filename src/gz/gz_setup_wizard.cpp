@@ -61,7 +61,7 @@ void gzSetupWizard_c::applySettings() {
         gzInfo_setDisplayModeInterlaced();
     }
     
-    gzStoreSettings();
+    gzInfo_storeSettings();
 }
 
 void gzSetupWizard_c::execute() {

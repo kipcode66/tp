@@ -17,6 +17,7 @@
 #define DMA_ALIGN(x) (((x) + 31) & ~31)
 
 bool gzExiTransfer(void* buf, u32 len, u32 mode);
+bool gzDetectNintendont();
 void gzReturnToLoader();
 
 #endif

@@ -18,6 +18,14 @@ bool gzExiTransfer(void* buf, u32 len, u32 mode) {
     return ok;
 }
 
+bool gzDetectNintendont() {
+    u8 probeBuf[32] ATTRIBUTE_ALIGN(32);
+    memset(probeBuf, 0, sizeof(probeBuf));
+    DCFlushRange(probeBuf, sizeof(probeBuf));
+    bool result = EXIDma(GZ_EXI_CHAN, probeBuf, sizeof(probeBuf), EXI_WRITE, NULL);
+    return result;
+}
+
 void gzReturnToLoader() {
     if (!g_gzInfo.mIsNintendont) {
         gzInfo_sendNotification("exit requires nintendont");

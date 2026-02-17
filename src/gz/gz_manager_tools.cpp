@@ -1,19 +1,19 @@
+#include "d/dolzel.h" // IWYU pragma: keep
+
+#include "gz/gz.h"
 #include "d/actor/d_a_alink.h"
 #include "d/d_camera.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_event.h"
 #include "d/d_event_manager.h"
+#include "gz/gz_menu_practice.h"
+#include "gz/gz_textbox.h"
+#include "gz/gz_utility_draw.h"
+#include "gz/gz_utility_notification.h"
+#include "gz/gz_utility_world_text.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "SSystem/SComponent/c_counter.h"
 #include "JSystem/JKernel/JKRAramArchive.h"
-
-#include "gz/gz.h"
-#include "gz/gz_menu_practice.h"
-#include "gz/gz_textbox.h"
-#include "gz/gz_utility_notification.h"
-#include "gz/gz_utility_world_text.h"
-#include "gz/gz_utility_draw.h"
-
 #include <cmath>
 #include <cstdio>
 

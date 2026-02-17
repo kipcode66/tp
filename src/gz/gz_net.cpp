@@ -9,7 +9,7 @@
 #include <dolphin/exi.h>
 #include <dolphin/os.h>
 
-int gzNetSendUDP(u32 ip, u16 port, const void* data, u32 len) {
+int gzNet_c::sendUDP(u32 ip, u16 port, const void* data, u32 len) {
     if (!g_gzInfo.mIsNintendont) {
         gzInfo_sendNotification("network requires nintendont");
         return -1;
@@ -64,7 +64,7 @@ int gzNetSendUDP(u32 ip, u16 port, const void* data, u32 len) {
     s32 iosErr = *(s32*)(statusBuf + 8);
     u32 netStarted = *(u32*)(statusBuf + 12);
     s32 initErr = *(s32*)(statusBuf + 16);
-    
+
     if (status != 0) {
         char msg[80];
         snprintf(msg, sizeof(msg), "net: s=%d fd=%d e=%d up=%d i=%d",
@@ -77,7 +77,7 @@ int gzNetSendUDP(u32 ip, u16 port, const void* data, u32 len) {
     return 0;
 }
 
-int gzNetRecvUDP(void* buf, u32 maxLen) {
+int gzNet_c::recvUDP(void* buf, u32 maxLen) {
     if (!g_gzInfo.mIsNintendont) {
         return -1;
     }

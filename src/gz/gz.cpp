@@ -1,139 +1,23 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
 #include "gz/gz.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_select_cursor.h"
 #include "gz/gz_menu_main.h"
 #include "gz/gz_setup_wizard.h"
 #include "gz/gz_utility_draw.h"
-#include "SSystem/SComponent/c_counter.h"
-#include "gz/gz_utility_notification.h"
-#include "d/d_com_inf_game.h"
-#include "d/d_drawlist.h"
-#include "d/d_select_cursor.h"
 #include "m_Do/m_Do_controller_pad.h"
 #include "m_Do/m_Do_graphic.h"
-#include "JSystem/J2DGraph/J2DOrthoGraph.h"
 #include "JSystem/JKernel/JKRArchive.h"
-#include "JSystem/JKernel/JKRAram.h"
 #include "JSystem/JKernel/JKRAramArchive.h"
-#include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JUtility/JUTDbPrint.h"
-#include "m_Do/m_Do_MemCard.h"
-#include "dolphin/card.h"
-#include "dolphin/gx/GXTexture.h"
+#include "SSystem/SComponent/c_counter.h"
 #include "dolphin/gx/GXCull.h"
 #include "dolphin/gx/GXGet.h"
-#include "dolphin/gx/GXTransform.h"
-#include "dolphin/gx/GXGeometry.h"
-#include "dolphin/gx/GXVert.h"
-#include "dolphin/gx/GXPixel.h"
-#include "dolphin/gx/GXTev.h"
-#include "dolphin/gx/GXLighting.h"
-#include "m_Do/m_Do_mtx.h"
+#include "dolphin/gx/GXTexture.h"
 #include <cmath>
 
-class gzCapture_c : public dDlst_base_c {
-public:
-    virtual void draw() {
-        if (mFlag == 0) {
-            return;
-        } else if (mFlag == 1) {
-            mFlag = 3;
-            GXSetTexCopySrc(0, 0, FB_WIDTH, FB_HEIGHT);
-            GXSetTexCopyDst(FB_WIDTH / 2, FB_HEIGHT / 2, (GXTexFmt)mDoGph_gInf_c::getFrameBufferTimg()->format, GX_ENABLE);
-            GXCopyTex(mDoGph_gInf_c::getFrameBufferTex(), GX_FALSE);
-            GXPixModeSync();
-            dComIfGp_onPauseFlag();
-        } else {
-            GXTexObj tex;
-            GXInitTexObj(&tex, mDoGph_gInf_c::getFrameBufferTex(), FB_WIDTH / 2, FB_HEIGHT / 2,
-                        (GXTexFmt)mDoGph_gInf_c::getFrameBufferTimg()->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
-            GXInitTexObjLOD(&tex, GX_LINEAR, GX_LINEAR, 0.0f, 0.0f, 0.0f, GX_FALSE, GX_FALSE, GX_ANISO_1);
-            GXLoadTexObj(&tex, GX_TEXMAP0);
-            GXSetNumChans(0);
-            GXSetNumTexGens(1);
-            GXSetTexCoordGen2(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, 60, GX_FALSE, 125);
-            GXSetNumTevStages(1);
-            GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR_NULL);
-            GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO, GX_CC_TEXC);
-            GXSetTevColorOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-            const GXColor color = {0, 0, 0, mAlpha};
-            GXSetTevColor(GX_TEVREG0, color);
-            GXSetTevAlphaIn(GX_TEVSTAGE0, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_A0);
-            GXSetTevAlphaOp(GX_TEVSTAGE0, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
-            GXSetZCompLoc(GX_TRUE);
-            GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
-            GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_OR);
-            GXSetAlphaCompare(GX_ALWAYS, 0, GX_AOP_OR, GX_ALWAYS, 0);
-            GXSetFog(GX_FOG_NONE, 0.0f, 0.0f, 0.0f, 0.0f, g_clearColor);
-            GXSetFogRangeAdj(GX_FALSE, 0, NULL);
-            GXSetCullMode(GX_CULL_NONE);
-            GXSetDither(GX_TRUE);
-            GXLoadPosMtxImm(g_mDoMtx_identity, GX_PNMTX0);
-            GXSetCurrentMtx(0);
-            GXClearVtxDesc();
-            GXSetVtxDesc(GX_VA_POS, GX_DIRECT);
-            GXSetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_CLR_RGBA, GX_RGBA4, 0);
-            GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_CLR_RGBA, GX_RGB8, 0);
-
-            GXBegin(GX_QUADS, GX_VTXFMT0, 4);
-            GXPosition3s16(mDoGph_gInf_c::getMinX(), mDoGph_gInf_c::getMinY(), 0);
-            GXTexCoord2s8(0, 0);
-            GXPosition3s16(mDoGph_gInf_c::getMaxX(), mDoGph_gInf_c::getMinY(), 0);
-            GXTexCoord2s8(1, 0);
-            GXPosition3s16(mDoGph_gInf_c::getMaxX(), mDoGph_gInf_c::getMaxY(), 0);
-            GXTexCoord2s8(1, 1);
-            GXPosition3s16(mDoGph_gInf_c::getMinX(), mDoGph_gInf_c::getMaxY(), 0);
-            GXTexCoord2s8(0, 1);
-            GXEnd();
-        }
-    }
-
-    virtual ~gzCapture_c() {}
-
-    static const u8 CAPTURE_DIM_ALPHA = 128;
-
-    gzCapture_c() {
-        mFlag = 0;
-        mAlpha = CAPTURE_DIM_ALPHA;
-    }
-
-    void setCaptureFlag() { mFlag = 1; }
-    void disable() { mFlag = 0; }
-    bool isCapturing() { return mFlag != 0; }
-
-private:
-    u8 mFlag;
-    u8 mAlpha;
-};
-
 gzInfo_c g_gzInfo;
-
-// Automation state for Python scripts - address dumped on boot
-gzAutoState_s g_gzAutoState = {
-    0x475A4155,  // magic = "GZAU"
-    false,       // menuVisible
-    false,       // optionMode
-    0, 0,        // cursorX, cursorY
-    3, 0, 0, 0,  // warpTypeIdx (OVERWORLD default), stage, room, spawn
-    false,       // warpExecuted
-    {0},         // currentStage
-    0            // faderStatus
-};
-
-void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset) {
-    DVDFileInfo ATTRIBUTE_ALIGN(32) fileInfo;
-    if (DVDOpen(filePath, &fileInfo)) {
-        int bytesRead = DVDReadPrio(&fileInfo, buffer, length, offset, 2);
-        if (bytesRead > 0) {
-            DVDClose(&fileInfo);
-        } else {
-            OSReport("no bytes read!\n");
-        }
-    } else {
-        OSReport("failed to open file %s\n", filePath);
-    }
-}
 
 void gzInfo_c::startIconPreload() {
     static const char* PATHS[] = {
@@ -601,13 +485,11 @@ int gzInfo_c::execute() {
             mMenuResourcesLoaded = false;
             mMenuLoadStep = 0;
 
-            OSReport("tpgz auto: 0x%08X\n", (u32)&g_gzAutoState);
-
 #ifndef __REVOLUTION_SDK__
             mIsNintendont = gzDetectNintendont();
             OSReport("tpgz: nintendont detected = %d\n", mIsNintendont);
 #endif
-            int settingsResult = gzLoadSettings();
+            int settingsResult = loadSettings();
 
             dComIfGp_setOxygen(OXYGEN_MAX);
             dComIfGp_setNowOxygen(OXYGEN_MAX);
@@ -716,22 +598,12 @@ int gzInfo_c::execute() {
         }
     }
 
-    // Update automation state for Python scripts
-    g_gzAutoState.menuVisible = mDisplay;
-    g_gzAutoState.optionMode = mMenuOption;
-    g_gzAutoState.cursorX = mCursor.x;
-    g_gzAutoState.cursorY = mCursor.y;
-    strncpy(g_gzAutoState.currentStage, dComIfGp_getStartStageName(), 7);
-    g_gzAutoState.currentStage[7] = '\0';
-    g_gzAutoState.faderStatus = mDoGph_gInf_c::getFader()->getStatus();
-
     return 1;
 }
 
-// Scissor padding to prevent drawing right up to menu edge
-static const u32 SCISSOR_PADDING = 8;
-
 int gzInfo_c::draw() {
+    static const u32 SCISSOR_PADDING = 8;
+
     if (!mGZInitialized) {
         if (mpFont != NULL) {
             gzSetup2DContext();
@@ -1038,142 +910,3 @@ int gzInfo_c::draw() {
     return 1;
 }
 
-void gzSetup2DContext() {
-    // Set up 2D orthographic projection for drawing J2DScreen-based elements.
-    // This is necessary because GZ draws after the game's normal 2D render pass,
-    // when the original graphics context (a stack-local ortho) is no longer valid.
-    // We must also set the current graf port because J2DScreen::draw uses it.
-    static J2DOrthoGraph sGzOrtho(0.0f, 0.0f, 608.0f, 448.0f, -1.0f, 1.0f);
-    sGzOrtho.setPort();
-    dComIfGp_setCurrentGrafPort(&sGzOrtho);
-
-    // Restore menu scissor after J2D setup (J2D resets scissor)
-    if (g_gzInfo.mDisplay) {
-        u32 left = (u32)g_gzInfo.mBackgroundXPos + SCISSOR_PADDING;
-        u32 top = (u32)g_gzInfo.mBackgroundYPos + SCISSOR_PADDING;
-        u32 width = (u32)g_gzInfo.mBackgroundWidth - (SCISSOR_PADDING * 2);
-        u32 height = (u32)g_gzInfo.mBackgroundHeight - (SCISSOR_PADDING * 2);
-        GXSetScissor(left, top, width, height);
-    }
-}
-
-int gzInfo_c::storeSettingsMemcard() {
-    CARDFileInfo file;
-    int ret;
-
-    ret = CARDProbeEx(0, NULL, NULL);
-    if (ret != CARD_RESULT_READY) {
-        return -1;
-    }
-
-    ret = CARDCreate(0, "tpgzcfg", SECTOR_SIZE, &file);
-    if (ret == CARD_RESULT_READY || ret == CARD_RESULT_EXIST) {
-        ret = CARDOpen(0, "tpgzcfg", &file);
-        if (ret == CARD_RESULT_READY) {
-            gzConfigHeader_s cfg;
-            cfg.version = GZ_SAVE_VERSION;
-            cfg.settingsOffset = sizeof(gzConfigHeader_s);
-
-            memcpy(mDoMemCd_Ctrl_c::sTmpBuf, &cfg, sizeof(gzConfigHeader_s));
-            memcpy(mDoMemCd_Ctrl_c::sTmpBuf + cfg.settingsOffset, &mSettings, sizeof(gzSettings_s));
-
-            ret = CARDWrite(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
-            if (ret == CARD_RESULT_READY) {
-                OSReport("stored tpgz settings to memcard!\n");
-                gzInfo_sendNotification("settings saved to memcard!");
-            }
-
-            CARDClose(&file);
-        }
-    }
-
-    return ret;
-}
-
-int gzInfo_c::loadSettingsMemcard() {
-    CARDFileInfo file;
-    int ret;
-
-    ret = CARDProbeEx(0, NULL, NULL);
-    if (ret != CARD_RESULT_READY) {
-        return -1;
-    }
-
-    ret = CARDOpen(0, "tpgzcfg", &file);
-    if (ret == CARD_RESULT_READY) {
-        ret = CARDRead(&file, mDoMemCd_Ctrl_c::sTmpBuf, SECTOR_SIZE, 0);
-        if (ret == CARD_RESULT_READY) {
-            OSReport("loaded tpgz settings from memcard!\n");
-            gzInfo_sendNotification("settings loaded from memcard!");
-
-            gzConfigHeader_s cfg;
-            memcpy(&cfg, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(gzConfigHeader_s));
-            if (cfg.version != GZ_SAVE_VERSION) {
-                OSReport("outdated tpgz save version!\n");
-                return -1;
-            }
-
-            gzSettings_s settings;
-            memcpy(&mSettings, mDoMemCd_Ctrl_c::sTmpBuf + cfg.settingsOffset, sizeof(gzSettings_s));
-        }
-
-        CARDClose(&file);
-    } else {
-        gzInfo_sendNotification("no memcard settings found!");
-    }
-
-    return ret;
-}
-
-int gzInfo_c::deleteSettingsMemcard() {
-    CARDFileInfo file;
-    int ret;
-
-    ret = CARDProbeEx(0, NULL, NULL);
-    if (ret != CARD_RESULT_READY) {
-        return -1;
-    }
-
-    ret = CARDDelete(0, "tpgzcfg");
-    if (ret == CARD_RESULT_READY) {
-        OSReport("deleted tpgz settings from memcard!\n");
-        gzInfo_sendNotification("memcard settings deleted!");
-    } else {
-        OSReport_Error("failed to delete tpgz settings from memcard!\n");
-    }
-
-    return ret;
-}
-
-void gzInfo_c::sendNotification(const char* msg) { 
-    if (mpNotification != NULL) mpNotification->send(msg);
-}
-
-void gzInfo_c::sendNotification(const char* msg, int i_notificationType) {
-    if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType);
-}
-
-static JKRExpHeap* s_gzHeap = NULL;
-static const u32 GZ_HEAP_SIZE = 0x100000;  // 1MB
-
-void gzCreateHeap() {
-    if (s_gzHeap != NULL) return;
-
-    JKRExpHeap* archiveHeap = (JKRExpHeap*)mDoExt_getArchiveHeap();
-    s_gzHeap = JKRExpHeap::create(GZ_HEAP_SIZE, archiveHeap, true);
-
-    JKRAllocFromAram(0xC0000, JKRAramHeap::HEAD);  // 768KB test fill
-}
-
-void gzSetGzHeap(JKRHeap* heap) {
-    s_gzHeap = (JKRExpHeap*)heap;
-}
-
-JKRHeap* gzGetGzHeap() {
-    return s_gzHeap;
-}
-
-JKRHeap* gzHeap(gzGroupId_e groupId) {
-    s_gzHeap->mCurrentGroupId = (u8)groupId;
-    return s_gzHeap;
-}

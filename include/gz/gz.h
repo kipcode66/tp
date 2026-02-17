@@ -4,12 +4,17 @@
 #include "c/c_damagereaction.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_item.h"
+#include "gz/gz_capture.h"
+#include "gz/gz_exi.h"
+#include "gz/gz_utility_misc.h"
 #include "gz/gz_manager_cheats.h"
 #include "gz/gz_manager_practice.h"
-#include "gz/gz_manager_tools.h"
 #include "gz/gz_manager_scene.h"
-#include "gz/gz_exi.h"
+#include "gz/gz_manager_tools.h"
+#include "gz/gz_memcard.h"
+#include "gz/gz_net.h"
 #include "gz/gz_sd.h"
+#include "gz/gz_utility_notification.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
 #include "m_Do/m_Do_controller_pad.h"
@@ -17,16 +22,14 @@
 #include "SSystem/SComponent/c_API_controller_pad.h"
 #include "dolphin/dvd.h"
 
-class gzMenu_c;
-class gzTextBox;
-class gzMainMenu_c;
-class gzNotification_c;
-class gzToolsMng_c;
-class dSelect_cursor_c;
-class gzCapture_c;
-class gzSetupWizard_c;
 class JKRArchive;
 class JKRHeap;
+class dSelect_cursor_c;
+class gzMainMenu_c;
+class gzMenu_c;
+class gzSetupWizard_c;
+class gzTextBox;
+class gzToolsMng_c;
 
 #define COLOR_WHITE 0xFFFFFFFFu
 #define COLOR_RED 0xFF0000FFu
@@ -37,19 +40,6 @@ class JKRHeap;
 #define COLOR_MAGENTA 0xFF00FFFFu
 #define COLOR_ORANGE 0xFFA500FFu
 #define COLOR_GRAY 0x808080FFu
-
-enum gzGroupId_e {
-    GZ_GROUP_MIN      = 0x60,
-
-    GZ_GROUP_TEXTBOX  = 0x60,
-    GZ_GROUP_MENU     = 0x61,
-    GZ_GROUP_UI       = 0x62,
-    GZ_GROUP_GRAPHICS = 0x63,
-    GZ_GROUP_TRACKER  = 0x64,
-    GZ_GROUP_OTHER    = 0x65,
-
-    GZ_GROUP_MAX      = 0x66,
-};
 
 #define COLOR_AMETHYST 0x9966FFFF
 #define COLOR_AQUAMARINE 0x71D9E2FF
@@ -130,25 +120,6 @@ struct gzCommandCombos_s {
     u32 mTeleportLoad;
     u32 mFreeCamToggle;
 };
-
-// Automation state for Python scripts to read via memory
-// Address dumped via OSReport on boot: "tpgz auto: 0x%08X"
-struct gzAutoState_s {
-    u32 magic;           // 0x475A4155 = "GZAU" to verify struct found
-    bool menuVisible;    // g_gzInfo.mDisplay
-    bool optionMode;     // g_gzInfo.mMenuOption
-    s32 cursorX;         // g_gzInfo.mCursor.x
-    s32 cursorY;         // g_gzInfo.mCursor.y
-    s32 warpTypeIdx;     // Current warp menu type selection
-    s32 warpStageIdx;    // Current warp menu stage selection
-    s32 warpRoomIdx;     // Current warp menu room selection
-    s32 warpSpawnIdx;    // Current warp menu spawn selection
-    bool warpExecuted;   // Set true when executeWarp() called, script clears it
-    char currentStage[8]; // Current stage ID after warp
-    s32 faderStatus;     // 0 = no fade, 1 = fading in progress
-};
-
-extern gzAutoState_s g_gzAutoState;
 
 struct gzToolsSettings_s {
     bool mMoveLink;
@@ -269,12 +240,10 @@ public:
     ResTIMG* getIconAtlas() { return mPreloadsComplete ? (ResTIMG*)mpPreloadBufs[3] : NULL; }
 
     void loadDefaultSettings();
-    int storeSettingsMemcard();
-    int loadSettingsMemcard();
-    int deleteSettingsMemcard();
+    int storeSettings();
+    int loadSettings();
+    int deleteSettings();
     void showHeapUsage();
-    void sendNotification(const char* msg);
-    void sendNotification(const char* msg, int i_notificationType);
     void setButtonFlags();
     void executeTools();
     void executeMoveLink();
@@ -298,6 +267,9 @@ public:
 
     JUTFont* getFont() { return mpFont; }
     void setFont(JUTFont* i_font) { mpFont = i_font; }
+
+    void sendNotification(const char* msg) { if (mpNotification != NULL) mpNotification->send(msg); }
+    void sendNotification(const char* msg, int i_notificationType) { if (mpNotification != NULL) mpNotification->send(msg, (gzNotification_c::NotificationType)i_notificationType); }
 
     // General Settings
     bool isCursorTypeClassic() { return getCursorType() & CURSOR_CLASSIC; }
@@ -552,6 +524,9 @@ public:
     gzCheatsMng_c mCheatsMng;
     gzToolsMng_c mToolsMng;
     gzSceneMng_c mSceneMng;
+    gzSD_c mSD;
+    gzNet_c mNet;
+    gzMemCard_c mMemCard;
 
     f32 mIconXPos;
     f32 mIconYPos;
@@ -608,12 +583,12 @@ inline bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
 inline bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
 inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 
-inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcard(); }
-inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
-inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
-inline int gzInfo_storeSettings() { return gzStoreSettings(); }
-inline int gzInfo_loadSettings() { return gzLoadSettings(); }
-inline int gzInfo_deleteSettings() { return gzDeleteSettings(); }
+inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.mMemCard.remove(); }
+inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.mMemCard.load(); }
+inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.mMemCard.store(); }
+inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
+inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
+inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
 inline void gzInfo_returnToLoader() { gzReturnToLoader(); }
 inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
@@ -1036,8 +1011,6 @@ namespace gzPad {
     inline f32 getAnalogL() { return mDoCPd_c::m_gzPadInfo.mTriggerLeft; }
 };
 
-void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
-
 inline bool gzCheckComboToggle(u32 combo, bool& wasHeld) {
     u32 rawHold = mDoCPd_c::getHold(0);
     bool comboHeld = combo && (rawHold & combo) == combo;
@@ -1045,20 +1018,6 @@ inline bool gzCheckComboToggle(u32 combo, bool& wasHeld) {
     wasHeld = comboHeld;
     return shouldToggle;
 }
-
-// Check if a group ID belongs to gz
-inline bool gzIsGzGroupId(u8 groupId) {
-    return groupId >= GZ_GROUP_MIN && groupId < GZ_GROUP_MAX;
-}
-
-void gzCreateHeap();
-void gzSetGzHeap(JKRHeap* heap);
-JKRHeap* gzGetGzHeap();
-JKRHeap* gzHeap(gzGroupId_e groupId);
-
-// Sets up 2D orthographic context for GZ overlay drawing.
-// Call this before drawing J2DScreen-based elements (like haihai arrows).
-void gzSetup2DContext();
 
 // Clears all controller input (buttons, sticks, triggers)
 inline void gzClearControllerInput() {

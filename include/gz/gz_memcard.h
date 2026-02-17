@@ -1,7 +1,7 @@
-#ifndef GZ_SD_H
-#define GZ_SD_H
+#ifndef GZ_MEMCARD_H
+#define GZ_MEMCARD_H
 
-class gzSD_c {
+class gzMemCard_c {
 public:
     int store();
     int load();

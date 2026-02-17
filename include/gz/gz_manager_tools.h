@@ -3,7 +3,7 @@
 
 #include "SSystem/SComponent/c_angle.h"
 #include "SSystem/SComponent/c_xyz.h"
-#include "SSystem/Scomponent/c_sxyz.h"
+#include "SSystem/SComponent/c_sxyz.h"
 
 class gzTextBox;
 

@@ -2957,7 +2957,9 @@ config.libs = [
             Object(Custom, "dolphin/card/CARDDelete.c"),
             Object(Custom, "gz/gz_utility_notification.cpp"),
             Object(Custom, "gz/gz.cpp"),
+            Object(Custom, "gz/gz_capture.cpp"),
             Object(Custom, "gz/gz_exi.cpp"),
+            Object(Custom, "gz/gz_memcard.cpp"),
             Object(Custom, "gz/gz_sd.cpp"),
             Object(Custom, "gz/gz_net.cpp"),
             Object(Custom, "gz/gz_textbox.cpp"),
@@ -2989,6 +2991,7 @@ config.libs = [
             Object(Custom, "gz/gz_manager_scene.cpp"),
             Object(Custom, "gz/gz_utility_world_text.cpp"),
             Object(Custom, "gz/gz_utility_draw.cpp"),
+            Object(Custom, "gz/gz_utility_misc.cpp"),
         ],
     },
 ]
@@ -3064,7 +3067,9 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
                 "d/d_debug_viewer.cpp",
                 "gz/gz_utility_notification.cpp",
                 "gz/gz.cpp",
+                "gz/gz_capture.cpp",
                 "gz/gz_exi.cpp",
+                "gz/gz_memcard.cpp",
                 "gz/gz_sd.cpp",
                 "gz/gz_net.cpp",
                 "gz/gz_textbox.cpp",
@@ -3096,6 +3101,7 @@ def link_order_callback(module_id: int, objects: List[str]) -> List[str]:
                 "gz/gz_manager_scene.cpp",
                 "gz/gz_utility_world_text.cpp",
                 "gz/gz_utility_draw.cpp",
+                "gz/gz_utility_misc.cpp",
             ]
     return objects
 

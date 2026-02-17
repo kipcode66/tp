@@ -4,19 +4,10 @@
 
 #include "gz/gz.h"
 #include "gz/gz_exi.h"
-#include "gz/gz_sd.h"
 #include <dolphin/exi.h>
 #include <dolphin/os.h>
 
-bool gzDetectNintendont() {
-    u8 probeBuf[32] ATTRIBUTE_ALIGN(32);
-    memset(probeBuf, 0, sizeof(probeBuf));
-    DCFlushRange(probeBuf, sizeof(probeBuf));
-    bool result = EXIDma(GZ_EXI_CHAN, probeBuf, sizeof(probeBuf), EXI_WRITE, NULL);
-    return result;
-}
-
-int gzStoreSettingsSD() {
+int gzSD_c::store() {
     static const u32 PAYLOAD_SIZE = 4 + sizeof(gzConfigHeader_s) + sizeof(gzSettings_s);
     static const u32 BUF_SIZE = DMA_ALIGN(PAYLOAD_SIZE);
     u8 buf[BUF_SIZE] ATTRIBUTE_ALIGN(32);
@@ -49,7 +40,7 @@ int gzStoreSettingsSD() {
     return 0;
 }
 
-int gzLoadSettingsSD() {
+int gzSD_c::load() {
     u8 cmdBuf[32] ATTRIBUTE_ALIGN(32);
     memset(cmdBuf, 0, sizeof(cmdBuf));
     *(u32*)cmdBuf = TPGZ_CMD_WORD(TPGZ_CMD_READ);
@@ -85,7 +76,7 @@ int gzLoadSettingsSD() {
     return 0;
 }
 
-int gzDeleteSettingsSD() {
+int gzSD_c::remove() {
     u8 cmdBuf[32] ATTRIBUTE_ALIGN(32);
     memset(cmdBuf, 0, sizeof(cmdBuf));
     *(u32*)cmdBuf = TPGZ_CMD_WORD(TPGZ_CMD_DELETE);
@@ -108,31 +99,32 @@ int gzDeleteSettingsSD() {
     return 0;
 }
 
+
 #endif // !__REVOLUTION_SDK__
 
-int gzStoreSettings() {
+int gzInfo_c::storeSettings() {
 #ifndef __REVOLUTION_SDK__
-    if (g_gzInfo.mIsNintendont) {
-        return gzStoreSettingsSD();
+    if (mIsNintendont) {
+        return mSD.store();
     }
 #endif
-    return g_gzInfo.storeSettingsMemcard();
+    return mMemCard.store();
 }
 
-int gzLoadSettings() {
+int gzInfo_c::loadSettings() {
 #ifndef __REVOLUTION_SDK__
-    if (g_gzInfo.mIsNintendont) {
-        return gzLoadSettingsSD();
+    if (mIsNintendont) {
+        return mSD.load();
     }
 #endif
-    return g_gzInfo.loadSettingsMemcard();
+    return mMemCard.load();
 }
 
-int gzDeleteSettings() {
+int gzInfo_c::deleteSettings() {
 #ifndef __REVOLUTION_SDK__
-    if (g_gzInfo.mIsNintendont) {
-        return gzDeleteSettingsSD();
+    if (mIsNintendont) {
+        return mSD.remove();
     }
 #endif
-    return g_gzInfo.deleteSettingsMemcard();
+    return mMemCard.remove();
 }
