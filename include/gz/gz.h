@@ -207,6 +207,7 @@ public:
     gzInfo_c() {
         mGZInitialized = false;
         mIsNintendont = false;
+        mIsPlayInfoInit = false;
         mInitPhase = INIT_PHASE_IDLE;
         mMenuResourcesLoaded = false;
         mMenuLoadStep = 0;
@@ -509,6 +510,7 @@ public:
     bool mDisplay;
     bool mGZInitialized;
     bool mIsNintendont;
+    bool mIsPlayInfoInit;
     int mInitPhase;
     bool mMenuResourcesLoaded;
     int mMenuLoadStep;
