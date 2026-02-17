@@ -3,6 +3,8 @@
 
 #include "dolphin/types.h"
 
+class J2DPicture;
+class JKRArchive;
 class JKRHeap;
 
 enum gzGroupId_e {
@@ -22,6 +24,7 @@ inline bool gzIsGzGroupId(u8 groupId) {
     return groupId >= GZ_GROUP_MIN && groupId < GZ_GROUP_MAX;
 }
 
+J2DPicture* gzCopyArchiveTexture(JKRArchive* arc, const char* name, JKRHeap* heap);
 void gzDVDLoadFile(const char* filePath, void* buffer, int length, int offset);
 void gzCreateHeap();
 void gzSetGzHeap(JKRHeap* heap);

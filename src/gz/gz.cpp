@@ -14,7 +14,6 @@
 #include "SSystem/SComponent/c_counter.h"
 #include "dolphin/gx/GXCull.h"
 #include "dolphin/gx/GXGet.h"
-#include "dolphin/gx/GXTexture.h"
 #include <cmath>
 
 gzInfo_c g_gzInfo;
@@ -122,6 +121,32 @@ void gzInfo_c::loadDefaultSettings() {
     mHeaderYPos = mBackgroundYPos + 30.0f;
 }
 
+int gzInfo_c::storeSettings() {
+#ifndef __REVOLUTION_SDK__
+    if (mIsNintendont) {
+        return mSD.storeSettings();
+    }
+#endif
+    return mMemCard.storeSettings();
+}
+
+int gzInfo_c::loadSettings() {
+#ifndef __REVOLUTION_SDK__
+    if (mIsNintendont) {
+        return mSD.loadSettings();
+    }
+#endif
+    return mMemCard.loadSettings();
+}
+
+int gzInfo_c::deleteSettings() {
+#ifndef __REVOLUTION_SDK__
+    if (mIsNintendont) {
+        return mSD.deleteSettings();
+    }
+#endif
+    return mMemCard.deleteSettings();
+}
 
 void gzInfo_c::startInit() {
     mInitPhase = INIT_PHASE_SETUP_RESOURCES;
@@ -152,27 +177,8 @@ void gzInfo_c::loadMenuResourcesBatch() {
         JKRArchive* msgArc = dComIfGp_getMsgArchive(4);
         if (msgArc != NULL) {
             JKRHeapOverrideScope scope(gfxHeap);
-
-            ResTIMG* bgSrc = (ResTIMG*)msgArc->getResource('TIMG', "i4_gra.bti");
-            if (bgSrc != NULL) {
-                u32 bgImgSize = GXGetTexBufferSize(bgSrc->width, bgSrc->height, bgSrc->format,
-                                                    bgSrc->mipmapEnabled, bgSrc->mipmapCount);
-                u32 bgSize = bgSrc->imageOffset + bgImgSize;
-                void* bgBuf = gfxHeap->alloc(bgSize, 32);
-                memcpy(bgBuf, bgSrc, bgSize);
-                mpBannerBg = new (gfxHeap, 4) J2DPicture((ResTIMG*)bgBuf);
-            }
-
-            ResTIMG* swirlSrc = (ResTIMG*)msgArc->getResource('TIMG', "tt_gold_uzu_long2.bti");
-            if (swirlSrc != NULL) {
-                u32 imgSize = GXGetTexBufferSize(swirlSrc->width, swirlSrc->height,
-                                                  swirlSrc->format, swirlSrc->mipmapEnabled,
-                                                  swirlSrc->mipmapCount);
-                u32 totalSize = swirlSrc->imageOffset + imgSize;
-                void* buf = gfxHeap->alloc(totalSize, 32);
-                memcpy(buf, swirlSrc, totalSize);
-                mpSwirl = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-            }
+            mpBannerBg = gzCopyArchiveTexture(msgArc, "i4_gra.bti", gfxHeap);
+            mpSwirl = gzCopyArchiveTexture(msgArc, "tt_gold_uzu_long2.bti", gfxHeap);
         }
         break;
     }
@@ -197,15 +203,7 @@ void gzInfo_c::loadMenuResourcesBatch() {
             };
             JKRHeapOverrideScope main2dScope(gfxHeap);
             for (int i = 0; i < 9; i++) {
-                ResTIMG* src = (ResTIMG*)main2dArc->getResource('TIMG', btnNames[i]);
-                if (src != NULL) {
-                    u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                                      src->mipmapEnabled, src->mipmapCount);
-                    u32 totalSize = src->imageOffset + imgSize;
-                    void* buf = JKRHeap::alloc(totalSize, 32, gfxHeap);
-                    memcpy(buf, src, totalSize);
-                    *btnPtrs[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-                }
+                *btnPtrs[i] = gzCopyArchiveTexture(main2dArc, btnNames[i], gfxHeap);
             }
         }
         break;
@@ -214,49 +212,14 @@ void gzInfo_c::loadMenuResourcesBatch() {
         JKRArchive* buttonArc = dComIfGp_getMeterButtonArchive();
         if (buttonArc != NULL) {
             JKRHeapOverrideScope btnScope(gfxHeap);
-
-            ResTIMG* src = (ResTIMG*)buttonArc->getResource('TIMG', "tt_zelda_button_l_base.bti");
-            if (src != NULL) {
-                u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                                  src->mipmapEnabled, src->mipmapCount);
-                u32 totalSize = src->imageOffset + imgSize;
-                void* buf = gfxHeap->alloc(totalSize, 32);
-                if (buf != NULL) {
-                    memcpy(buf, src, totalSize);
-                    mpBtnLRBase = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-                }
-            }
+            mpBtnLRBase = gzCopyArchiveTexture(buttonArc, "tt_zelda_button_l_base.bti", gfxHeap);
         }
 
         JKRArchive* ringArc = dComIfGp_getRingResArchive();
         if (ringArc != NULL) {
-            ResTIMG* src;
             JKRHeapOverrideScope scope(gfxHeap);
-            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_l_text.bti");
-
-            if (src != NULL) {
-                u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                                  src->mipmapEnabled, src->mipmapCount);
-                u32 totalSize = src->imageOffset + imgSize;
-                void* buf = gfxHeap->alloc(totalSize, 32);
-                if (buf != NULL) {
-                    memcpy(buf, src, totalSize);
-                    mpBtnLText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-                }
-            }
-
-            src = (ResTIMG*)ringArc->getResource('TIMG', "tt_zelda_button_r_text.bti");
-
-            if (src != NULL) {
-                u32 imgSize = GXGetTexBufferSize(src->width, src->height, src->format,
-                                                  src->mipmapEnabled, src->mipmapCount);
-                u32 totalSize = src->imageOffset + imgSize;
-                void* buf = gfxHeap->alloc(totalSize, 32);
-                if (buf != NULL) {
-                    memcpy(buf, src, totalSize);
-                    mpBtnRText = new (gfxHeap, 4) J2DPicture((ResTIMG*)buf);
-                }
-            }
+            mpBtnLText = gzCopyArchiveTexture(ringArc, "tt_zelda_button_l_text.bti", gfxHeap);
+            mpBtnRText = gzCopyArchiveTexture(ringArc, "tt_zelda_button_r_text.bti", gfxHeap);
         }
         break;
     }
@@ -634,85 +597,10 @@ int gzInfo_c::draw() {
         u8 baseAlpha = isMenuPausesGame() ? 255 : 128;
         u32 theme = mSettings.mTextColor;
 
-        if (mpBackground != NULL) {
-            mpBackground->setAlpha(baseAlpha);
-            mpBackground->draw(mBackgroundXPos, mBackgroundYPos, mBackgroundWidth, mBackgroundHeight, false, false, false);
-        }
-
-        static const f32 OUTER_THICKNESS = 3.0f;
-        GXColor outerShadow = {30, 28, 20, baseAlpha};
-        gzDrawRectOutline(mBackgroundXPos, mBackgroundYPos,
-                          mBackgroundWidth, mBackgroundHeight,
-                          OUTER_THICKNESS, outerShadow);
-
-        static const f32 GOLD_THICKNESS = 2.0f;
-        static const f32 GOLD_INSET = OUTER_THICKNESS;
-        GXColor goldBorder = gzGetThemedBorderColor(theme, baseAlpha);
-        gzDrawRectOutline(mBackgroundXPos + GOLD_INSET, mBackgroundYPos + GOLD_INSET,
-                          mBackgroundWidth - (GOLD_INSET * 2), mBackgroundHeight - (GOLD_INSET * 2),
-                          GOLD_THICKNESS, goldBorder);
-
-        static const f32 HIGHLIGHT_THICKNESS = 2.0f;
-        static const f32 HIGHLIGHT_INSET = GOLD_INSET + GOLD_THICKNESS;
-        u8 highlightAlpha = (u8)((mBorderHighlightAlpha * baseAlpha) / 255);
-        GXColor highlightBorder = gzGetThemedHighlightColor(theme, highlightAlpha);
-        gzDrawRectOutline(mBackgroundXPos + HIGHLIGHT_INSET, mBackgroundYPos + HIGHLIGHT_INSET,
-                          mBackgroundWidth - (HIGHLIGHT_INSET * 2), mBackgroundHeight - (HIGHLIGHT_INSET * 2),
-                          HIGHLIGHT_THICKNESS, highlightBorder);
-
-        if (mpMainMenu != NULL) {
-            if (mpMainMenu->isTransitioning()) {
-                u32 currentFrame = cCt_getFrameCount();
-                f32 sepStartX = mpMainMenu->isTransitionForward() ? mSeparatorVisibleX : mSeparatorHiddenX;
-                f32 sepEndX = mpMainMenu->isTransitionForward() ? mSeparatorHiddenX : mSeparatorVisibleX;
-                mSeparatorXPos = calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
-                                                   sepStartX, sepEndX, mpMainMenu->getTransitionDuration());
-
-                // Sync submenu position for tab connector drawing
-                if (mpCurrentMenu != NULL) {
-                    f32 subStartX = mpMainMenu->isTransitionForward() ? mpMainMenu->getSubHiddenX() : mpMainMenu->getSubVisibleX();
-                    f32 subEndX = mpMainMenu->isTransitionForward() ? mpMainMenu->getSubVisibleX() : mpMainMenu->getSubHiddenX();
-                    mpCurrentMenu->setXPos(calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
-                                                             subStartX, subEndX, mpMainMenu->getTransitionDuration()));
-                }
-            } else {
-                mSeparatorXPos = (mCursor.x == 0) ? mSeparatorVisibleX : mSeparatorHiddenX;
-            }
-        }
-
-        f32 separatorY = mBackgroundYPos + 40.0f;
-        f32 separatorLeft = mBackgroundXPos + HIGHLIGHT_INSET + 2.0f;
-        f32 separatorRight = mBackgroundXPos + mBackgroundWidth - HIGHLIGHT_INSET - 2.0f;
-        GXColor separatorColor = gzGetThemedSeparatorColor(theme, baseAlpha);
-        gzDrawHorizontalLine(separatorLeft, separatorRight, separatorY, 1.0f, separatorColor);
-
-        // Draw submenu content box - left edge follows separator, clamped to menu bounds
-        {
-            f32 boxPadding = HIGHLIGHT_INSET + 2.0f;
-            f32 boxTop = separatorY;
-            f32 boxBottom = mBackgroundYPos + mBackgroundHeight - boxPadding;
-            f32 boxRight = mBackgroundXPos + mBackgroundWidth - boxPadding;
-            // Clamp left edge: follows separator when visible, snaps to left edge when separator is hidden
-            f32 boxLeft = (mSeparatorXPos > mBackgroundXPos + boxPadding) ? mSeparatorXPos : mBackgroundXPos + boxPadding;
-
-        if (mSeparatorXPos > mBackgroundXPos + HIGHLIGHT_INSET) {
-            f32 separatorBottom = boxBottom;
-            gzDrawVerticalLine(mSeparatorXPos, separatorY, separatorBottom, 2.0f, separatorColor);
-        }
-
-            // Semi-transparent filled box (flat rectangle)
-            GXColor boxColor = gzGetThemedBorderColor(theme, (u8)((baseAlpha * 90) / 255));
-            gzDrawFilledRect(boxLeft, boxTop, boxRight - boxLeft, boxBottom - boxTop, boxColor);
-        }
+        drawMenuFrame(baseAlpha, theme);
 
         if (mpIcon != NULL) mpIcon->draw(mIconXPos, mIconYPos, mIconWidth, mIconHeight, false, false, false);
         if (mpHeader != NULL) mpHeader->draw(mHeaderXPos, mHeaderYPos, mSettings.mTextColor);
-
-        bool inMainMenu = (mCursor.x == 0);
-
-        f32 circleRadius = 9.0f;
-        f32 iconY = mBackgroundYPos + 21.0f;
-        f32 textY = mBackgroundYPos + 30.0f;
 
         f32 bannerX = mSeparatorVisibleX;
         f32 bannerY = mBackgroundYPos + 8.0f;
@@ -743,143 +631,7 @@ int gzInfo_c::draw() {
                           bigS, bigS, true, false, false);
         }
 
-        f32 hintStartX = mSeparatorVisibleX + 20.0f;
-        f32 btnSize = 16.0f;
-        f32 letterSizeAB = 10.0f;
-        f32 letterSizeXY = 8.0f;
-        f32 letterSizeZ = 6.0f;
-        f32 letterOffsetAB = (btnSize - letterSizeAB) / 2.0f;
-        f32 letterOffsetXY = (btnSize - letterSizeXY) / 2.0f;
-        f32 letterOffsetZ = (btnSize - letterSizeZ) / 2.0f;
-
-        // Gamecube Button Colors
-        static const JUtility::TColor colorA(0, 200, 80, 255);
-        static const JUtility::TColor colorB(200, 60, 60, 255);
-        static const JUtility::TColor colorXY(180, 180, 180, 255);
-        static const JUtility::TColor colorZ(100, 100, 200, 255);
-
-        if (inMainMenu) {
-            f32 iconX = hintStartX;
-            f32 btnY = iconY - btnSize/2;
-            if (mpBtnABBase != NULL) {
-                mpBtnABBase->setAlpha(255);
-                mpBtnABBase->setWhite(colorA);
-                mpBtnABBase->draw(iconX, btnY, btnSize, btnSize, false, false, false);
-            }
-            if (mpBtnAText != NULL) {
-                mpBtnAText->setAlpha(255);
-                mpBtnAText->draw(iconX + letterOffsetAB, btnY + letterOffsetAB, letterSizeAB, letterSizeAB, false, false, false);
-            }
-            if (mpButtonHintText != NULL) {
-                mpButtonHintText->setFontSize(18.0f, 18.0f);
-                mpButtonHintText->setString("Enter Menu");
-                mpButtonHintText->draw(iconX + btnSize + 4.0f, textY, COLOR_WHITE);
-            }
-        } else if (mpCurrentMenu != NULL) {
-            gzButtonHints_s hints = mpCurrentMenu->getButtonHints();
-            f32 currentX = hintStartX;
-
-            for (int i = 0; i < hints.count && i < 7; i++) {
-                J2DPicture* base = NULL;
-                J2DPicture* text = NULL;
-                JUtility::TColor baseColor(255, 255, 255, 255);
-                f32 lSize = letterSizeAB;
-                f32 lOffset = letterOffsetAB;
-                const char* btnLabel = NULL;
-                switch (hints.hints[i].button) {
-                case GZ_BTN_A:
-                    base = mpBtnABBase;
-                    text = mpBtnAText;
-                    baseColor = colorA;
-                    break;
-                case GZ_BTN_B:
-                    base = mpBtnABBase;
-                    text = mpBtnBText;
-                    baseColor = colorB;
-                    break;
-                case GZ_BTN_X:
-                    base = mpBtnXBase;
-                    text = mpBtnXText;
-                    baseColor = colorXY;
-                    lSize = letterSizeXY;
-                    lOffset = letterOffsetXY;
-                    break;
-                case GZ_BTN_Y:
-                    base = mpBtnYBase;
-                    text = mpBtnYText;
-                    baseColor = colorXY;
-                    lSize = letterSizeXY;
-                    lOffset = letterOffsetXY;
-                    break;
-                case GZ_BTN_Z:
-                    base = mpBtnZBase;
-                    text = mpBtnZText;
-                    baseColor = colorZ;
-                    lSize = letterSizeZ;
-                    lOffset = letterOffsetZ;
-                    break;
-                case GZ_BTN_L:
-                    base = mpBtnLRBase;
-                    text = mpBtnLText;
-                    break;
-                case GZ_BTN_R:
-                    base = mpBtnLRBase;
-                    text = mpBtnRText;
-                    break;
-                }
-                f32 btnY = iconY - btnSize/2;
-                f32 btnWidth = btnSize;
-                if (hints.hints[i].button == GZ_BTN_L || hints.hints[i].button == GZ_BTN_R) {
-                    bool isRBtn = (hints.hints[i].button == GZ_BTN_R);
-                    f32 lrWidth = 27.0f;
-                    f32 lrHeight = 16.0f;
-                    f32 lrY = iconY - lrHeight/2 + 2.0f;
-                    if (base != NULL) {
-                        base->setAlpha(255);
-                        base->setWhite(colorXY);
-                        base->draw(currentX, lrY, lrWidth, lrHeight, isRBtn, false, false);
-                    }
-                    if (text != NULL) {
-                        f32 textWidth = 4.0f;
-                        f32 textHeight = 7.0f;
-                        f32 textX = currentX + (lrWidth - textWidth) / 2.0f + 1.0f;
-                        f32 textY = lrY + (lrHeight - textHeight) / 2.0f - 2.0f;
-                        text->setAlpha(255);
-                        text->draw(textX, textY, textWidth, textHeight, false, false, false);
-                    }
-                    btnWidth = lrWidth;
-                } else if (btnLabel != NULL) {
-                    if (mpButtonHintText != NULL) {
-                        mpButtonHintText->setFontSize(18.0f, 18.0f);
-                        mpButtonHintText->setString(btnLabel);
-                        mpButtonHintText->updateBounds();
-                        mpButtonHintText->draw(currentX, textY, 0xAAAAAAFF);
-                        btnWidth = mpButtonHintText->getWidth();
-                    }
-                } else {
-                    if (base != NULL) {
-                        base->setAlpha(255);
-                        base->setWhite(baseColor);
-                        base->draw(currentX, btnY, btnSize, btnSize, false, false, false);
-                    }
-                    if (text != NULL) {
-                        text->setAlpha(255);
-                        text->draw(currentX + lOffset, btnY + lOffset, lSize, lSize, false, false, false);
-                    }
-                }
-
-                if (mpButtonHintText != NULL) {
-                    mpButtonHintText->setFontSize(18.0f, 18.0f);
-                    mpButtonHintText->setString(hints.hints[i].text);
-                    mpButtonHintText->updateBounds();
-                    f32 textX = currentX + btnWidth + 3.0f;
-                    mpButtonHintText->draw(textX, textY, COLOR_WHITE);
-                    currentX += btnWidth + 3.0f + mpButtonHintText->getWidth() + 8.0f;
-                } else {
-                    currentX += 90.0f;
-                }
-            }
-        }
+        drawButtonHints();
 
         u32 savedLeft, savedTop, savedWidth, savedHeight;
         GXGetScissor(&savedLeft, &savedTop, &savedWidth, &savedHeight);
@@ -910,3 +662,205 @@ int gzInfo_c::draw() {
     return 1;
 }
 
+void gzInfo_c::drawMenuFrame(u8 baseAlpha, u32 theme) {
+    if (mpBackground != NULL) {
+        mpBackground->setAlpha(baseAlpha);
+        mpBackground->draw(mBackgroundXPos, mBackgroundYPos, mBackgroundWidth, mBackgroundHeight, false, false, false);
+    }
+
+    static const f32 OUTER_THICKNESS = 3.0f;
+    GXColor outerShadow = {30, 28, 20, baseAlpha};
+    gzDrawRectOutline(mBackgroundXPos, mBackgroundYPos,
+                      mBackgroundWidth, mBackgroundHeight,
+                      OUTER_THICKNESS, outerShadow);
+
+    static const f32 GOLD_THICKNESS = 2.0f;
+    static const f32 GOLD_INSET = OUTER_THICKNESS;
+    GXColor goldBorder = gzGetThemedBorderColor(theme, baseAlpha);
+    gzDrawRectOutline(mBackgroundXPos + GOLD_INSET, mBackgroundYPos + GOLD_INSET,
+                      mBackgroundWidth - (GOLD_INSET * 2), mBackgroundHeight - (GOLD_INSET * 2),
+                      GOLD_THICKNESS, goldBorder);
+
+    static const f32 HIGHLIGHT_THICKNESS = 2.0f;
+    static const f32 HIGHLIGHT_INSET = GOLD_INSET + GOLD_THICKNESS;
+    u8 highlightAlpha = (u8)((mBorderHighlightAlpha * baseAlpha) / 255);
+    GXColor highlightBorder = gzGetThemedHighlightColor(theme, highlightAlpha);
+    gzDrawRectOutline(mBackgroundXPos + HIGHLIGHT_INSET, mBackgroundYPos + HIGHLIGHT_INSET,
+                      mBackgroundWidth - (HIGHLIGHT_INSET * 2), mBackgroundHeight - (HIGHLIGHT_INSET * 2),
+                      HIGHLIGHT_THICKNESS, highlightBorder);
+
+    if (mpMainMenu != NULL) {
+        if (mpMainMenu->isTransitioning()) {
+            u32 currentFrame = cCt_getFrameCount();
+            f32 sepStartX = mpMainMenu->isTransitionForward() ? mSeparatorVisibleX : mSeparatorHiddenX;
+            f32 sepEndX = mpMainMenu->isTransitionForward() ? mSeparatorHiddenX : mSeparatorVisibleX;
+            mSeparatorXPos = calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
+                                               sepStartX, sepEndX, mpMainMenu->getTransitionDuration());
+
+            if (mpCurrentMenu != NULL) {
+                f32 subStartX = mpMainMenu->isTransitionForward() ? mpMainMenu->getSubHiddenX() : mpMainMenu->getSubVisibleX();
+                f32 subEndX = mpMainMenu->isTransitionForward() ? mpMainMenu->getSubVisibleX() : mpMainMenu->getSubHiddenX();
+                mpCurrentMenu->setXPos(calcSlidePosition(currentFrame, mpMainMenu->getTransitionStart(),
+                                                         subStartX, subEndX, mpMainMenu->getTransitionDuration()));
+            }
+        } else {
+            mSeparatorXPos = (mCursor.x == 0) ? mSeparatorVisibleX : mSeparatorHiddenX;
+        }
+    }
+
+    f32 separatorY = mBackgroundYPos + 40.0f;
+    f32 separatorLeft = mBackgroundXPos + HIGHLIGHT_INSET + 2.0f;
+    f32 separatorRight = mBackgroundXPos + mBackgroundWidth - HIGHLIGHT_INSET - 2.0f;
+    GXColor separatorColor = gzGetThemedSeparatorColor(theme, baseAlpha);
+    gzDrawHorizontalLine(separatorLeft, separatorRight, separatorY, 1.0f, separatorColor);
+
+    {
+        f32 boxPadding = HIGHLIGHT_INSET + 2.0f;
+        f32 boxTop = separatorY;
+        f32 boxBottom = mBackgroundYPos + mBackgroundHeight - boxPadding;
+        f32 boxRight = mBackgroundXPos + mBackgroundWidth - boxPadding;
+        f32 boxLeft = (mSeparatorXPos > mBackgroundXPos + boxPadding) ? mSeparatorXPos : mBackgroundXPos + boxPadding;
+
+        if (mSeparatorXPos > mBackgroundXPos + HIGHLIGHT_INSET) {
+            f32 separatorBottom = boxBottom;
+            gzDrawVerticalLine(mSeparatorXPos, separatorY, separatorBottom, 2.0f, separatorColor);
+        }
+
+        GXColor boxColor = gzGetThemedBorderColor(theme, (u8)((baseAlpha * 90) / 255));
+        gzDrawFilledRect(boxLeft, boxTop, boxRight - boxLeft, boxBottom - boxTop, boxColor);
+    }
+}
+
+void gzInfo_c::drawButtonHints() {
+    f32 iconY = mBackgroundYPos + 21.0f;
+    f32 textY = mBackgroundYPos + 30.0f;
+    bool inMainMenu = (mCursor.x == 0);
+
+    f32 hintStartX = mSeparatorVisibleX + 20.0f;
+    f32 btnSize = 16.0f;
+    f32 letterSizeAB = 10.0f;
+    f32 letterSizeXY = 8.0f;
+    f32 letterSizeZ = 6.0f;
+    f32 letterOffsetAB = (btnSize - letterSizeAB) / 2.0f;
+    f32 letterOffsetXY = (btnSize - letterSizeXY) / 2.0f;
+    f32 letterOffsetZ = (btnSize - letterSizeZ) / 2.0f;
+
+    static const JUtility::TColor colorA(0, 200, 80, 255);
+    static const JUtility::TColor colorB(200, 60, 60, 255);
+    static const JUtility::TColor colorXY(180, 180, 180, 255);
+    static const JUtility::TColor colorZ(100, 100, 200, 255);
+
+    if (inMainMenu) {
+        f32 iconX = hintStartX;
+        f32 btnY = iconY - btnSize / 2;
+        if (mpBtnABBase != NULL) {
+            mpBtnABBase->setAlpha(255);
+            mpBtnABBase->setWhite(colorA);
+            mpBtnABBase->draw(iconX, btnY, btnSize, btnSize, false, false, false);
+        }
+        if (mpBtnAText != NULL) {
+            mpBtnAText->setAlpha(255);
+            mpBtnAText->draw(iconX + letterOffsetAB, btnY + letterOffsetAB, letterSizeAB, letterSizeAB, false, false, false);
+        }
+        if (mpButtonHintText != NULL) {
+            mpButtonHintText->setFontSize(18.0f, 18.0f);
+            mpButtonHintText->setString("Enter Menu");
+            mpButtonHintText->draw(iconX + btnSize + 4.0f, textY, COLOR_WHITE);
+        }
+    } else if (mpCurrentMenu != NULL) {
+        gzButtonHints_s hints = mpCurrentMenu->getButtonHints();
+        f32 currentX = hintStartX;
+
+        for (int i = 0; i < hints.count && i < 7; i++) {
+            J2DPicture* base = NULL;
+            J2DPicture* text = NULL;
+            JUtility::TColor baseColor(255, 255, 255, 255);
+            f32 lSize = letterSizeAB;
+            f32 lOffset = letterOffsetAB;
+            switch (hints.hints[i].button) {
+            case GZ_BTN_A:
+                base = mpBtnABBase;
+                text = mpBtnAText;
+                baseColor = colorA;
+                break;
+            case GZ_BTN_B:
+                base = mpBtnABBase;
+                text = mpBtnBText;
+                baseColor = colorB;
+                break;
+            case GZ_BTN_X:
+                base = mpBtnXBase;
+                text = mpBtnXText;
+                baseColor = colorXY;
+                lSize = letterSizeXY;
+                lOffset = letterOffsetXY;
+                break;
+            case GZ_BTN_Y:
+                base = mpBtnYBase;
+                text = mpBtnYText;
+                baseColor = colorXY;
+                lSize = letterSizeXY;
+                lOffset = letterOffsetXY;
+                break;
+            case GZ_BTN_Z:
+                base = mpBtnZBase;
+                text = mpBtnZText;
+                baseColor = colorZ;
+                lSize = letterSizeZ;
+                lOffset = letterOffsetZ;
+                break;
+            case GZ_BTN_L:
+                base = mpBtnLRBase;
+                text = mpBtnLText;
+                break;
+            case GZ_BTN_R:
+                base = mpBtnLRBase;
+                text = mpBtnRText;
+                break;
+            }
+            f32 btnY = iconY - btnSize / 2;
+            f32 btnWidth = btnSize;
+            if (hints.hints[i].button == GZ_BTN_L || hints.hints[i].button == GZ_BTN_R) {
+                bool isRBtn = (hints.hints[i].button == GZ_BTN_R);
+                f32 lrWidth = 27.0f;
+                f32 lrHeight = 16.0f;
+                f32 lrY = iconY - lrHeight / 2 + 2.0f;
+                if (base != NULL) {
+                    base->setAlpha(255);
+                    base->setWhite(colorXY);
+                    base->draw(currentX, lrY, lrWidth, lrHeight, isRBtn, false, false);
+                }
+                if (text != NULL) {
+                    f32 textWidth = 4.0f;
+                    f32 textHeight = 7.0f;
+                    f32 textX = currentX + (lrWidth - textWidth) / 2.0f + 1.0f;
+                    f32 textY = lrY + (lrHeight - textHeight) / 2.0f - 2.0f;
+                    text->setAlpha(255);
+                    text->draw(textX, textY, textWidth, textHeight, false, false, false);
+                }
+                btnWidth = lrWidth;
+            } else {
+                if (base != NULL) {
+                    base->setAlpha(255);
+                    base->setWhite(baseColor);
+                    base->draw(currentX, btnY, btnSize, btnSize, false, false, false);
+                }
+                if (text != NULL) {
+                    text->setAlpha(255);
+                    text->draw(currentX + lOffset, btnY + lOffset, lSize, lSize, false, false, false);
+                }
+            }
+
+            if (mpButtonHintText != NULL) {
+                mpButtonHintText->setFontSize(18.0f, 18.0f);
+                mpButtonHintText->setString(hints.hints[i].text);
+                mpButtonHintText->updateBounds();
+                f32 textX = currentX + btnWidth + 3.0f;
+                mpButtonHintText->draw(textX, textY, COLOR_WHITE);
+                currentX += btnWidth + 3.0f + mpButtonHintText->getWidth() + 8.0f;
+            } else {
+                currentX += 90.0f;
+            }
+        }
+    }
+}

@@ -233,6 +233,9 @@ public:
     void loadMenuResourcesBatch();
     void loadMenuResources();
 
+    void drawMenuFrame(u8 baseAlpha, u32 theme);
+    void drawButtonHints();
+
     void startIconPreload();
     void pollIconPreload();
     J2DPicture* getCheckIcon() { return mpCheckIcon; }
@@ -583,9 +586,9 @@ inline bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
 inline bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
 inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 
-inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.mMemCard.remove(); }
-inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.mMemCard.load(); }
-inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.mMemCard.store(); }
+inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.mMemCard.deleteSettings(); }
+inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.mMemCard.loadSettings(); }
+inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.mMemCard.storeSettings(); }
 inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
 inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
 inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
