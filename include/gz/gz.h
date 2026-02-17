@@ -8,6 +8,8 @@
 #include "gz/gz_manager_practice.h"
 #include "gz/gz_manager_tools.h"
 #include "gz/gz_manager_scene.h"
+#include "gz/gz_exi.h"
+#include "gz/gz_sd.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
 #include "m_Do/m_Do_controller_pad.h"
@@ -270,16 +272,6 @@ public:
     int storeSettingsMemcard();
     int loadSettingsMemcard();
     int deleteSettingsMemcard();
-#ifndef __REVOLUTION_SDK__
-    bool detectNintendont();
-    int storeSettingsSD();
-    int loadSettingsSD();
-    int deleteSettingsSD();
-    void returnToLoader();
-#endif
-    int storeSettings();
-    int loadSettings();
-    int deleteSettings();
     void showHeapUsage();
     void sendNotification(const char* msg);
     void sendNotification(const char* msg, int i_notificationType);
@@ -619,10 +611,10 @@ inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.deleteSettingsMemcard(); }
 inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.loadSettingsMemcard(); }
 inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.storeSettingsMemcard(); }
-inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
-inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
-inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
-inline void gzInfo_returnToLoader() { g_gzInfo.returnToLoader(); }
+inline int gzInfo_storeSettings() { return gzStoreSettings(); }
+inline int gzInfo_loadSettings() { return gzLoadSettings(); }
+inline int gzInfo_deleteSettings() { return gzDeleteSettings(); }
+inline void gzInfo_returnToLoader() { gzReturnToLoader(); }
 inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
 inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }

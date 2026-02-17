@@ -604,10 +604,10 @@ int gzInfo_c::execute() {
             OSReport("tpgz auto: 0x%08X\n", (u32)&g_gzAutoState);
 
 #ifndef __REVOLUTION_SDK__
-            mIsNintendont = detectNintendont();
+            mIsNintendont = gzDetectNintendont();
             OSReport("tpgz: nintendont detected = %d\n", mIsNintendont);
 #endif
-            int settingsResult = loadSettings();
+            int settingsResult = gzLoadSettings();
 
             dComIfGp_setOxygen(OXYGEN_MAX);
             dComIfGp_setNowOxygen(OXYGEN_MAX);

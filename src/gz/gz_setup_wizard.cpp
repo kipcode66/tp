@@ -54,12 +54,14 @@ void gzSetupWizard_c::applySettings() {
     g_gzInfo.setMenuSfx(mMenuSfx);
     g_gzInfo.setCursorType(mCursorType);
     g_gzInfo.setTextColor(GZ_TEXT_COLORS[mThemeIndex]);
+
     if (mDisplayMode) {
         gzInfo_setDisplayModeProgressive();
     } else {
         gzInfo_setDisplayModeInterlaced();
     }
-    g_gzInfo.storeSettings();
+    
+    gzStoreSettings();
 }
 
 void gzSetupWizard_c::execute() {
