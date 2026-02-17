@@ -513,6 +513,38 @@ void gzToolsMng_c::drawLinkInfo() {
     gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 7), COLOR_WHITE, "speed: %.4f", player->speedF);
 }
 
+void gzInputViewer_s::cleanup() {
+    if (!isInitialized) return;
+
+    JKRHeap* gfxHeap = gzHeap(GZ_GROUP_GRAPHICS);
+    delete pAbtn;
+    delete pBbtn;
+    delete pXbtn;
+    delete pYbtn;
+    delete pZbtn;
+    delete pSbtn;
+    delete pStick;
+    delete pSubstick;
+    for (int i = 0; i < 4; i++) {
+        delete pDPad[i];
+        pDPad[i] = NULL;
+    }
+    delete pTrigL;
+    delete pTrigR;
+    pAbtn = pBbtn = pXbtn = pYbtn = pZbtn = pSbtn = NULL;
+    pStick = pSubstick = pTrigL = pTrigR = NULL;
+
+    if (pStickBuf != NULL) { gfxHeap->free(pStickBuf); pStickBuf = NULL; }
+    if (pDPadBuf != NULL) { gfxHeap->free(pDPadBuf); pDPadBuf = NULL; }
+    if (pTrigBuf != NULL) { gfxHeap->free(pTrigBuf); pTrigBuf = NULL; }
+
+    gzTextBox_free(pStickValueText);
+    gzTextBox_free(pSubstickValueText);
+    pStickValueText = pSubstickValueText = NULL;
+
+    isInitialized = false;
+}
+
 void gzInputViewer_s::drawButton(J2DPicture* pic, u32 button, u32 color, f32 x, f32 y, f32 sx, f32 sy) {
     if (pic != NULL) {
         const u8 UNPRESSED_ALPHA = 80;
@@ -561,39 +593,37 @@ void gzToolsMng_c::drawInputViewer() {
             }
 
             DVDFileInfo file;
-            void* buffer = gfxHeap->alloc(0x1560, 32);
+            mInputViewer.pStickBuf = gfxHeap->alloc(0x1560, 32);
             if (DVDOpen("/gz/buttons/stick-outline-64.bti", &file)) {
-                
-                DVDReadPrio(&file, buffer, 0x1560, 0, 2);
+                DVDReadPrio(&file, mInputViewer.pStickBuf, 0x1560, 0, 2);
 
-                mInputViewer.pStick = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
-                mInputViewer.pSubstick = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+                mInputViewer.pStick = new (gfxHeap, 4) J2DPicture((ResTIMG*)mInputViewer.pStickBuf);
+                mInputViewer.pSubstick = new (gfxHeap, 4) J2DPicture((ResTIMG*)mInputViewer.pStickBuf);
 
                 DVDClose(&file);
             }
 
             if (DVDOpen("/gz/buttons/dpad-key.bti", &file)) {
-                buffer = gfxHeap->alloc(0x900, 32);
-                DVDReadPrio(&file, buffer, 0x900, 0, 2);
+                mInputViewer.pDPadBuf = gfxHeap->alloc(0x900, 32);
+                DVDReadPrio(&file, mInputViewer.pDPadBuf, 0x900, 0, 2);
 
                 for (int i = 0; i < 4; i++) {
-                    mInputViewer.pDPad[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+                    mInputViewer.pDPad[i] = new (gfxHeap, 4) J2DPicture((ResTIMG*)mInputViewer.pDPadBuf);
                 }
 
                 DVDClose(&file);
             }
 
             if (DVDOpen("/gz/buttons/lr_outline.bti", &file)) {
-                buffer = gfxHeap->alloc(0xB80, 32);
-                DVDReadPrio(&file, buffer, 0xB80, 0, 2);
+                mInputViewer.pTrigBuf = gfxHeap->alloc(0xB80, 32);
+                DVDReadPrio(&file, mInputViewer.pTrigBuf, 0xB80, 0, 2);
 
-                mInputViewer.pTrigL = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
-                mInputViewer.pTrigR = new (gfxHeap, 4) J2DPicture((ResTIMG*)buffer);
+                mInputViewer.pTrigL = new (gfxHeap, 4) J2DPicture((ResTIMG*)mInputViewer.pTrigBuf);
+                mInputViewer.pTrigR = new (gfxHeap, 4) J2DPicture((ResTIMG*)mInputViewer.pTrigBuf);
 
                 DVDClose(&file);
             }
 
-            gfxHeap->free(buffer);
         }
 
         mInputViewer.pStickValueText = gzTextBox_allocate();
@@ -679,5 +709,7 @@ void gzToolsMng_c::draw() {
 
     if (gzInfo_isTool_InputViewer()) {
         drawInputViewer();
+    } else {
+        mInputViewer.cleanup();
     }
 }

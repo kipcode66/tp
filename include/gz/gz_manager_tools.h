@@ -89,6 +89,7 @@ struct ElevatorEscapeState {
 class J2DPicture;
 struct gzInputViewer_s {
     void drawButton(J2DPicture* pic, u32 button, u32 color, f32 x, f32 y, f32 sx, f32 sy);
+    void cleanup();
 
     bool isInitialized;
     J2DPicture* pAbtn;
@@ -104,6 +105,9 @@ struct gzInputViewer_s {
     J2DPicture* pTrigR;
     gzTextBox* pStickValueText;
     gzTextBox* pSubstickValueText;
+    void* pStickBuf;
+    void* pDPadBuf;
+    void* pTrigBuf;
 };
 
 class gzToolsMng_c {
