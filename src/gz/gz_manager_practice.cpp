@@ -43,6 +43,8 @@ void gzSaveLoaderMng_c::doSaveInject() {
     memcpy(&g_dComIfG_gameInfo.info.mSavedata, mDoMemCd_Ctrl_c::sTmpBuf, sizeof(dSv_save_c));
     dComIfGs_getSave(dComIfGs_getSaveInfo()->getDan().mStageNo);
 
+    dKy_set_nexttime(dComIfGs_getTime());
+
     if (mSaveCallbacks.stageInitCb != NULL) {
         OSReport("running stageInit callback\n");
         mSaveCallbacks.stageInitCb();
