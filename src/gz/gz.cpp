@@ -1,6 +1,7 @@
 #include "d/dolzel.h" // IWYU pragma: keep
 
 #include "gz/gz.h"
+#include "d/actor/d_a_alink.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_select_cursor.h"
 #include "gz/gz_menu_main.h"
@@ -81,6 +82,9 @@ void gzInfo_c::loadDefaultSettings() {
     mSettings.mCommandCombos.mTeleportSave = (PAD_TRIGGER_R | PAD_BUTTON_UP);
     mSettings.mCommandCombos.mTeleportLoad = (PAD_TRIGGER_R | PAD_BUTTON_DOWN);
     mSettings.mCommandCombos.mFreeCamToggle = (PAD_TRIGGER_Z | PAD_BUTTON_B | PAD_BUTTON_A);
+    mSettings.mOnline.mStateStreaming = false;
+    mSettings.mOnline.mServerIP = gzNet_c::makeIP(192, 168, 86, 30);
+    mSettings.mOnline.mServerPort = 52224; // 0x00CC00
     mSettings.mDropShadows = true;
     mSettings.mMenuPausesGame = true;
     setCursorType(1);
@@ -546,6 +550,66 @@ int gzInfo_c::execute() {
         mToolsMng.execute();
         mSceneMng.execute();
         mSaveLoaderMng.execute();
+    }
+
+    {
+        static bool wasStreaming = false;
+
+        if (mSettings.mOnline.mStateStreaming && !wasStreaming) {
+            mNet.connect(mSettings.mOnline.mServerIP, mSettings.mOnline.mServerPort);
+            wasStreaming = true;
+        } else if (!mSettings.mOnline.mStateStreaming && wasStreaming) {
+            mNet.disconnect();
+            wasStreaming = false;
+        }
+
+        if (wasStreaming) {
+            daAlink_c* link = daAlink_getAlinkActorClass();
+            if (link != NULL) {
+                // Packet payload: [1B player_id][1B msg_type=STATE][2B len][state data]
+                // State data: [3x f32 pos][3x s16 angle][f32 speed][u16 action]
+                u8 pkt[4 + 24];
+                pkt[0] = 0;    // player_id (server assigns)
+                pkt[1] = 0x01; // MSG_STATE
+                pkt[2] = 0;    // payload len high
+                pkt[3] = 24;   // payload len low
+
+                u8* d = pkt + 4;
+                f32 px = link->current.pos.x;
+                f32 py = link->current.pos.y;
+                f32 pz = link->current.pos.z;
+                memcpy(d + 0,  &px, 4);
+                memcpy(d + 4,  &py, 4);
+                memcpy(d + 8,  &pz, 4);
+                d[12] = (link->shape_angle.x >> 8) & 0xFF;
+                d[13] = link->shape_angle.x & 0xFF;
+                d[14] = (link->shape_angle.y >> 8) & 0xFF;
+                d[15] = link->shape_angle.y & 0xFF;
+                d[16] = (link->shape_angle.z >> 8) & 0xFF;
+                d[17] = link->shape_angle.z & 0xFF;
+                f32 spd = link->speedF;
+                memcpy(d + 18, &spd, 4);
+                d[22] = (link->mProcID >> 8) & 0xFF;
+                d[23] = link->mProcID & 0xFF;
+
+                mNet.stateWrite(pkt, sizeof(pkt));
+            }
+
+            u8 recvBuf[4 + 24];
+            int recvLen = mNet.stateRead(recvBuf, sizeof(recvBuf));
+            if (recvLen >= 28) {
+                u8 playerID = recvBuf[0];
+                u8* rd = recvBuf + 4;
+                f32 rx, ry, rz, rspd;
+                memcpy(&rx, rd + 0, 4);
+                memcpy(&ry, rd + 4, 4);
+                memcpy(&rz, rd + 8, 4);
+                s16 rAngle = (rd[14] << 8) | rd[15];
+                memcpy(&rspd, rd + 18, 4);
+                OSReport("TPGZ RECV: p%d (%.0f,%.0f,%.0f) a=%d s=%.1f\n",
+                         playerID, rx, ry, rz, rAngle, rspd);
+            }
+        }
     }
 
     if (wasDisplayed && !mDisplay) {

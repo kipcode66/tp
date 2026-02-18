@@ -170,6 +170,12 @@ struct gzSceneSettings_s {
     bool mMuteSFX;
 };
 
+struct gzOnlineSettings_s {
+    bool mStateStreaming;
+    u32 mServerIP;      // big-endian IP (use gzNet_c::makeIP)
+    u16 mServerPort;    // default 52224 (0x00CC00)
+};
+
 struct gzSettings_s {
     u32 mTextColor;  // todo: just make this an index?
     bool mDropShadows;
@@ -180,11 +186,12 @@ struct gzSettings_s {
     bool mMenuPausesGame;
     bool mBootToMenu;
     bool mMenuSfx;
-    
+
     gzCheatsSettings_s mCheats;
     gzToolsSettings_s mTools;
     gzSceneSettings_s mScene;
     gzCommandCombos_s mCommandCombos;
+    gzOnlineSettings_s mOnline;
 };
 
 // tpgz config file header
@@ -407,6 +414,15 @@ public:
     void setTool_Timer(bool i_opt) { mSettings.mTools.mTimer = i_opt; }
     void setTool_FreeCam(bool i_opt) { mSettings.mTools.mFreeCam = i_opt; }
     void setTool_UniversalMapDelay(bool i_opt) { mSettings.mTools.mUniversalMapDelay = i_opt; }    
+
+    // Online
+    bool isOnline_StateStreaming() { return mSettings.mOnline.mStateStreaming; }
+    u32 getOnline_ServerIP() { return mSettings.mOnline.mServerIP; }
+    u16 getOnline_ServerPort() { return mSettings.mOnline.mServerPort; }
+
+    void setOnline_StateStreaming(bool i_opt) { mSettings.mOnline.mStateStreaming = i_opt; }
+    void setOnline_ServerIP(u32 i_ip) { mSettings.mOnline.mServerIP = i_ip; }
+    void setOnline_ServerPort(u16 i_port) { mSettings.mOnline.mServerPort = i_port; }
 
     // Scene
     bool isScene_FreezeTime() { return mSettings.mScene.mFreezeTime; }
@@ -868,6 +884,11 @@ inline bool gzInfo_isScene_MuteSFX() { return g_gzInfo.isScene_MuteSFX(); }
 inline void gzInfo_onScene_MuteSFX() { g_gzInfo.setScene_MuteSFX(true); }
 inline void gzInfo_offScene_MuteSFX() { g_gzInfo.setScene_MuteSFX(false); }
 
+
+// Online
+inline bool gzInfo_isOnline_StateStreaming() { return g_gzInfo.isOnline_StateStreaming(); }
+inline void gzInfo_onOnline_StateStreaming() { g_gzInfo.setOnline_StateStreaming(true); }
+inline void gzInfo_offOnline_StateStreaming() { g_gzInfo.setOnline_StateStreaming(false); }
 
 inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}
 inline bool gzInfo_isMenuPausesGame() { return g_gzInfo.isMenuPausesGame(); }
