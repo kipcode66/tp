@@ -96,7 +96,7 @@ The generated files give you a working starting point:
 | Execute | `f_pc/f_pc_manager.cpp` | Calls `execute()` every frame before game actors run |
 | Draw | `f_pc/f_pc_manager.cpp` | Calls `draw()` every frame after game actors render |
 | Init | `d/d_s_logo.cpp` | Calls `startInit()` once after all game resources load |
-| Input | `m_Do/m_Do_controller_pad.cpp` | Maps port 1 input to a mod-accessible pad struct; blocks game input when mod menu is displayed |
+| Input | `m_Do/m_Do_controller_pad.cpp` | Maps port 1 input to a mod-accessible pad struct |
 | Dev mode | `m_Do/m_Do_main.cpp` | Sets `developmentMode = 1` to enable debug features |
 | Debug draw | `m_Do/m_Do_ext.cpp` | Enables debug drawing primitives unconditionally |
 
@@ -147,6 +147,7 @@ The umbra layer is always available to your mod code:
 #include "umbra/umbra_platform.h"
 #include "umbra/umbra_nintendont.h"
 #include "umbra/umbra_storage.h"
+#include "umbra/umbra_net.h"
 
 // Detect what platform we're running on
 UmbraPlatform platform = umbraDetectPlatform();
@@ -154,10 +155,28 @@ UmbraPlatform platform = umbraDetectPlatform();
 // Send data to the Nintendont kernel (bypasses EXI)
 ninMailboxTransfer(buf, len, mode);
 
-// Persist settings (Nintendont SD card or physical memory card)
-umbraStorageNintendont storage;
-storage.write(data, size);
-storage.read(data, size);
+// Persist settings to Nintendont SD card via kernel FatFS
+umbraStorageNintendont sdStorage;
+sdStorage.write(data, size);
+sdStorage.read(data, size);
+
+// Persist settings to physical memory card via CARD API
+umbraStorageMemcard mcStorage("mymod_cfg");
+mcStorage.write(data, size);
+mcStorage.read(data, size);
+
+// Networking (requires Nintendont kernel with network support)
+umbraNet net;
+
+// Persistent connection for state streaming
+net.connect(umbraNet::makeIP(192, 168, 1, 100), 5000);
+net.stateWrite(data, size);
+net.stateRead(buf, maxLen);
+net.disconnect();
+
+// One-shot UDP send/recv
+net.sendUDP(ip, port, data, len);
+net.recvUDP(buf, maxLen);
 
 // Return to the Nintendont loader
 ninReturnToLoader();

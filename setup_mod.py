@@ -277,16 +277,9 @@ def apply_hook_controller_pad(mod_name: str) -> None:
 #endif
     }}
 
-    // Map port 1 inputs to mod controller info
     if (m_gamePad[0] != NULL) {{
         convert(&m_modPadInfo, m_gamePad[0]);
         LRlockCheck(&m_modPadInfo);
-    }}
-
-    // Block game inputs when mod menu is displayed
-    if (g_{mod_name}Info.isDisplay()) {{
-        m_cpadInfo[0].mPressedButtonFlags = 0;
-        m_cpadInfo[0].mButtonFlags = 0;
     }}
 }}"""
     content = content.replace(old_read_end, new_read_end, 1)
