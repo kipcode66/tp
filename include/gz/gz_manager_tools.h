@@ -110,6 +110,18 @@ struct gzInputViewer_s {
     void* pTrigBuf;
 };
 
+struct gzToolLinkDebugInfo_s {
+    void create();
+    void delete_();
+
+    bool isInitialized;
+    gzTextBox* pTimeTbox;
+    gzTextBox* pActionTbox;
+    gzTextBox* pPosText[3];
+    gzTextBox* pAngleText[2];
+    gzTextBox* pSpeedText;
+};
+
 class gzToolsMng_c {
 public:
     void execute();
@@ -139,6 +151,7 @@ private:
     EBMBState mEBMB;
     RollCheckerState mRollChecker;
     gzInputViewer_s mInputViewer;
+    gzToolLinkDebugInfo_s mLinkInfo;
 };
 
 #endif // GZ_MANAGER_TOOLS_H

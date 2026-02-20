@@ -493,24 +493,97 @@ void gzToolsMng_c::drawRollChecker() {
                     mRollChecker.resultText, mRollChecker.resultColor, 1.5f, -0.5f);
 }
 
+void gzToolLinkDebugInfo_s::create() {
+    const f32 FONT_SIZE = 15.0f;
+
+    pTimeTbox = gzTextBox_allocate();
+    if (pTimeTbox == NULL) return;
+    pTimeTbox->setFontSize(FONT_SIZE, FONT_SIZE);
+
+    pActionTbox = gzTextBox_allocate();
+    if (pActionTbox == NULL) return;
+    pActionTbox->setFontSize(FONT_SIZE, FONT_SIZE);
+
+    for (int i = 0; i < 3; i++) {
+        pPosText[i] = gzTextBox_allocate();
+        if (pPosText[i] == NULL) return;
+        pPosText[i]->setFontSize(FONT_SIZE, FONT_SIZE);
+    }
+
+    for (int i = 0; i < 2; i++) {
+        pAngleText[i] = gzTextBox_allocate();
+        if (pAngleText[i] == NULL) return;
+        pAngleText[i]->setFontSize(FONT_SIZE, FONT_SIZE);
+    }
+
+    pSpeedText = gzTextBox_allocate();
+    if (pSpeedText == NULL) return;
+    pSpeedText->setFontSize(FONT_SIZE, FONT_SIZE);
+
+    isInitialized = true;
+}
+
+void gzToolLinkDebugInfo_s::delete_() {
+    if (isInitialized) {
+        delete pTimeTbox;
+        pTimeTbox = NULL;
+
+        delete pActionTbox;
+        pActionTbox = NULL;
+
+        for (int i = 0; i < 3; i++) {
+            delete pPosText[i];
+            pPosText[i] = NULL;
+        }
+
+        for (int i = 0; i < 2; i++) {
+            delete pAngleText[i];
+            pAngleText[i] = NULL;
+        }
+
+        delete pSpeedText;
+        pSpeedText = NULL;
+
+        isInitialized = false;
+    }
+}
+
 void gzToolsMng_c::drawLinkInfo() {
     daAlink_c* player = daAlink_getAlinkActorClass();
     if (player == NULL)
         return;
 
-    const int BASE_X = 400;
+    if (!mLinkInfo.isInitialized) {
+        mLinkInfo.create();
+    }
+
+    const int BASE_X = 450;
     const int BASE_Y = 200;
     const int LINE_HEIGHT = 20;
 
-    // TODO: do we like prints or textboxes here more?
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 0), COLOR_WHITE, "time: %02d:%02d", dKy_getdaytime_hour(), dKy_getdaytime_minute());
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 1), COLOR_WHITE, "action: %d", player->mProcID);
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 2), COLOR_WHITE, "pos x: %.4f", player->current.pos.x);
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 3), COLOR_WHITE, "pos y: %.4f", player->current.pos.y);
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 4), COLOR_WHITE, "pos z: %.4f", player->current.pos.z);
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 5), COLOR_WHITE, "angle: %d", (u16)player->shape_angle.y);
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 6), COLOR_WHITE, "v-angle: %d", player->mBodyAngle.x);
-    gzPrint(BASE_X, BASE_Y + (LINE_HEIGHT * 7), COLOR_WHITE, "speed: %.4f", player->speedF);
+    mLinkInfo.pTimeTbox->setStringf("time: %02d:%02d", dKy_getdaytime_hour(), dKy_getdaytime_minute());
+    mLinkInfo.pTimeTbox->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 0), COLOR_WHITE);
+
+    mLinkInfo.pActionTbox->setStringf("action: %d", player->mProcID);
+    mLinkInfo.pActionTbox->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 1), COLOR_WHITE);
+
+    mLinkInfo.pPosText[0]->setStringf("pos x: %.4f", player->current.pos.x);
+    mLinkInfo.pPosText[0]->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 2), COLOR_WHITE);
+
+    mLinkInfo.pPosText[1]->setStringf("pos y: %.4f", player->current.pos.y);
+    mLinkInfo.pPosText[1]->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 3), COLOR_WHITE);
+
+    mLinkInfo.pPosText[2]->setStringf("pos z: %.4f", player->current.pos.z);
+    mLinkInfo.pPosText[2]->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 4), COLOR_WHITE);
+
+    mLinkInfo.pAngleText[0]->setStringf("angle: %d", (u16)player->shape_angle.y);
+    mLinkInfo.pAngleText[0]->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 5), COLOR_WHITE);
+
+    mLinkInfo.pAngleText[1]->setStringf("v-angle: %d", player->mBodyAngle.x);
+    mLinkInfo.pAngleText[1]->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 6), COLOR_WHITE);
+
+    mLinkInfo.pSpeedText->setStringf("speed: %.4f", player->speedF);
+    mLinkInfo.pSpeedText->draw(BASE_X, BASE_Y + (LINE_HEIGHT * 7), COLOR_WHITE);
 }
 
 void gzInputViewer_s::cleanup() {
@@ -705,6 +778,8 @@ void gzToolsMng_c::draw() {
 
     if (gzInfo_isTool_LinkDebugInfo()) {
         drawLinkInfo();
+    } else {
+        mLinkInfo.delete_();
     }
 
     if (gzInfo_isTool_InputViewer()) {

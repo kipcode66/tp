@@ -458,10 +458,6 @@ int gzInfo_c::execute() {
 #endif
             int settingsResult = loadSettings();
 
-            dComIfGp_setOxygen(OXYGEN_MAX);
-            dComIfGp_setNowOxygen(OXYGEN_MAX);
-            dComIfGp_setMaxOxygen(OXYGEN_MAX);
-
             mGZInitialized = true;
             mInitPhase = INIT_PHASE_DONE;
 
