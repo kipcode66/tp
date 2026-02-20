@@ -5,7 +5,7 @@
 #include "gz/gz_utility_draw.h"
 #include "d/d_select_cursor.h"
 
-// Wrap cursor movement so fast scrolling stays withing [0, maxLines]
+// Wrap cursor movement so fast scrolling stays within [0, maxLines]
 static int wrapMenuCursorY(int value, int maxLines) {
     value %= maxLines;
     return (value < 0) ? value + maxLines : value;
