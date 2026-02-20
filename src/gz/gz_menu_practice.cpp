@@ -94,15 +94,15 @@ void gzPracticeMenu_c::execute() {
         break;
     }
 
-    // Tab switching (uses left/right)
-    if (gzPad::getTrigRight()) {
+    // Tab switching (uses L/R triggers)
+    if (gzPad::getTrigR()) {
         mCurrentTab = (mCurrentTab + 1) % TAB_MAX;
         l_cursor->y = 0;
         gzInfo_resetTopLine();
         gzInfo_seStart(Z2SE_SY_TALK_CURSOR);
     }
 
-    if (gzPad::getTrigLeft()) {
+    if (gzPad::getTrigL()) {
         mCurrentTab = (mCurrentTab - 1 + TAB_MAX) % TAB_MAX;
         l_cursor->y = 0;
         gzInfo_resetTopLine();

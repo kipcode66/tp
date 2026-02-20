@@ -362,8 +362,18 @@ void gzMenu_c::handleNavigation(int maxLines) {
 
     gzCursor* l_cursor = gzInfo_getCursor();
 
+    if (gzPad::getTrigRight()) {
+        l_cursor->y = (l_cursor->y + 5) % maxLines;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
+
     if (gzPad::getTrigDown()) {
         l_cursor->y = (l_cursor->y + 1) % maxLines;
+        gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
+    }
+
+    if (gzPad::getTrigLeft()) {
+        l_cursor->y = (l_cursor->y == 0) ? maxLines - 5 : l_cursor->y - 5;
         gzInfo_seStart(Z2SE_SY_NAME_CURSOR);
     }
 
