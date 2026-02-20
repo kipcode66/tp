@@ -241,7 +241,6 @@ def apply_hook_controller_pad(mod_name: str) -> None:
     - Add #include for mod header
     - Add m_modPadInfo static member
     - Map port 1 inputs to mod pad info
-    - Block game inputs when mod menu is displayed
     """
     path = SCRIPT_DIR / "src" / "m_Do" / "m_Do_controller_pad.cpp"
     content = path.read_text()
@@ -261,7 +260,7 @@ def apply_hook_controller_pad(mod_name: str) -> None:
     new_decl = f"interface_of_controller_pad mDoCPd_c::m_debugCpadInfo[4];\ninterface_of_controller_pad mDoCPd_c::m_modPadInfo;"
     content = content.replace(old_decl, new_decl, 1)
 
-    # After the main pad read loop, add mod pad mapping and input blocking.
+    # After the main pad read loop, add mod pad mapping.
     # Insert after the closing of the for loop in read().
     old_read_end = """        pad++;
         interface++;
@@ -295,7 +294,7 @@ def apply_hook_controller_pad(mod_name: str) -> None:
         header = header.replace(old_debug, new_debug, 1)
         header_path.write_text(header)
 
-    print(f"  Hooked m_Do/m_Do_controller_pad.cpp (mod pad + input blocking)")
+    print(f"  Hooked m_Do/m_Do_controller_pad.cpp (mod pad)")
 
 
 def apply_hook_development_mode() -> None:
