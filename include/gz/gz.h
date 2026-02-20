@@ -5,15 +5,15 @@
 #include "d/d_com_inf_game.h"
 #include "d/d_item.h"
 #include "gz/gz_capture.h"
-#include "gz/gz_exi.h"
 #include "gz/gz_utility_misc.h"
 #include "gz/gz_manager_cheats.h"
 #include "gz/gz_manager_practice.h"
 #include "gz/gz_manager_scene.h"
 #include "gz/gz_manager_tools.h"
-#include "gz/gz_memcard.h"
-#include "gz/gz_net.h"
-#include "gz/gz_sd.h"
+#include "umbra/umbra_nintendont.h"
+#include "umbra/umbra_platform.h"
+#include "umbra/umbra_storage.h"
+#include "umbra/umbra_net.h"
 #include "gz/gz_utility_notification.h"
 #include "JSystem/J2DGraph/J2DPicture.h"
 #include "JSystem/J2DGraph/J2DTextBox.h"
@@ -172,7 +172,7 @@ struct gzSceneSettings_s {
 
 struct gzOnlineSettings_s {
     bool mStateStreaming;
-    u32 mServerIP;      // big-endian IP (use gzNet_c::makeIP)
+    u32 mServerIP;      // big-endian IP (use umbraNet::makeIP)
     u16 mServerPort;    // default 52224 (0x00CC00)
 };
 
@@ -211,9 +211,8 @@ class gzInfo_c {
 public:
     static const int GZ_SAVE_VERSION = 1;
 
-    gzInfo_c() {
+    gzInfo_c() : mMemCard("tpgzcfg") {
         mGZInitialized = false;
-        mIsNintendont = false;
         mIsPlayInfoInit = false;
         mInitPhase = INIT_PHASE_IDLE;
         mMenuResourcesLoaded = false;
@@ -525,7 +524,6 @@ public:
     s16 mInputWaitTimer;
     bool mDisplay;
     bool mGZInitialized;
-    bool mIsNintendont;
     bool mIsPlayInfoInit;
     int mInitPhase;
     bool mMenuResourcesLoaded;
@@ -545,9 +543,9 @@ public:
     gzCheatsMng_c mCheatsMng;
     gzToolsMng_c mToolsMng;
     gzSceneMng_c mSceneMng;
-    gzSD_c mSD;
-    gzNet_c mNet;
-    gzMemCard_c mMemCard;
+    umbraStorageNintendont mSD;
+    umbraNet mNet;
+    umbraStorageMemcard mMemCard;
 
     f32 mIconXPos;
     f32 mIconYPos;
@@ -604,13 +602,10 @@ inline bool gzInfo_getDisplayMode() { return g_gzInfo.getDisplayMode(); }
 inline bool gzInfo_getReloadType() { return g_gzInfo.getReloadType(); }
 inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 
-inline int gzInfo_deleteSettingsMemcard() { return g_gzInfo.mMemCard.deleteSettings(); }
-inline int gzInfo_loadSettingsMemcard() { return g_gzInfo.mMemCard.loadSettings(); }
-inline int gzInfo_storeSettingsMemcard() { return g_gzInfo.mMemCard.storeSettings(); }
 inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
 inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
 inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
-inline void gzInfo_returnToLoader() { gzReturnToLoader(); }
+inline void gzInfo_returnToLoader() { ninReturnToLoader(); }
 inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
 inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }

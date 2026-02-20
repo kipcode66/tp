@@ -1,9 +1,9 @@
-#ifndef GZ_NET_H
-#define GZ_NET_H
+#ifndef UMBRA_NET_H
+#define UMBRA_NET_H
 
 #include "dolphin/types.h"
 
-class gzNet_c {
+class umbraNet {
 public:
     int sendUDP(u32 ip, u16 port, const void* data, u32 len);
     int recvUDP(void* buf, u32 maxLen);
@@ -18,4 +18,4 @@ public:
     }
 };
 
-#endif
+#endif // UMBRA_NET_H

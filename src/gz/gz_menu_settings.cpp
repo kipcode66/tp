@@ -126,7 +126,7 @@ gzSettingsMenu_c::gzSettingsMenu_c() {
     mpLines[SETTING_LOAD] = mpLoad;
     mpLines[SETTING_DELETE] = mpDelete;
 
-    if (g_gzInfo.mIsNintendont) {
+    if (umbraIsNintendont()) {
         mpReturnToLoader = new (gzHeap(GZ_GROUP_MENU), 4) gzLine("return to loader", "exit game and return to homebrew channel");
         mpLines[SETTING_RETURN_TO_LOADER] = mpReturnToLoader;
         mLineCount = LINE_NUM;

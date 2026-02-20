@@ -83,7 +83,7 @@ void gzInfo_c::loadDefaultSettings() {
     mSettings.mCommandCombos.mTeleportLoad = (PAD_TRIGGER_R | PAD_BUTTON_DOWN);
     mSettings.mCommandCombos.mFreeCamToggle = (PAD_TRIGGER_Z | PAD_BUTTON_B | PAD_BUTTON_A);
     mSettings.mOnline.mStateStreaming = false;
-    mSettings.mOnline.mServerIP = gzNet_c::makeIP(192, 168, 86, 30);
+    mSettings.mOnline.mServerIP = umbraNet::makeIP(192, 168, 86, 30);
     mSettings.mOnline.mServerPort = 52224; // 0x00CC00
     mSettings.mDropShadows = true;
     mSettings.mMenuPausesGame = true;
@@ -126,30 +126,93 @@ void gzInfo_c::loadDefaultSettings() {
 }
 
 int gzInfo_c::storeSettings() {
+    u8 data[sizeof(gzConfigHeader_s) + sizeof(gzSettings_s)];
+
+    gzConfigHeader_s cfg;
+    cfg.version = GZ_SAVE_VERSION;
+    cfg.settingsOffset = sizeof(gzConfigHeader_s);
+    memset(cfg.reserved, 0, sizeof(cfg.reserved));
+    memcpy(data, &cfg, sizeof(gzConfigHeader_s));
+    memcpy(data + cfg.settingsOffset, &mSettings, sizeof(gzSettings_s));
+
+    umbraStorage* storage;
 #ifndef __REVOLUTION_SDK__
-    if (mIsNintendont) {
-        return mSD.storeSettings();
-    }
+    if (umbraIsNintendont()) {
+        storage = &mSD;
+    } else
 #endif
-    return mMemCard.storeSettings();
+    {
+        storage = &mMemCard;
+    }
+
+    int result = storage->write(data, sizeof(data));
+    if (result != 0) {
+        gzInfo_sendNotification("save FAILED");
+        return -1;
+    }
+
+    gzInfo_sendNotification("settings saved!");
+    gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
+    return 0;
 }
 
 int gzInfo_c::loadSettings() {
+    u8 data[sizeof(gzConfigHeader_s) + sizeof(gzSettings_s)];
+
+    umbraStorage* storage;
 #ifndef __REVOLUTION_SDK__
-    if (mIsNintendont) {
-        return mSD.loadSettings();
-    }
+    if (umbraIsNintendont()) {
+        storage = &mSD;
+    } else
 #endif
-    return mMemCard.loadSettings();
+    {
+        storage = &mMemCard;
+    }
+
+    int result = storage->read(data, sizeof(data));
+    if (result != 0) {
+        gzInfo_sendNotification("load FAILED");
+        return -1;
+    }
+
+    gzConfigHeader_s cfg;
+    memcpy(&cfg, data, sizeof(gzConfigHeader_s));
+    if (cfg.version == 0) {
+        gzInfo_sendNotification("load FAILED (not found)");
+        return -1;
+    }
+    if (cfg.version != GZ_SAVE_VERSION) {
+        OSReport("TPGZ: outdated save version %d (expected %d)\n",
+                 cfg.version, GZ_SAVE_VERSION);
+        gzInfo_sendNotification("load FAILED (version)");
+        return -1;
+    }
+    memcpy(&mSettings, data + cfg.settingsOffset, sizeof(gzSettings_s));
+    gzInfo_sendNotification("settings loaded!");
+    gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
+    return 0;
 }
 
 int gzInfo_c::deleteSettings() {
+    umbraStorage* storage;
 #ifndef __REVOLUTION_SDK__
-    if (mIsNintendont) {
-        return mSD.deleteSettings();
-    }
+    if (umbraIsNintendont()) {
+        storage = &mSD;
+    } else
 #endif
-    return mMemCard.deleteSettings();
+    {
+        storage = &mMemCard;
+    }
+
+    int result = storage->remove();
+    if (result != 0) {
+        gzInfo_sendNotification("delete FAILED");
+        return -1;
+    }
+
+    gzInfo_sendNotification("settings deleted!");
+    gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
+    return 0;
 }
 
 void gzInfo_c::startInit() {
@@ -453,8 +516,7 @@ int gzInfo_c::execute() {
             mMenuLoadStep = 0;
 
 #ifndef __REVOLUTION_SDK__
-            mIsNintendont = gzDetectNintendont();
-            OSReport("tpgz: nintendont detected = %d\n", mIsNintendont);
+            umbraDetectPlatform();
 #endif
             int settingsResult = loadSettings();
 
