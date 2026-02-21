@@ -6,6 +6,7 @@ enum UmbraPlatform {
     PLATFORM_NINTENDONT,
     PLATFORM_NINTENDONT_UMBRA,
     PLATFORM_DOLPHIN,
+    PLATFORM_DOLPHIN_UMBRA, // doesn't exist... yet :^)
     PLATFORM_SWISS,
 };
 
