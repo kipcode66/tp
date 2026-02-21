@@ -145,13 +145,14 @@ int gzInfo_c::storeSettings() {
         storage = &mMemCard;
     }
 
+    bool useSD = (storage == &mSD);
     int result = storage->write(data, sizeof(data));
     if (result != 0) {
-        gzInfo_sendNotification("save FAILED");
+        gzInfo_sendNotification(useSD ? "save FAILED (sd)" : "save FAILED (memcard)");
         return -1;
     }
 
-    gzInfo_sendNotification("settings saved!");
+    gzInfo_sendNotification(useSD ? "saved to sd!" : "saved to memcard!");
     gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
     return 0;
 }
@@ -169,26 +170,27 @@ int gzInfo_c::loadSettings() {
         storage = &mMemCard;
     }
 
+    bool useSD = (storage == &mSD);
     int result = storage->read(data, sizeof(data));
     if (result != 0) {
-        gzInfo_sendNotification("load FAILED");
+        gzInfo_sendNotification(useSD ? "load FAILED (sd)" : "load FAILED (memcard)");
         return -1;
     }
 
     gzConfigHeader_s cfg;
     memcpy(&cfg, data, sizeof(gzConfigHeader_s));
     if (cfg.version == 0) {
-        gzInfo_sendNotification("load FAILED (not found)");
+        gzInfo_sendNotification(useSD ? "load FAILED (not found, sd)" : "load FAILED (not found, memcard)");
         return -1;
     }
     if (cfg.version != GZ_SAVE_VERSION) {
         OSReport("TPGZ: outdated save version %d (expected %d)\n",
                  cfg.version, GZ_SAVE_VERSION);
-        gzInfo_sendNotification("load FAILED (version)");
+        gzInfo_sendNotification(useSD ? "load FAILED (version, sd)" : "load FAILED (version, memcard)");
         return -1;
     }
     memcpy(&mSettings, data + cfg.settingsOffset, sizeof(gzSettings_s));
-    gzInfo_sendNotification("settings loaded!");
+    gzInfo_sendNotification(useSD ? "loaded from sd!" : "loaded from memcard!");
     gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
     return 0;
 }
@@ -204,13 +206,14 @@ int gzInfo_c::deleteSettings() {
         storage = &mMemCard;
     }
 
+    bool useSD = (storage == &mSD);
     int result = storage->remove();
     if (result != 0) {
-        gzInfo_sendNotification("delete FAILED");
+        gzInfo_sendNotification(useSD ? "delete FAILED (sd)" : "delete FAILED (memcard)");
         return -1;
     }
 
-    gzInfo_sendNotification("settings deleted!");
+    gzInfo_sendNotification(useSD ? "deleted from sd!" : "deleted from memcard!");
     gzInfo_seStart(Z2SE_SY_CONTINUE_OK);
     return 0;
 }

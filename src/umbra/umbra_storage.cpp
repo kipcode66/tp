@@ -8,7 +8,8 @@
 #include <dolphin/os.h>
 
 static const u32 CMD_SIZE = 4;
-static u8 s_cardWorkArea[CARD_WORKAREA_SIZE] ATTRIBUTE_ALIGN(32);
+
+#define SECTOR_SIZE 0x2000
 
 int umbraStorageNintendont::write(const void* data, u32 size) {
     u32 payloadSize = CMD_SIZE + size;
@@ -75,37 +76,29 @@ int umbraStorageMemcard::write(const void* data, u32 size) {
     s32 result;
     CARDFileInfo fileInfo;
 
-    result = CARDMount(UMBRA_CARD_CHAN, s_cardWorkArea, NULL);
+    result = CARDProbeEx(UMBRA_CARD_CHAN, NULL, NULL);
     if (result != CARD_RESULT_READY) {
         return -1;
     }
 
-    u32 cardSize = (size + CARD_READ_SIZE - 1) & ~(CARD_READ_SIZE - 1);
-
-    result = CARDOpen(UMBRA_CARD_CHAN, mFilename, &fileInfo);
-    if (result == CARD_RESULT_NOFILE) {
-        result = CARDCreate(UMBRA_CARD_CHAN, mFilename, cardSize, &fileInfo);
+    result = CARDCreate(UMBRA_CARD_CHAN, mFilename, SECTOR_SIZE, &fileInfo);
+    if (result == CARD_RESULT_READY || result == CARD_RESULT_EXIST) {
+        result = CARDOpen(UMBRA_CARD_CHAN, mFilename, &fileInfo);
         if (result != CARD_RESULT_READY) {
-            CARDUnmount(UMBRA_CARD_CHAN);
             return -1;
         }
-    } else if (result != CARD_RESULT_READY) {
-        CARDUnmount(UMBRA_CARD_CHAN);
+    } else {
         return -1;
     }
 
-    u8 writeBuf[DMA_ALIGN(512)] ATTRIBUTE_ALIGN(32);
-    if (cardSize > sizeof(writeBuf)) {
-        CARDClose(&fileInfo);
-        CARDUnmount(UMBRA_CARD_CHAN);
-        return -1;
+    u8 writeBuf[SECTOR_SIZE] ATTRIBUTE_ALIGN(32);
+    memset(writeBuf, 0, sizeof(writeBuf));
+    if (size <= sizeof(writeBuf)) {
+        memcpy(writeBuf, data, size);
     }
-    memset(writeBuf, 0, cardSize);
-    memcpy(writeBuf, data, size);
 
-    result = CARDWrite(&fileInfo, writeBuf, cardSize, 0);
+    result = CARDWrite(&fileInfo, writeBuf, SECTOR_SIZE, 0);
     CARDClose(&fileInfo);
-    CARDUnmount(UMBRA_CARD_CHAN);
     return (result == CARD_RESULT_READY) ? 0 : -1;
 }
 
@@ -113,47 +106,40 @@ int umbraStorageMemcard::read(void* data, u32 size) {
     s32 result;
     CARDFileInfo fileInfo;
 
-    result = CARDMount(UMBRA_CARD_CHAN, s_cardWorkArea, NULL);
+    result = CARDProbeEx(UMBRA_CARD_CHAN, NULL, NULL);
     if (result != CARD_RESULT_READY) {
         return -1;
     }
 
     result = CARDOpen(UMBRA_CARD_CHAN, mFilename, &fileInfo);
     if (result != CARD_RESULT_READY) {
-        CARDUnmount(UMBRA_CARD_CHAN);
         return -1;
     }
 
-    u32 cardSize = (size + CARD_READ_SIZE - 1) & ~(CARD_READ_SIZE - 1);
-    u8 readBuf[DMA_ALIGN(512)] ATTRIBUTE_ALIGN(32);
-    if (cardSize > sizeof(readBuf)) {
-        CARDClose(&fileInfo);
-        CARDUnmount(UMBRA_CARD_CHAN);
-        return -1;
-    }
-    memset(readBuf, 0, cardSize);
+    u8 readBuf[SECTOR_SIZE] ATTRIBUTE_ALIGN(32);
+    memset(readBuf, 0, sizeof(readBuf));
 
-    result = CARDRead(&fileInfo, readBuf, cardSize, 0);
+    result = CARDRead(&fileInfo, readBuf, SECTOR_SIZE, 0);
     CARDClose(&fileInfo);
-    CARDUnmount(UMBRA_CARD_CHAN);
 
     if (result != CARD_RESULT_READY) {
         return -1;
     }
-    memcpy(data, readBuf, size);
+    if (size <= sizeof(readBuf)) {
+        memcpy(data, readBuf, size);
+    }
     return 0;
 }
 
 int umbraStorageMemcard::remove() {
     s32 result;
 
-    result = CARDMount(UMBRA_CARD_CHAN, s_cardWorkArea, NULL);
+    result = CARDProbeEx(UMBRA_CARD_CHAN, NULL, NULL);
     if (result != CARD_RESULT_READY) {
         return -1;
     }
 
     result = CARDDelete(UMBRA_CARD_CHAN, mFilename);
-    CARDUnmount(UMBRA_CARD_CHAN);
     return (result == CARD_RESULT_READY) ? 0 : -1;
 }
 

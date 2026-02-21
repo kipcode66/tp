@@ -605,7 +605,6 @@ inline u8 gzInfo_getBossFlag() { return g_gzInfo.getBossFlag(); }
 inline int gzInfo_storeSettings() { return g_gzInfo.storeSettings(); }
 inline int gzInfo_loadSettings() { return g_gzInfo.loadSettings(); }
 inline int gzInfo_deleteSettings() { return g_gzInfo.deleteSettings(); }
-inline void gzInfo_returnToLoader() { ninReturnToLoader(); }
 inline u32 gzInfo_nextCursorType() { return g_gzInfo.nextCursorType(); }
 inline u32 gzInfo_prevCursorType() { return g_gzInfo.prevCursorType(); }
 inline u32 gzInfo_nextTextColor() { return g_gzInfo.nextTextColor(); }
@@ -614,6 +613,14 @@ inline u32 gzInfo_prevTextColor() { return g_gzInfo.prevTextColor(); }
 inline void gzInfo_seStart(u32 i_sfxID) { g_gzInfo.seStart(i_sfxID); }
 inline void gzInfo_sendNotification(const char* msg) { g_gzInfo.sendNotification(msg); }
 inline void gzInfo_sendNotification(const char* msg, int i_notificationType) { g_gzInfo.sendNotification(msg, i_notificationType); }
+
+inline void gzInfo_returnToLoader() {
+    if (umbraDetectPlatform() != PLATFORM_NINTENDONT_UMBRA) {
+        gzInfo_sendNotification("exit requires umbra nintendont");
+        return;
+    }
+    ninReturnToLoader();
+}
 
 inline bool gzInfo_isInDungeon(int i_stageNo) {
     // Check if we're in the dungeon, and return true
@@ -884,7 +891,13 @@ inline void gzInfo_offScene_MuteSFX() { g_gzInfo.setScene_MuteSFX(false); }
 
 // Online
 inline bool gzInfo_isOnline_StateStreaming() { return g_gzInfo.isOnline_StateStreaming(); }
-inline void gzInfo_onOnline_StateStreaming() { g_gzInfo.setOnline_StateStreaming(true); }
+inline void gzInfo_onOnline_StateStreaming() {
+    if (umbraDetectPlatform() != PLATFORM_NINTENDONT_UMBRA) {
+        gzInfo_sendNotification("net requires umbra nintendont");
+        return;
+    }
+    g_gzInfo.setOnline_StateStreaming(true);
+}
 inline void gzInfo_offOnline_StateStreaming() { g_gzInfo.setOnline_StateStreaming(false); }
 
 inline bool gzInfo_isMainMenuVisible() { return g_gzInfo.mCursor.x == 0;}

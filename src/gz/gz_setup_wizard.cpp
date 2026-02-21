@@ -23,9 +23,7 @@ gzSetupWizard_c::gzSetupWizard_c() {
     mpOption2 = gzTextBox_allocate();
     mpHint = gzTextBox_allocate();
 
-    mpTPCursor = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dSelect_cursor_c(2, 1.0f, NULL);
-    mpTPCursor->setParam(0.96f, 0.84f, 0.03f, 0.5f, 0.5f);
-    mpTPCursor->setAlphaRate(1.0f);
+    mpTPCursor = NULL;
 }
 
 gzSetupWizard_c::~gzSetupWizard_c() {
@@ -329,7 +327,15 @@ void gzSetupWizard_c::draw() {
         mpHint->draw(0.0f, BOX_Y + BOX_H - 22.0f, COLOR_GRAY, HBIND_CENTER);
     }
 
-    if (tpCursorTarget != NULL) {
+    if (tpCursorTarget != NULL && mpTPCursor == NULL) {
+        mpTPCursor = new (gzHeap(GZ_GROUP_GRAPHICS), 4) dSelect_cursor_c(2, 1.0f, NULL);
+        if (mpTPCursor != NULL) {
+            mpTPCursor->setParam(0.96f, 0.84f, 0.03f, 0.5f, 0.5f);
+            mpTPCursor->setAlphaRate(1.0f);
+        }
+    }
+
+    if (tpCursorTarget != NULL && mpTPCursor != NULL) {
         tpCursorTarget->updateBounds();
         f32 cursorX = tpCursorX + 304.0f + gzMenuLayout::TP_CURSOR_X_OFFSET + 3.0f;
         f32 cursorY = optionY + (tpCursorTarget->getHeight() / 2.0f) +

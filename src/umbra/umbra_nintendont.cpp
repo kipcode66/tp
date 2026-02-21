@@ -11,16 +11,25 @@ bool ninMailboxTransfer(void* buf, u32 len, u32 mode) {
     if (mode == 1) {
         DCFlushRange(buf, len);
     } else {
-        DCInvalidateRange(buf, len);
+        // Stamp magic so kernel can identify this as an umbra read.
+        // The kernel overwrites the buffer with response data.
+        if (len >= 4) {
+            *(u32*)buf = UMBRA_CMD_WORD(0);
+        }
+        DCFlushRange(buf, len);
     }
 
     u32 physAddr = (u32)buf & 0x1FFFFFFF;
 
-    mailbox[1] = len;
-    mailbox[2] = physAddr;
-    mailbox[0] = (0x12 << 8) | (mode & 0xFF);
+    // Command format must match EXIDMA.S:
+    // EXI_CMD_1 = data pointer (physical)
+    // EXI_CMD_0 = 0x12000000 | (chn << 20) | (mode << 16) | (len & 0xFFFF)
+    mailbox[1] = physAddr;
+    mailbox[0] = 0x12000000 | (0 << 20) | ((mode & 0xF) << 16) | (len & 0xFFFF);
 
-    for (int i = 0; i < 1000000; i++) {
+    // Poll until kernel clears the command. SD card writes can take
+    // hundreds of ms.
+    for (int i = 0; i < 500000000; i++) {
         if (mailbox[0] == 0) {
             if (mode == 0) {
                 DCInvalidateRange(buf, len);
