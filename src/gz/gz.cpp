@@ -17,6 +17,8 @@
 #include "dolphin/gx/GXGet.h"
 #include <cmath>
 
+#include "umbra/umbra_gdb.h"
+
 gzInfo_c g_gzInfo;
 
 void gzInfo_c::startIconPreload() {
@@ -521,6 +523,8 @@ int gzInfo_c::execute() {
 #ifndef __REVOLUTION_SDK__
             umbraDetectPlatform();
 #endif
+            umbra_gdb_install_crash_handlers();
+
             int settingsResult = loadSettings();
 
             mGZInitialized = true;
@@ -539,6 +543,7 @@ int gzInfo_c::execute() {
         return 0;
     }
 
+    umbra_gdb_poll();
     pollIconPreload();
 
     if (mpSetupWizard != NULL) {

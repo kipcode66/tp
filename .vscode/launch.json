@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Nintendont GDB",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/GZ2E01/framework.elf",
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gdb",
+      "miDebuggerServerAddress": "192.168.86.208:2159",
+      "stopAtConnect": true,
+      "setupCommands": [
+        {
+          "text": "set confirm off",
+          "ignoreFailures": false
+        },
+        {
+          "text": "source ${workspaceFolder}/build/GZ2E01/load_rel_symbols.gdb",
+          "ignoreFailures": false
+        }
+      ],
+      "postRemoteConnectCommands": [
+        {
+          "text": "load-all-symbols",
+          "ignoreFailures": false
+        }
+      ]
+    }
+  ]
+}

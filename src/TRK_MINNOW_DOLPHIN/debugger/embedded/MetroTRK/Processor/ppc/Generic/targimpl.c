@@ -1,5 +1,6 @@
 #include "TRK_MINNOW_DOLPHIN/ppc/Generic/targimpl.h"
 #include "TRK_MINNOW_DOLPHIN/utils/common/MWTrace.h"
+#include "umbra/umbra_gdb.h"
 #include <stdint.h>
 #include <cstring>
 
@@ -391,6 +392,8 @@ void TRKPostInterruptEvent(void) {
     int local_14;
     size_t registerSize;
     TRKEvent event;
+
+    umbra_gdb_trk_hook();
 
     if (gTRKState.inputActivated) {
         gTRKState.inputActivated = FALSE;

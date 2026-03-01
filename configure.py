@@ -3074,6 +3074,21 @@ if config.non_matching and custom_dol_objects:
         "implicit": [ldscript_path, "build/binutils", "tools/patch_forceactive.py"],
     })
 
+# Generate GDB REL symbol loader script after all PLFs are linked
+if config.non_matching:
+    gdb_loader_out = f"build/{version}/load_rel_symbols.gdb"
+    config.custom_build_rules.append({
+        "name": "gen_gdb_rel_loader",
+        "command": f"$python tools/gen_gdb_rel_loader.py build/{version}",
+        "description": "GDB REL LOADER $out",
+    })
+    config.custom_build_steps.setdefault("post-build", []).append({
+        "outputs": gdb_loader_out,
+        "rule": "gen_gdb_rel_loader",
+        "inputs": [f"build/{version}/config.json"],
+        "implicit": ["tools/gen_gdb_rel_loader.py"],
+    })
+
 # Optional extra categories for progress tracking
 config.progress_categories = [
     ProgressCategory("game", "TP Game Code"),
