@@ -9,8 +9,16 @@
       "cwd": "${workspaceFolder}",
       "MIMode": "gdb",
       "miDebuggerPath": "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gdb",
-      "miDebuggerServerAddress": "192.168.86.208:2159",
+      "miDebuggerServerAddress": "${input:wiiAddress}:2159",
       "stopAtConnect": true,
+      "logging": {
+        "engineLogging": false,
+        "traceResponse": false
+      },
+      "symbolLoadInfo": {
+        "loadAll": true,
+        "exceptionList": ""
+      },
       "setupCommands": [
         {
           "text": "set confirm off",
@@ -27,6 +35,14 @@
           "ignoreFailures": false
         }
       ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "wiiAddress",
+      "type": "promptString",
+      "description": "Wii IP address",
+      "default": "192.168.1.100"
     }
   ]
 }

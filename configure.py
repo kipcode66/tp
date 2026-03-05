@@ -223,7 +223,7 @@ config.compilers_tag = "20251118"
 config.dtk_tag = "v1.8.0"
 config.objdiff_tag = "v3.6.1"
 config.sjiswrap_tag = "v1.2.2"
-config.wibo_tag = "1.0.0"
+config.wibo_tag = "1.0.3"
 
 # Project
 config.config_path = Path("config") / config.version / "config.yml"
@@ -239,12 +239,9 @@ config.asflags = [
 config.ldflags = [
     "-fp hardware",
     "-nodefaults",
+    "-mapunused",
 ]
-if args.debug:
-    config.ldflags.append("-g")  # Or -gdwarf-2 for Wii linkers
-if args.map:
-    config.ldflags.append("-mapunused")
-    # config.ldflags.append("-listclosure") # For Wii linkers
+# config.ldflags.append("-listclosure") # For Wii linkers
 
 # Use for any additional files that should cause a re-configure when modified
 config.reconfig_deps = []
@@ -317,7 +314,7 @@ if config.version in USE_REVOLUTION_SDK_VERSIONS:
 
 # Debug flags
 if args.debug:
-    # Or -sym dwarf-2 for Wii compilers
+    # Or -sym on for Wii compilers
     cflags_base.extend(["-sym on", "-DDEBUG=1"])
 elif config.version == "ShieldD":
     cflags_base.extend(["-DDEBUG=1"])
@@ -3075,19 +3072,35 @@ if config.non_matching and custom_dol_objects:
     })
 
 # Generate GDB REL symbol loader script after all PLFs are linked
-if config.non_matching:
-    gdb_loader_out = f"build/{version}/load_rel_symbols.gdb"
-    config.custom_build_rules.append({
-        "name": "gen_gdb_rel_loader",
-        "command": f"$python tools/gen_gdb_rel_loader.py build/{version}",
-        "description": "GDB REL LOADER $out",
-    })
-    config.custom_build_steps.setdefault("post-build", []).append({
-        "outputs": gdb_loader_out,
-        "rule": "gen_gdb_rel_loader",
-        "inputs": [f"build/{version}/config.json"],
-        "implicit": ["tools/gen_gdb_rel_loader.py"],
-    })
+gdb_loader_out = f"build/{version}/load_rel_symbols.gdb"
+config.custom_build_rules.append({
+    "name": "gen_gdb_rel_loader",
+    "command": f"$python tools/gen_gdb_rel_loader.py build/{version}",
+    "description": "GDB REL LOADER $out",
+})
+config.custom_build_steps.setdefault("post-build", []).append({
+    "outputs": gdb_loader_out,
+    "rule": "gen_gdb_rel_loader",
+    "inputs": [f"build/{version}/config.json"],
+    "implicit": ["tools/gen_gdb_rel_loader.py"],
+})
+
+# Generate DWARF 2 debug info from DWARF 1 .o files after link
+debug_info_out = f"build/{version}/debug_info.o"
+config.custom_build_rules.append({
+    "name": "gen_dwarf2_debug",
+    "command": f"$python tools/gen_dwarf2_debug.py build/{version}",
+    "description": "DWARF2 DEBUG $out",
+})
+config.custom_build_steps.setdefault("post-build", []).append({
+    "outputs": debug_info_out,
+    "rule": "gen_dwarf2_debug",
+    "inputs": [f"build/{version}/framework.elf.MAP"],
+    "implicit": [
+        f"build/{version}/framework.elf",
+        "tools/gen_dwarf2_debug.py",
+    ],
+})
 
 # Optional extra categories for progress tracking
 config.progress_categories = [
@@ -3143,7 +3156,7 @@ rule rebuild_iso
 build {assets_stamp}: mod_assets_checksum | always
 
 # Rebuild ISO
-build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py {assets_stamp}
+build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py {assets_stamp} || post-build
 
 """
         # Add phony always target if not already present

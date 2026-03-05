@@ -19,7 +19,7 @@ extern "C" {
 
 /* Must match kernel/gdb.h */
 
-#define GDB_SHM_BASE      ((volatile u32*)0x93003600)
+#define GDB_SHM_BASE      ((volatile u32*)0xD3003600)  /* uncached MEM2 mirror */
 #define GDB_SHM_SIZE      512
 
 #define GDB_SHM_MAGIC     0x47444253  /* "GDBS" */
@@ -44,11 +44,15 @@ extern "C" {
 #define SHM_FPR_BYTE_OFF   0x0A8
 #define SHM_FPSCR_BYTE_OFF 0x1A8
 #define SHM_HALT_REQ       108
+#define SHM_PPC_HEARTBEAT  109
+#define SHM_PPC_HALT_SEEN  110
+#define SHM_EXIT_REQ       111
+#define SHM_IC_INVAL_CNT   112  /* 0x1C0 / 4 */
+#define SHM_IC_INVAL_ADDR  113  /* 0x1C4 / 4, array of up to 8 addrs */
 
 #define MSR_SE (1 << 10)
 
-#define SI_C0INBUFH   (*(volatile u32*)0xCC006404)
-#define PAD_TRIGGER_Z 0x0010
+static void do_game_exit(void);
 
 static u32 exception_to_signal(u32 exception_id) {
     switch (exception_id & 0xFFFF) {
@@ -80,11 +84,26 @@ static const char* exception_name(u32 exception_id) {
     }
 }
 
-/* Reads SI hardware directly — works in exception context */
-static bool read_z_button(void) {
-    u32 data0 = SI_C0INBUFH;
-    u16 buttons = (u16)(data0 >> 16);
-    return (buttons & PAD_TRIGGER_Z) != 0;
+/* Process ARM's I-cache invalidation queue.
+ * ARM writes instructions directly to physical memory, bypassing all PPC
+ * caches.  To make the new instruction visible to the I-pipeline:
+ *   1. DCInvalidateRange (dcbi) — discard any stale D-cache line for the
+ *      address.  On 750CL the L2 is unified; a dirty D-cache castout could
+ *      refill L2 with old data that shadows what ARM wrote to DRAM.
+ *   2. ICInvalidateRange (icbi) — invalidate both L1 I-cache AND L2 for
+ *      the address, forcing the next I-fetch to go all the way to DRAM. */
+static void process_ic_inval(void) {
+    u32 cnt = GDB_SHM_BASE[SHM_IC_INVAL_CNT];
+    if (cnt == 0)
+        return;
+    if (cnt > 8)
+        cnt = 8;
+    for (u32 i = 0; i < cnt; i++) {
+        u32 addr = GDB_SHM_BASE[SHM_IC_INVAL_ADDR + i];
+        DCInvalidateRange((void*)addr, 32);
+        ICInvalidateRange((void*)addr, 4);
+    }
+    GDB_SHM_BASE[SHM_IC_INVAL_CNT] = 0;
 }
 
 static int start_gdb_server(u16 port) {
@@ -115,6 +134,9 @@ static int start_gdb_server(u16 port) {
 }
 
 static __OSExceptionHandler old_handlers[__OS_EXCEPTION_MAX];
+
+/* Forward declaration — C implementation called from asm crash handler stub */
+extern "C" void crash_handler_impl(__OSException exception, OSContext* ctx);
 
 static void save_ctx_to_shm(OSContext* ctx, u32 exc_vector) {
     for (int i = 0; i < 32; i++)
@@ -163,7 +185,26 @@ static void restore_shm_to_ctx(OSContext* ctx, u32 state) {
     ctx->fpscr = (u32)*fpscr_shm;
 }
 
-static void umbra_gdb_crash_handler(__OSException exception, OSContext* ctx) {
+/* Assembly crash handler entry point.
+ * The OS exception dispatch (OS.c __OSEVStart) saves only r3-r5, CR, LR,
+ * CTR, XER, SRR0, SRR1 to the context.  ALL other GPRs (r0, r1, r2, r6-r31)
+ * and GQRs still hold the interrupted program's values and MUST be saved
+ * before any C code runs — C function prologues immediately clobber r0
+ * (mflr r0) and r1 (stwu r1, -N(r1)).
+ *
+ * This follows the exact SDK pattern used by DecrementerExceptionHandler,
+ * ExternalInterruptHandler, and OSDefaultExceptionHandler. */
+static asm void umbra_gdb_crash_handler(__REGISTER __OSException exception,
+                                         __REGISTER OSContext* ctx) {
+    nofralloc
+    OS_EXCEPTION_SAVE_GPRS(ctx)
+    stwu r1, -8(r1)
+    b crash_handler_impl
+    /* crash_handler_impl calls OSLoadContext and never returns */
+}
+
+/* C implementation of the crash handler — entered with full context saved. */
+extern "C" void crash_handler_impl(__OSException exception, OSContext* ctx) {
     u32 exc_vector = ((u32)exception + 1) * 0x100;
 
     OSReport("tpgz: exception 0x%04X (%s) at PC=0x%08X LR=0x%08X\n",
@@ -175,53 +216,65 @@ static void umbra_gdb_crash_handler(__OSException exception, OSContext* ctx) {
         OSReport("tpgz: gdbserver listening on port 2159\n");
         if (old_handlers[exception])
             old_handlers[exception](exception, ctx);
-        return;
+        OSLoadContext(ctx);
     }
 
-    int server_err = start_gdb_server(2159);
-    OSReport("tpgz: gdbserver start result=%d\n", server_err);
+    /* Only start the GDB server if it's not already running.  Avoid EXI
+     * transfers from exception context when possible — they can leave
+     * the bus in an inconsistent state for the game. */
+    if (GDB_SHM_BASE[SHM_MAGIC] != GDB_SHM_MAGIC) {
+        int server_err = start_gdb_server(2159);
+        OSReport("tpgz: gdbserver start result=%d\n", server_err);
 
-    if (server_err != 0) {
-        OSReport("tpgz: gdb server failed to start\n");
-        if (old_handlers[exception])
-            old_handlers[exception](exception, ctx);
-        return;
+        if (server_err != 0) {
+            OSReport("tpgz: gdb server failed to start\n");
+            if (old_handlers[exception])
+                old_handlers[exception](exception, ctx);
+            OSLoadContext(ctx);
+        }
     }
 
     for (int wait = 0; wait < 500000000; wait++) {
-        DCInvalidateRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
         if (GDB_SHM_BASE[SHM_MAGIC] == GDB_SHM_MAGIC) {
             save_ctx_to_shm(ctx, exc_vector);
             GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
-            DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
             OSReport("tpgz: gdb shm ready, waiting for debugger\n");
 
+            AIStopDMA();
+
             while (1) {
-                DCInvalidateRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
                 u32 state = GDB_SHM_BASE[SHM_STATE];
 
                 if (state == GDB_STATE_RESUME || state == GDB_STATE_STEP) {
                     restore_shm_to_ctx(ctx, state);
+                    process_ic_inval();
+                    ICFlashInvalidate();
+                    AIStartDMA();
                     OSLoadContext(ctx);
-                } else if (state == GDB_STATE_DETACH) {
-                    GDB_SHM_BASE[SHM_MAGIC] = 0;
-                    DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
-                    OSLoadContext(ctx);
+                    /* does not return */
                 }
-
-                if (read_z_button()) {
+                else if (state == GDB_STATE_DETACH) {
+                    u32 exit_req = GDB_SHM_BASE[SHM_EXIT_REQ];
+                    restore_shm_to_ctx(ctx, GDB_STATE_RESUME);
                     GDB_SHM_BASE[SHM_MAGIC] = 0;
-                    DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
-                    break;
+                    process_ic_inval();
+                    ICFlashInvalidate();
+                    AIStartDMA();
+                    if (exit_req == 1) {
+                        GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
+                        do_game_exit(); /* does not return */
+                    }
+                    OSLoadContext(ctx);
+                    /* does not return */
                 }
             }
-            break;
         }
     }
 
     OSReport("tpgz: gdb exiting crash handler\n");
     if (old_handlers[exception])
         old_handlers[exception](exception, ctx);
+    OSLoadContext(ctx);
 }
 
 static void arm_crash_gdb(u16 port) {
@@ -254,6 +307,8 @@ extern "C" void umbra_gdb_install_crash_handlers(void) {
         __OS_EXCEPTION_DSI,
         __OS_EXCEPTION_ISI,
         __OS_EXCEPTION_ALIGNMENT,
+        __OS_EXCEPTION_PROGRAM,   /* trap instructions (breakpoints) */
+        __OS_EXCEPTION_TRACE,     /* single-step (MSR_SE) */
         /* NOT FLOATING_POINT — OS uses it for lazy FPU context switching */
     };
 
@@ -317,26 +372,27 @@ static void restore_regs_from_shm(u32 state) {
 
 static void gdb_spin_wait(void) {
     while (1) {
-        DCInvalidateRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
         u32 state = GDB_SHM_BASE[SHM_STATE];
 
         if (state == GDB_STATE_RESUME || state == GDB_STATE_STEP) {
             restore_regs_from_shm(state);
-            ICFlashInvalidate(); /* ARM may have patched PPC code */
+            process_ic_inval();
+            ICFlashInvalidate();
             TRKSwapAndGo();
         }
         else if (state == GDB_STATE_DETACH) {
+            u32 exit_req = GDB_SHM_BASE[SHM_EXIT_REQ];
             GDB_SHM_BASE[SHM_MAGIC] = 0;
-            DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
+            process_ic_inval();
             ICFlashInvalidate();
+            if (exit_req == 1) {
+                GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
+                do_game_exit();
+            }
             TRKSwapAndGo();
         }
     }
 }
-
-#define SHM_PPC_HEARTBEAT 109
-#define SHM_PPC_HALT_SEEN 110
-#define SHM_EXIT_REQ      111
 
 /* Uncached MEM2 mirror, shared with Nintendont kernel at 0x13003420 */
 #define PPC_RESET_STATUS  ((volatile u32*)0xD3003420)
@@ -366,27 +422,42 @@ static void do_game_exit(void) {
 
 extern "C" void umbra_gdb_poll(void) {
     static u32 heartbeat = 0;
-    static bool auto_started = false;
+    static bool dbg_plat = false;
+    static bool dbg_magic = false;
 
-    if (!auto_started) {
-        auto_started = true;
-        start_gdb_server(2159);
+    /* SHM lives in uncached MEM2 (0xD3xxxxxx) — only exists on real Wii.
+     * GC games on Dolphin don't have MEM2 mapped; access will DSI. */
+    if (!umbraIsNintendont()) {
+        if (!dbg_plat) {
+            dbg_plat = true;
+            OSReport("gdb_poll: not nintendont, skipping\n");
+        }
+        return;
     }
 
-    DCInvalidateRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
+    u32 magic = GDB_SHM_BASE[SHM_MAGIC];
+    if (magic != GDB_SHM_MAGIC)
+        return;
 
+    /* EXIT_REQ is checked after MAGIC to avoid reading uninitialized MEM2
+     * before the GDB server has set up the SHM area.  Kill while halted
+     * is handled directly by the DETACH handlers in each spin loop. */
     if (GDB_SHM_BASE[SHM_EXIT_REQ] == 1) {
         GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
-        DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
         do_game_exit(); /* does not return */
     }
 
+    u32 halt = GDB_SHM_BASE[SHM_HALT_REQ];
     GDB_SHM_BASE[SHM_PPC_HEARTBEAT] = ++heartbeat;
-    GDB_SHM_BASE[SHM_PPC_HALT_SEEN] = GDB_SHM_BASE[SHM_HALT_REQ];
-    DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
+    GDB_SHM_BASE[SHM_PPC_HALT_SEEN] = halt;
 
-    if (GDB_SHM_BASE[SHM_HALT_REQ] != 1)
+    if (halt != 1) {
+        if (heartbeat <= 3)
+            OSReport("gdb_poll: hb=%u halt=%u\n", heartbeat, halt);
         return;
+    }
+
+    OSReport("gdb_poll: HALTING! hb=%u\n", heartbeat);
 
     OSContext ctx;
     OSSaveContext(&ctx);
@@ -403,7 +474,6 @@ extern "C" void umbra_gdb_poll(void) {
     GDB_SHM_BASE[SHM_SIGNAL] = 2; /* SIGINT */
     GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
     GDB_SHM_BASE[SHM_HALT_REQ] = 0;
-    DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
 
     /* Flush stack so ARM can read PPC memory via physical addresses */
     DCFlushRange((void*)(sp & ~0x1F), 32 * 1024);
@@ -411,39 +481,45 @@ extern "C" void umbra_gdb_poll(void) {
     AIStopDMA();
 
     while (1) {
-        DCInvalidateRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
         u32 state = GDB_SHM_BASE[SHM_STATE];
 
-        if (state == GDB_STATE_RESUME || state == GDB_STATE_STEP) {
-            ICFlashInvalidate(); /* ARM may have patched PPC code */
+        if (state == GDB_STATE_STEP) {
+            process_ic_inval();
+            ICFlashInvalidate();
+            AIStartDMA();
+            /* Single-step: set MSR_SE and resume via OSLoadContext so the
+             * trace exception fires on the next instruction, which TRK
+             * catches and routes back to umbra_gdb_trk_hook. */
+            ctx.srr1 |= MSR_SE;
+            OSLoadContext(&ctx);
+            /* does not return */
+        } else if (state == GDB_STATE_RESUME) {
+            process_ic_inval();
+            ICFlashInvalidate();
             AIStartDMA();
             return;
         } else if (state == GDB_STATE_DETACH) {
+            u32 exit_req = GDB_SHM_BASE[SHM_EXIT_REQ];
             GDB_SHM_BASE[SHM_MAGIC] = 0;
-            DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
+            process_ic_inval();
             ICFlashInvalidate();
             AIStartDMA();
+            if (exit_req == 1) {
+                GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
+                do_game_exit();
+            }
             return;
         }
 
-        if (read_z_button()) {
-            GDB_SHM_BASE[SHM_HALT_REQ] = 0;
-            GDB_SHM_BASE[SHM_STATE] = GDB_STATE_RESUME;
-            DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
-            ICFlashInvalidate();
-            AIStartDMA();
-            return;
-        }
     }
 }
 
 extern "C" void umbra_gdb_trk_hook(void) {
-    DCInvalidateRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
-
+    if (!umbraIsNintendont())
+        return;
     if (GDB_SHM_BASE[SHM_MAGIC] == GDB_SHM_MAGIC) {
         save_regs_to_shm();
         GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
-        DCFlushRange((void*)GDB_SHM_BASE, GDB_SHM_SIZE);
         gdb_spin_wait(); /* does not return */
     }
 }

@@ -54,6 +54,41 @@ def get_elf_sections(plf_path):
     return sections
 
 
+def get_elf_text_base(elf_path):
+    """Get the .text section virtual address from an ELF file."""
+    try:
+        with open(elf_path, "rb") as f:
+            magic = f.read(4)
+            if magic != b"\x7fELF":
+                return None
+            f.seek(0)
+            ehdr = f.read(52)
+            e_shoff = struct.unpack(">I", ehdr[32:36])[0]
+            e_shentsize = struct.unpack(">H", ehdr[46:48])[0]
+            e_shnum = struct.unpack(">H", ehdr[48:50])[0]
+            e_shstrndx = struct.unpack(">H", ehdr[50:52])[0]
+
+            f.seek(e_shoff + e_shstrndx * e_shentsize)
+            shstrtab_hdr = f.read(e_shentsize)
+            strtab_off = struct.unpack(">I", shstrtab_hdr[16:20])[0]
+            strtab_size = struct.unpack(">I", shstrtab_hdr[20:24])[0]
+            f.seek(strtab_off)
+            strtab = f.read(strtab_size)
+
+            for i in range(e_shnum):
+                f.seek(e_shoff + i * e_shentsize)
+                shdr = f.read(e_shentsize)
+                sh_name_idx = struct.unpack(">I", shdr[0:4])[0]
+                end = strtab.index(b"\x00", sh_name_idx)
+                name = strtab[sh_name_idx:end].decode("ascii", errors="replace")
+                if name == ".text":
+                    sh_addr = struct.unpack(">I", shdr[12:16])[0]
+                    return sh_addr
+    except Exception:
+        pass
+    return None
+
+
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     repo_root = os.path.dirname(script_dir)
@@ -71,7 +106,7 @@ def main():
     with open(config_path) as f:
         cfg = json.load(f)
 
-    # Build module_id -> (plf_path, set of section names)
+    # Build module_id -> (plf_path, set of section names, debug_o or None)
     modules = {}
     for m in cfg.get("modules", []):
         mid = m.get("module_id")
@@ -80,7 +115,10 @@ def main():
             plf = os.path.join(build_dir, name, "%s.plf" % name)
             if os.path.exists(plf):
                 elf_sections = get_elf_sections(plf)
-                modules[mid] = (plf, elf_sections)
+                debug_o = os.path.join(build_dir, name, "debug_info.o")
+                if not os.path.exists(debug_o):
+                    debug_o = None
+                modules[mid] = (plf, elf_sections, debug_o)
 
     out_path = os.path.join(build_dir, "load_rel_symbols.gdb")
 
@@ -90,14 +128,20 @@ def main():
 
         # load-dol-symbols
         elf_path = os.path.join(build_dir, "framework.elf")
+        debug_o_path = os.path.join(build_dir, "debug_info.o")
+        text_base = get_elf_text_base(elf_path)
         f.write("define load-dol-symbols\n")
         f.write("  symbol-file %s\n" % elf_path)
-        f.write("  printf \"Loaded DOL symbols\\n\"\n")
+        if text_base is not None and os.path.exists(debug_o_path):
+            f.write("  add-symbol-file %s 0x%X\n" % (debug_o_path, text_base))
+            f.write("  printf \"Loaded DOL symbols + debug info\\n\"\n")
+        else:
+            f.write("  printf \"Loaded DOL symbols\\n\"\n")
         f.write("end\n\n")
 
-        # Per-module loader commands
+        # Per-module loader commands (PLF symbols only)
         for mid in sorted(modules.keys()):
-            plf, elf_sections = modules[mid]
+            plf, elf_sections, debug_o = modules[mid]
 
             # Determine which extra sections this PLF actually has
             extra_secs = []
@@ -133,7 +177,23 @@ def main():
             f.write("  end\n")
             f.write("end\n\n")
 
-        # load-rel-symbols: walk the OS module linked list
+        # Per-module debug info loader commands (DWARF 2 line info)
+        modules_with_debug = {
+            mid: debug_o for mid, (plf, elf_sections, debug_o) in modules.items()
+            if debug_o
+        }
+        for mid in sorted(modules_with_debug.keys()):
+            debug_o = modules_with_debug[mid]
+            f.write("define __dbg_%d\n" % mid)
+            f.write("  set $__t = *(unsigned int*)($__si + 8) & ~1\n")
+            f.write("  set $__ts = *(unsigned int*)($__si + 12)\n")
+            f.write("  if $__t != 0 && $__ts != 0\n")
+            f.write("    add-symbol-file %s $__t\n" % debug_o)
+            f.write("    set $__loaded = $__loaded + 1\n")
+            f.write("  end\n")
+            f.write("end\n\n")
+
+        # load-rel-symbols: walk the OS module linked list (PLF only)
         f.write("define load-rel-symbols\n")
         f.write("  set confirm off\n")
         f.write("  set $__mod = *(unsigned int*)0x800030C8\n")
@@ -155,7 +215,49 @@ def main():
         f.write('  printf "Loaded %d REL modules\\n", $__loaded\n')
         f.write("end\n\n")
 
-        # load-all-symbols
+        # load-debug-for: walk module list, load debug info for one module by ID
+        # Usage: load-debug-for <module_id>
+        f.write("define load-debug-for\n")
+        f.write("  set confirm off\n")
+        f.write("  set $__target_id = $arg0\n")
+        f.write("  set $__mod = *(unsigned int*)0x800030C8\n")
+        f.write("  set $__loaded = 0\n")
+        f.write("  while $__mod != 0 && $__loaded == 0\n")
+        f.write("    set $__id = *(unsigned int*)($__mod)\n")
+        f.write("    set $__next = *(unsigned int*)($__mod + 4)\n")
+        f.write("    set $__ns = *(unsigned int*)($__mod + 0x0C)\n")
+        f.write("    set $__si = *(unsigned int*)($__mod + 0x10)\n")
+        f.write("    if $__id == $__target_id\n")
+
+        for mid in sorted(modules_with_debug.keys()):
+            f.write("      if $__id == %d\n" % mid)
+            f.write("        __dbg_%d\n" % mid)
+            f.write("      end\n")
+
+        f.write("    end\n")
+        f.write("    set $__mod = $__next\n")
+        f.write("  end\n")
+        f.write("  set confirm on\n")
+        f.write("  if $__loaded == 0\n")
+        f.write('    printf "Module %d not found or has no debug info\\n", $__target_id\n')
+        f.write("  end\n")
+        f.write("end\n\n")
+
+        # Named convenience commands: dbg-<module_name>
+        # Generates e.g. "define dbg-d_a_grass" -> "load-debug-for 73"
+        module_names = {}  # mid -> name
+        for m in cfg.get("modules", []):
+            mid = m.get("module_id")
+            name = m.get("name")
+            if mid in modules_with_debug and name:
+                module_names[mid] = name
+
+        for mid, name in sorted(module_names.items(), key=lambda x: x[1]):
+            f.write("define dbg-%s\n" % name)
+            f.write("  load-debug-for %d\n" % mid)
+            f.write("end\n")
+
+        # load-all-symbols (PLF symbols only — use load-debug-info separately)
         f.write("define load-all-symbols\n")
         f.write("  load-dol-symbols\n")
         f.write("  load-rel-symbols\n")
