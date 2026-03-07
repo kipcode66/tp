@@ -3208,7 +3208,7 @@ rule rebuild_iso
 build {assets_stamp}: mod_assets_checksum | tools/check_mod_assets.py always
 
 # Rebuild ISO
-build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py {assets_stamp} || post-build
+build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py {assets_stamp}
 
 """
         content = content.replace(
