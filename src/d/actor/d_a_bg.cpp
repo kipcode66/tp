@@ -16,6 +16,7 @@
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JKernel/JKRSolidHeap.h"
 #include "JSystem/J3DGraphAnimator/J3DMaterialAnm.h"
+#include <cstring>
 
 const char* daBg_c::setArcName() {
     static char arcName[32];
@@ -283,7 +284,7 @@ int daBg_c::draw() {
     int sp38 = 0;
 
     dDlst_window_c* sp34 = dComIfGp_getWindow(0);
-    camera_class* sp30 = dComIfGp_getCamera(sp34->getCameraID());
+    camera_process_class* sp30 = dComIfGp_getCamera(sp34->getCameraID());
 
     dComIfGd_setListBG();
     mDoLib_clipper::changeFar(1000000.0f);

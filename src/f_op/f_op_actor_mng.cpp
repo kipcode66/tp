@@ -776,7 +776,7 @@ bool fopAcM_addAngleY(fopAc_ac_c* i_actor, s16 i_target, s16 i_step) {
     return cLib_chaseAngleS(&angle->y, i_target, i_step);
 }
 
-void dummy(fopAc_ac_c* i_actor) {
+static void dummy(fopAc_ac_c* i_actor) {
     fopAcM_SetSpeedF(i_actor, 10.0f);
 }
 
@@ -895,7 +895,7 @@ bool fopAcM_checkCullingBox(Mtx m, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z
         return false;
 }
 
-static cull_box l_cullSizeBox[] = {
+cull_box l_cullSizeBox[fopAc_CULLBOX_MAX_e] = {
     {
         {-40.0f, 0.0f, -40.0f},
         {40.0f, 125.0f, 40.0f},
@@ -960,7 +960,7 @@ static cull_box l_cullSizeBox[] = {
 #endif
 };
 
-static cull_sphere l_cullSizeSphere[] = {
+cull_sphere l_cullSizeSphere[fopAc_CULLSPHERE_MAX_e] = {
     {
         {0.0f, 0.0f, 0.0f},
         80.0f,
@@ -2162,7 +2162,7 @@ static void get_vectle_calc(const cXyz* pXyzA, const cXyz* pXyzB, cXyz* pOut) {
 void fopAcM_setEffectMtx(const fopAc_ac_c* i_actor, const J3DModelData* modelData) {
     const cXyz* pEyePos = &i_actor->eyePos;
     camera_class* camera = dCam_getCamera();
-    cXyz v1 = *pEyePos - camera->lookat.eye;
+    cXyz v1 = *pEyePos - camera->view.lookat.eye;
     cXyz v2;
     get_vectle_calc(&i_actor->tevStr.field_0x32c, pEyePos, &v2);
     cXyz half;

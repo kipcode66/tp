@@ -10,6 +10,7 @@
 #include "d/actor/d_a_horse.h"
 #include "d/actor/d_a_obj_ihasi.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 static int daE_Warpappear_Draw(e_warpappear_class* i_this) {
     int sw = (fopAcM_GetParam(i_this) >> 8) & 0xFF;
@@ -291,8 +292,8 @@ static void demo_camera(e_warpappear_class* i_this) {
 };
 
     daPy_py_c* pla = (daPy_py_c*)dComIfGp_getPlayer(0);
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
-    camera_class* camera0 = dComIfGp_getCamera(0);
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera0 = dComIfGp_getCamera(0);
     daHorse_c* horse = (daHorse_c*)dComIfGp_getHorseActor();
 
     cXyz sp48, sp54;

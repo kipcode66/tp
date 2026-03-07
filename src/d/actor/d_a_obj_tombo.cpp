@@ -13,6 +13,7 @@
 #include "f_op/f_op_camera_mng.h"
 #include "f_pc/f_pc_name.h"
 #include "m_Do/m_Do_lib.h"
+#include <cstring>
 
 class daObj_TomHIO_c : public JORReflexible {
 public:
@@ -504,7 +505,7 @@ void daObjTOMBO_c::Z_BufferChk() {
     cStack_68 = current.pos;
     cStack_68.y += 20.0f;
     mDoLib_project(&cStack_68, &local_5c);
-    camera_class* pCamera = dComIfGp_getCamera(0);
+    camera_process_class* pCamera = dComIfGp_getCamera(0);
     f32 trimHeight;
     if (pCamera != NULL) {
         trimHeight = pCamera->mCamera.TrimHeight();

@@ -8,6 +8,7 @@
 #include "d/actor/d_a_obj_drop.h"
 #include "SSystem/SComponent/c_math.h"
 #include <cmath>
+#include <cstring>
 #include "d/actor/d_a_player.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_camera.h"
@@ -462,7 +463,7 @@ int daObjDrop_c::actionCompleteWait() {
 }
 
 int daObjDrop_c::actionOrderCompleteDemo() {
-    camera_class* pcamera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* pcamera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
 
     if (eventInfo.checkCommandDemoAccrpt()) {
         pcamera->mCamera.SetTrimTypeForce(1);
@@ -479,7 +480,7 @@ int daObjDrop_c::actionOrderCompleteDemo() {
 }
 
 int daObjDrop_c::actionCompleateDemo() {
-    camera_class* pcamera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* pcamera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     pcamera->mCamera.SetTrimTypeForce(1);
 
     if (eventInfo.checkCommandDemoAccrpt()) {

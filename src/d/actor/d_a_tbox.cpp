@@ -10,6 +10,7 @@
 #include "SSystem/SComponent/c_math.h"
 #include "Z2AudioLib/Z2Instances.h"
 #include <cmath>
+#include <cstring>
 
 static const f32 l_cull_size_box[6] = { -150.0f, -10.0f, -150.0f, 150.0f, 300.0f, 100.0f };
 
@@ -1063,7 +1064,7 @@ int daTbox_c::actionDropDemo() {
             home.pos = current.pos;
 
             if (field_0x9c9 != 0) {
-                camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+                camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
                 camera->mCamera.Start();
                 camera->mCamera.SetTrimSize(0);
                 field_0x9c9 = 0;
@@ -1476,7 +1477,7 @@ int daTbox_c::checkDrop() {
 }
 
 void daTbox_c::settingDropDemoCamera() {
-    camera_class* player_camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* player_camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     player_camera->mCamera.Stop();
 
     dStage_MapEvent_dt_c* maptooldata = dEvt_control_c::searchMapEventData(getEvent(), fopAcM_GetRoomNo(this));

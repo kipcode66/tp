@@ -13,6 +13,7 @@
 #include "c/c_damagereaction.h"
 #include "Z2AudioLib/Z2Instances.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 enum Joint {
     /* 0x0 */ JNT_WAIST,
@@ -1039,8 +1040,8 @@ static int ni_play(ni_class* i_this) {
     sp78.y = 0.0f;
     sp78.z = -i_this->mPadMainStickY;
 
-    camera_class* camera = dComIfGp_getCamera(0);
-    sp84 = camera->lookat.center - camera->lookat.eye;
+    camera_process_class* camera = dComIfGp_getCamera(0);
+    sp84 = camera->view.lookat.center - camera->view.lookat.eye;
 
     cMtx_YrotS(*calc_mtx, cM_atan2s(-sp84.x, -sp84.z));
     MtxPosition(&sp78, &sp84);
@@ -1158,7 +1159,7 @@ static int ni_play(ni_class* i_this) {
 static void play_camera(ni_class* i_this) {
     fopAc_ac_c* a_this = (fopAc_ac_c*)i_this;
 
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     camera_class* camera0 = (camera_class*)dComIfGp_getCamera(0);
     daPy_py_c* player = (daPy_py_c*)dComIfGp_getPlayer(0);
     cXyz sp1D8;
@@ -1199,8 +1200,8 @@ static void play_camera(ni_class* i_this) {
         camera->mCamera.Stop();
 
         i_this->field_0xafc = 500.0f;
-        i_this->field_0xac8 = camera0->lookat.eye;
-        i_this->field_0xad4 = camera0->lookat.center;
+        i_this->field_0xac8 = camera0->view.lookat.eye;
+        i_this->field_0xad4 = camera0->view.lookat.center;
         i_this->field_0xaec = dComIfGd_getView()->fovy;
 
         player->changeOriginalDemo();

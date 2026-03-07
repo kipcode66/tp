@@ -44,7 +44,7 @@ void daE_BG_HIO_c::genMessage(JORMContext* ctx) {
 namespace {
 dCcD_SrcSph cc_bg_src = {
     {
-        {0x0, {{0x0, 0x0, 0x0}, {(s32)0xD8FBFDFF, 0x03}, 0x75}}, // mObj
+        {0x0, {{0x0, 0x0, 0x0}, {0xD8FBFDFF, 0x03}, 0x75}}, // mObj
         {dCcD_SE_METAL, 0x0, 0x0, 0x0, 0x0}, // mGObjAt
         {dCcD_SE_NONE, 0x0, 0x0, 0x0, 0x2}, // mGObjTg
         {0x0}, // mGObjCo
@@ -93,7 +93,7 @@ int daE_BG_c::ctrlJoint(J3DJoint* i_joint, J3DModel* i_model) {
 }
 
 int daE_BG_c::JointCallBack(J3DJoint* i_joint, int param_1) {
-    if (param_1 == NULL) {
+    if (param_1 == 0) {
         J3DModel* model = j3dSys.getModel();
         daE_BG_c* bg = (daE_BG_c*)model->getUserArea();
         if (bg != NULL) {
@@ -430,7 +430,7 @@ void daE_BG_c::executeAttack() {
     s16 unkShort1;
     cXyz unkXyz1;
 
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
 
     cXyz playerPos = daPy_getPlayerActorClass()->current.pos;
 
@@ -1099,7 +1099,7 @@ void daE_BG_c::action() {
     mCreatureSound.setLinkSearch(isAttacking);
     if (mActionMode != 0 && mActionMode != 3) {
         dBgS_LinChk linChk;
-        linChk.Set(&dComIfGp_getCamera(0)->lookat.eye, &attention_info.position, this);
+        linChk.Set(&dComIfGp_getCamera(0)->view.lookat.eye, &attention_info.position, this);
         if (dComIfG_Bgsp().LineCross(&linChk)) {
             attention_info.flags &= ~fopAc_AttnFlag_BATTLE_e;
         } else {

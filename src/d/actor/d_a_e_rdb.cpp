@@ -14,6 +14,7 @@
 #include "m_Do/m_Do_graphic.h"
 #include "f_op/f_op_actor_enemy.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 class daE_RDB_HIO_c : public JORReflexible {
 public:
@@ -1087,7 +1088,7 @@ static void cam_spd_set(e_rdb_class* i_this) {
 static void demo_camera(e_rdb_class* i_this) {
     fopEn_enemy_c* a_this = (fopEn_enemy_c*)&i_this->enemy;
     daPy_py_c* player = (daPy_py_c*)dComIfGp_getPlayer(0);
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     cXyz sp28, sp34, sp40, sp4c;
     s8 sVar1 = 0;
 
@@ -1296,8 +1297,8 @@ static void demo_camera(e_rdb_class* i_this) {
         if (i_this->field_0x10aa >= 40) {
             e_rd_class* bulblin_p = (e_rd_class*)fopAcM_SearchByName(PROC_E_RD);
             if (bulblin_p != NULL) {
-                a_this->current.pos = bulblin_p->actor.current.pos;
-                a_this->eyePos = bulblin_p->actor.eyePos;
+                a_this->current.pos = bulblin_p->enemy.current.pos;
+                a_this->eyePos = bulblin_p->enemy.eyePos;
             }
         }
 
