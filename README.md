@@ -14,6 +14,8 @@ Umbra provides a platform abstraction layer and build system for creating mods t
 - **Storage abstraction** -- write/read settings via Nintendont kernel FatFS or physical memory card (CARD API)
 - **Return to loader** -- clean exit back to the Nintendont loader
 - **Game hooks** -- scaffolded `execute()`/`draw()`/`startInit()` entry points wired into the game loop
+- **GDB remote debugging** -- on-device GDB stub via shared memory, with stepping and Python-based symbol loading
+- **DWARF debug info** -- converts MetroWerks DWARF 1 to DWARF 2 for source-level debugging of DOL and REL modules
 - **Build system** -- compiles custom code alongside the decomp, patches it into the DOL, and rebuilds the ISO
 
 ## Dependencies
@@ -139,6 +141,60 @@ python setup_mod.py mymod --no-hooks
 
 Place files in the `mod_assets/` directory. The directory structure is copied 1:1 into the final disc image during ISO rebuild.
 
+## GDB Remote Debugging
+
+Umbra includes a GDB remote stub for source-level debugging of game code. It supports both real hardware via [umbra-nintendont](https://github.com/zsrtp/umbra-nintendont) (PPC-to-ARM communication over shared memory) and emulation via [umbra-dolphin](https://github.com/zsrtp/umbra-dolphin).
+
+### Setup
+
+GDB tooling is not built by default. If you want to use the debugger, run the post-build step after your initial build:
+
+```sh
+ninja post-build
+```
+
+This builds `powerpc-eabi-gdb` from source with Python scripting support, generates the symbol loader script, and converts MetroWerks DWARF 1 debug info to DWARF 2. This only needs to run once (or when source files change).
+
+### Enabling GDB in your mod
+
+```cpp
+#include "umbra/umbra_gdb.h"
+
+// Start the GDB server from your settings menu:
+umbra_gdb_auto_start(2159);  // start GDB server on port 2159
+
+// In your game loop:
+umbra_gdb_poll();  // check for halt requests from GDB
+```
+
+`umbra_gdb_auto_start()` sends the GDB server start command to the kernel.
+
+`umbra_gdb_poll()` should be called every frame. It checks for async halt requests (GDB's Ctrl-C) and handles stepping/resuming.
+
+### Connecting
+
+**VS Code (recommended):** Install the [GDB DAP](https://marketplace.visualstudio.com/items?itemName=OlegTolmatcev.gdb-dap) extension. Launch configurations are provided in `.vscode/launch.json` ("Attach to Nintendont" or "Attach to Dolphin"). Symbols are loaded automatically on connect.
+
+**Command line:**
+
+```sh
+build/binutils/powerpc-eabi-gdb build/GZ2E01/framework.elf \
+    -ex "source build/GZ2E01/load_rel_symbols.py" \
+    -ex "target remote 192.168.1.100:2159"
+```
+
+### GDB Commands
+
+DOL and REL symbols are loaded automatically on connect via a stop event handler. The following commands are also available manually in the GDB console:
+
+| Command | Description |
+|---------|-------------|
+| `load-dol-symbols` | Load DOL (framework.elf) symbols + DWARF debug info |
+| `load-rel-symbols` | Walk the OS module list and load PLF symbols for all RELs |
+| `load-all-symbols` | Run both `load-dol-symbols` and `load-rel-symbols` |
+| `load-debug-for <id>` | Load DWARF debug info for a specific REL module by ID |
+| `dbg-<name>` | Shorthand for `load-debug-for` (e.g. `dbg-d_a_grass`) |
+
 ## Umbra Platform API
 
 The umbra layer is always available to your mod code:
@@ -178,6 +234,13 @@ net.disconnect();
 net.sendUDP(ip, port, data, len);
 net.recvUDP(buf, maxLen);
 
+// Start GDB server on the kernel (for programmatic use)
+net.gdbStart(2159);
+
+// GDB server + polling (see GDB section above)
+umbra_gdb_auto_start(2159);
+umbra_gdb_poll();
+
 // Return to the Nintendont loader
 ninReturnToLoader();
 ```
@@ -194,9 +257,14 @@ umbra/
 ├── include/<mod>/         # Your mod's headers
 ├── src/<mod>/             # Your mod's source
 ├── mod_assets/            # Custom assets copied into ISO
+├── .vscode/launch.json        # VS Code debug configs (Nintendont + Dolphin)
 ├── tools/
 │   ├── rebuild-decomp-tp.py    # ISO rebuild script
 │   ├── patch_forceactive.py    # Auto-patches linker script with custom symbols
-│   └── check_mod_assets.py     # Asset checksum tracker
+│   ├── check_mod_assets.py     # Asset checksum tracker
+│   ├── build_gdb.py            # Builds powerpc-eabi-gdb from source
+│   ├── gen_gdb_rel_loader.py   # Generates Python GDB symbol loader
+│   └── gen_dwarf2_debug.py     # Converts MW DWARF 1 to DWARF 2 debug info
+├── build/binutils/             # Cross-tools (powerpc-eabi-gdb, etc.)
 └── orig/GZ2E01/           # Vanilla disc image (not checked in)
 ```

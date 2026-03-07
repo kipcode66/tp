@@ -15,6 +15,7 @@
 import argparse
 import importlib
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -217,7 +218,7 @@ if not config.non_matching:
     config.asm_dir = None
 
 # Tool versions
-config.binutils_tag = "2.42-1"
+config.binutils_tag = "2.42-2"
 config.compilers_tag = "20251118"
 config.dtk_tag = "v1.8.0"
 config.objdiff_tag = "v3.6.1"
@@ -3072,6 +3073,38 @@ if config.non_matching and custom_dol_objects:
         "implicit": [ldscript_path, "build/binutils", "tools/patch_forceactive.py"],
     })
 
+# Generate DWARF 2 debug info from DWARF 1 .o files after link
+debug_info_out = f"build/{version}/debug_info.o"
+config.custom_build_rules.append({
+    "name": "gen_dwarf2_debug",
+    "command": f"$python tools/gen_dwarf2_debug.py build/{version}",
+    "description": "DWARF2 DEBUG $out",
+    "pool": "console",
+})
+config.custom_build_steps.setdefault("post-build", []).append({
+    "outputs": debug_info_out,
+    "rule": "gen_dwarf2_debug",
+    "inputs": [f"build/{version}/framework.elf.MAP"],
+    "implicit": [
+        f"build/{version}/framework.elf",
+        "tools/gen_dwarf2_debug.py",
+    ],
+})
+
+# Generate GDB REL symbol loader script after debug info is ready
+gdb_loader_out = f"build/{version}/load_rel_symbols.py"
+config.custom_build_rules.append({
+    "name": "gen_gdb_rel_loader",
+    "command": f"$python tools/gen_gdb_rel_loader.py build/{version}",
+    "description": "GDB REL LOADER $out",
+})
+config.custom_build_steps.setdefault("post-build", []).append({
+    "outputs": gdb_loader_out,
+    "rule": "gen_gdb_rel_loader",
+    "inputs": [f"build/{version}/config.json"],
+    "implicit": ["tools/gen_gdb_rel_loader.py", debug_info_out],
+})
+
 # Optional extra categories for progress tracking
 config.progress_categories = [
     ProgressCategory("game", "TP Game Code"),
@@ -3088,6 +3121,15 @@ config.progress_report_args = [
 ]
 
 if args.mode == "configure":
+    # Save existing build.ninja to detect no-op regenerations
+    try:
+        old_ninja_stat = os.stat("build.ninja")
+        with open("build.ninja", "r") as f:
+            old_ninja_content = f.read()
+    except FileNotFoundError:
+        old_ninja_stat = None
+        old_ninja_content = None
+
     # Write build.ninja and objdiff.json
     generate_build(config)
 
@@ -3123,15 +3165,12 @@ rule rebuild_iso
 
         # Add the build step before the default rule
         iso_build = f"""# mod_assets checksum
-build {assets_stamp}: mod_assets_checksum | always
+build {assets_stamp}: mod_assets_checksum | tools/check_mod_assets.py always
 
 # Rebuild ISO
 build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp-tp.py {assets_stamp}
 
 """
-        # Add phony always target if not already present
-        if "build always: phony" not in content:
-            iso_build = "build always: phony\n\n" + iso_build
         content = content.replace(
             "# Default rule\n",
             iso_build + "# Default rule\n"
@@ -3145,6 +3184,14 @@ build {output_iso}: rebuild_iso | {dol_output} {rel_output} tools/rebuild-decomp
 
         with open("build.ninja", "w") as f:
             f.write(content)
+
+    # If build.ninja content is unchanged, restore the original mtime so ninja
+    # doesn't re-evaluate the entire build graph on the next invocation.
+    if old_ninja_content is not None:
+        with open("build.ninja", "r") as f:
+            new_ninja_content = f.read()
+        if new_ninja_content == old_ninja_content:
+            os.utime("build.ninja", (old_ninja_stat.st_atime, old_ninja_stat.st_mtime))
 elif args.mode == "progress":
     # Print progress information
     calculate_progress(config)

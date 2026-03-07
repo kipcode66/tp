@@ -646,6 +646,21 @@ def generate_build_ninja(
     else:
         sys.exit("ProjectConfig.binutils_tag missing")
 
+    # Build GDB from source (links against system Python for scripting support)
+    build_gdb_script = config.tools_dir / "build_gdb.py"
+    gdb = binutils / f"powerpc-eabi-gdb{EXE}"
+    gdb_version = getattr(config, "gdb_version", "17.1")
+    n.rule(
+        name="build_gdb",
+        command=f"$python {build_gdb_script} {binutils} --version {gdb_version}",
+        description="GDB $out",
+    )
+    n.build(
+        outputs=gdb,
+        rule="build_gdb",
+        implicit=[build_gdb_script, binutils_implicit or binutils],
+    )
+
     n.newline()
 
     ###
@@ -1296,7 +1311,7 @@ def generate_build_ninja(
             n.newline()
 
         # Add all build steps needed post-build (re-building archives and such)
-        write_custom_step("post-build", "post-link")
+        write_custom_step("post-build", "post-link", extra_inputs=[gdb])
 
         ###
         # Helper rule for building all source files

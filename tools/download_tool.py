@@ -108,11 +108,19 @@ def download(url, response, output) -> None:
             for name in files:
                 os.chmod(os.path.join(root, name), 0o755)
         output.touch(mode=0o755)  # Update dir modtime
+        # Truncate to whole seconds — MWCC via Wine only produces
+        # second-precision timestamps, so sub-second causes spurious rebuilds.
+        t = int(output.stat().st_mtime)
+        os.utime(output, (t, t))
     else:
         with open(output, "wb") as f:
             shutil.copyfileobj(response, f)
         st = os.stat(output)
         os.chmod(output, st.st_mode | stat.S_IEXEC)
+        # Truncate to whole seconds — MWCC via Wine only produces
+        # second-precision timestamps, so sub-second causes spurious rebuilds.
+        t = int(os.stat(output).st_mtime)
+        os.utime(output, (t, t))
 
 
 def main() -> None:
