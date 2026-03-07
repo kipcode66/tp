@@ -7,7 +7,7 @@
       "request": "attach",
       "program": "${workspaceFolder}/build/${input:gameId}/framework.elf",
       "target": "${input:wiiAddress}:${input:gdbPort}",
-      "debugAdapterExecutable": "${workspaceFolder}/build/binutils/powerpc-eabi-gdb"
+      "debugAdapterExecutable": "${workspaceFolder}/build/binutils/gdb-wrapper.sh"
     },
     {
       "name": "Attach to Dolphin",
@@ -15,7 +15,7 @@
       "request": "attach",
       "program": "${workspaceFolder}/build/${input:gameId}/framework.elf",
       "target": "${input:dolphinAddress}:${input:gdbPort}",
-      "debugAdapterExecutable": "${workspaceFolder}/build/binutils/powerpc-eabi-gdb"
+      "debugAdapterExecutable": "${workspaceFolder}/build/binutils/gdb-wrapper.sh"
     }
   ],
   "inputs": [

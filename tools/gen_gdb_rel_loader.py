@@ -306,6 +306,19 @@ def main():
         f.write("set confirm off\n")
         f.write("source %s\n" % out_path)
 
+    # Generate GDB wrapper script for VS Code DAP.
+    # The gdb-dap extension may not set CWD to the workspace folder, so
+    # GDB wouldn't find .gdbinit.  The wrapper ensures GDB starts in the
+    # repo root.
+    binutils_dir = os.path.join(repo_root, "build", "binutils")
+    gdb_binary = os.path.join(binutils_dir, "powerpc-eabi-gdb")
+    wrapper_path = os.path.join(binutils_dir, "gdb-wrapper.sh")
+    with open(wrapper_path, "w") as f:
+        f.write("#!/bin/bash\n")
+        f.write('cd "%s"\n' % repo_root)
+        f.write('exec "%s" "$@"\n' % gdb_binary)
+    os.chmod(wrapper_path, 0o755)
+
     print("Generated %s (%d module mappings)" % (out_path, len(modules)))
 
 
