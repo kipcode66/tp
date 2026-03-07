@@ -21,6 +21,7 @@
 #include "Z2AudioLib/Z2Instances.h"
 #include "d/d_s_play.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 class daNpc_Ks_HIO_c : public JORReflexible {
 public:
@@ -1032,9 +1033,9 @@ static void npc_ks_home(npc_ks_class* i_this) {
             i_this->path_no = 0;
             i_this->field_0xaec = 1;
             if (fopAcM_CheckCondition(actor, 4) != 0) {
-                camera_class* camera = dComIfGp_getCamera(0);
-                mae.x = camera->lookat.eye.x - camera->lookat.center.x;
-                mae.z = camera->lookat.eye.z - camera->lookat.center.z;
+                camera_process_class* camera = dComIfGp_getCamera(0);
+                mae.x = camera->view.lookat.eye.x - camera->view.lookat.center.x;
+                mae.z = camera->view.lookat.eye.z - camera->view.lookat.center.z;
                 cMtx_YrotS(*calc_mtx, cM_atan2s(mae.x, mae.z));
                 if ((i_this->set_id & 1) != 0) {
                     mae.x = 100.0f;
@@ -1044,7 +1045,7 @@ static void npc_ks_home(npc_ks_class* i_this) {
                 mae.y = -50.0f;
                 mae.z = 200.0f;
                 MtxPosition(&mae, &ato);
-                actor->current.pos = camera->lookat.eye + ato;
+                actor->current.pos = camera->view.lookat.eye + ato;
                 actor->old = actor->current;
             }
         }
@@ -1801,12 +1802,12 @@ static void hang_end_check(npc_ks_class* i_this) {
             i_this->field_0xaec = 1;
             actor->current.angle.x = 0;
             if (fopAcM_CheckCondition(actor, 4) != 0) {
-                camera_class* camera = dComIfGp_getCamera(0);
+                camera_process_class* camera = dComIfGp_getCamera(0);
                 if (checkDoorDemo()) {
                     cMtx_YrotS(*calc_mtx, player->shape_angle.y + 0x8000);
                 } else {
-                    mae.x = camera->lookat.eye.x - camera->lookat.center.x;
-                    mae.z = camera->lookat.eye.z - camera->lookat.center.z;
+                    mae.x = camera->view.lookat.eye.x - camera->view.lookat.center.x;
+                    mae.z = camera->view.lookat.eye.z - camera->view.lookat.center.z;
                     cMtx_YrotS(*calc_mtx, cM_atan2s(mae.x, mae.z));
                 }
 
@@ -1818,7 +1819,7 @@ static void hang_end_check(npc_ks_class* i_this) {
                 mae.y = -50.0f;
                 mae.z = 100.0f;
                 MtxPosition(&mae, &ato);
-                actor->current.pos = camera->lookat.eye + ato;
+                actor->current.pos = camera->view.lookat.eye + ato;
                 actor->old = actor->current;
             }
         }
@@ -1874,7 +1875,6 @@ static void npc_ks_hang(npc_ks_class* i_this) {
         start_pya = i_this->target_angle;
     }
 
-    s16 sVar1;
     switch (i_this->mode) {
         case 0:
             i_this->timer[0] = 0;
@@ -1925,11 +1925,13 @@ static void npc_ks_hang(npc_ks_class* i_this) {
                 anm_init(i_this, 24, 3.0f, 2, 1.0f);
             }
 
-            sVar1 = start_pya - sw_p->actor.current.angle.y;
-            if (sVar1 < 0x4000 && sVar1 > -0x4000) {
-                actor->home.angle.y = sw_p->actor.current.angle.y + 0x8000;
-            } else {
-                actor->home.angle.y = sw_p->actor.current.angle.y;
+            {
+                s16 sVar1 = start_pya - sw_p->actor.current.angle.y;
+                if (sVar1 < 0x4000 && sVar1 > -0x4000) {
+                    actor->home.angle.y = sw_p->actor.current.angle.y + 0x8000;
+                } else {
+                    actor->home.angle.y = sw_p->actor.current.angle.y;
+                }
             }
             break;
 
@@ -2059,7 +2061,6 @@ static void npc_ks_hang_s(npc_ks_class* i_this) {
     cXyz mae, ato;
     cLib_addCalcAngleS2(&actor->current.angle.y, actor->home.angle.y + 0x4000, 2, 0x800);
 
-    s16 sVar1;
     switch (i_this->mode) {
         case 0:
             int asdf;
@@ -2108,11 +2109,13 @@ static void npc_ks_hang_s(npc_ks_class* i_this) {
                 anm_init(i_this, 24, 3.0f, 2, 1.0f);
             }
 
-            sVar1 = i_this->target_angle - sw_p->actor.current.angle.y;
-            if (sVar1 < 0x4000 && sVar1 > -0x4000) {
-                actor->home.angle.y = sw_p->actor.current.angle.y + 0x8000;
-            } else {
-                actor->home.angle.y = sw_p->actor.current.angle.y;
+            {
+                s16 sVar1 = i_this->target_angle - sw_p->actor.current.angle.y;
+                if (sVar1 < 0x4000 && sVar1 > -0x4000) {
+                    actor->home.angle.y = sw_p->actor.current.angle.y + 0x8000;
+                } else {
+                    actor->home.angle.y = sw_p->actor.current.angle.y;
+                }
             }
             break;
 
@@ -2211,7 +2214,7 @@ static void npc_ks_e_hang(npc_ks_class* i_this) {
             break;
 
         case 3:
-            if (i_this->field_0x5fa == s16(YREG_S(7) - 0x3800)) {
+            if (i_this->field_0x5fa == s16(YREG_S(7) + 0xC800)) {
                 actor->health = 10;
                 i_this->mode = 20;
                 i_this->timer[0] = 0;
@@ -2534,8 +2537,8 @@ static void* s_fsdown_sub(void* i_actor, void* i_data) {
 static void demo_camera(npc_ks_class* i_this) {
     fopAc_ac_c* actor = &i_this->actor;
     daPy_py_c* player = (daPy_py_c*)dComIfGp_getPlayer(0);
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
-    camera_class* unused_cam_p = dComIfGp_getCamera(0);
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* unused_cam_p = dComIfGp_getCamera(0);
     obj_sw_class* sw_p = i_this->child_no;
     fopAc_ac_c* base_sw_p = &sw_p->actor;
     cXyz mae, ato;
@@ -4045,14 +4048,14 @@ static int npc_ks_option(npc_ks_class* i_this) {
             (fopAcM_CheckCondition(actor, 4) != 0 && fopAcM_otherBgCheck(actor, dComIfGp_getPlayer(0)))) {
             if (iVar1 != 0 && player3->speedF > 2.0f) {
                 camera_class* camera = (camera_class*) dComIfGp_getCamera(0);
-                mae.x = camera->lookat.eye.x - camera->lookat.center.x;
-                mae.z = camera->lookat.eye.z - camera->lookat.center.z;
+                mae.x = camera->view.lookat.eye.x - camera->view.lookat.center.x;
+                mae.z = camera->view.lookat.eye.z - camera->view.lookat.center.z;
                 cMtx_YrotS(*calc_mtx, cM_atan2s(mae.x, mae.z));
                 mae.x = 0.0f;
                 mae.y = -50.0f;
                 mae.z = 100.0f;
                 MtxPosition(&mae, &ato);
-                ato += camera->lookat.eye;
+                ato += camera->view.lookat.eye;
                 
                 dBgS_GndChk gnd_chk;
                 gnd_chk.SetPos(&ato);

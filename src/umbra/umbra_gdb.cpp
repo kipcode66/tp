@@ -3,7 +3,6 @@
 #include "TRK_MINNOW_DOLPHIN/ppc/Generic/targimpl.h"
 #include <dolphin/os/OSCache.h>
 #include <dolphin/os/OSContext.h>
-#include <dolphin/os/OSException.h>
 #include <dolphin/os/OSIC.h>
 
 #include "umbra/umbra_gdb.h"
@@ -11,7 +10,6 @@
 #include "umbra/umbra_platform.h"
 
 extern "C" {
-    void OSReport(const char* msg, ...);
     void AIStopDMA(void);
     void AIStartDMA(void);
     BOOL OSDisableInterrupts(void);
@@ -19,7 +17,7 @@ extern "C" {
 
 /* Must match kernel/gdb.h */
 
-#define GDB_SHM_BASE      ((volatile u32*)0xD3003600)  /* uncached MEM2 mirror */
+#define GDB_SHM_BASE      ((volatile u32*)0xD3003600)
 #define GDB_SHM_SIZE      512
 
 #define GDB_SHM_MAGIC     0x47444253  /* "GDBS" */
@@ -47,51 +45,70 @@ extern "C" {
 #define SHM_PPC_HEARTBEAT  109
 #define SHM_PPC_HALT_SEEN  110
 #define SHM_EXIT_REQ       111
-#define SHM_IC_INVAL_CNT   112  /* 0x1C0 / 4 */
-#define SHM_IC_INVAL_ADDR  113  /* 0x1C4 / 4, array of up to 8 addrs */
+#define SHM_IC_INVAL_CNT   112
+#define SHM_IC_INVAL_ADDR  113
+#define SHM_TBU_SAVE       121
+#define SHM_TBL_SAVE       122
+#define SHM_DEC_SAVE       123
 
 #define MSR_SE (1 << 10)
+#define MSR_EE (1 << 15)
+
+static u16 s_gdb_port = 2159;
+
+/* Freeze PPC time during halt so game timers don't see a multi-second gap. */
+static asm u32 get_tbu(void) { nofralloc; mftbu r3; blr; }
+static asm u32 get_tbl(void) { nofralloc; mftb r3; blr; }
+static asm u32 get_dec(void) { nofralloc; mfspr r3, 22; blr; }
+static asm void set_tb(register u32 tbu, register u32 tbl) {
+    nofralloc
+    li r5, 0
+    mtspr 284, r5
+    mtspr 285, r3
+    mtspr 284, r4
+    blr
+}
+static asm void set_dec(register u32 val) { nofralloc; mtspr 22, r3; blr; }
+
+static void save_timebase(void) {
+    u32 tbu1, tbu2, tbl;
+    do {
+        tbu1 = get_tbu();
+        tbl  = get_tbl();
+        tbu2 = get_tbu();
+    } while (tbu1 != tbu2);
+    GDB_SHM_BASE[SHM_TBU_SAVE] = tbu1;
+    GDB_SHM_BASE[SHM_TBL_SAVE] = tbl;
+    GDB_SHM_BASE[SHM_DEC_SAVE] = get_dec();
+}
+
+static void restore_timebase(void) {
+    set_tb(GDB_SHM_BASE[SHM_TBU_SAVE], GDB_SHM_BASE[SHM_TBL_SAVE]);
+    set_dec(GDB_SHM_BASE[SHM_DEC_SAVE]);
+}
+
+static u32 s_saved_msr_ee = 0;
 
 static void do_game_exit(void);
 
 static u32 exception_to_signal(u32 exception_id) {
     switch (exception_id & 0xFFFF) {
-    case 0x0200: return 11; /* SIGSEGV */
-    case 0x0300: return 11; /* SIGSEGV */
-    case 0x0400: return 11; /* SIGSEGV */
-    case 0x0500: return 2;  /* SIGINT */
-    case 0x0600: return 11; /* SIGSEGV */
-    case 0x0700: return 5;  /* SIGTRAP */
-    case 0x0800: return 8;  /* SIGFPE */
-    case 0x0900: return 14; /* SIGALRM */
-    case 0x0D00: return 5;  /* SIGTRAP */
-    default:     return 5;  /* SIGTRAP */
+    case 0x0200: return 11;
+    case 0x0300: return 11;
+    case 0x0400: return 11;
+    case 0x0500: return 2;
+    case 0x0600: return 11;
+    case 0x0700: return 5;
+    case 0x0800: return 8;
+    case 0x0900: return 14;
+    case 0x0D00: return 5;
+    default:     return 5;
     }
 }
 
-static const char* exception_name(u32 exception_id) {
-    switch (exception_id & 0xFFFF) {
-    case 0x0200: return "Machine Check";
-    case 0x0300: return "DSI";
-    case 0x0400: return "ISI";
-    case 0x0500: return "External Interrupt";
-    case 0x0600: return "Alignment";
-    case 0x0700: return "Program";
-    case 0x0800: return "FP Unavailable";
-    case 0x0900: return "Decrementer";
-    case 0x0D00: return "Trace";
-    default:     return "Unknown";
-    }
-}
-
-/* Process ARM's I-cache invalidation queue.
- * ARM writes instructions directly to physical memory, bypassing all PPC
- * caches.  To make the new instruction visible to the I-pipeline:
- *   1. DCInvalidateRange (dcbi) — discard any stale D-cache line for the
- *      address.  On 750CL the L2 is unified; a dirty D-cache castout could
- *      refill L2 with old data that shadows what ARM wrote to DRAM.
- *   2. ICInvalidateRange (icbi) — invalidate both L1 I-cache AND L2 for
- *      the address, forcing the next I-fetch to go all the way to DRAM. */
+/* ARM writes instructions to physical memory, bypassing PPC caches.
+ * DCInvalidateRange prevents stale D-cache castouts from refilling L2.
+ * ICInvalidateRange forces I-fetch from DRAM. */
 static void process_ic_inval(void) {
     u32 cnt = GDB_SHM_BASE[SHM_IC_INVAL_CNT];
     if (cnt == 0)
@@ -114,7 +131,6 @@ static int start_gdb_server(u16 port) {
     u8 buf[32] ATTRIBUTE_ALIGN(32);
     u8 statusBuf[32] ATTRIBUTE_ALIGN(32);
 
-    /* No memset — dolzel.h PCH not available */
     for (int i = 0; i < 32; i++) {
         buf[i] = 0;
         statusBuf[i] = 0;
@@ -132,11 +148,6 @@ static int start_gdb_server(u16 port) {
     u32 status = *(u32*)(statusBuf + 0);
     return (status == 0) ? 0 : -1;
 }
-
-static __OSExceptionHandler old_handlers[__OS_EXCEPTION_MAX];
-
-/* Forward declaration — C implementation called from asm crash handler stub */
-extern "C" void crash_handler_impl(__OSException exception, OSContext* ctx);
 
 static void save_ctx_to_shm(OSContext* ctx, u32 exc_vector) {
     for (int i = 0; i < 32; i++)
@@ -160,166 +171,9 @@ static void save_ctx_to_shm(OSContext* ctx, u32 exc_vector) {
     GDB_SHM_BASE[SHM_SIGNAL] = exception_to_signal(exc_vector);
 }
 
-static void restore_shm_to_ctx(OSContext* ctx, u32 state) {
-    for (int i = 0; i < 32; i++)
-        ctx->gpr[i] = GDB_SHM_BASE[SHM_GPR_BASE + i];
-
-    ctx->srr0 = GDB_SHM_BASE[SHM_PC];
-    ctx->lr   = GDB_SHM_BASE[SHM_LR];
-    ctx->cr   = GDB_SHM_BASE[SHM_CR];
-    ctx->ctr  = GDB_SHM_BASE[SHM_CTR];
-    ctx->xer  = GDB_SHM_BASE[SHM_XER];
-
-    u32 msr = GDB_SHM_BASE[SHM_MSR];
-    if (state == GDB_STATE_STEP)
-        msr |= MSR_SE;
-    else
-        msr &= ~MSR_SE;
-    ctx->srr1 = msr;
-
-    volatile u64* fpr_shm = (volatile u64*)((u8*)GDB_SHM_BASE + SHM_FPR_BYTE_OFF);
-    for (int i = 0; i < 32; i++)
-        *(volatile u64*)&ctx->fpr[i] = fpr_shm[i];
-
-    volatile u64* fpscr_shm = (volatile u64*)((u8*)GDB_SHM_BASE + SHM_FPSCR_BYTE_OFF);
-    ctx->fpscr = (u32)*fpscr_shm;
-}
-
-/* Assembly crash handler entry point.
- * The OS exception dispatch (OS.c __OSEVStart) saves only r3-r5, CR, LR,
- * CTR, XER, SRR0, SRR1 to the context.  ALL other GPRs (r0, r1, r2, r6-r31)
- * and GQRs still hold the interrupted program's values and MUST be saved
- * before any C code runs — C function prologues immediately clobber r0
- * (mflr r0) and r1 (stwu r1, -N(r1)).
- *
- * This follows the exact SDK pattern used by DecrementerExceptionHandler,
- * ExternalInterruptHandler, and OSDefaultExceptionHandler. */
-static asm void umbra_gdb_crash_handler(__REGISTER __OSException exception,
-                                         __REGISTER OSContext* ctx) {
-    nofralloc
-    OS_EXCEPTION_SAVE_GPRS(ctx)
-    stwu r1, -8(r1)
-    b crash_handler_impl
-    /* crash_handler_impl calls OSLoadContext and never returns */
-}
-
-/* C implementation of the crash handler — entered with full context saved. */
-extern "C" void crash_handler_impl(__OSException exception, OSContext* ctx) {
-    u32 exc_vector = ((u32)exception + 1) * 0x100;
-
-    OSReport("tpgz: exception 0x%04X (%s) at PC=0x%08X LR=0x%08X\n",
-             exc_vector, exception_name(exc_vector), ctx->srr0, ctx->lr);
-
-    if (!umbraIsNintendont()) {
-        /* Dolphin handles GDB at emulator level; just start server and chain */
-        start_gdb_server(2159);
-        OSReport("tpgz: gdbserver listening on port 2159\n");
-        if (old_handlers[exception])
-            old_handlers[exception](exception, ctx);
-        OSLoadContext(ctx);
-    }
-
-    /* Only start the GDB server if it's not already running.  Avoid EXI
-     * transfers from exception context when possible — they can leave
-     * the bus in an inconsistent state for the game. */
-    if (GDB_SHM_BASE[SHM_MAGIC] != GDB_SHM_MAGIC) {
-        int server_err = start_gdb_server(2159);
-        OSReport("tpgz: gdbserver start result=%d\n", server_err);
-
-        if (server_err != 0) {
-            OSReport("tpgz: gdb server failed to start\n");
-            if (old_handlers[exception])
-                old_handlers[exception](exception, ctx);
-            OSLoadContext(ctx);
-        }
-    }
-
-    for (int wait = 0; wait < 500000000; wait++) {
-        if (GDB_SHM_BASE[SHM_MAGIC] == GDB_SHM_MAGIC) {
-            save_ctx_to_shm(ctx, exc_vector);
-            GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
-            OSReport("tpgz: gdb shm ready, waiting for debugger\n");
-
-            AIStopDMA();
-
-            while (1) {
-                u32 state = GDB_SHM_BASE[SHM_STATE];
-
-                if (state == GDB_STATE_RESUME || state == GDB_STATE_STEP) {
-                    restore_shm_to_ctx(ctx, state);
-                    process_ic_inval();
-                    ICFlashInvalidate();
-                    AIStartDMA();
-                    OSLoadContext(ctx);
-                    /* does not return */
-                }
-                else if (state == GDB_STATE_DETACH) {
-                    u32 exit_req = GDB_SHM_BASE[SHM_EXIT_REQ];
-                    restore_shm_to_ctx(ctx, GDB_STATE_RESUME);
-                    GDB_SHM_BASE[SHM_MAGIC] = 0;
-                    process_ic_inval();
-                    ICFlashInvalidate();
-                    AIStartDMA();
-                    if (exit_req == 1) {
-                        GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
-                        do_game_exit(); /* does not return */
-                    }
-                    OSLoadContext(ctx);
-                    /* does not return */
-                }
-            }
-        }
-    }
-
-    OSReport("tpgz: gdb exiting crash handler\n");
-    if (old_handlers[exception])
-        old_handlers[exception](exception, ctx);
-    OSLoadContext(ctx);
-}
-
-static void arm_crash_gdb(u16 port) {
-    if (!umbraHasUmbraSupport())
-        return;
-
-    u8 buf[32] ATTRIBUTE_ALIGN(32);
-    u8 statusBuf[32] ATTRIBUTE_ALIGN(32);
-
-    for (int i = 0; i < 32; i++) {
-        buf[i] = 0;
-        statusBuf[i] = 0;
-    }
-
-    *(u32*)(buf + 0) = UMBRA_CMD_WORD(UMBRA_CMD_GDB_ARM_CRASH);
-    buf[4] = (port >> 8) & 0xFF;
-    buf[5] = port & 0xFF;
-
-    umbraTransfer(buf, sizeof(buf), 1);
-    umbraTransfer(statusBuf, sizeof(statusBuf), 0);
-}
-
-extern "C" void umbra_gdb_auto_start(void) {
-    start_gdb_server(2159);
-}
-
-extern "C" void umbra_gdb_install_crash_handlers(void) {
-    static const __OSException exceptions[] = {
-        __OS_EXCEPTION_MACHINE_CHECK,
-        __OS_EXCEPTION_DSI,
-        __OS_EXCEPTION_ISI,
-        __OS_EXCEPTION_ALIGNMENT,
-        __OS_EXCEPTION_PROGRAM,   /* trap instructions (breakpoints) */
-        __OS_EXCEPTION_TRACE,     /* single-step (MSR_SE) */
-        /* NOT FLOATING_POINT — OS uses it for lazy FPU context switching */
-    };
-
-    for (u32 i = 0; i < sizeof(exceptions) / sizeof(exceptions[0]); i++) {
-        old_handlers[exceptions[i]] =
-            __OSSetExceptionHandler(exceptions[i], umbra_gdb_crash_handler);
-    }
-
-    if (!umbraIsNintendont()) {
-        arm_crash_gdb(2159);
-    }
+extern "C" void umbra_gdb_auto_start(u16 port) {
+    s_gdb_port = port;
+    start_gdb_server(port);
 }
 
 static void save_regs_to_shm(void) {
@@ -394,22 +248,18 @@ static void gdb_spin_wait(void) {
     }
 }
 
-/* Uncached MEM2 mirror, shared with Nintendont kernel at 0x13003420 */
 #define PPC_RESET_STATUS  ((volatile u32*)0xD3003420)
 
 /* Must match loader/source/ppc/PADReadGC/source/PADReadGC.c DoGameExit() */
 static void do_game_exit(void) {
     OSDisableInterrupts();
     AIStopDMA();
-    /* Signal kernel to exit */
     *PPC_RESET_STATUS = 0x1DEA;
     while (*PPC_RESET_STATUS == 0x1DEA)
         ;
-    /* Disable memory protection */
     *(volatile u32*)0xCC00403C = 0xF;
     *(volatile u32*)0xCC004040 = 0;
     *(volatile u32*)0xCC004020 = 0xFF;
-    /* Copy return stub from MEM2 */
     volatile u32* dest = (volatile u32*)0x80004000;
     volatile u32* src  = (volatile u32*)0x93011810;
     u32 size = 0x1800;
@@ -422,48 +272,31 @@ static void do_game_exit(void) {
 
 extern "C" void umbra_gdb_poll(void) {
     static u32 heartbeat = 0;
-    static bool dbg_plat = false;
-    static bool dbg_magic = false;
 
-    /* SHM lives in uncached MEM2 (0xD3xxxxxx) — only exists on real Wii.
-     * GC games on Dolphin don't have MEM2 mapped; access will DSI. */
-    if (!umbraIsNintendont()) {
-        if (!dbg_plat) {
-            dbg_plat = true;
-            OSReport("gdb_poll: not nintendont, skipping\n");
-        }
+    /* SHM lives in uncached MEM2 — only exists on real Wii, not Dolphin. */
+    if (!umbraIsNintendont())
         return;
-    }
 
     u32 magic = GDB_SHM_BASE[SHM_MAGIC];
     if (magic != GDB_SHM_MAGIC)
         return;
 
-    /* EXIT_REQ is checked after MAGIC to avoid reading uninitialized MEM2
-     * before the GDB server has set up the SHM area.  Kill while halted
-     * is handled directly by the DETACH handlers in each spin loop. */
     if (GDB_SHM_BASE[SHM_EXIT_REQ] == 1) {
         GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
-        do_game_exit(); /* does not return */
+        do_game_exit();
     }
 
     u32 halt = GDB_SHM_BASE[SHM_HALT_REQ];
     GDB_SHM_BASE[SHM_PPC_HEARTBEAT] = ++heartbeat;
     GDB_SHM_BASE[SHM_PPC_HALT_SEEN] = halt;
 
-    if (halt != 1) {
-        if (heartbeat <= 3)
-            OSReport("gdb_poll: hb=%u halt=%u\n", heartbeat, halt);
+    if (halt != 1)
         return;
-    }
-
-    OSReport("gdb_poll: HALTING! hb=%u\n", heartbeat);
 
     OSContext ctx;
     OSSaveContext(&ctx);
 
-    /* OSSaveContext saves its own return address as LR, not our caller's.
-     * Walk the back chain to get the real caller LR. */
+    /* OSSaveContext saves its own return address as LR, not our caller's. */
     u32 sp = ctx.gpr[1];
     u32 back_chain = *(volatile u32*)sp;
     if (back_chain >= 0x80000000 && back_chain < 0x81800000) {
@@ -471,11 +304,12 @@ extern "C" void umbra_gdb_poll(void) {
     }
 
     save_ctx_to_shm(&ctx, 0x0500);
-    GDB_SHM_BASE[SHM_SIGNAL] = 2; /* SIGINT */
+    GDB_SHM_BASE[SHM_SIGNAL] = 2;
     GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
     GDB_SHM_BASE[SHM_HALT_REQ] = 0;
 
-    /* Flush stack so ARM can read PPC memory via physical addresses */
+    save_timebase();
+
     DCFlushRange((void*)(sp & ~0x1F), 32 * 1024);
 
     AIStopDMA();
@@ -486,16 +320,13 @@ extern "C" void umbra_gdb_poll(void) {
         if (state == GDB_STATE_STEP) {
             process_ic_inval();
             ICFlashInvalidate();
-            AIStartDMA();
-            /* Single-step: set MSR_SE and resume via OSLoadContext so the
-             * trace exception fires on the next instruction, which TRK
-             * catches and routes back to umbra_gdb_trk_hook. */
-            ctx.srr1 |= MSR_SE;
+            s_saved_msr_ee = ctx.srr1 & MSR_EE;
+            ctx.srr1 = (ctx.srr1 | MSR_SE) & ~MSR_EE;
             OSLoadContext(&ctx);
-            /* does not return */
         } else if (state == GDB_STATE_RESUME) {
             process_ic_inval();
             ICFlashInvalidate();
+            restore_timebase();
             AIStartDMA();
             return;
         } else if (state == GDB_STATE_DETACH) {
@@ -503,6 +334,7 @@ extern "C" void umbra_gdb_poll(void) {
             GDB_SHM_BASE[SHM_MAGIC] = 0;
             process_ic_inval();
             ICFlashInvalidate();
+            restore_timebase();
             AIStartDMA();
             if (exit_req == 1) {
                 GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
@@ -510,7 +342,6 @@ extern "C" void umbra_gdb_poll(void) {
             }
             return;
         }
-
     }
 }
 
@@ -520,6 +351,6 @@ extern "C" void umbra_gdb_trk_hook(void) {
     if (GDB_SHM_BASE[SHM_MAGIC] == GDB_SHM_MAGIC) {
         save_regs_to_shm();
         GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
-        gdb_spin_wait(); /* does not return */
+        gdb_spin_wait();
     }
 }

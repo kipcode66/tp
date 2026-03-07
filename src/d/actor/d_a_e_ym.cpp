@@ -14,6 +14,7 @@
 #include "d/d_com_inf_game.h"
 #include "f_op/f_op_actor_enemy.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 class daE_YM_HIO_c: public JORReflexible {
 public:
@@ -3136,7 +3137,7 @@ void daE_YM_c::action() {
         offWolfNoLock();
         if (mType == 1 && fopAcM_CheckCondition(this, 4) == 0) {
             dBgS_LinChk lin_chk;
-            lin_chk.Set(&dComIfGp_getCamera(0)->lookat.eye, &attention_info.position, this);
+            lin_chk.Set(&dComIfGp_getCamera(0)->view.lookat.eye, &attention_info.position, this);
             if (dComIfG_Bgsp().LineCross(&lin_chk)) {
                 onWolfNoLock();
             }
@@ -3146,7 +3147,7 @@ void daE_YM_c::action() {
     cXyz unused_vec(field_0x68c, field_0x68c, field_0x68c);
     cXyz my_pos = current.pos;
     setMidnaBindEffect(this, &mSound, &my_pos, &scale);
-    mpMorf->play(NULL, dComIfGp_getReverb(fopAcM_GetRoomNo(this)));
+    mpMorf->play(0, dComIfGp_getReverb(fopAcM_GetRoomNo(this)));
     mpBrk->play();
 }
 

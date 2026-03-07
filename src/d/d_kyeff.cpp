@@ -8,6 +8,7 @@
 #include "d/d_kyeff.h"
 #include "d/d_com_inf_game.h"
 #include "d/d_kankyo_wether.h"
+#include <cstring>
 
 #if DEBUG
 class dKyeff_HIO_c : public JORReflexible {
@@ -116,7 +117,7 @@ static int dKyeff_Create(kankyo_class* i_this) {
     dKyw_wether_init();
 
     if (strcmp(dComIfGp_getStartStageName(), "Name") == 0) {
-        camera_class* camera = dComIfGp_getCamera(0);
+        camera_process_class* camera = dComIfGp_getCamera(0);
         OSTime time = OSGetTime();
         OSTicksToCalendarTime(time, &calendar);
 

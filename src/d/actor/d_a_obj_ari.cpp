@@ -12,6 +12,7 @@
 #include "d/d_menu_insect.h"
 #include "d/d_procname.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 static bool hio_set;
 
@@ -500,7 +501,7 @@ void daObjARI_c::Z_BufferChk() {
     vec1.y += 20.0f;
     mDoLib_project(&vec1, &vec2);
     f32 trim_height;
-    camera_class* camera = dComIfGp_getCamera(0);
+    camera_process_class* camera = dComIfGp_getCamera(0);
     if (camera != NULL) {
         trim_height = camera->mCamera.TrimHeight();
     } else {

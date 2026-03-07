@@ -11,6 +11,7 @@
 #include "d/d_cc_d.h"
 #include "d/d_menu_insect.h"
 #include "f_pc/f_pc_name.h"
+#include <cstring>
 
 class daObj_KuwHIO_c : public JORReflexible{
 public:
@@ -529,7 +530,7 @@ void daObjKUW_c::Z_BufferChk() {
     cStack_68.y += 20.0f;
     mDoLib_project(&cStack_68, &local_5c);
     
-    camera_class* cc = dComIfGp_getCamera(0);
+    camera_process_class* cc = dComIfGp_getCamera(0);
     f32 trimHeight;
     if (cc != NULL) {
         trimHeight = cc->mCamera.TrimHeight();

@@ -93,7 +93,7 @@ int daE_GI_c::ctrlJoint(J3DJoint* i_joint, J3DModel* i_model) {
 }
 
 int daE_GI_c::JointCallBack(J3DJoint* i_joint, int param_1) {
-    if (param_1 == NULL) {
+    if (param_1 == 0) {
         J3DModel* model = j3dSys.getModel();
         daE_GI_c* a_this = (daE_GI_c*)model->getUserArea();
         
@@ -816,7 +816,7 @@ void daE_GI_c::action() {
 
     if (attention_info.flags & fopAc_AttnFlag_BATTLE_e) {
         dBgS_LinChk linecheck;
-        linecheck.Set(&dComIfGp_getCamera(0)->lookat.eye, &attention_info.position, this);
+        linecheck.Set(&dComIfGp_getCamera(0)->view.lookat.eye, &attention_info.position, this);
         if (dComIfG_Bgsp().LineCross(&linecheck)) {
             attention_info.flags &= ~fopAc_AttnFlag_BATTLE_e;
         }

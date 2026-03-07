@@ -6,6 +6,7 @@
 #include "f_op/f_op_camera_mng.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JKernel/JKRSolidHeap.h"
+#include <cstring>
 
 void dBgp_c::material_c::draw() {
     material_c* material = this;
@@ -677,7 +678,7 @@ void dBgp_c::draw(fopAc_ac_c* i_actor) {
     mPacket.reset();
     mDoLib_clipper::changeFar(100000.0f);
 
-    camera_class* sp30 = dComIfGp_getCamera(0);
+    camera_process_class* sp30 = dComIfGp_getCamera(0);
     dCamera_c* camera = &sp30->mCamera;
     JUT_ASSERT(1287, camera != NULL)
 

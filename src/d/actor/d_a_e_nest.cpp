@@ -14,6 +14,7 @@
 #include "d/d_bomb.h"
 #include "d/d_procname.h"
 #include "f_op/f_op_camera_mng.h"
+#include <cstring>
 
 static bool hio_set;
 
@@ -784,7 +785,7 @@ static void* shot_b_sub(void* i_actor, void* i_data) {
 }
 
 static void demo_camera(e_nest_class* i_this) {
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     s8 end_demo = false;
     
     switch (i_this->mDemoStage) {

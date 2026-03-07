@@ -7,6 +7,7 @@
 
 #include "d/actor/d_a_b_tn.h"
 #include <cmath>
+#include <cstring>
 #include "Z2AudioLib/Z2Instances.h"
 #include "d/actor/d_a_boomerang.h"
 #include "d/actor/d_a_nbomb.h"
@@ -1630,7 +1631,7 @@ static void* s_obj_sub(void* i_actor, void* i_data) {
 }
 
 void daB_TN_c::demo_skip(int param_1) {
-    camera_class* cameraClass = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* cameraClass = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     daPy_py_c* player = daPy_getPlayerActorClass();
 
     if (param_1 == 0) {
@@ -1674,7 +1675,7 @@ int daB_TN_c::DemoSkipCallBack(void* i_this, int param_1) {
 
 void daB_TN_c::executeRoomDemo() {
     daPy_py_c* player = daPy_getPlayerActorClass();
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     cXyz sp24 = player->current.pos;
     cXyz sp30;
 
@@ -1824,7 +1825,7 @@ void daB_TN_c::executeRoomDemo() {
 void daB_TN_c::executeOpening() {
     cXyz sp7c, sp34;
     daPy_py_c* player = daPy_getPlayerActorClass();
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
 
     fopAcM_searchPlayerDistance(this);
 
@@ -2677,7 +2678,7 @@ void daB_TN_c::executeDamageH() {
 void daB_TN_c::executeChangeDemo() {
     cXyz sp28, sp34, sp40;
     daPy_py_c* player = daPy_getPlayerActorClass();
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
 
     switch (mActionMode2) {
     case ACTION2_0_e:
@@ -4177,7 +4178,7 @@ void daB_TN_c::executeYoroke() {
 
 void daB_TN_c::executeEnding() {
     daPy_py_c* player = daPy_getPlayerActorClass();
-    camera_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
+    camera_process_class* camera = dComIfGp_getCamera(dComIfGp_getPlayerCameraID(0));
     cXyz sp1c, sp28;
 
     switch (mActionMode2) {

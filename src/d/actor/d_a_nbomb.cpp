@@ -14,6 +14,7 @@
 #include "f_op/f_op_kankyo_mng.h"
 #include "d/actor/d_a_mirror.h"
 #include "JSystem/JAudio2/JAUSectionHeap.h"
+#include <cstring>
 
 void daNbomb_c::coHitCallback(fopAc_ac_c* i_hitActor) {
     if (fopAcM_GetGroup(i_hitActor) == fopAc_ENEMY_e ||
@@ -96,7 +97,7 @@ int daNbomb_c::searchEnemy(fopAc_ac_c* i_enemy) {
 
 static void* daNbomb_searchEnemy(fopAc_ac_c* i_actor, void* i_data) {
     if (fopAcM_GetGroup(i_actor) == fopAc_ENEMY_e &&
-        ((daNbomb_c*)i_data)->searchEnemy(i_actor) != NULL)
+        ((daNbomb_c*)i_data)->searchEnemy(i_actor) != 0)
     {
         return i_actor;
     }
@@ -707,13 +708,13 @@ BOOL daNbomb_c::procExplodeInit() {
 }
 
 BOOL daNbomb_c::procExplode() {
-    camera_class* camera = dComIfGp_getCamera(0);
+    camera_process_class* camera = dComIfGp_getCamera(0);
     f32 dist_scale = 0.0f;
 
     mLightInfluence.mPow = mExplosionStrength * 1500.0f;
     mWindInfluence.mStrength = mExplosionStrength;
 
-    f32 dist_to_cam = current.pos.abs(camera->lookat.eye);
+    f32 dist_to_cam = current.pos.abs(camera->view.lookat.eye);
     if (dist_to_cam < 1500.0f) {
         dist_scale = dist_to_cam / 1500.0f;
         dist_scale *= dist_scale * dist_scale;

@@ -20,6 +20,7 @@
 #include "JSystem/JUtility/JUTReport.h"
 
 #include <cstdlib>
+#include <cstring>
  
 #ifndef DEBUG
 extern "C" int atoi(const char* str) {
