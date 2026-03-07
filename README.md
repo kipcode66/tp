@@ -97,6 +97,44 @@ To add new features to the practice ROM:
 - Look at existing custom files in `src/gz/` for examples of how to structure and integrate new code
 - Re-run `python configure.py -v VERSION` and `ninja` to include your changes
 
+## GDB Remote Debugging
+
+Umbra includes a GDB remote stub for source-level debugging of game code. It supports both real hardware via [umbra-nintendont](https://github.com/zsrtp/umbra-nintendont) and emulation via [umbra-dolphin](https://github.com/zsrtp/umbra-dolphin).
+
+### Setup
+
+GDB tooling is not built by default. If you want to use the debugger, run the post-build step after your initial build:
+
+```sh
+ninja post-build
+```
+
+This builds `powerpc-eabi-gdb` from source with Python scripting support, generates the symbol loader script, and converts MetroWerks DWARF 1 debug info to DWARF 2. This only needs to run once (or when source files change).
+
+### Connecting
+
+**VS Code (recommended):** Install the [GDB DAP](https://marketplace.visualstudio.com/items?itemName=OlegTolmatcev.gdb-dap) extension. Launch configurations are provided in `.vscode/launch.json` ("Attach to Nintendont" or "Attach to Dolphin"). Symbols are loaded automatically on connect.
+
+**Command line:**
+
+```sh
+build/binutils/powerpc-eabi-gdb build/GZ2E01/framework.elf \
+    -ex "source build/GZ2E01/load_rel_symbols.py" \
+    -ex "target remote 192.168.1.100:2159"
+```
+
+### GDB Commands
+
+DOL and REL symbols are loaded automatically on connect via a stop event handler. The following commands are also available manually in the GDB console:
+
+| Command | Description |
+|---------|-------------|
+| `load-dol-symbols` | Load DOL (framework.elf) symbols + DWARF debug info |
+| `load-rel-symbols` | Walk the OS module list and load PLF symbols for all RELs |
+| `load-all-symbols` | Run both `load-dol-symbols` and `load-rel-symbols` |
+| `load-debug-for <id>` | Load DWARF debug info for a specific REL module by ID |
+| `dbg-<name>` | Shorthand for `load-debug-for` (e.g. `dbg-d_a_grass`) |
+
 ## Adding Custom Assets
 
 - Place your custom asset into the `mod_assets` directory. The directory structure will be copied 1:1 to the final disc image.
