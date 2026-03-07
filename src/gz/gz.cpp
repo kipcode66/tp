@@ -523,8 +523,6 @@ int gzInfo_c::execute() {
 #ifndef __REVOLUTION_SDK__
             umbraDetectPlatform();
 #endif
-            umbra_gdb_install_crash_handlers();
-
             int settingsResult = loadSettings();
 
             mGZInitialized = true;

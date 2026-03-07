@@ -142,7 +142,7 @@ s8 dScnPly_c::calcPauseTimer() {
     }
 }
 
-#if DEBUG
+#if ENABLE_REGHIO
 dScnPly_reg_childHIO_c::dScnPly_reg_childHIO_c() {
     for (int i = 0; i < 30; i++) {
         mFloatReg[i] = 0.0f;
@@ -218,7 +218,9 @@ void dScnPly_reg_HIO_c::genMessage(JORMContext* mctx) {
         mctx->genNode(l_nodeName[i], &mChildReg[i], 0, 0);
     }
 }
+#endif
 
+#if DEBUG
 dScnPly_preset_HIO_c::dScnPly_preset_HIO_c() {
     field_0x5 = 0;
     memset(mPresetData, 0, sizeof(mPresetData));
