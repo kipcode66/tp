@@ -57,31 +57,31 @@ def build_gdb(src_dir: Path, work_dir: Path, prefix: Path) -> None:
     build_dir.mkdir(parents=True, exist_ok=True)
 
     jobs = str(os.cpu_count() or 4)
+    configure_path = str(src_dir / "configure")
+    prefix_path = str(prefix)
+
+    def run(cmd_args, **kwargs):
+        subprocess.check_call(cmd_args, cwd=build_dir, **kwargs)
 
     # Configure
-    configure = src_dir / "configure"
-    cmd = [
-        str(configure),
+    configure_cmd = [
+        configure_path,
         "--target=powerpc-eabi",
-        f"--prefix={prefix}",
+        f"--prefix={prefix_path}",
         "--with-python=python3",
         "--disable-sim",
         "--disable-nls",
         "--disable-werror",
     ]
     print("Configuring GDB...")
-    subprocess.check_call(cmd, cwd=build_dir, stdout=subprocess.DEVNULL)
+    run(configure_cmd, stdout=subprocess.DEVNULL)
 
     # Build
     print("Building GDB (this may take a few minutes)...")
-    subprocess.check_call(
-        ["make", f"-j{jobs}"], cwd=build_dir, stdout=subprocess.DEVNULL
-    )
+    run(["make", f"-j{jobs}"], stdout=subprocess.DEVNULL)
 
     # Install
-    subprocess.check_call(
-        ["make", "install"], cwd=build_dir, stdout=subprocess.DEVNULL
-    )
+    run(["make", "install"], stdout=subprocess.DEVNULL)
 
 
 def main() -> None:
@@ -98,9 +98,18 @@ def main() -> None:
     if not binutils_dir.exists():
         sys.exit(f"Binutils directory not found: {binutils_dir}")
 
-    gdb_binary = binutils_dir / "powerpc-eabi-gdb"
+    EXE = ".exe" if sys.platform == "win32" else ""
+    gdb_binary = binutils_dir / f"powerpc-eabi-gdb{EXE}"
     if gdb_binary.exists():
         print(f"GDB already exists at {gdb_binary}, skipping build")
+        return
+
+    if sys.platform == "win32":
+        print(
+            "WARNING: Building GDB from source is not supported on Windows.\n"
+            "GDB debugging requires powerpc-eabi-gdb (v14.1+, for DAP support).\n"
+            f"Place powerpc-eabi-gdb.exe in: {binutils_dir}"
+        )
         return
 
     work_dir = binutils_dir.parent / "gdb-build"

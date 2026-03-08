@@ -3,6 +3,7 @@
 #include "TRK_MINNOW_DOLPHIN/ppc/Generic/targimpl.h"
 #include <dolphin/os/OSCache.h>
 #include <dolphin/os/OSContext.h>
+#include <dolphin/os/OSException.h>
 #include <dolphin/os/OSIC.h>
 
 #include "umbra/umbra_gdb.h"
@@ -10,9 +11,13 @@
 #include "umbra/umbra_platform.h"
 
 extern "C" {
+    void OSReport(const char* msg, ...);
     void AIStopDMA(void);
     void AIStartDMA(void);
     BOOL OSDisableInterrupts(void);
+    __OSExceptionHandler __OSSetExceptionHandler(__OSException exception,
+                                                  __OSExceptionHandler handler);
+    void OSLoadContext(OSContext* ctx);
 }
 
 /* Must match kernel/gdb.h */
@@ -171,8 +176,148 @@ static void save_ctx_to_shm(OSContext* ctx, u32 exc_vector) {
     GDB_SHM_BASE[SHM_SIGNAL] = exception_to_signal(exc_vector);
 }
 
+static void restore_shm_to_ctx(OSContext* ctx, u32 state) {
+    for (int i = 0; i < 32; i++)
+        ctx->gpr[i] = GDB_SHM_BASE[SHM_GPR_BASE + i];
+
+    ctx->srr0 = GDB_SHM_BASE[SHM_PC];
+    ctx->lr   = GDB_SHM_BASE[SHM_LR];
+    ctx->cr   = GDB_SHM_BASE[SHM_CR];
+    ctx->ctr  = GDB_SHM_BASE[SHM_CTR];
+    ctx->xer  = GDB_SHM_BASE[SHM_XER];
+
+    u32 msr = GDB_SHM_BASE[SHM_MSR];
+    if (state == GDB_STATE_STEP)
+        msr = (msr | MSR_SE) & ~MSR_EE;
+    else
+        msr = (msr & ~MSR_SE) | s_saved_msr_ee;
+    ctx->srr1 = msr;
+
+    volatile u64* fpr_shm = (volatile u64*)((u8*)GDB_SHM_BASE + SHM_FPR_BYTE_OFF);
+    for (int i = 0; i < 32; i++)
+        *(volatile u64*)&ctx->fpr[i] = fpr_shm[i];
+    volatile u64* fpscr_shm = (volatile u64*)((u8*)GDB_SHM_BASE + SHM_FPSCR_BYTE_OFF);
+    ctx->fpscr = (u32)*fpscr_shm;
+}
+
+static __OSExceptionHandler s_old_program_handler;
+static __OSExceptionHandler s_old_trace_handler;
+
+/* Forward declaration — C handler entered from asm stub. */
+static void gdb_exc_handler(__OSException exception, OSContext* ctx);
+
+/* OS exception trampoline saves r3-r5, CR, LR, CTR, XER, SRR0, SRR1.
+ * This asm stub saves the remaining GPRs before entering C code,
+ * so OSLoadContext can restore the full register set on resume. */
+static asm void gdb_exc_asm_stub(void) {
+    nofralloc
+    stw     r0, OS_CONTEXT_R0(r4)
+    stw     r1, OS_CONTEXT_R1(r4)
+    stw     r2, OS_CONTEXT_R2(r4)
+    stw     r6, OS_CONTEXT_R6(r4)
+    stw     r7, OS_CONTEXT_R7(r4)
+    stw     r8, OS_CONTEXT_R8(r4)
+    stw     r9, OS_CONTEXT_R9(r4)
+    stw     r10, OS_CONTEXT_R10(r4)
+    stw     r11, OS_CONTEXT_R11(r4)
+    stw     r12, OS_CONTEXT_R12(r4)
+    stw     r13, OS_CONTEXT_R13(r4)
+    stw     r14, OS_CONTEXT_R14(r4)
+    stw     r15, OS_CONTEXT_R15(r4)
+    stw     r16, OS_CONTEXT_R16(r4)
+    stw     r17, OS_CONTEXT_R17(r4)
+    stw     r18, OS_CONTEXT_R18(r4)
+    stw     r19, OS_CONTEXT_R19(r4)
+    stw     r20, OS_CONTEXT_R20(r4)
+    stw     r21, OS_CONTEXT_R21(r4)
+    stw     r22, OS_CONTEXT_R22(r4)
+    stw     r23, OS_CONTEXT_R23(r4)
+    stw     r24, OS_CONTEXT_R24(r4)
+    stw     r25, OS_CONTEXT_R25(r4)
+    stw     r26, OS_CONTEXT_R26(r4)
+    stw     r27, OS_CONTEXT_R27(r4)
+    stw     r28, OS_CONTEXT_R28(r4)
+    stw     r29, OS_CONTEXT_R29(r4)
+    stw     r30, OS_CONTEXT_R30(r4)
+    stw     r31, OS_CONTEXT_R31(r4)
+    stwu    r1, -8(r1)
+    b       gdb_exc_handler
+}
+
+static void gdb_exc_handler(__OSException exception, OSContext* ctx) {
+    OSReport("tpgz: gdb_exc_handler entered, exc=%d srr0=0x%08X\n",
+             exception, ctx->srr0);
+
+    if (GDB_SHM_BASE[SHM_MAGIC] != GDB_SHM_MAGIC) {
+        OSReport("tpgz: SHM magic not set, chaining\n");
+        __OSExceptionHandler old = (exception == __OS_EXCEPTION_PROGRAM) ?
+            s_old_program_handler : s_old_trace_handler;
+        if (old)
+            old(exception, ctx);
+        return;
+    }
+
+    u32 exc_vector = (exception == __OS_EXCEPTION_TRACE) ? 0xD00 : 0x700;
+
+    /* Only save MSR_EE / timebase / stop DMA on initial break (Program exception).
+     * Trace exceptions from single-step have MSR_EE deliberately cleared;
+     * re-saving would lose the original EE state and resume with interrupts
+     * permanently disabled — causing DVD errors, timer failures, etc. */
+    if (exception != __OS_EXCEPTION_TRACE) {
+        s_saved_msr_ee = ctx->srr1 & MSR_EE;
+    }
+
+    save_ctx_to_shm(ctx, exc_vector);
+    GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
+
+    if (exception != __OS_EXCEPTION_TRACE) {
+        save_timebase();
+        AIStopDMA();
+    }
+
+    OSReport("tpgz: waiting for debugger (vec=0x%X)\n", exc_vector);
+
+    while (1) {
+        u32 state = GDB_SHM_BASE[SHM_STATE];
+
+        if (state == GDB_STATE_RESUME || state == GDB_STATE_STEP) {
+            restore_shm_to_ctx(ctx, state);
+            process_ic_inval();
+            ICFlashInvalidate();
+            if (state == GDB_STATE_RESUME) {
+                restore_timebase();
+                AIStartDMA();
+            }
+            OSLoadContext(ctx);
+        } else if (state == GDB_STATE_DETACH) {
+            u32 exit_req = GDB_SHM_BASE[SHM_EXIT_REQ];
+            GDB_SHM_BASE[SHM_MAGIC] = 0;
+            process_ic_inval();
+            ICFlashInvalidate();
+            restore_timebase();
+            AIStartDMA();
+            if (exit_req == 1) {
+                GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
+                do_game_exit();
+            }
+            ctx->srr1 = (ctx->srr1 & ~MSR_SE) | s_saved_msr_ee;
+            OSLoadContext(ctx);
+        }
+    }
+}
+
+static void install_exc_handlers(void) {
+    s_old_program_handler = __OSSetExceptionHandler(
+        __OS_EXCEPTION_PROGRAM, (__OSExceptionHandler)gdb_exc_asm_stub);
+    s_old_trace_handler = __OSSetExceptionHandler(
+        __OS_EXCEPTION_TRACE, (__OSExceptionHandler)gdb_exc_asm_stub);
+}
+
 extern "C" void umbra_gdb_auto_start(u16 port) {
     s_gdb_port = port;
+    if (umbraIsNintendont()) {
+        install_exc_handlers();
+    }
     start_gdb_server(port);
 }
 
@@ -272,6 +417,7 @@ static void do_game_exit(void) {
 
 extern "C" void umbra_gdb_poll(void) {
     static u32 heartbeat = 0;
+    static bool exc_handlers_installed = false;
 
     /* SHM lives in uncached MEM2 — only exists on real Wii, not Dolphin. */
     if (!umbraIsNintendont())
@@ -280,6 +426,16 @@ extern "C" void umbra_gdb_poll(void) {
     u32 magic = GDB_SHM_BASE[SHM_MAGIC];
     if (magic != GDB_SHM_MAGIC)
         return;
+
+    if (!exc_handlers_installed) {
+        exc_handlers_installed = true;
+        install_exc_handlers();
+    }
+
+    /* Process any pending icache invalidation requests from ARM.
+     * Critical after dirty disconnect: ARM restores original instructions
+     * but PPC icache may still have stale trap instructions. */
+    process_ic_inval();
 
     if (GDB_SHM_BASE[SHM_EXIT_REQ] == 1) {
         GDB_SHM_BASE[SHM_EXIT_REQ] = 0;
