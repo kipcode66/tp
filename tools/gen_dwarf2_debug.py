@@ -238,7 +238,7 @@ def build_o_index(search_dirs):
                     "debug_info.o", "debug_varinfo.o"
                 ):
                     full = os.path.join(dirpath, fn)
-                    if fn not in o_by_basename or "/src/" in full:
+                    if fn not in o_by_basename or (os.sep + "src" + os.sep) in full:
                         o_by_basename[fn] = full
     return o_by_basename
 
@@ -1106,6 +1106,18 @@ def generate_combined_obj(map_path, o_index, out_s, out_o, build_dir,
             parts = o_rel_norm.split(os.sep)
             src_dir = os.path.join(*parts[:-1]) if len(parts) >= 2 else "."
             source_path = os.path.join(src_dir, source_name).replace("\\", "/")
+
+            # The build system may strip prefixes (e.g. libs/dolphin/src/os/X.c
+            # compiles to build/src/dolphin/os/X.o, giving src/dolphin/os/X.c).
+            # Check if the path exists; if not, try libs/<lib>/src/<rest>.
+            project_root = os.path.dirname(os.path.dirname(build_dir))
+            if not os.path.exists(os.path.join(project_root, source_path)):
+                sp_parts = source_path.split("/")
+                if len(sp_parts) >= 3 and sp_parts[0] == "src":
+                    libs_path = "libs/%s/src/%s" % (
+                        sp_parts[1], "/".join(sp_parts[2:]))
+                    if os.path.exists(os.path.join(project_root, libs_path)):
+                        source_path = libs_path
 
             if source_path not in file_table:
                 file_table[source_path] = len(file_table) + 1
