@@ -114,7 +114,13 @@ This converts MetroWerks DWARF 1 debug info to DWARF 2 and generates the GDB sym
 
 ### Connecting
 
-A bundled VS Code debug adapter (`.vscode/penumbra-debug/`) handles connecting automatically. Use the launch configurations in `.vscode/launch.json`:
+Install the bundled debug adapter extension (one-time setup):
+
+```sh
+code --install-extension .vscode/penumbra-debug.vsix
+```
+
+Then use the launch configurations in `.vscode/launch.json`:
 
 - **Penumbra: Attach to Nintendont** -- connect to a Wii running the GDB stub
 - **Penumbra: Attach to Dolphin** -- connect to Dolphin's GDB stub
