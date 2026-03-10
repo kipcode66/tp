@@ -161,6 +161,8 @@ class ProjectConfig:
         self.ninja_path: Optional[Path] = None  # If None, use system PATH
         self.objdiff_tag: Optional[str] = None  # Git tag
         self.objdiff_path: Optional[Path] = None  # If None, download
+        self.penumbra_tag: Optional[str] = None  # Git tag
+        self.penumbra_path: Optional[Path] = None  # If None, download
 
         # Project config
         self.non_matching: bool = False
@@ -649,6 +651,24 @@ def generate_build_ninja(
     else:
         sys.exit("ProjectConfig.binutils_tag missing")
 
+    penumbra_implicit = None
+    if config.penumbra_path:
+        penumbra = config.penumbra_path
+    elif config.penumbra_tag:
+        penumbra = config.build_dir / "binutils" / "penumbra"
+        penumbra_implicit = penumbra
+        n.build(
+            outputs=penumbra,
+            rule="download_tool",
+            implicit=download_tool,
+            variables={
+                "tool": "penumbra",
+                "tag": config.penumbra_tag,
+            },
+        )
+    else:
+        penumbra = None
+
     # Build GDB from source (links against system Python for scripting support)
     build_gdb_script = config.tools_dir / "build_gdb.py"
     gdb = binutils / f"powerpc-eabi-gdb{EXE}"
@@ -673,7 +693,7 @@ def generate_build_ninja(
     n.build(
         outputs="tools",
         rule="phony",
-        inputs=[dtk, sjiswrap, wrapper, compilers, binutils, objdiff],
+        inputs=[dtk, sjiswrap, wrapper, compilers, binutils, objdiff, penumbra],
     )
     n.newline()
 
