@@ -1105,7 +1105,7 @@ def generate_combined_obj(map_path, o_index, out_s, out_o, build_dir,
             o_rel_norm = os.path.relpath(o_path, build_dir)
             parts = o_rel_norm.split(os.sep)
             src_dir = os.path.join(*parts[:-1]) if len(parts) >= 2 else "."
-            source_path = os.path.join(src_dir, source_name)
+            source_path = os.path.join(src_dir, source_name).replace("\\", "/")
 
             if source_path not in file_table:
                 file_table[source_path] = len(file_table) + 1
