@@ -189,6 +189,12 @@ parser.add_argument(
     action="store_false",
     help="disable progress calculation",
 )
+parser.add_argument(
+    "--penumbra",
+    dest="penumbra",
+    action="store_true",
+    help="include debug info generation in the default build",
+)
 args = parser.parse_args()
 
 config = ProjectConfig()
@@ -3116,20 +3122,13 @@ if config.non_matching and custom_dol_objects:
 
 # Generate DWARF 2 debug info from DWARF 1 .o files after link
 debug_info_out = f"build/{version}/debug_info.o"
+as_exe = ".exe" if is_windows() else ""
 config.custom_build_rules.append({
     "name": "gen_dwarf2_debug",
-    "command": f"$python tools/gen_dwarf2_debug.py build/{version}",
+    "command": f"$python tools/gen_dwarf2_debug.py build/{version}"
+               f" --as build/binutils/powerpc-eabi-as{as_exe}",
     "description": "DWARF2 DEBUG $out",
     "pool": "console",
-})
-config.custom_build_steps.setdefault("post-build", []).append({
-    "outputs": debug_info_out,
-    "rule": "gen_dwarf2_debug",
-    "inputs": [f"build/{version}/framework.elf.MAP"],
-    "implicit": [
-        f"build/{version}/framework.elf",
-        "tools/gen_dwarf2_debug.py",
-    ],
 })
 
 # Generate GDB REL symbol loader script after debug info is ready
@@ -3139,12 +3138,23 @@ config.custom_build_rules.append({
     "command": f"$python tools/gen_gdb_rel_loader.py build/{version}",
     "description": "GDB REL LOADER $out",
 })
-config.custom_build_steps.setdefault("post-build", []).append({
-    "outputs": gdb_loader_out,
-    "rule": "gen_gdb_rel_loader",
-    "inputs": [f"build/{version}/config.json"],
-    "implicit": ["tools/gen_gdb_rel_loader.py", debug_info_out],
-})
+
+if args.penumbra:
+    config.custom_build_steps.setdefault("post-link", []).append({
+        "outputs": debug_info_out,
+        "rule": "gen_dwarf2_debug",
+        "inputs": [f"build/{version}/framework.elf.MAP"],
+        "implicit": [
+            f"build/{version}/framework.elf",
+            "tools/gen_dwarf2_debug.py",
+        ],
+    })
+    config.custom_build_steps.setdefault("post-link", []).append({
+        "outputs": gdb_loader_out,
+        "rule": "gen_gdb_rel_loader",
+        "inputs": [f"build/{version}/config.json"],
+        "implicit": ["tools/gen_gdb_rel_loader.py", debug_info_out],
+    })
 
 # Optional extra categories for progress tracking
 config.progress_categories = [

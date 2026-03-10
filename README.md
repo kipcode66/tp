@@ -103,13 +103,14 @@ Umbra includes a GDB remote stub for source-level debugging of game code. It sup
 
 ### Setup
 
-GDB tooling is not built by default. If you want to use the debugger, run the post-build step after your initial build:
+To include debug info (DWARF 2 conversion + REL symbol loader) as part of the default build, configure with `--penumbra`:
 
 ```sh
-ninja post-build
+python configure.py --penumbra
+ninja
 ```
 
-This builds `powerpc-eabi-gdb` from source with Python scripting support, generates the symbol loader script, and converts MetroWerks DWARF 1 debug info to DWARF 2. This only needs to run once (or when source files change).
+This converts MetroWerks DWARF 1 debug info to DWARF 2 and generates the GDB symbol loader script during the normal build. Debug info is regenerated automatically when source files change.
 
 ### Connecting
 

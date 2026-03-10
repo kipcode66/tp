@@ -194,7 +194,7 @@ class ProjectConfig:
             None  # Custom ninja build rules
         )
         self.custom_build_steps: Optional[Dict[str, List[Dict[str, Any]]]] = (
-            None  # Custom build steps, types are ["pre-compile", "post-compile", "post-link", "post-build"]
+            None  # Custom build steps, types are ["pre-compile", "post-compile", "post-link"]
         )
         self.generate_compile_commands: bool = (
             True  # Generate compile_commands.json for clangd
@@ -668,21 +668,6 @@ def generate_build_ninja(
         )
     else:
         penumbra = None
-
-    # Build GDB from source (links against system Python for scripting support)
-    build_gdb_script = config.tools_dir / "build_gdb.py"
-    gdb = binutils / f"powerpc-eabi-gdb{EXE}"
-    gdb_version = getattr(config, "gdb_version", "17.1")
-    n.rule(
-        name="build_gdb",
-        command=f"$python {build_gdb_script} {binutils} --version {gdb_version}",
-        description="GDB $out",
-    )
-    n.build(
-        outputs=gdb,
-        rule="build_gdb",
-        implicit=[build_gdb_script, binutils_implicit or binutils],
-    )
 
     n.newline()
 
@@ -1331,9 +1316,6 @@ def generate_build_ninja(
             )
             n.newline()
 
-        # Add all build steps needed post-build (re-building archives and such)
-        write_custom_step("post-build", "post-link", extra_inputs=[gdb])
-
         ###
         # Helper rule for building all source files
         ###
@@ -1361,7 +1343,7 @@ def generate_build_ninja(
             rule="check",
             inputs=config.check_sha_path,
             implicit=[dtk, *link_outputs],
-            order_only="post-build",
+            order_only="post-link",
         )
         n.newline()
 
@@ -1383,7 +1365,7 @@ def generate_build_ninja(
                 python_lib,
                 report_path,
             ],
-            order_only="post-build",
+            order_only="post-link",
         )
 
         ###
@@ -1399,7 +1381,7 @@ def generate_build_ninja(
             outputs=report_path,
             rule="report",
             implicit=[objdiff, "objdiff.json", "all_source"],
-            order_only="post-build",
+            order_only="post-link",
         )
 
         n.comment("Phony edge that will always be considered dirty by ninja.")
@@ -1426,7 +1408,7 @@ def generate_build_ninja(
             outputs=report_baseline_path,
             rule="report",
             implicit=[objdiff, "all_source", "always"],
-            order_only="post-build",
+            order_only="post-link",
         )
         n.build(
             outputs="baseline",
