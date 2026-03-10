@@ -1072,7 +1072,7 @@ def process_object_varinfo(o_path, map_entries, remap_offsets=None,
 
 
 def generate_combined_obj(map_path, o_index, out_s, out_o, build_dir,
-                          text_base, label=""):
+                          text_base, label="", as_cmd="powerpc-eabi-as"):
     """Generate a combined debug_info.o from MAP file and .o index.
 
     Returns (n_funcs, n_vars, n_lines, n_skipped) or None.
@@ -1155,7 +1155,7 @@ def generate_combined_obj(map_path, o_index, out_s, out_o, build_dir,
     func_count, var_count, line_count = result
 
     # Assemble
-    as_cmd = ["powerpc-eabi-as", "-o", out_o, out_s]
+    as_cmd = [as_cmd, "-o", out_o, out_s]
     res = subprocess.run(as_cmd, capture_output=True, text=True)
     if res.returncode != 0:
         print("  Assembly failed for %s: %s" % (label or out_o, res.stderr.strip()))
@@ -1165,11 +1165,15 @@ def generate_combined_obj(map_path, o_index, out_s, out_o, build_dir,
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: %s <build_dir>" % sys.argv[0])
-        sys.exit(1)
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument("build_dir")
+    p.add_argument("--as", dest="assembler", default="powerpc-eabi-as",
+                   help="path to powerpc-eabi-as")
+    args = p.parse_args()
 
-    build_dir = os.path.abspath(sys.argv[1])
+    build_dir = os.path.abspath(args.build_dir)
+    assembler = args.assembler
 
     # --- DOL ---
     dol_map = os.path.join(build_dir, "framework.elf.MAP")
@@ -1193,7 +1197,7 @@ def main():
     o_index = build_o_index([build_dir])
 
     result = generate_combined_obj(dol_map, o_index, dol_s, dol_o, build_dir,
-                                    text_base, "DOL")
+                                    text_base, "DOL", assembler)
     if result:
         func_count, var_count, line_count, skip = result
         print("DOL: %d functions, %d params/vars, %d line entries (%d skipped)" %
@@ -1228,7 +1232,8 @@ def main():
         ])
 
         result = generate_combined_obj(plf_map, rel_o_index, rel_s, rel_o,
-                                        build_dir, rel_text_base, entry)
+                                        build_dir, rel_text_base, entry,
+                                        assembler)
         if result:
             rel_count += 1
         else:
