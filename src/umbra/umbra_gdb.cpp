@@ -268,6 +268,11 @@ static void gdb_exc_handler(__OSException exception, OSContext* ctx) {
     }
 
     save_ctx_to_shm(ctx, exc_vector);
+
+    /* Flush D-cache so ARM can read stack for backtrace.
+     * Must happen before STATE=STOPPED so data is visible when ARM reads. */
+    DCFlushRange((void*)(ctx->gpr[1] & ~0x1F), 32 * 1024);
+
     GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
 
     if (exception != __OS_EXCEPTION_TRACE) {
@@ -506,6 +511,7 @@ extern "C" void umbra_gdb_trk_hook(void) {
         return;
     if (GDB_SHM_BASE[SHM_MAGIC] == GDB_SHM_MAGIC) {
         save_regs_to_shm();
+        DCFlushRange((void*)(gTRKCPUState.Default.GPR[1] & ~0x1F), 32 * 1024);
         GDB_SHM_BASE[SHM_STATE] = GDB_STATE_STOPPED;
         gdb_spin_wait();
     }

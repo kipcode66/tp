@@ -88,11 +88,28 @@ def wibo_url(tag: str) -> str:
     return f"{repo}/releases/download/{tag}/wibo-{arch}"
 
 
+def penumbra_url(tag: str) -> str:
+    uname = platform.uname()
+    suffix = ""
+    system = uname.system.lower()
+    if system == "darwin":
+        system = "macos"
+    elif system == "windows":
+        suffix = ".exe"
+    arch = uname.machine.lower()
+    if arch == "amd64":
+        arch = "x86_64"
+
+    repo = "https://github.com/zsrtp/penumbra"
+    return f"{repo}/releases/download/{tag}/penumbra-{system}-{arch}{suffix}"
+
+
 TOOLS: Dict[str, Callable[[str], str]] = {
     "binutils": binutils_url,
     "compilers": compilers_url,
     "dtk": dtk_url,
     "objdiff-cli": objdiff_cli_url,
+    "penumbra": penumbra_url,
     "sjiswrap": sjiswrap_url,
     "wibo": wibo_url,
 }
