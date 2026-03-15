@@ -1,9 +1,18 @@
 #include "umbra/umbra_usb.h"
+#ifdef PLATFORM_WII
+#include <revolution/exi.h>
+#include <revolution/card.h>
+#else
 #include <dolphin/exi.h>
+#include <dolphin/card.h>
+#endif
 
 namespace umbra {
 
 bool usb_probe(int chan) {
+    if (chan != CARD_SLOT_A && chan != CARD_SLOT_B)
+        return false;
+
     if (!EXIProbe(chan))
         return false;
 
@@ -33,6 +42,9 @@ bool usb_probe(int chan) {
 }
 
 static int usb_transfer(int chan, void *data, int len, bool write) {
+    if (chan != CARD_SLOT_A && chan != CARD_SLOT_B)
+        return -1;
+
     if (!EXILock(chan, 0, NULL)) {
         return -1;
     }
